@@ -15,8 +15,8 @@ import {
 // ─────────────────────────────────────────────────────────────────────────────
 const PLANS = [
   { id: "notarized", name: "Will with Notarization", price: 4999, gradient: "from-slate-700 to-slate-800", icon: <FileText size={18} />, badge: null, features: ["Lawyer-drafted Will","Free notarization","1-year free updates","Digital certified copy","Email support"] },
-  { id: "registered", name: "Will with Registration", price: 19999, gradient: "from-blue-800 to-blue-900", icon: <Landmark size={18} />, badge: "Most Popular", features: ["All Notarized features","Sub-registrar filing","Physical copy courier","1-year legal support","Priority helpline"] },
-  { id: "premium", name: "Premium Will", price: 29999, gradient: "from-emerald-800 to-emerald-900", icon: <Star size={18} />, badge: "Best Value", features: ["All Registration features","Doorstep lawyer visit","Doorstep notarization","90-min consultation","3-year support"] },
+  { id: "registered", name: "Will with Registration", price: 19999, gradient: "from-slate-700 to-slate-800", icon: <Landmark size={18} />, badge: "Most Popular", features: ["All Notarized features","Sub-registrar filing","Physical copy courier","1-year legal support","Priority helpline"] },
+  { id: "premium", name: "Premium Will", price: 29999, gradient: "from-[#d09d61] to-[#a37843]", icon: <Star size={18} />, badge: "Best Value", features: ["All Registration features","Doorstep lawyer visit","Doorstep notarization","90-min consultation","3-year support"] },
   { id: "nri", name: "NRI Will", price: 29999, gradient: "from-violet-800 to-violet-900", icon: <Globe size={18} />, badge: "NRI Special", features: ["120-min consultation","Foreign asset support","Embassy attestation","Multi-jurisdiction docs","Lifetime updates"] },
 ];
 const ADDONS = [
@@ -37,7 +37,7 @@ const MOCK_CLIENTS = [
   { id:5, name:"Anil Kapoor Joshi", phone:"+91 54321 09876", status:"Notarized", date:"2024-11-15", value:"₹29,999" },
 ];
 const fmt = n => "₹" + n.toLocaleString("en-IN");
-const statusStyle = s => ({ Draft:"bg-amber-400/15 text-amber-400 border border-amber-400/20", Notarized:"bg-blue-400/15 text-blue-400 border border-blue-400/20", Registered:"bg-emerald-400/15 text-emerald-400 border border-emerald-400/20" }[s]);
+const statusStyle = s => ({ Draft:"bg-amber-400/15 text-amber-400 border border-amber-400/20", Notarized:"bg-slate-100 text-slate-700 border border-slate-200", Registered:"bg-[#d09d61]/15 text-[#d09d61] border border-[#d09d61]/20" }[s]);
 const now = new Date();
 const today = { day: now.getDate(), month: MONTHS[now.getMonth()], year: now.getFullYear() };
 
@@ -113,7 +113,7 @@ const ASSET_CATALOGUE = [
   ]},
 ];
 const COLOR = {
-  blue:  {bg:"bg-blue-500/10",  border:"border-blue-500/20",  text:"text-blue-400",  chip:"border-blue-400/40 bg-blue-400/10"},
+  blue:  {bg:"bg-slate-100",  border:"border-slate-200",  text:"text-slate-700",  chip:"border-slate-200 bg-white"},
   amber: {bg:"bg-amber-500/10", border:"border-amber-500/20", text:"text-amber-400", chip:"border-amber-400/40 bg-amber-400/10"},
   rose:  {bg:"bg-rose-500/10",  border:"border-rose-500/20",  text:"text-rose-400",  chip:"border-rose-400/40 bg-rose-400/10"},
   cyan:  {bg:"bg-cyan-500/10",  border:"border-cyan-500/20",  text:"text-cyan-400",  chip:"border-cyan-400/40 bg-cyan-400/10"},
@@ -227,39 +227,30 @@ export default function SmartWill() {
   );
 
   return (
-    <div className="min-h-screen bg-slate-950" style={{fontFamily:"'DM Sans','Segoe UI',sans-serif"}}>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap');
-        .serif{font-family:'EB Garamond',Georgia,serif;}
-        .fade-in{animation:fi 0.22s ease-out;}
-        @keyframes fi{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
-        ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:#0f172a}::-webkit-scrollbar-thumb{background:#334155;border-radius:3px}
-        input[type=range]{accent-color:#10b981}
-        @media print{.no-print{display:none!important}.print-area{margin:0;padding:0}}
-      `}</style>
+    <div className="min-h-screen bg-[#f7f6f2] text-slate-900">
 
       {/* HEADER */}
       {view!=="wizard" && (
-        <header className="sticky top-0 z-50 bg-slate-900/95 backdrop-blur border-b border-white/5">
+        <header className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-slate-200">
           <div className="max-w-7xl mx-auto px-5 h-[58px] flex items-center justify-between">
             <div className="flex items-center gap-2 cursor-pointer" onClick={()=>setView("landing")}>
-              <div className="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center shadow-lg shadow-emerald-500/25"><Scale size={15} className="text-white"/></div>
-              <span className="text-white font-bold text-lg serif">SmartWill</span>
-              <span className="text-[9px] font-bold text-emerald-400 bg-emerald-400/10 border border-emerald-400/20 px-1.5 py-0.5 rounded">INDIA</span>
+              <div className="w-8 h-8 bg-[#d09d61] rounded-lg flex items-center justify-center shadow-lg shadow-[#d09d61]/15"><Scale size={15} className="text-white"/></div>
+              <span className="text-slate-900 font-bold text-lg serif">SmartWill</span>
+              <span className="text-[9px] font-bold tracking-[0.35em] text-[#924d06] bg-[#f8edd1] border border-[#d09d61] px-1.5 py-0.5 rounded">INDIA</span>
             </div>
             <div className="flex items-center gap-3">
               {view==="lawyer" ? (
                 <>
-                  <div className="flex items-center gap-2 bg-slate-800 rounded-lg px-3 py-1.5 text-sm">
-                    <div className="w-6 h-6 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center text-[9px] font-bold text-white">AK</div>
-                    <span className="text-slate-300 text-sm">Adv. Anand Kumar</span>
+                  <div className="flex items-center gap-2 bg-slate-100 rounded-lg px-3 py-1.5 text-sm border border-slate-200">
+                    <div className="w-6 h-6 bg-slate-200 rounded-full flex items-center justify-center text-[9px] font-bold text-slate-900">AK</div>
+                    <span className="text-[#d09d61] text-sm">Adv. Anand Kumar</span>
                   </div>
-                  <button onClick={()=>setView("landing")} className="flex items-center gap-1.5 text-slate-400 hover:text-white text-sm transition-colors"><LogOut size={13}/>Logout</button>
+                  <button onClick={()=>setView("landing")} className="flex items-center gap-1.5 text-slate-600 hover:text-slate-900 text-sm transition-colors"><LogOut size={13}/>Logout</button>
                 </>
               ):(
                 <>
-                  <button onClick={()=>setView("lawyer")} className="flex items-center gap-1.5 text-slate-400 hover:text-white border border-slate-700 hover:border-slate-500 rounded-lg px-3 py-1.5 text-sm transition-all"><LogIn size={13}/>Lawyer Portal</button>
-                  <button onClick={()=>setView("signup")} className="flex items-center gap-1.5 bg-emerald-500 hover:bg-emerald-400 text-white rounded-lg px-4 py-2 text-sm font-semibold transition-colors shadow-lg shadow-emerald-500/20">Create Your Will <ArrowRight size={13}/></button>
+                  <button onClick={()=>setView("lawyer")} className="flex items-center gap-1.5 text-slate-600 hover:text-slate-900 border border-slate-200 hover:border-slate-300 rounded-lg px-3 py-1.5 text-sm transition-all"><LogIn size={13}/>Lawyer Portal</button>
+                  <button onClick={()=>setView("signup")} className="flex items-center gap-1.5 bg-[#d09d61] hover:bg-[#d7a46a] text-[#020617] rounded-lg px-4 py-2 text-sm font-semibold transition-colors shadow-lg shadow-[#d09d61]/20">Create Your Will <ArrowRight size={13}/></button>
                 </>
               )}
             </div>
@@ -274,31 +265,33 @@ export default function SmartWill() {
       {view==="lawyer" && <LawyerPortal onCreateWill={()=>{setWizardStep(1);setView("wizard");}}/>}
 
       {view==="wizard" && (
-        <div className="flex flex-col h-screen bg-slate-950 fade-in">
+        <div className="flex flex-col h-screen bg-slate-100 fade-in">
           {/* Wizard bar */}
-          <div className="flex-none bg-slate-900 border-b border-slate-800 px-4 h-[50px] flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <button onClick={()=>setView("landing")} className="text-slate-500 hover:text-white transition-colors"><ChevronLeft size={16}/></button>
-              <div className="w-6 h-6 bg-emerald-500 rounded-md flex items-center justify-center"><Scale size={11} className="text-white"/></div>
-              <span className="text-white font-semibold serif text-sm">SmartWill</span>
-              <span className="text-slate-600 text-xs">/  Will Drafting</span>
+          <div className="flex-none bg-white/95 border-b border-slate-200 px-4 h-[60px] flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <button onClick={()=>setView("landing")} className="text-slate-600 hover:text-slate-900 transition-colors"><ChevronLeft size={16}/></button>
+              <div className="w-8 h-8 bg-[#d09d61] rounded-2xl flex items-center justify-center shadow-lg shadow-[#d09d61]/15"><Scale size={12} className="text-[#020617]"/></div>
+              <div>
+                <div className="text-slate-900 font-semibold serif text-sm">SmartWill</div>
+                <div className="text-slate-500 text-[10px]">Will Drafting</div>
+              </div>
             </div>
-            <div className="flex items-center gap-0.5">
+            <div className="flex items-center gap-1">
               {WIZARD_STEPS.map(s=>(
                 <button key={s.n} onClick={()=>setWizardStep(s.n)}
-                  className={`flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-semibold transition-all ${wizardStep===s.n?"bg-emerald-500 text-white":wizardStep>s.n?"text-emerald-400":"text-slate-500 hover:text-slate-300"}`}>
+                    className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-[10px] font-semibold transition-all ${wizardStep===s.n?"bg-[#d09d61] text-[#020617]":"border border-slate-200 text-slate-600 hover:bg-slate-100 hover:text-slate-900"}`}>
                   {wizardStep>s.n?<Check size={9}/>:<span>{s.n}</span>}
                   <span className="hidden md:inline">{s.label}</span>
                 </button>
               ))}
             </div>
-            <button onClick={()=>setShowWillDoc(true)} className="flex items-center gap-1.5 text-xs text-emerald-400 hover:text-emerald-300 border border-emerald-500/30 hover:border-emerald-500/60 rounded-lg px-3 py-1.5 transition-all font-semibold">
+            <button onClick={()=>setShowWillDoc(true)} className="flex items-center gap-1.5 text-xs text-[#d09d61] hover:text-[#b6844a] border border-[#d09d61]/30 hover:border-[#d09d61]/60 rounded-lg px-3 py-1.5 transition-all font-semibold">
               <Eye size={12}/>Generate Will
             </button>
           </div>
           {/* Split pane */}
           <div className="flex flex-1 overflow-hidden">
-            <div className="w-full lg:w-[50%] overflow-y-auto p-5 bg-slate-950">
+            <div className="w-full lg:w-[50%] overflow-y-auto p-5 bg-slate-50">
               <WizardForms
                 step={wizardStep} will={will} setWill={setWill}
                 addBene={addBene} removeBene={removeBene} updateBene={updateBene}
@@ -310,7 +303,7 @@ export default function SmartWill() {
                 onGenerate={()=>setShowWillDoc(true)}
               />
             </div>
-            <div className="hidden lg:flex lg:w-[50%] bg-slate-800 p-5 overflow-y-auto items-start justify-center">
+            <div className="hidden lg:flex lg:w-[50%] bg-slate-100 p-5 overflow-y-auto items-start justify-center">
               <LiveDocPreview will={will} residualBene={residualBene} allocTotal={allocTotal}/>
             </div>
           </div>
@@ -326,46 +319,54 @@ export default function SmartWill() {
 function LandingPage({plans,addons,selectedPlan,setSelectedPlan,addonsState,setAddons,totalPrice,onStart}){
   return(
     <div className="fade-in">
-      <section className="relative bg-slate-900 overflow-hidden pt-16 pb-20">
-        <div className="absolute inset-0 pointer-events-none opacity-40">
-          <div className="absolute top-0 left-1/3 w-96 h-96 bg-emerald-600/10 rounded-full blur-3xl"/>
-          <div className="absolute bottom-0 right-1/3 w-72 h-72 bg-blue-600/10 rounded-full blur-3xl"/>
+      <section className="relative overflow-hidden pt-24 pb-24 apv-hero bg-slate-100">
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute -top-16 -left-20 w-[40rem] h-[40rem] rounded-full bg-[#d09d61]/15 blur-[140px]"/>
+          <div className="absolute top-12 right-[-4rem] w-[30rem] h-[30rem] rounded-full bg-[#0693e3]/12 blur-[130px]"/>
+          <div className="absolute bottom-[-5rem] left-1/4 w-[32rem] h-[32rem] rounded-full bg-white/5 blur-[120px]"/>
         </div>
-        <div className="max-w-3xl mx-auto px-5 text-center relative">
-          <div className="inline-flex items-center gap-2 bg-emerald-400/10 border border-emerald-400/20 rounded-full px-4 py-1.5 mb-5">
-            <Sparkles size={12} className="text-emerald-400"/>
-            <span className="text-emerald-400 text-xs font-semibold">Trusted by 50,000+ Indians · Bar Council Empanelled</span>
+        <div className="relative z-10 max-w-5xl mx-auto px-5 text-center">
+          <div className="apv-pill mb-6 mx-auto">
+            <Sparkles size={14} className="text-[#d09d61]"/>
+            <span>Trusted by 50,000+ Indians · Bar Council Empanelled</span>
           </div>
-          <h1 className="text-4xl lg:text-5xl font-bold text-white serif mb-4 leading-tight">Create a Legally Valid Will<br/><span className="text-emerald-400">Online in 20 Minutes</span></h1>
-          <p className="text-slate-400 text-lg mb-8">AI-assisted drafting · Lawyer-reviewed · Notarized at doorstep</p>
-          <button onClick={onStart} className="inline-flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-white font-bold text-base rounded-xl px-7 py-3.5 transition-all shadow-xl shadow-emerald-500/20">
-            Start Creating Your Will Free <ArrowRight size={17}/>
-          </button>
-          <p className="text-slate-500 text-xs mt-3">No credit card · SSL encrypted · Lawyer reviewed</p>
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-slate-900 serif leading-tight tracking-tight mb-6">
+            Create a Legally Valid Will<br/>
+            <span className="text-[#d09d61]">Online in 20 Minutes</span>
+          </h1>
+          <p className="max-w-3xl mx-auto text-slate-600 text-lg md:text-xl mb-10">AI-assisted drafting · Lawyer-reviewed · Notarized at doorstep</p>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-4">
+            <button onClick={onStart} className="apv-btn apv-btn-lg">Start Creating Your Will Free <ArrowRight size={18}/></button>
+            <button onClick={onStart} className="apv-btn-alt">Learn More</button>
+          </div>
+          <p className="text-slate-600 text-xs">No credit card · SSL encrypted · Lawyer reviewed</p>
         </div>
       </section>
-      <section className="bg-slate-950 py-14 px-5">
+      <section className="bg-slate-50 py-20 px-5">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-2xl font-bold text-white serif text-center mb-2">Choose Your Plan</h2>
-          <p className="text-slate-400 text-sm text-center mb-9">Transparent pricing · No hidden charges</p>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="text-center mb-12">
+            <p className="text-[#d09d61] tracking-[0.35em] uppercase text-xs mb-3">Plan Options</p>
+            <h2 className="apv-section-title">Choose Your Plan</h2>
+            <p className="text-slate-600 text-sm mt-3">Transparent pricing · No hidden charges</p>
+          </div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {plans.map(plan=>(
               <div key={plan.id} onClick={()=>setSelectedPlan(plan)}
-                className={`relative rounded-2xl border cursor-pointer transition-all ${selectedPlan.id===plan.id?"border-emerald-400 ring-2 ring-emerald-400/20":"border-slate-800 hover:border-slate-600"} bg-slate-900 overflow-hidden`}>
-                {plan.badge&&<div className="absolute top-0 right-0 bg-emerald-500 text-white text-[9px] font-bold px-2.5 py-1 rounded-bl-xl">{plan.badge}</div>}
-                <div className={`bg-gradient-to-br ${plan.gradient} p-4`}>
-                  <div className="text-white/60 mb-1.5">{plan.icon}</div>
+                className={`apv-card relative overflow-hidden cursor-pointer transition-all ${selectedPlan.id===plan.id?"ring-2 ring-[#d09d61]/20":"hover:border-[#d09d61]/25 border border-slate-200"}`}>
+                {plan.badge&&<div className="absolute top-0 right-0 bg-[#d09d61] text-[#020617] text-[9px] font-bold px-3 py-1 rounded-bl-xl">{plan.badge}</div>}
+                <div className={`bg-gradient-to-br ${plan.gradient} p-5`}> 
+                  <div className="text-white/90 mb-2">{plan.icon}</div>
                   <h3 className="text-white font-bold serif text-base leading-tight">{plan.name}</h3>
-                  <div className="mt-2 flex items-baseline gap-1"><span className="text-xl font-bold text-white serif">{fmt(plan.price)}</span><span className="text-white/50 text-xs">once</span></div>
+                  <div className="mt-3 flex items-baseline gap-2"><span className="text-2xl md:text-[1.45rem] font-black text-white serif">{fmt(plan.price)}</span><span className="text-white/60 text-xs">once</span></div>
                 </div>
-                <div className="p-4 space-y-1.5">
+                <div className="p-5 space-y-3">
                   {plan.features.map((f,i)=>(
-                    <div key={i} className="flex items-start gap-1.5"><CheckCircle size={11} className="text-emerald-400 mt-0.5 shrink-0"/><span className="text-slate-300 text-xs">{f}</span></div>
+                    <div key={i} className="flex items-start gap-2"><CheckCircle size={13} className="text-[#d09d61] mt-0.5 shrink-0"/><span className="text-slate-700 text-sm leading-relaxed">{f}</span></div>
                   ))}
                 </div>
-                <div className="px-4 pb-4">
+                <div className="px-5 pb-5">
                   <button onClick={e=>{e.stopPropagation();setSelectedPlan(plan);onStart();}}
-                    className={`w-full py-2 rounded-xl text-xs font-bold transition-all ${selectedPlan.id===plan.id?"bg-emerald-500 hover:bg-emerald-400 text-white":"bg-slate-800 hover:bg-slate-700 text-slate-300"}`}>
+                    className={`w-full py-3 rounded-full text-sm font-semibold transition-all ${selectedPlan.id===plan.id?"bg-[#d09d61] text-[#020617]":"bg-slate-900 hover:bg-slate-800 text-white"}`}>
                     {selectedPlan.id===plan.id?"✓ Selected":"Select Plan"}
                   </button>
                 </div>
@@ -374,41 +375,44 @@ function LandingPage({plans,addons,selectedPlan,setSelectedPlan,addonsState,setA
           </div>
         </div>
       </section>
-      <section className="bg-slate-900 py-14 px-5">
-        <div className="max-w-5xl mx-auto">
-          <h2 className="text-2xl font-bold text-white serif text-center mb-8">Customize Your Order</h2>
+      <section className="bg-slate-50 py-20 px-5">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-10">
+            <p className="text-[#d09d61] tracking-[0.35em] uppercase text-xs mb-3">Customize Your Order</p>
+            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 serif">Add-ons & summary</h2>
+          </div>
           <div className="grid lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2 space-y-3">
+            <div className="lg:col-span-2 space-y-4">
               {addons.map(addon=>(
-                <label key={addon.id} className={`flex items-center justify-between p-3.5 rounded-xl border cursor-pointer transition-all ${addonsState[addon.id]?"border-emerald-400/40 bg-emerald-400/5":"border-slate-800 hover:border-slate-600 bg-slate-950"}`}>
-                  <div className="flex items-center gap-2.5">
-                    <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${addonsState[addon.id]?"bg-emerald-500/20 text-emerald-400":"bg-slate-800 text-slate-500"}`}>{addon.icon}</div>
-                    <span className="text-white text-sm font-medium">{addon.label}</span>
+                <label key={addon.id} className={`flex items-center justify-between p-4 rounded-[28px] border transition-all ${addonsState[addon.id]?"border-[#d09d61]/30 bg-[#fff7e8]":"border-slate-200 bg-white hover:border-[#d09d61]/30"}`}>
+                  <div className="flex items-center gap-3">
+                    <div className={`w-11 h-11 rounded-2xl flex items-center justify-center ${addonsState[addon.id]?"bg-[#d09d61]/15 text-[#d09d61]":"bg-slate-100 text-slate-500"}`}>{addon.icon}</div>
+                    <span className="text-slate-900 text-sm font-medium">{addon.label}</span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <span className="text-emerald-400 font-bold text-sm serif">+{fmt(addon.price)}</span>
-                    <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${addonsState[addon.id]?"bg-emerald-500 border-emerald-500":"border-slate-600"}`}>
-                      {addonsState[addon.id]&&<Check size={10} className="text-white"/>}
+                    <span className="text-[#d09d61] font-semibold text-sm">+{fmt(addon.price)}</span>
+                    <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${addonsState[addon.id]?"bg-[#d09d61] border-[#d09d61]":"border-slate-300"}`}>
+                      {addonsState[addon.id]&&<Check size={10} className="text-[#020617]"/>}
                     </div>
                     <input type="checkbox" className="sr-only" checked={!!addonsState[addon.id]} onChange={()=>setAddons(p=>({...p,[addon.id]:!p[addon.id]}))}/>
                   </div>
                 </label>
               ))}
             </div>
-            <div className="bg-slate-950 border border-slate-800 rounded-2xl p-5 h-fit sticky top-20">
-              <h3 className="text-white font-bold serif mb-4">Order Summary</h3>
-              <div className="space-y-2 mb-4 text-sm">
-                <div className="flex justify-between"><span className="text-slate-400">Plan</span><span className="text-white text-xs text-right max-w-[130px]">{selectedPlan.name}</span></div>
-                <div className="flex justify-between"><span className="text-slate-400">Base</span><span className="text-white">{fmt(selectedPlan.price)}</span></div>
+            <div className="apv-card p-6 sticky top-20">
+              <h3 className="text-slate-900 font-bold serif mb-5">Order Summary</h3>
+              <div className="space-y-3 text-sm mb-6 text-slate-700">
+                <div className="flex justify-between"><span className="text-slate-600">Plan</span><span className="text-slate-800 text-xs text-right max-w-[160px]">{selectedPlan.name}</span></div>
+                <div className="flex justify-between"><span className="text-slate-600">Base</span><span className="text-slate-800">{fmt(selectedPlan.price)}</span></div>
                 {addons.filter(a=>addonsState[a.id]).map(a=>(
-                  <div key={a.id} className="flex justify-between"><span className="text-slate-400">{a.label}</span><span className="text-emerald-400">+{fmt(a.price)}</span></div>
+                  <div key={a.id} className="flex justify-between"><span className="text-slate-700">{a.label}</span><span className="text-[#d09d61]">+{fmt(a.price)}</span></div>
                 ))}
               </div>
-              <div className="border-t border-slate-800 pt-3.5 mb-4">
-                <div className="flex justify-between items-baseline"><span className="text-slate-300 font-semibold">Total</span><span className="text-xl font-bold text-emerald-400 serif">{fmt(totalPrice)}</span></div>
-                <p className="text-slate-500 text-xs mt-0.5">Inclusive of all taxes</p>
+              <div className="border-t border-slate-200 pt-4 mb-5">
+                <div className="flex justify-between items-baseline"><span className="text-slate-700 font-semibold">Total</span><span className="text-2xl font-black text-[#d09d61] serif">{fmt(totalPrice)}</span></div>
+                <p className="text-slate-600 text-xs mt-2">Inclusive of all taxes</p>
               </div>
-              <button onClick={onStart} className="w-full bg-emerald-500 hover:bg-emerald-400 text-white font-bold py-2.5 rounded-xl text-sm flex items-center justify-center gap-2 transition-colors">Proceed <ArrowRight size={14}/></button>
+              <button onClick={onStart} className="apv-btn w-full justify-center">Proceed <ArrowRight size={14}/></button>
             </div>
           </div>
         </div>
@@ -421,39 +425,39 @@ function LandingPage({plans,addons,selectedPlan,setSelectedPlan,addonsState,setA
 // SIGNUP / OTP / DISCLAIMER
 // ─────────────────────────────────────────────────────────────────────────────
 function SignupView({signup,setSignup,onNext}){
-  const IC="w-full bg-slate-950 border border-slate-700 rounded-xl pl-9 pr-4 py-2.5 text-white placeholder-slate-600 text-sm focus:outline-none focus:border-emerald-500 transition-colors";
+  const IC="w-full apv-input rounded-2xl pl-11 pr-4 py-3 text-slate-900 placeholder:text-slate-500 text-sm focus:outline-none transition";
   return(
-    <div className="fade-in min-h-[calc(100vh-58px)] bg-slate-950 flex items-center justify-center px-4 py-12">
+    <div className="fade-in min-h-[calc(100vh-58px)] bg-slate-100 flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-md">
-        <div className="text-center mb-6">
-          <div className="w-11 h-11 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl flex items-center justify-center mx-auto mb-3"><User size={20} className="text-emerald-400"/></div>
-          <h2 className="text-2xl font-bold text-white serif">Create Account</h2>
-          <p className="text-slate-400 text-sm mt-1">Start your Will in under 2 minutes</p>
+        <div className="text-center mb-8">
+          <div className="w-14 h-14 bg-[#d09d61]/15 border border-[#d09d61]/20 rounded-3xl flex items-center justify-center mx-auto mb-4"><User size={22} className="text-[#d09d61]"/></div>
+          <h2 className="text-3xl font-black text-slate-900 serif">Create Account</h2>
+          <p className="text-slate-600 text-sm mt-2">Start your Will in under 2 minutes</p>
         </div>
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4">
-          {[{k:"name",l:"Full Legal Name",t:"text",icon:<User size={13}/>,p:"As per Aadhaar / PAN"},{k:"phone",l:"Mobile Number",t:"tel",icon:<Phone size={13}/>,p:"10-digit number"},{k:"email",l:"Email",t:"email",icon:<Mail size={13}/>,p:"For Will delivery"}].map(f=>(
+        <div className="apv-card p-6 space-y-4">
+          {[{k:"name",l:"Full Legal Name",t:"text",icon:<User size={14}/>,p:"As per Aadhaar / PAN"},{k:"phone",l:"Mobile Number",t:"tel",icon:<Phone size={14}/>,p:"10-digit number"},{k:"email",l:"Email",t:"email",icon:<Mail size={14}/>,p:"For Will delivery"}].map(f=>(
             <div key={f.k}>
-              <label className="block text-slate-400 text-[10px] font-bold mb-1 uppercase tracking-widest">{f.l}</label>
-              <div className="relative"><div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">{f.icon}</div>
+              <label className="block apv-label mb-2">{f.l}</label>
+              <div className="relative"><div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">{f.icon}</div>
                 <input type={f.t} value={signup[f.k]} onChange={e=>setSignup(p=>({...p,[f.k]:e.target.value}))} placeholder={f.p} className={IC}/>
               </div>
             </div>
           ))}
           <div>
-            <label className="block text-slate-400 text-[10px] font-bold mb-1 uppercase tracking-widest">State of Residence</label>
-            <div className="relative"><MapPin size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"/>
+            <label className="block apv-label mb-2">State of Residence</label>
+            <div className="relative"><MapPin size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"/>
               <select value={signup.state} onChange={e=>setSignup(p=>({...p,state:e.target.value}))} className={IC+" appearance-none"}>
                 {STATES.map(s=><option key={s}>{s}</option>)}
               </select>
             </div>
           </div>
-          <label className="flex items-start gap-2.5 cursor-pointer">
-            <div onClick={()=>setSignup(p=>({...p,terms:!p.terms}))} className={`w-5 h-5 rounded border-2 flex items-center justify-center shrink-0 mt-0.5 transition-all ${signup.terms?"bg-emerald-500 border-emerald-500":"border-slate-600"}`}>
-              {signup.terms&&<Check size={10} className="text-white"/>}
+          <label className="flex items-start gap-3 cursor-pointer">
+            <div onClick={()=>setSignup(p=>({...p,terms:!p.terms}))} className={`w-5 h-5 rounded-lg border-2 flex items-center justify-center shrink-0 mt-1 transition-all ${signup.terms?"bg-[#d09d61] border-[#d09d61]":"border-slate-400"}`}>
+              {signup.terms&&<Check size={10} className="text-[#020617]"/>}
             </div>
-            <span className="text-slate-400 text-sm">I agree to the <span className="text-emerald-400">Terms of Service</span> and <span className="text-emerald-400">Privacy Policy</span></span>
+            <span className="text-slate-600 text-sm">I agree to the <span className="text-[#d09d61]">Terms of Service</span> and <span className="text-[#d09d61]">Privacy Policy</span></span>
           </label>
-          <button onClick={()=>signup.terms&&onNext()} className={`w-full py-2.5 rounded-xl font-bold text-sm transition-all ${signup.terms?"bg-emerald-500 hover:bg-emerald-400 text-white":"bg-slate-800 text-slate-500 cursor-not-allowed"}`}>
+          <button onClick={()=>signup.terms&&onNext()} className={`w-full py-3 rounded-full font-bold text-sm transition-all ${signup.terms?"apv-btn":"bg-slate-200 text-slate-500 cursor-not-allowed"}`}>
             Send OTP to +91 {signup.phone.slice(0,5)||"XXXXX"}XXXXX
           </button>
         </div>
@@ -464,20 +468,20 @@ function SignupView({signup,setSignup,onNext}){
 
 function OtpView({otp,handleOtp,otpRefs,phone,onNext}){
   return(
-    <div className="fade-in min-h-[calc(100vh-58px)] bg-slate-950 flex items-center justify-center px-4">
-      <div className="w-full max-w-xs text-center">
-        <div className="w-12 h-12 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4"><Phone size={20} className="text-emerald-400"/></div>
-        <h2 className="text-xl font-bold text-white serif mb-1">Verify Mobile</h2>
-        <p className="text-slate-400 text-sm mb-6">OTP sent to +91 {phone.slice(0,5)}XXXXX</p>
-        <div className="flex justify-center gap-2 mb-4">
+    <div className="fade-in min-h-[calc(100vh-58px)] bg-slate-100 flex items-center justify-center px-4">
+      <div className="w-full max-w-xs apv-card p-8 text-center">
+        <div className="w-14 h-14 bg-[#d09d61]/15 border border-[#d09d61]/20 rounded-3xl flex items-center justify-center mx-auto mb-4"><Phone size={22} className="text-[#d09d61]"/></div>
+        <h2 className="text-2xl font-black text-slate-900 serif mb-2">Verify Mobile</h2>
+        <p className="text-slate-600 text-sm mb-6">OTP sent to +91 {phone.slice(0,5)}XXXXX</p>
+        <div className="flex justify-center gap-3 mb-5">
           {otp.map((d,i)=>(
             <input key={i} ref={el=>otpRefs.current[i]=el} type="text" inputMode="numeric" maxLength={1} value={d}
               onChange={e=>handleOtp(i,e.target.value)}
-              className="w-10 h-12 bg-slate-900 border border-slate-700 rounded-xl text-center text-white text-lg font-bold focus:outline-none focus:border-emerald-500 transition-colors"/>
+              className="w-12 h-14 apv-input rounded-2xl text-center text-slate-900 text-lg font-bold focus:outline-none"/>
           ))}
         </div>
-        <p className="text-slate-500 text-xs mb-4">Demo: <span className="text-emerald-400 cursor-pointer" onClick={()=>{const a=["1","2","3","4","5","6"];otpRefs.current.forEach((r,i)=>{if(r)r.value=a[i]});handleOtp(0,"1");handleOtp(1,"2");handleOtp(2,"3");handleOtp(3,"4");handleOtp(4,"5");handleOtp(5,"6");}}>Auto-fill 123456</span></p>
-        <button onClick={()=>otp.every(Boolean)&&onNext()} className={`w-full py-2.5 rounded-xl font-bold text-sm transition-all ${otp.every(Boolean)?"bg-emerald-500 hover:bg-emerald-400 text-white":"bg-slate-800 text-slate-500 cursor-not-allowed"}`}>Verify & Continue</button>
+        <p className="text-slate-500 text-xs mb-4">Demo: <span className="text-[#d09d61] cursor-pointer" onClick={()=>{const a=["1","2","3","4","5","6"];otpRefs.current.forEach((r,i)=>{if(r)r.value=a[i]});handleOtp(0,"1");handleOtp(1,"2");handleOtp(2,"3");handleOtp(3,"4");handleOtp(4,"5");handleOtp(5,"6");}}>Auto-fill 123456</span></p>
+        <button onClick={()=>otp.every(Boolean)&&onNext()} className={`w-full py-3 rounded-full font-bold text-sm transition-all ${otp.every(Boolean)?"apv-btn":"bg-slate-200 text-slate-500 cursor-not-allowed"}`}>Verify & Continue</button>
       </div>
     </div>
   );
@@ -485,20 +489,20 @@ function OtpView({otp,handleOtp,otpRefs,phone,onNext}){
 
 function DisclaimerView({dchecks,setDchecks,allChecked,onAgree,onBack}){
   return(
-    <div className="fade-in fixed inset-0 z-50 bg-slate-950/97 flex items-center justify-center px-4 py-8 overflow-y-auto">
-      <div className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-lg shadow-2xl">
-        <div className="bg-gradient-to-r from-amber-600/20 to-red-600/10 border-b border-amber-500/20 p-5 rounded-t-2xl flex gap-3">
-          <AlertTriangle size={20} className="text-amber-400 shrink-0 mt-0.5"/>
-          <div><h3 className="text-white font-bold text-lg serif">Before You Begin</h3><p className="text-amber-200/70 text-sm">Read and confirm all statements</p></div>
+    <div className="fade-in fixed inset-0 z-50 bg-slate-100/95 flex items-center justify-center px-4 py-8 overflow-y-auto">
+      <div className="w-full max-w-lg apv-card shadow-2xl">
+        <div className="bg-gradient-to-r from-[#d09d61]/15 to-[#0693e3]/10 border-b border-slate-200 p-5 rounded-t-3xl flex gap-4">
+          <AlertTriangle size={22} className="text-[#d09d61] shrink-0 mt-0.5"/>
+          <div><h3 className="text-slate-900 font-bold text-lg serif">Before You Begin</h3><p className="text-slate-600 text-sm">Read and confirm all statements</p></div>
         </div>
-        <div className="p-5">
-          <div className="flex items-start gap-2.5 bg-red-500/8 border border-red-500/25 rounded-xl p-4 mb-5">
-            <Lock size={16} className="text-red-400 mt-0.5 shrink-0"/>
-            <div><p className="text-red-300 font-semibold text-sm">Locked Fields — Cannot Be Changed Later</p>
-              <p className="text-red-200/60 text-xs mt-0.5">Once you proceed, your <strong>Testator's Full Name</strong> and <strong>Country (India)</strong> are permanently set.</p>
+        <div className="p-6">
+          <div className="flex items-start gap-3 bg-[#fef3c7]/20 border border-[#f59e0b]/20 rounded-3xl p-4 mb-6">
+            <Lock size={18} className="text-[#d09d61] mt-0.5 shrink-0"/>
+            <div><p className="text-slate-900 font-semibold text-sm">Locked Fields — Cannot Be Changed Later</p>
+              <p className="text-slate-500 text-xs mt-1">Once you proceed, your <strong>Testator's Full Name</strong> and <strong>Country (India)</strong> are permanently set.</p>
             </div>
           </div>
-          <div className="space-y-2.5 mb-5">
+          <div className="space-y-3 mb-6">
             {[
               {k:"nonMuslim",t:"I confirm I am a Non-Muslim. Muslim testamentary succession is governed by Muslim Personal Law — this tool is not designed for Muslim testators."},
               {k:"age",t:"I am at least 18 years of age and am of sound and disposing mind at the time of making this Will."},
@@ -506,17 +510,17 @@ function DisclaimerView({dchecks,setDchecks,allChecked,onAgree,onBack}){
               {k:"tool",t:"I understand SmartWill is an online drafting tool and does not substitute for personalised legal advice for complex estates."},
             ].map(item=>(
               <label key={item.k} onClick={()=>setDchecks(p=>({...p,[item.k]:!p[item.k]}))}
-                className={`flex items-start gap-3 p-3.5 rounded-xl cursor-pointer border transition-all ${dchecks[item.k]?"border-emerald-500/40 bg-emerald-500/5":"border-slate-800 hover:border-slate-700"}`}>
-                <div className={`w-5 h-5 rounded border-2 flex items-center justify-center shrink-0 mt-0.5 transition-all ${dchecks[item.k]?"bg-emerald-500 border-emerald-500":"border-slate-600"}`}>
-                  {dchecks[item.k]&&<Check size={10} className="text-white"/>}
+                className={`flex items-start gap-3 p-4 rounded-3xl cursor-pointer border transition-all ${dchecks[item.k]?"border-[#d09d61]/30 bg-[#fef3c7]/30":"border-slate-200 hover:border-[#d09d61]/20"}`}>
+                <div className={`w-5 h-5 rounded-lg border-2 flex items-center justify-center shrink-0 mt-1 transition-all ${dchecks[item.k]?"bg-[#d09d61] border-[#d09d61]":"border-slate-300"}`}>
+                  {dchecks[item.k]&&<Check size={10} className="text-[#020617]"/>}
                 </div>
-                <span className="text-slate-300 text-sm leading-relaxed">{item.t}</span>
+                <span className="text-slate-700 text-sm leading-relaxed">{item.t}</span>
               </label>
             ))}
           </div>
-          <div className="flex gap-2.5">
-            <button onClick={onBack} className="px-4 py-2.5 rounded-xl border border-slate-700 text-slate-400 hover:text-white text-sm font-medium transition-all">← Back</button>
-            <button onClick={()=>allChecked&&onAgree()} className={`flex-1 py-2.5 rounded-xl font-bold text-sm transition-all ${allChecked?"bg-emerald-500 hover:bg-emerald-400 text-white":"bg-slate-800 text-slate-500 cursor-not-allowed"}`}>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <button onClick={onBack} className="w-full sm:w-auto px-5 py-3 rounded-full border border-slate-200 text-slate-600 hover:text-slate-900 text-sm font-medium transition-all">← Back</button>
+            <button onClick={()=>allChecked&&onAgree()} className={`flex-1 py-3 rounded-full font-bold text-sm transition-all ${allChecked?"apv-btn":"bg-slate-200 text-slate-400 cursor-not-allowed"}`}>
               {allChecked?"I Agree — Start My Will →":"Check all boxes to continue"}
             </button>
           </div>
@@ -530,8 +534,8 @@ function DisclaimerView({dchecks,setDchecks,allChecked,onAgree,onBack}){
 // WIZARD FORMS (6 steps)
 // ─────────────────────────────────────────────────────────────────────────────
 function WizardForms({step,will,setWill,addBene,removeBene,updateBene,addAsset,removeAsset,updateAssetData,updateAssetAlloc,allocTotal,assetAdded,onNext,onPrev,onGenerate}){
-  const IC="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-white placeholder-slate-600 text-sm focus:outline-none focus:border-emerald-500 transition-colors";
-  const LC="block text-slate-400 text-[10px] font-bold mb-1 uppercase tracking-widest";
+  const IC="w-full apv-input rounded-2xl px-3.5 py-2.5 text-slate-900 placeholder:text-slate-500 text-sm focus:outline-none transition";
+  const LC="block apv-label mb-1";
   const set=(path,v)=>setWill(p=>{
     const keys=path.split(".");
     if(keys.length===1) return{...p,[keys[0]]:v};
@@ -544,7 +548,7 @@ function WizardForms({step,will,setWill,addBene,removeBene,updateBene,addAsset,r
       {step===1&&(
         <div className="space-y-4">
           <StepHeader icon={<User size={17}/>} title="Testator Details" sub="Section I — Your identity & declaration of fitness"/>
-          <div className="bg-blue-500/8 border border-blue-500/20 rounded-xl p-3.5 text-xs text-blue-300 flex items-start gap-2"><Info size={13} className="mt-0.5 shrink-0"/>You declare that you are of sound mind and executing this Will voluntarily, free from coercion or undue influence.</div>
+          <div className="bg-slate-100 border border-slate-200 rounded-xl p-3.5 text-xs text-slate-600 flex items-start gap-2"><Info size={13} className="mt-0.5 shrink-0"/>You declare that you are of sound mind and executing this Will voluntarily, free from coercion or undue influence.</div>
           <div>
             <label className={LC}>Full Legal Name <span className="text-red-400 normal-case text-[9px]">(Locked)</span></label>
             <div className="relative"><Lock size={11} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-600"/>
@@ -617,11 +621,11 @@ function WizardForms({step,will,setWill,addBene,removeBene,updateBene,addAsset,r
           <FormBlock title="Administration Type">
             <div className="flex gap-3">
               {[{v:"jointly",l:"Jointly (Must act together)"},{v:"jointly_severally",l:"Jointly & Severally (May act independently)"}].map(o=>(
-                <label key={o.v} className={`flex-1 flex items-center gap-2 p-3 rounded-xl border cursor-pointer transition-all ${will.executor.adminType===o.v?"border-emerald-500/50 bg-emerald-500/5":"border-slate-700 hover:border-slate-600"}`}>
-                  <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all ${will.executor.adminType===o.v?"border-emerald-500 bg-emerald-500":"border-slate-600"}`}>
+                <label key={o.v} className={`flex-1 flex items-center gap-2 p-3 rounded-xl border cursor-pointer transition-all ${will.executor.adminType===o.v?"border-[#d09d61]/50 bg-[#d09d61]/10":"border-slate-700 hover:border-slate-600"}`}>
+                  <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all ${will.executor.adminType===o.v?"border-[#d09d61] bg-[#d09d61]":"border-slate-600"}`}>
                     {will.executor.adminType===o.v&&<div className="w-1.5 h-1.5 rounded-full bg-white"/>}
                   </div>
-                  <span className="text-slate-300 text-xs" onClick={()=>set("executor.adminType",o.v)}>{o.l}</span>
+                  <span className="text-slate-700 text-xs" onClick={()=>set("executor.adminType",o.v)}>{o.l}</span>
                 </label>
               ))}
             </div>
@@ -656,9 +660,9 @@ function WizardForms({step,will,setWill,addBene,removeBene,updateBene,addAsset,r
       {step===3&&(
         <div className="space-y-4">
           <StepHeader icon={<Baby size={17}/>} title="Guardian Details" sub="Section III — For minor beneficiaries (optional)"/>
-          <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 text-sm text-slate-300 leading-relaxed">
-            <p className="font-semibold text-white mb-1">Do you have minor beneficiaries?</p>
-            <p className="text-slate-400 text-sm">If any beneficiary is under 18, nominate a guardian to manage their inheritance until they come of age. This section is optional if all beneficiaries are adults.</p>
+          <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 text-sm text-slate-700 leading-relaxed">
+            <p className="font-semibold text-slate-900 mb-1">Do you have minor beneficiaries?</p>
+            <p className="text-slate-600 text-sm">If any beneficiary is under 18, nominate a guardian to manage their inheritance until they come of age. This section is optional if all beneficiaries are adults.</p>
           </div>
           <Toggle label="I have minor beneficiaries / want to nominate a Guardian" checked={will.guardian.hasMinors} onChange={v=>set("guardian.hasMinors",v)}/>
           {will.guardian.hasMinors&&(
@@ -694,10 +698,10 @@ function WizardForms({step,will,setWill,addBene,removeBene,updateBene,addAsset,r
           <StepHeader icon={<Users size={17}/>} title="Beneficiaries" sub="People named to receive your assets"/>
           <div className="space-y-3">
             {will.beneficiaries.map((b,idx)=>(
-              <div key={b.id} className="bg-slate-900 border border-slate-800 rounded-xl p-4">
+              <div key={b.id} className="bg-slate-50 border border-slate-200 rounded-xl p-4">
                 <div className="flex justify-between items-center mb-3">
-                  <span className="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Beneficiary {idx+1}</span>
-                  {will.beneficiaries.length>1&&<button onClick={()=>removeBene(b.id)} className="text-red-400 hover:text-red-300"><Trash2 size={13}/></button>}
+                  <span className="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Beneficiary {idx+1}</span>
+                  {will.beneficiaries.length>1&&<button onClick={()=>removeBene(b.id)} className="text-red-500 hover:text-red-600"><Trash2 size={13}/></button>}
                 </div>
                 <div className="grid grid-cols-2 gap-2.5">
                   <div><label className={LC}>Full Name</label><input value={b.name} onChange={e=>updateBene(b.id,"name",e.target.value)} className={IC} placeholder="Full name"/></div>
@@ -710,7 +714,7 @@ function WizardForms({step,will,setWill,addBene,removeBene,updateBene,addAsset,r
               </div>
             ))}
           </div>
-          <button onClick={addBene} className="w-full border-2 border-dashed border-slate-700 hover:border-emerald-500 text-slate-500 hover:text-emerald-400 rounded-xl py-2.5 flex items-center justify-center gap-2 transition-all text-sm">
+          <button onClick={addBene} className="w-full border-2 border-dashed border-slate-700 hover:border-[#d09d61] text-slate-500 hover:text-[#d09d61] rounded-xl py-2.5 flex items-center justify-center gap-2 transition-all text-sm">
             <Plus size={14}/>Add Beneficiary
           </button>
           <Nav onNext={onNext} onPrev={onPrev}/>
@@ -726,11 +730,11 @@ function WizardForms({step,will,setWill,addBene,removeBene,updateBene,addAsset,r
             <div className="flex gap-2.5">
               {[{v:"itemized",l:"Itemized (Specific assets to specific people)"},{v:"global",l:"Global (Divide entire estate at once)"}].map(o=>(
                 <label key={o.v} onClick={()=>setWill(p=>({...p,distributionMode:o.v}))}
-                  className={`flex-1 flex items-start gap-2 p-3 rounded-xl border cursor-pointer transition-all ${will.distributionMode===o.v?"border-emerald-500/50 bg-emerald-500/5":"border-slate-700 hover:border-slate-600"}`}>
-                  <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center mt-0.5 transition-all ${will.distributionMode===o.v?"border-emerald-500 bg-emerald-500":"border-slate-600"}`}>
+                  className={`flex-1 flex items-start gap-2 p-3 rounded-xl border cursor-pointer transition-all ${will.distributionMode===o.v?"border-[#d09d61]/50 bg-[#d09d61]/10":"border-slate-700 hover:border-slate-600"}`}>
+                  <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center mt-0.5 transition-all ${will.distributionMode===o.v?"border-[#d09d61] bg-[#d09d61]":"border-slate-600"}`}>
                     {will.distributionMode===o.v&&<div className="w-1.5 h-1.5 rounded-full bg-white"/>}
                   </div>
-                  <span className="text-slate-300 text-xs">{o.l}</span>
+                  <span className="text-slate-700 text-xs">{o.l}</span>
                 </label>
               ))}
             </div>
@@ -742,11 +746,11 @@ function WizardForms({step,will,setWill,addBene,removeBene,updateBene,addAsset,r
               <div className="flex gap-2.5 mb-3">
                 {[{v:"equal",l:"Equal share among all"},{v:"percentage",l:"Specified percentages"}].map(o=>(
                   <label key={o.v} onClick={()=>setWill(p=>({...p,globalMode:o.v}))}
-                    className={`flex-1 flex items-center gap-2 p-2.5 rounded-xl border cursor-pointer transition-all ${will.globalMode===o.v?"border-emerald-500/50 bg-emerald-500/5":"border-slate-700"}`}>
-                    <div className={`w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center transition-all ${will.globalMode===o.v?"border-emerald-500 bg-emerald-500":"border-slate-600"}`}>
+                    className={`flex-1 flex items-center gap-2 p-2.5 rounded-xl border cursor-pointer transition-all ${will.globalMode===o.v?"border-[#d09d61]/50 bg-[#d09d61]/10":"border-slate-700"}`}>
+                    <div className={`w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center transition-all ${will.globalMode===o.v?"border-[#d09d61] bg-[#d09d61]":"border-slate-600"}`}>
                       {will.globalMode===o.v&&<div className="w-1 h-1 rounded-full bg-white"/>}
                     </div>
-                    <span className="text-slate-300 text-xs">{o.l}</span>
+                    <span className="text-slate-700 text-xs">{o.l}</span>
                   </label>
                 ))}
               </div>
@@ -757,8 +761,8 @@ function WizardForms({step,will,setWill,addBene,removeBene,updateBene,addAsset,r
                     return(
                       <div key={b.id}>
                         <div className="flex items-center justify-between mb-1">
-                          <span className="text-slate-300 text-xs">{b.name||"Unnamed"} <span className="text-slate-500">({b.relation})</span></span>
-                          <span className="text-emerald-400 text-xs font-bold">{will.globalPercentages[b.id]||0}%</span>
+                          <span className="text-slate-700 text-xs">{b.name||"Unnamed"} <span className="text-slate-500">({b.relation})</span></span>
+                          <span className="text-[#d09d61] text-xs font-bold">{will.globalPercentages[b.id]||0}%</span>
                         </div>
                         <input type="range" min="0" max="100" value={will.globalPercentages[b.id]||0}
                           onChange={e=>setWill(p=>({...p,globalPercentages:{...p.globalPercentages,[b.id]:e.target.value}}))}
@@ -768,7 +772,7 @@ function WizardForms({step,will,setWill,addBene,removeBene,updateBene,addAsset,r
                   })}
                   <div className="flex justify-between text-xs mt-2 pt-2 border-t border-slate-700">
                     <span className="text-slate-500">Total Allocated</span>
-                    <span className={`font-bold ${will.beneficiaries.reduce((s,b)=>s+(parseFloat(will.globalPercentages[b.id])||0),0)===100?"text-emerald-400":"text-amber-400"}`}>
+                    <span className={`font-bold ${will.beneficiaries.reduce((s,b)=>s+(parseFloat(will.globalPercentages[b.id])||0),0)===100?"text-[#d09d61]":"text-amber-400"}`}>
                       {will.beneficiaries.reduce((s,b)=>s+(parseFloat(will.globalPercentages[b.id])||0),0)}%
                       {will.beneficiaries.reduce((s,b)=>s+(parseFloat(will.globalPercentages[b.id])||0),0)!==100&&
                         <span className="ml-2 text-amber-400 text-[10px] border border-amber-400/30 bg-amber-400/10 px-1.5 py-0.5 rounded-full">Must equal 100%</span>
@@ -817,7 +821,7 @@ function WizardForms({step,will,setWill,addBene,removeBene,updateBene,addAsset,r
                     const valid=total===100;
                     const hasAnyInput=asset.allowSplit?Object.values(asset.allocs).some(v=>v!==""):true;
                     return(
-                      <div key={asset.uid} className={`bg-slate-900 border rounded-xl p-4 ${hasAnyInput&&!valid?"border-amber-500/30":"border-slate-800"}`}>
+                      <div key={asset.uid} className={`bg-slate-50 border rounded-xl p-4 ${hasAnyInput&&!valid?"border-amber-500/30":"border-slate-200"}`}>
                         <div className="flex items-center justify-between mb-3">
                           <div className="flex items-center gap-2">
                             <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${c.bg} ${c.text}`}>{asset.catItem.icon}</div>
@@ -853,9 +857,9 @@ function WizardForms({step,will,setWill,addBene,removeBene,updateBene,addAsset,r
                               <div className="flex items-center justify-between mt-1.5 pt-2 border-t border-slate-800">
                                 <span className="text-slate-500 text-xs">Total</span>
                                 <div className="flex items-center gap-2">
-                                  <span className={`font-bold serif ${valid?"text-emerald-400":"text-amber-400"}`}>{total}%</span>
+                                  <span className={`font-bold serif ${valid?"text-[#d09d61]":"text-amber-400"}`}>{total}%</span>
                                   {!valid&&<span className="flex items-center gap-1 bg-amber-500/10 border border-amber-500/25 text-amber-400 text-[10px] px-2 py-0.5 rounded-full"><AlertTriangle size={9}/>Must equal 100%</span>}
-                                  {valid&&<CheckCircle size={12} className="text-emerald-400"/>}
+                                  {valid&&<CheckCircle size={12} className="text-[#d09d61]"/>}
                                 </div>
                               </div>
                             </div>
@@ -924,10 +928,10 @@ function WizardForms({step,will,setWill,addBene,removeBene,updateBene,addAsset,r
               </div>
             ))}
           </FormBlock>
-          <div className="bg-emerald-500/8 border border-emerald-500/20 rounded-xl p-4 text-xs text-emerald-300">
+          <div className="bg-[#d09d61]/8 border border-[#d09d61]/20 rounded-xl p-4 text-xs text-[#b88d48]">
             All rest, residue and remainder of my estate shall vest absolutely in <strong>{will.beneficiaries.find(b=>String(b.id)===String(will.residualBeneId))?.name||"Selected Beneficiary"}</strong>.
           </div>
-          <button onClick={onGenerate} className="w-full bg-emerald-500 hover:bg-emerald-400 text-white font-bold py-3.5 rounded-xl text-sm transition-colors flex items-center justify-center gap-2">
+          <button onClick={onGenerate} className="w-full bg-[#d09d61] hover:bg-[#b88442] text-[#020617] font-bold py-3.5 rounded-xl text-sm transition-colors flex items-center justify-center gap-2">
             <FileText size={16}/>Generate Complete Will Document →
           </button>
           <button onClick={onPrev} className="w-full text-slate-500 hover:text-white text-sm py-2 transition-colors">← Back</button>
@@ -953,7 +957,7 @@ function LiveDocPreview({will,residualBene,allocTotal}){
   return(
     <div className="w-full max-w-[520px] rounded-xl shadow-2xl overflow-hidden border border-amber-900/20">
       <div className="bg-slate-700 px-4 py-2 flex items-center gap-2">
-        <div className="w-2.5 h-2.5 rounded-full bg-red-400/80"/><div className="w-2.5 h-2.5 rounded-full bg-amber-400/80"/><div className="w-2.5 h-2.5 rounded-full bg-emerald-400/80"/>
+        <div className="w-2.5 h-2.5 rounded-full bg-red-400/80"/><div className="w-2.5 h-2.5 rounded-full bg-amber-400/80"/><div className="w-2.5 h-2.5 rounded-full bg-[#d09d61]/80"/>
         <span className="text-slate-400 text-xs ml-2 flex items-center gap-1.5"><Eye size={10}/>Live Preview — Will Document</span>
       </div>
       <div className="bg-[#fefcf3] p-7 text-[12.5px] leading-relaxed" style={{fontFamily:"'EB Garamond','Times New Roman',serif",color:"#2d2a1e"}}>
@@ -1038,17 +1042,17 @@ function WillDocument({will,residualBene,allocTotal,onBack,onPrint,willDocRef}){
         @import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;0,700;1,400&display=swap');
       `}</style>
       {/* Top bar */}
-      <div className="no-print sticky top-0 z-50 bg-slate-900 border-b border-slate-700 px-5 py-3 flex items-center justify-between">
-        <button onClick={onBack} className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors text-sm"><ChevronLeft size={16}/>Back to Wizard</button>
+      <div className="no-print sticky top-0 z-50 bg-white border-b border-slate-200 px-5 py-3 flex items-center justify-between">
+        <button onClick={onBack} className="flex items-center gap-2 text-slate-600 hover:text-slate-900 transition-colors text-sm"><ChevronLeft size={16}/>Back to Wizard</button>
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 bg-emerald-500 rounded-md flex items-center justify-center"><Scale size={13} className="text-white"/></div>
-          <span className="text-white font-bold serif">SmartWill — Generated Will Document</span>
+          <div className="w-7 h-7 bg-[#d09d61] rounded-md flex items-center justify-center"><Scale size={13} className="text-[#020617]"/></div>
+          <span className="text-slate-900 font-bold serif">SmartWill — Generated Will Document</span>
         </div>
         <div className="flex items-center gap-2.5">
           <button onClick={onPrint} className="flex items-center gap-1.5 bg-slate-700 hover:bg-slate-600 text-white rounded-lg px-3.5 py-2 text-sm transition-colors">
             <Printer size={14}/>Print
           </button>
-          <button onClick={onPrint} className="flex items-center gap-1.5 bg-emerald-500 hover:bg-emerald-400 text-white rounded-lg px-3.5 py-2 text-sm font-semibold transition-colors">
+          <button onClick={onPrint} className="flex items-center gap-1.5 bg-[#d09d61] hover:bg-[#b88442] text-[#020617] rounded-lg px-3.5 py-2 text-sm font-semibold transition-colors">
             <Download size={14}/>Download PDF
           </button>
         </div>
@@ -1261,41 +1265,41 @@ function WillSection({num,title,children}){
 function LawyerPortal({onCreateWill}){
   const [tab,setTab]=useState("clients");
   const stats=[
-    {l:"Total Clients",v:"128",d:"+12 this month",icon:<Users size={17}/>,c:"text-blue-400"},
-    {l:"Wills Completed",v:"94",d:"+8 this week",icon:<CheckCircle size={17}/>,c:"text-emerald-400"},
+    {l:"Total Clients",v:"128",d:"+12 this month",icon:<Users size={17}/>,c:"text-slate-600"},
+    {l:"Wills Completed",v:"94",d:"+8 this week",icon:<CheckCircle size={17}/>,c:"text-[#d09d61]"},
     {l:"Pending Actions",v:"7",d:"Needs attention",icon:<Clock size={17}/>,c:"text-amber-400"},
     {l:"Revenue MTD",v:"₹4.2L",d:"+23% vs last mo.",icon:<TrendingUp size={17}/>,c:"text-violet-400"},
   ];
   return(
-    <div className="fade-in min-h-[calc(100vh-58px)] bg-slate-950">
+    <div className="fade-in min-h-[calc(100vh-58px)] bg-slate-100">
       <div className="max-w-6xl mx-auto px-5 py-8">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h2 className="text-xl font-bold text-white serif">Lawyer Dashboard</h2>
-            <p className="text-slate-400 text-sm">Adv. Anand Kumar · Bar No. MH/12345/2005</p>
+            <h2 className="text-xl font-bold text-slate-900 serif">Lawyer Dashboard</h2>
+            <p className="text-slate-600 text-sm">Adv. Anand Kumar · Bar No. MH/12345/2005</p>
           </div>
-          <button onClick={onCreateWill} className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-white font-semibold px-4 py-2 rounded-xl text-sm transition-colors">
+          <button onClick={onCreateWill} className="apv-btn flex items-center gap-2 py-2 px-4 rounded-xl text-sm font-semibold">
             <Plus size={14}/>Create Will for Client
           </button>
         </div>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           {stats.map(s=>(
-            <div key={s.l} className="bg-slate-900 border border-slate-800 rounded-xl p-4">
+            <div key={s.l} className="bg-white border border-slate-200 rounded-xl p-4">
               <div className={`${s.c} mb-2`}>{s.icon}</div>
-              <div className="text-2xl font-bold text-white serif">{s.v}</div>
-              <div className="text-slate-400 text-xs">{s.l}</div>
+              <div className="text-2xl font-bold text-slate-900 serif">{s.v}</div>
+              <div className="text-slate-600 text-xs">{s.l}</div>
               <div className="text-slate-500 text-[10px] mt-0.5">{s.d}</div>
             </div>
           ))}
         </div>
-        <div className="flex gap-1 bg-slate-900 border border-slate-800 rounded-xl p-1 w-fit mb-5">
+        <div className="flex gap-1 bg-white border border-slate-200 rounded-xl p-1 w-fit mb-5">
           {["clients","completed","pending"].map(t=>(
-            <button key={t} onClick={()=>setTab(t)} className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all capitalize ${tab===t?"bg-emerald-500 text-white":"text-slate-400 hover:text-white"}`}>{t}</button>
+            <button key={t} onClick={()=>setTab(t)} className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all capitalize ${tab===t?"bg-[#d09d61] text-[#020617]":"text-slate-600 hover:text-slate-900"}`}>{t}</button>
           ))}
         </div>
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
-          <div className="px-5 py-3.5 border-b border-slate-800 flex justify-between items-center">
-            <h3 className="text-white font-bold serif">Client Will Tracker</h3>
+        <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden">
+          <div className="px-5 py-3.5 border-b border-slate-200 flex justify-between items-center">
+            <h3 className="text-slate-900 font-bold serif">Client Will Tracker</h3>
             <span className="text-slate-500 text-xs">{MOCK_CLIENTS.length} clients</span>
           </div>
           <table className="w-full">
@@ -1309,18 +1313,18 @@ function LawyerPortal({onCreateWill}){
                 <tr key={c.id} className="border-b border-slate-800/50 hover:bg-slate-800/30 transition-colors">
                   <td className="px-5 py-3.5">
                     <div className="flex items-center gap-2.5">
-                      <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 to-violet-600 flex items-center justify-center text-[9px] font-bold text-white">
+                      <div className="w-7 h-7 rounded-full bg-slate-200 flex items-center justify-center text-[9px] font-bold text-slate-900">
                         {c.name.split(" ").slice(0,2).map(n=>n[0]).join("")}
                       </div>
-                      <span className="text-white text-sm font-medium">{c.name}</span>
+                      <span className="text-slate-900 text-sm font-medium">{c.name}</span>
                     </div>
                   </td>
-                  <td className="px-5 py-3.5 text-slate-400 text-sm">{c.phone}</td>
-                  <td className="px-5 py-3.5 text-emerald-400 text-sm font-semibold serif">{c.value}</td>
+                  <td className="px-5 py-3.5 text-slate-500 text-sm">{c.phone}</td>
+                  <td className="px-5 py-3.5 text-[#d09d61] text-sm font-semibold serif">{c.value}</td>
                   <td className="px-5 py-3.5"><span className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${statusStyle(c.status)}`}>{c.status}</span></td>
                   <td className="px-5 py-3.5 text-slate-500 text-xs">{c.date}</td>
                   <td className="px-5 py-3.5">
-                    <button onClick={onCreateWill} className="flex items-center gap-1.5 text-emerald-400 hover:text-emerald-300 text-xs font-semibold transition-colors">
+                    <button onClick={onCreateWill} className="flex items-center gap-1.5 text-[#d09d61] hover:text-[#b88442] text-xs font-semibold transition-colors">
                       <Edit3 size={11}/>Open Draft
                     </button>
                   </td>
@@ -1339,8 +1343,8 @@ function StepHeader({icon,title,sub}){
   return(
     <div className="mb-5">
       <div className="flex items-center gap-2.5 mb-0.5">
-        <div className="w-8 h-8 bg-emerald-500/10 border border-emerald-500/20 rounded-xl flex items-center justify-center text-emerald-400">{icon}</div>
-        <h3 className="text-white font-bold text-xl serif">{title}</h3>
+        <div className="w-8 h-8 bg-[#d09d61]/10 border border-[#d09d61]/20 rounded-xl flex items-center justify-center text-[#d09d61]">{icon}</div>
+        <h3 className="text-slate-900 font-bold text-xl serif">{title}</h3>
       </div>
       <p className="text-slate-500 text-xs ml-10">{sub}</p>
     </div>
@@ -1348,17 +1352,17 @@ function StepHeader({icon,title,sub}){
 }
 function FormBlock({title,children}){
   return(
-    <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 space-y-3">
-      {title&&<p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-2">{title}</p>}
+    <div className="bg-white border border-slate-200 rounded-xl p-4 space-y-3">
+      {title&&<p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-2">{title}</p>}
       {children}
     </div>
   );
 }
 function Toggle({label,checked,onChange}){
   return(
-    <label className={`flex items-center justify-between p-3.5 rounded-xl border cursor-pointer transition-all ${checked?"border-emerald-500/40 bg-emerald-500/5":"border-slate-800 hover:border-slate-700"}`}>
-      <span className="text-slate-300 text-sm">{label}</span>
-      <div onClick={()=>onChange(!checked)} className={`w-10 h-5 rounded-full relative transition-all ${checked?"bg-emerald-500":"bg-slate-700"}`}>
+    <label className={`flex items-center justify-between p-3.5 rounded-xl border cursor-pointer transition-all ${checked?"border-[#d09d61]/40 bg-[#d09d61]/10":"border-slate-200 hover:border-slate-300"}`}>
+      <span className="text-slate-700 text-sm">{label}</span>
+      <div onClick={()=>onChange(!checked)} className={`w-10 h-5 rounded-full relative transition-all ${checked?"bg-[#d09d61]":"bg-slate-700"}`}>
         <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-all ${checked?"left-5.5 translate-x-0.5":"left-0.5"}`} style={{left:checked?"22px":"2px"}}/>
       </div>
     </label>
@@ -1367,8 +1371,8 @@ function Toggle({label,checked,onChange}){
 function Nav({onNext,onPrev}){
   return(
     <div className="flex gap-3 pt-2">
-      {onPrev&&<button onClick={onPrev} className="flex-1 py-2.5 border border-slate-700 rounded-xl text-slate-400 hover:text-white hover:border-slate-500 text-sm font-medium transition-all flex items-center justify-center gap-1.5"><ChevronLeft size={14}/>Back</button>}
-      {onNext&&<button onClick={onNext} className="flex-1 bg-emerald-500 hover:bg-emerald-400 text-white py-2.5 rounded-xl text-sm font-bold transition-colors flex items-center justify-center gap-1.5">Next<ChevronRight size={14}/></button>}
+      {onPrev&&<button onClick={onPrev} className="flex-1 py-2.5 border border-slate-200 rounded-xl text-slate-700 hover:text-slate-900 hover:border-slate-300 text-sm font-medium transition-all flex items-center justify-center gap-1.5"><ChevronLeft size={14}/>Back</button>}
+      {onNext&&<button onClick={onNext} className="flex-1 bg-[#d09d61] hover:bg-[#c4934c] text-[#020617] py-2.5 rounded-xl text-sm font-bold transition-colors flex items-center justify-center gap-1.5">Next<ChevronRight size={14}/></button>}
     </div>
   );
 }
