@@ -152,4 +152,4 @@ export interface DisclaimerChecks {
   tool: boolean;
 }
 
-export type ViewName = "landing" | "signup" | "otp" | "disclaimer" | "lawyer" | "wizard";
+export type ViewName = "landing" | "signup" | "otp" | "disclaimer" | "lawyerLogin" | "lawyer" | "wizard";

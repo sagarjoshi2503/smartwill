@@ -7,6 +7,7 @@ import LandingPage from "./components/LandingPage";
 import SignupView from "./components/SignupView";
 import OtpView from "./components/OtpView";
 import DisclaimerView from "./components/DisclaimerView";
+import LawyerLoginView from "./components/LawyerLoginView";
 import LawyerPortal from "./components/LawyerPortal";
 import WizardForms from "./components/WizardForms";
 import LiveDocPreview from "./components/LiveDocPreview";
@@ -93,7 +94,7 @@ export default function SmartWill() {
                 </>
               ):(
                 <>
-                  <button onClick={()=>setView("lawyer")} className="flex items-center gap-1.5 text-slate-600 hover:text-slate-900 border border-slate-200 hover:border-slate-300 rounded-lg px-3 py-1.5 text-sm transition-all"><LogIn size={13}/>Lawyer Portal</button>
+                  <button onClick={()=>setView("lawyerLogin")} className="flex items-center gap-1.5 text-slate-600 hover:text-slate-900 border border-slate-200 hover:border-slate-300 rounded-lg px-3 py-1.5 text-sm transition-all"><LogIn size={13}/>Lawyer Portal</button>
                   <button onClick={()=>setView("signup")} className="flex items-center gap-1.5 bg-[#d09d61] hover:bg-[#d7a46a] text-[#020617] rounded-lg px-4 py-2 text-sm font-semibold transition-colors shadow-lg shadow-[#d09d61]/20">Create Your Will <ArrowRight size={13}/></button>
                 </>
               )}
@@ -106,6 +107,7 @@ export default function SmartWill() {
       {view==="signup" && <SignupView signup={signup} setSignup={setSignup} onNext={()=>setView("otp")}/>}
       {view==="otp" && <OtpView otp={otp} handleOtp={handleOtp} otpRefs={otpRefs} phone={signup.phone} onNext={()=>setView("disclaimer")}/>}
       {view==="disclaimer" && <DisclaimerView dchecks={dchecks} setDchecks={setDchecks} allChecked={allDchecked} onAgree={()=>setView("wizard")} onBack={()=>setView("otp")}/>}
+      {view==="lawyerLogin" && <LawyerLoginView onLogin={()=>setView("lawyer")} onBack={()=>setView("landing")}/>}
       {view==="lawyer" && <LawyerPortal onCreateWill={()=>{setWizardStep(1);setView("wizard");}}/>}
 
       {view==="wizard" && (
