@@ -8,6 +8,17 @@ const CLIENT_ID = process.env.VITE_GOOGLE_CLIENT_ID || process.env.GOOGLE_CLIENT
 const client = CLIENT_ID ? new OAuth2Client(CLIENT_ID) : null;
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+  // The frontend can be served from a different origin than this function
+  // (e.g. GitHub Pages calling the Vercel-hosted API). This endpoint carries
+  // no cookies/session, so a wildcard is safe — nothing origin-specific to protect.
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
+  if (req.method === "OPTIONS") {
+    res.status(204).end();
+    return;
+  }
   if (req.method !== "POST") {
     res.status(405).json({ error: "Method not allowed" });
     return;

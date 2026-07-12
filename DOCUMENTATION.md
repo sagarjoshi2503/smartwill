@@ -60,6 +60,10 @@ src/utils/
   allocation.ts             allocTotal, formatAllocCompact (live preview), formatAllocFull
                           (printable document) — the compact/full variants render
                           slightly different text and are kept separate intentionally
+  apiBase.ts                 apiUrl() — prefixes API calls with VITE_API_BASE_URL so the
+                          frontend always reaches the Vercel deployment's /api routes,
+                          even when the static files themselves are served elsewhere
+                          (GitHub Pages), see §4.2a
 src/components/
   shared/                   StepHeader, FormBlock, Toggle, Nav, Clause, WillSection —
                           small presentational pieces reused across steps/documents
@@ -142,6 +146,19 @@ Clicking "Create Your Will" lands on a "Get Started" screen with two paths:
   `{name, email}`. `App.tsx`'s `handleGoogleSuccess` then pre-fills `signup`
   with that name/email and — since Google already proved identity — **skips
   the phone/OTP screens entirely**, going straight to `disclaimer`.
+
+  **This only works where the request can reach `api/auth/google.ts` — i.e. a
+  Vercel deployment.** GitHub Pages is static-only and cannot run that function
+  under any circumstances, so the frontend always calls an *absolute* URL built
+  from `VITE_API_BASE_URL` (see `src/utils/apiBase.ts`'s `apiUrl()` helper) —
+  e.g. `https://smartwill-seven.vercel.app/api/auth/google` — rather than a
+  same-origin relative path. That means the exact same static build works
+  correctly whether it's served from Vercel itself or from GitHub Pages;
+  both talk to the one real backend on Vercel. Because that request is then
+  cross-origin when the frontend isn't Vercel, `api/auth/google.ts` sets
+  permissive CORS headers (`Access-Control-Allow-Origin: *`) and handles the
+  browser's `OPTIONS` preflight — safe here since the endpoint returns no
+  cookies/session, just `{name, email}` derived from the token itself.
 - **"Continue with Phone Number"** — unchanged: leads to `SignupView` → `OtpView`
   → `disclaimer`, exactly as before Google SSO was added.
 
@@ -164,9 +181,18 @@ Client ID:
      This also makes it available to `api/auth/google.ts` at runtime (Vercel
      injects all configured env vars into serverless functions regardless of
      the `VITE_` prefix — that prefix only matters for Vite's client bundling).
-5. Redeploy. Until this is done, `GoogleSignInButton` shows a small "Google
-   Sign-In isn't configured" notice instead of a button (and the API route
-   returns a 500 if somehow called anyway) — it fails soft, not with a crash.
+5. If this build is *not* the Vercel deployment itself (e.g. it's the
+   GitHub Pages copy, or you're running `npm run dev` locally without
+   `vercel dev`), also set `VITE_API_BASE_URL` to the Vercel deployment's
+   origin (e.g. `https://smartwill-seven.vercel.app`) so the frontend's fetch
+   calls reach a place that can actually run `api/auth/google.ts`. Leave it
+   unset when the frontend build *is* the Vercel deployment.
+6. Redeploy. Until the Client ID is set, `GoogleSignInButton` shows a small
+   "Google Sign-In isn't configured" notice instead of a button (and the API
+   route returns a 500 if somehow called anyway) — it fails soft, not with a
+   crash. If `VITE_API_BASE_URL` is missing/wrong on a non-Vercel build, the
+   fetch will 404/405 and `AuthChoiceView` shows a clear inline error instead
+   of throwing (see the content-type check in `handleCredential`).
 
 A Client ID is a public identifier, not a secret — it's fine that it ends up in
 the client-side JS bundle. What actually gets verified server-side is the ID
