@@ -43,6 +43,9 @@ export default function SmartWill() {
   // Auth
   const handleGoogleSuccess = (profile: GoogleProfile) => {
     setSignup(p=>({...p, name: profile.name, email: profile.email}));
+    // Google Sign-In only ever gives us name + email — no phone or state, so
+    // those two Testator fields are left for the user to fill in themselves.
+    setWill(p=>({...p, testator: {...p.testator, fullName: profile.name}}));
     setSkippedOtp(true);
     setView("disclaimer");
   };
@@ -52,6 +55,10 @@ export default function SmartWill() {
     if(!/^\d?$/.test(v)) return;
     const n=[...otp]; n[i]=v; setOtp(n);
     if(v && i<5) otpRefs.current[i+1]?.focus();
+  };
+  const handleOtpVerified = () => {
+    setWill(p=>({...p, testator: {...p.testator, fullName: signup.name}}));
+    setView("disclaimer");
   };
 
   // Beneficiary ops
@@ -115,7 +122,7 @@ export default function SmartWill() {
       {view==="landing" && <LandingPage plans={PLANS} addons={ADDONS} selectedPlan={selectedPlan} setSelectedPlan={setSelectedPlan} addonsState={addons} setAddons={setAddons} totalPrice={totalPrice} onStart={()=>setView("authChoice")}/>}
       {view==="authChoice" && <AuthChoiceView onGoogleSuccess={handleGoogleSuccess} onPhone={()=>{setSkippedOtp(false);setView("signup");}} onBack={()=>setView("landing")}/>}
       {view==="signup" && <SignupView signup={signup} setSignup={setSignup} onNext={()=>setView("otp")}/>}
-      {view==="otp" && <OtpView otp={otp} handleOtp={handleOtp} otpRefs={otpRefs} phone={signup.phone} onNext={()=>setView("disclaimer")}/>}
+      {view==="otp" && <OtpView otp={otp} handleOtp={handleOtp} otpRefs={otpRefs} phone={signup.phone} onNext={handleOtpVerified}/>}
       {view==="disclaimer" && <DisclaimerView dchecks={dchecks} setDchecks={setDchecks} allChecked={allDchecked} onAgree={()=>setView("wizard")} onBack={()=>setView(skippedOtp?"authChoice":"otp")}/>}
       {view==="lawyerLogin" && <LawyerLoginView onLogin={()=>setView("lawyer")} onBack={()=>setView("landing")}/>}
       {view==="lawyer" && <LawyerPortal onCreateWill={()=>{setWizardStep(1);setView("wizard");}}/>}

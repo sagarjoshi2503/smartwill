@@ -3,17 +3,24 @@ import type { WillState, MockClient } from "../types";
 
 export const DEFAULT_WILL: WillState = {
   // Section 0 - Identity
+  // fullName is intentionally left blank here — it's filled in only once the
+  // user completes phone/OTP or Google sign-in (see App.tsx: handleOtpVerified /
+  // handleGoogleSuccess). Every other field starts empty for the user to fill in;
+  // signDay/Month/Year default to today's real date since that's simply correct,
+  // not placeholder demo data.
   testator: {
-    fullName:"Arjun Verma", relation:"son", parentSpouseName:"Suresh Verma",
-    age:"42", address:"12, Shanti Nagar, Baner, Pune – 411045, Maharashtra",
-    idType:"PAN Card", idNumber:"ABCPV1234F", country:"India",
-    signPlace:"Pune", signDay:String(today.day), signMonth:today.month, signYear:String(today.year),
+    fullName:"", relation:"son", parentSpouseName:"",
+    age:"", address:"",
+    idType:"PAN Card", idNumber:"", country:"India",
+    signPlace:"", signDay:String(today.day), signMonth:today.month, signYear:String(today.year),
   },
-  // Section II - Executor
+  // Section II - Executor. idType/relation/adminType are left at a neutral
+  // first/structural choice (they're <select>s with no blank option), but no
+  // fabricated name/address/ID-number text remains.
   executor: {
-    name:"Priya Verma", idType:"Aadhaar Card", idNumber:"9876-5432-1098",
-    address:"12, Shanti Nagar, Baner, Pune – 411045",
-    relation:"Spouse",
+    name:"", idType:"Aadhaar Card", idNumber:"",
+    address:"",
+    relation:"Son",
     hasJoint:false,
     jointName:"", jointIdType:"PAN Card", jointIdNumber:"", jointAddress:"",
     adminType:"jointly_severally", // "jointly" | "jointly_severally"
@@ -32,20 +39,19 @@ export const DEFAULT_WILL: WillState = {
   globalMode:"equal", // "equal" | "percentage"
   globalPercentages:{}, // beneficiaryId -> pct string
   assets:[], // built by asset picker
-  // Section V - Residual
-  residualBeneId:"1",
+  // Section V - Residual — no beneficiary pre-selected until the user adds one
+  residualBeneId:"",
   residualIdType:"Aadhaar Card",
   residualIdNumber:"",
   // Section VI - Special Instructions
-  specialInstructions:"My funeral shall be performed according to Hindu rites. I request my family to donate my usable organs. My personal library of books shall be donated to the nearest public library.",
-  // Beneficiaries (used across sections)
-  beneficiaries:[
-    { id:1, name:"Priya Verma", relation:"Spouse" },
-    { id:2, name:"Rohan Verma", relation:"Son" },
-  ],
+  specialInstructions:"",
+  // Beneficiaries — starts empty; the user adds their own via "+ Add Beneficiary"
+  beneficiaries:[],
+  // Witnesses: the Indian Succession Act requires exactly two, so the two slots
+  // stay (the UI has no "add witness" control), but with no fabricated identities
   witnesses:[
-    { name:"Sanjay Kulkarni", address:"45, Park Street, Pune – 411001" },
-    { name:"Meena Desai", address:"7, Lake View Apartments, Pune – 411004" },
+    { name:"", address:"" },
+    { name:"", address:"" },
   ],
 };
 

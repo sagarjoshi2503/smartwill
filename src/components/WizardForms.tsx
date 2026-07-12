@@ -394,7 +394,7 @@ export default function WizardForms({step,will,setWill,addBene,removeBene,update
               </select>
             </div>
             <div className="grid grid-cols-2 gap-3 mt-2.5">
-              <div><label className={LC}>Residual Beneficiary ID Type</label>
+              <div><label className={LC}>ID Type</label>
                 <select value={will.residualIdType} onChange={e=>setWill(p=>({...p,residualIdType:e.target.value}))} className={IC+" appearance-none"}>
                   {ID_TYPES.map(t=><option key={t}>{t}</option>)}
                 </select>
