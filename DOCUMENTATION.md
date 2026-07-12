@@ -11,10 +11,11 @@ formatted, print-ready Last Will & Testament document modeled on the Indian
 Succession Act, 1925. It also has a separate "Lawyer Portal" (email/password
 login gate, not verified against anything real) with a mock client dashboard.
 
-The one real backend piece is a single Vercel serverless function
-(`api/auth/google.ts`) that verifies Google Sign-In ID tokens server-side —
-see §4.2a. Everything else (phone OTP, lawyer login, payment, PDF generation,
-the lawyer portal's client list) is still fully mocked/hard-coded client state.
+The one real backend piece is a single Vercel Python serverless function
+(`api/auth/verify.py`, FastAPI) that verifies Google Sign-In ID tokens
+server-side — see §4.2a. Everything else (phone OTP, lawyer login, payment,
+PDF generation, the lawyer portal's client list) is still fully
+mocked/hard-coded client state.
 
 All app state otherwise lives in React `useState` in memory. Nothing is
 persisted (no localStorage) — refreshing the page resets everything to
@@ -30,7 +31,7 @@ hard-coded demo defaults.
 | Styling | Tailwind CSS 3 + a handful of hand-written utility classes (`apv-*`) in `src/index.css` |
 | Icons | `lucide-react` |
 | Deployment | Deployed to both Vercel (domain root) and GitHub Pages (`gh-pages` package, sub-path) — `vite.config.ts` uses a relative `base: './'` so the same build works at either location |
-| Backend | One Vercel serverless function: `api/auth/google.ts` (verifies Google Sign-In ID tokens via `google-auth-library`) |
+| Backend | One Vercel Python serverless function: `api/auth/verify.py` (FastAPI, verifies Google Sign-In ID tokens via Python's `google-auth`) |
 
 There is no router, no state library (Redux/Zustand/Context), no form library,
 no test runner, and no linter configured.
@@ -86,10 +87,15 @@ src/components/
   LiveDocPreview.tsx        Compact live-updating preview shown in the wizard's right pane
   WillDocument.tsx          Full printable 7-section Will document
   LawyerPortal.tsx          Mock lawyer dashboard (stats + client table)
-api/auth/google.ts         Vercel serverless function — verifies a Google ID token
-                          server-side via `google-auth-library`, returns
-                          {name, email} on success. The only real backend code
-                          in the repo; see §4.2a for setup.
+api/auth/verify.py         Vercel Python serverless function (FastAPI) — verifies a Google
+                          ID token server-side via Python's `google-auth`, returns
+                          {name, email} on success. The only real backend code in the
+                          repo; see §4.2a for setup. File is named `verify.py`, not
+                          `google.py`, on purpose — see the note in §4.2a about why.
+vercel.json                Rewrites the public /api/auth/google URL to this file's
+                          filesystem-convention route (/api/auth/verify), so the
+                          frontend's fetch target never had to change.
+requirements.txt           Python deps for api/auth/verify.py (fastapi, google-auth, requests)
 src/index.css              Tailwind directives + custom "apv-*" utility classes, fonts, print CSS
 tailwind.config.js         Tailwind content globs + brand color palette + font families
 postcss.config.js          standard tailwind/autoprefixer pipeline
@@ -141,24 +147,37 @@ Clicking "Create Your Will" lands on a "Get Started" screen with two paths:
 
 - **"Continue with Google"** — renders Google's official Sign-In button via
   Google Identity Services (`GoogleSignInButton`). On success, the raw ID token
-  is POSTed to `api/auth/google.ts`, a Vercel serverless function that verifies
-  the token's signature server-side with `google-auth-library` and returns
-  `{name, email}`. `App.tsx`'s `handleGoogleSuccess` then pre-fills `signup`
-  with that name/email and — since Google already proved identity — **skips
-  the phone/OTP screens entirely**, going straight to `disclaimer`.
+  is POSTed to `/api/auth/google`, which a Vercel *rewrite* (`vercel.json`)
+  routes to `api/auth/verify.py` — a Python FastAPI serverless function that
+  verifies the token's signature server-side with Python's `google-auth`
+  library and returns `{name, email}`. `App.tsx`'s `handleGoogleSuccess` then
+  pre-fills `signup` with that name/email and — since Google already proved
+  identity — **skips the phone/OTP screens entirely**, going straight to
+  `disclaimer`.
 
-  **This only works where the request can reach `api/auth/google.ts` — i.e. a
-  Vercel deployment.** GitHub Pages is static-only and cannot run that function
-  under any circumstances, so the frontend always calls an *absolute* URL built
-  from `VITE_API_BASE_URL` (see `src/utils/apiBase.ts`'s `apiUrl()` helper) —
-  e.g. `https://smartwill-seven.vercel.app/api/auth/google` — rather than a
+  **The file is deliberately not named `google.py`.** Vercel's Python runtime
+  adds a function's own directory to `sys.path`, so a file literally named
+  `google.py` would shadow the real `google` PyPI package the moment it tried
+  `from google.oauth2 import id_token` — a self-import collision, verified by
+  actually hitting it during development. `verify.py` avoids the name clash;
+  `vercel.json` rewrites the stable public path `/api/auth/google` to this
+  file's filesystem-convention route (`/api/auth/verify`), so nothing on the
+  frontend had to change when the backend moved from Node to Python.
+
+  **This only works where the request can reach that function — i.e. a
+  Vercel deployment.** GitHub Pages is static-only and cannot run Python (or
+  any server-side code) under any circumstances, so the frontend always calls
+  an *absolute* URL built from `VITE_API_BASE_URL` (see
+  `src/utils/apiBase.ts`'s `apiUrl()` helper) — e.g.
+  `https://smartwill-seven.vercel.app/api/auth/google` — rather than a
   same-origin relative path. That means the exact same static build works
   correctly whether it's served from Vercel itself or from GitHub Pages;
   both talk to the one real backend on Vercel. Because that request is then
-  cross-origin when the frontend isn't Vercel, `api/auth/google.ts` sets
-  permissive CORS headers (`Access-Control-Allow-Origin: *`) and handles the
-  browser's `OPTIONS` preflight — safe here since the endpoint returns no
-  cookies/session, just `{name, email}` derived from the token itself.
+  cross-origin when the frontend isn't Vercel, `api/auth/verify.py` adds
+  permissive CORS via FastAPI's `CORSMiddleware` (`allow_origins=["*"]`) and
+  handles the browser's `OPTIONS` preflight automatically — safe here since
+  the endpoint returns no cookies/session, just `{name, email}` derived from
+  the token itself.
 - **"Continue with Phone Number"** — unchanged: leads to `SignupView` → `OtpView`
   → `disclaimer`, exactly as before Google SSO was added.
 
@@ -178,14 +197,14 @@ Client ID:
 4. Set it as `VITE_GOOGLE_CLIENT_ID` in **two** places (same value both times):
    - Locally: a `.env.local` file at the repo root (see `.env.example`).
    - On Vercel: Project Settings → Environment Variables → `VITE_GOOGLE_CLIENT_ID`.
-     This also makes it available to `api/auth/google.ts` at runtime (Vercel
+     This also makes it available to `api/auth/verify.py` at runtime (Vercel
      injects all configured env vars into serverless functions regardless of
      the `VITE_` prefix — that prefix only matters for Vite's client bundling).
 5. If this build is *not* the Vercel deployment itself (e.g. it's the
    GitHub Pages copy, or you're running `npm run dev` locally without
    `vercel dev`), also set `VITE_API_BASE_URL` to the Vercel deployment's
    origin (e.g. `https://smartwill-seven.vercel.app`) so the frontend's fetch
-   calls reach a place that can actually run `api/auth/google.ts`. Leave it
+   calls reach a place that can actually run `api/auth/verify.py`. Leave it
    unset when the frontend build *is* the Vercel deployment.
 6. Redeploy. Until the Client ID is set, `GoogleSignInButton` shows a small
    "Google Sign-In isn't configured" notice instead of a button (and the API
@@ -247,9 +266,10 @@ string) — merging them would change the rendered document text.
 - `RELATIONS`, `ID_TYPES`, `MONTHS` — dropdown option lists reused across steps.
 - `ASSET_CATALOGUE` — the asset-type schema/template catalogue described above.
 - `COLOR` — Tailwind class lookup per asset category color tag.
-- `DEFAULT_WILL` — the entire initial `will` state shape, pre-filled with a realistic
-  demo persona ("Arjun Verma", Pune address, SBI account, Zerodha demat, etc.) so the
-  app is fully explorable without typing anything.
+- `DEFAULT_WILL` — the entire initial `will` state shape. `fullName` is filled in
+  once OTP/Google sign-in completes (see §4.2a); every other field starts empty
+  (no fabricated demo persona) except where a `<select>` needs some value and
+  today's real signing date.
 - `MOCK_CLIENTS` — lawyer-portal demo rows.
 
 `will` shape (informal):
@@ -294,18 +314,21 @@ npm run deploy      # predeploy runs build automatically, then gh-pages -d dist 
 `vite.config.ts` uses a relative `base: './'`, so the same `dist/` build works
 both at a domain root (Vercel, e.g. `https://smartwill-seven.vercel.app/`) and
 under a sub-path (GitHub Pages, `https://<user>.github.io/smartwill/`, via the
-`gh-pages` deploy script). Vercel additionally auto-detects `api/*.ts` files as
-serverless functions alongside the static Vite build — no `vercel.json` needed.
+`gh-pages` deploy script). Vercel also auto-detects `api/*.py` files as Python
+serverless functions (installing `requirements.txt`) alongside the static Vite
+build. `vercel.json` is present specifically to rewrite the public
+`/api/auth/google` path to `api/auth/verify.py`'s filesystem-convention route
+(`/api/auth/verify`) — see §4.2a for why the file isn't named `google.py`.
 The `dist/` folder is currently committed to the repo (a built snapshot), which is
 unusual — normally `dist/` would be gitignored and only produced by CI/`gh-pages`.
 
 ## 8. Notable gaps / things to know before extending
 
-- **Almost no backend.** Only `api/auth/google.ts` is real (verifies Google
-  Sign-In tokens). Payment, PDF generation, the phone/OTP flow, the lawyer
-  login gate, and the lawyer portal's client list are all still fully
-  mocked/hard-coded. Anything resembling "save my will" or "email me a copy"
-  does not exist yet.
+- **Almost no backend.** Only `api/auth/verify.py` is real (verifies Google
+  Sign-In tokens, in Python/FastAPI — the rest of the app is TypeScript/React).
+  Payment, PDF generation, the phone/OTP flow, the lawyer login gate, and the
+  lawyer portal's client list are all still fully mocked/hard-coded. Anything
+  resembling "save my will" or "email me a copy" does not exist yet.
 - **Remaining copy-paste**: within `WizardForms.tsx`, the JSX for optional
   joint/substitute executor blocks (step 2) and main/substitute guardian blocks
   (step 3) still repeats the same ID-type/ID-number/address field trio with only

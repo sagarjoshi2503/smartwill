@@ -25,3 +25,8 @@ yarn-error.log*
 .env
 .env.local
 .vercel
+
+# Python (api/*.py serverless functions)
+__pycache__/
+*.pyc
+.venv*/
