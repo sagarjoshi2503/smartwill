@@ -2,16 +2,22 @@
 
 ## 1. What this is
 
-SmartWill is a **frontend-only prototype** (no backend, no database, no auth) for an
-Indian online Will-drafting product. It walks a user through picking a pricing plan,
-a mock signup/OTP/legal-disclaimer flow, a 6-step wizard that collects testator /
-executor / guardian / beneficiary / asset / residual-clause data, and finally renders
-a formatted, print-ready Last Will & Testament document modeled on the Indian
-Succession Act, 1925. It also has a separate "Lawyer Portal" view with a mock client
-dashboard.
+SmartWill is a **mostly frontend, mock-everything prototype** (no database, no
+persisted sessions) for an Indian online Will-drafting product. It walks a user
+through picking a pricing plan, a signup flow (Google SSO **or** mock phone/OTP),
+a legal-disclaimer gate, a 6-step wizard that collects testator / executor /
+guardian / beneficiary / asset / residual-clause data, and finally renders a
+formatted, print-ready Last Will & Testament document modeled on the Indian
+Succession Act, 1925. It also has a separate "Lawyer Portal" (email/password
+login gate, not verified against anything real) with a mock client dashboard.
 
-All state lives in React `useState` in memory. Nothing is persisted (no
-localStorage, no API calls) — refreshing the page resets everything to
+The one real backend piece is a single Vercel serverless function
+(`api/auth/google.ts`) that verifies Google Sign-In ID tokens server-side —
+see §4.2a. Everything else (phone OTP, lawyer login, payment, PDF generation,
+the lawyer portal's client list) is still fully mocked/hard-coded client state.
+
+All app state otherwise lives in React `useState` in memory. Nothing is
+persisted (no localStorage) — refreshing the page resets everything to
 hard-coded demo defaults.
 
 ## 2. Tech stack
@@ -23,7 +29,8 @@ hard-coded demo defaults.
 | Language | TypeScript, fully typed (no `@ts-nocheck`) |
 | Styling | Tailwind CSS 3 + a handful of hand-written utility classes (`apv-*`) in `src/index.css` |
 | Icons | `lucide-react` |
-| Deployment | `gh-pages` package → GitHub Pages, base path `/smartwill/` |
+| Deployment | Deployed to both Vercel (domain root) and GitHub Pages (`gh-pages` package, sub-path) — `vite.config.ts` uses a relative `base: './'` so the same build works at either location |
+| Backend | One Vercel serverless function: `api/auth/google.ts` (verifies Google Sign-In ID tokens via `google-auth-library`) |
 
 There is no router, no state library (Redux/Zustand/Context), no form library,
 no test runner, and no linter configured.
@@ -57,22 +64,35 @@ src/components/
   shared/                   StepHeader, FormBlock, Toggle, Nav, Clause, WillSection —
                           small presentational pieces reused across steps/documents
   LandingPage.tsx           Hero, pricing plans, add-ons, order summary
-  SignupView.tsx            Signup form (name/phone/email/state + terms)
+  AuthChoiceView.tsx        "Get Started" screen — Google Sign-In button OR
+                          "Continue with Phone Number", see §4.2a
+  GoogleSignInButton.tsx    Thin wrapper around Google Identity Services' JS SDK;
+                          renders the official Google button, hands the raw ID
+                          token up to the caller for server-side verification
+  SignupView.tsx            Phone/OTP signup form (name/phone/email/state + terms)
   OtpView.tsx                6-digit OTP entry (includes the pre-existing "Auto-fill
                           123456" demo shortcut and its stale-closure quirk, see below)
   DisclaimerView.tsx        4-checkbox legal disclaimer gate
+  LawyerLoginView.tsx        Email/password gate in front of the Lawyer Portal —
+                          client-side only, accepts any syntactically valid
+                          email + non-empty password (no real backend check)
   WizardForms.tsx           All 6 wizard steps (Testator/Executor/Guardian/
                           Beneficiaries/Assets/Residual) — kept as one component,
                           matching the original step markup exactly
   LiveDocPreview.tsx        Compact live-updating preview shown in the wizard's right pane
   WillDocument.tsx          Full printable 7-section Will document
   LawyerPortal.tsx          Mock lawyer dashboard (stats + client table)
+api/auth/google.ts         Vercel serverless function — verifies a Google ID token
+                          server-side via `google-auth-library`, returns
+                          {name, email} on success. The only real backend code
+                          in the repo; see §4.2a for setup.
 src/index.css              Tailwind directives + custom "apv-*" utility classes, fonts, print CSS
 tailwind.config.js         Tailwind content globs + brand color palette + font families
 postcss.config.js          standard tailwind/autoprefixer pipeline
-vite.config.ts             base: '/smartwill/' (GitHub Pages sub-path), react plugin
+vite.config.ts             base: './' (relative, works at a domain root or a sub-path), react plugin
 tsconfig.json / .node.json  standard Vite React TS config
 package.json               scripts: dev, build, preview, predeploy, deploy (gh-pages -d dist)
+.env.example               documents VITE_GOOGLE_CLIENT_ID (see §4.2a)
 apv.html                   a saved copy of https://apv.co.in — reference/theme source only,
                           not imported or built into the app (per commit "Changed themes
                           just like apv.co.in")
@@ -80,16 +100,12 @@ dist/                     pre-built output, checked in (from a previous `npm run
 README.md                 just the title "smartwill" — no real docs (this file replaces that gap)
 ```
 
-**Everything the app does lives in a single file: `src/App.tsx`.** There is no
-component folder structure, no separate data/types files, no routing — it's one
-large functional module with many locally-defined components.
-
 ## 4. Application flow (state machine)
 
 Top-level state in `SmartWill()` (the default-exported root component):
 
 ```
-view: "landing" | "signup" | "otp" | "disclaimer" | "lawyer" | "wizard"
+view: "landing" | "authChoice" | "signup" | "otp" | "disclaimer" | "lawyerLogin" | "lawyer" | "wizard"
 ```
 
 Flow for a testator:
@@ -114,9 +130,49 @@ never verified against anything real; there's even a "Demo: Auto-fill 123456" sh
   each with feature bullets, selectable via click.
 - 4 `ADDONS` (Registration, Spouse Will, Gift a Will, Doorstep Notarization) as toggleable checkboxes.
 - Live order summary computing `totalPrice = plan.price + sum(selected addon prices)`.
-- "Proceed" / "Start Creating Your Will Free" buttons both just call `onStart` → `setView("signup")`. No real checkout/payment integration exists anywhere.
+- "Proceed" / "Start Creating Your Will Free" buttons, and the header's "Create Your Will" button, all call `onStart` → `setView("authChoice")`.
 
-### 4.2 Signup / OTP / Disclaimer (mocked auth & compliance gate)
+### 4.2a Auth choice: Google SSO vs. phone/OTP (`AuthChoiceView`)
+Clicking "Create Your Will" lands on a "Get Started" screen with two paths:
+
+- **"Continue with Google"** — renders Google's official Sign-In button via
+  Google Identity Services (`GoogleSignInButton`). On success, the raw ID token
+  is POSTed to `api/auth/google.ts`, a Vercel serverless function that verifies
+  the token's signature server-side with `google-auth-library` and returns
+  `{name, email}`. `App.tsx`'s `handleGoogleSuccess` then pre-fills `signup`
+  with that name/email and — since Google already proved identity — **skips
+  the phone/OTP screens entirely**, going straight to `disclaimer`.
+- **"Continue with Phone Number"** — unchanged: leads to `SignupView` → `OtpView`
+  → `disclaimer`, exactly as before Google SSO was added.
+
+`DisclaimerView`'s "Back" button is context-aware (`skippedOtp` state in
+`App.tsx`): it returns to `authChoice` if the user arrived via Google, or to
+`otp` if they arrived via the phone flow.
+
+**Setup required** — Google Sign-In won't work until you provide a real OAuth
+Client ID:
+1. In [Google Cloud Console](https://console.cloud.google.com/apis/credentials),
+   create an **OAuth 2.0 Client ID** of type "Web application".
+2. Add every origin the app is served from under **Authorized JavaScript
+   origins** — e.g. `http://localhost:5173` for local dev, and your Vercel
+   domain(s) (`https://smartwill-seven.vercel.app`, plus any preview-deployment
+   pattern you use).
+3. Copy the generated Client ID (it looks like `1234567890-abc...apps.googleusercontent.com`).
+4. Set it as `VITE_GOOGLE_CLIENT_ID` in **two** places (same value both times):
+   - Locally: a `.env.local` file at the repo root (see `.env.example`).
+   - On Vercel: Project Settings → Environment Variables → `VITE_GOOGLE_CLIENT_ID`.
+     This also makes it available to `api/auth/google.ts` at runtime (Vercel
+     injects all configured env vars into serverless functions regardless of
+     the `VITE_` prefix — that prefix only matters for Vite's client bundling).
+5. Redeploy. Until this is done, `GoogleSignInButton` shows a small "Google
+   Sign-In isn't configured" notice instead of a button (and the API route
+   returns a 500 if somehow called anyway) — it fails soft, not with a crash.
+
+A Client ID is a public identifier, not a secret — it's fine that it ends up in
+the client-side JS bundle. What actually gets verified server-side is the ID
+token Google issues after the user signs in, not the Client ID itself.
+
+### 4.2b Phone signup / OTP / Disclaimer (mocked auth & compliance gate)
 - `SignupView`: name/phone/email/state fields + a "must accept terms" checkbox before "Send OTP" is enabled. Nothing is sent anywhere.
 - `OtpView`: 6 separate digit inputs with auto-advance focus; includes a **demo auto-fill link** that fills `123456`. No backend verification — advancing only requires all 6 boxes non-empty.
 - `DisclaimerView`: 4 mandatory checkboxes (non-Muslim declaration, age ≥18 & sound mind, Indian law governs, tool ≠ legal advice) that must all be checked to proceed. This encodes real Indian legal constraints (Muslim personal law is excluded; Indian Succession Act, 1925 applies) directly into the UX copy.
@@ -150,8 +206,13 @@ string) — merging them would change the rendered document text.
 - "Print" and "Download PDF" buttons both just call `window.print()` (browser print-to-PDF) — there is no server-side PDF generation.
 - Print CSS (`@media print`) hides the `no-print` toolbar and strips shadows/margins from the document page.
 
-### 4.5 Lawyer Portal (`LawyerPortal`)
-- Purely presentational mock dashboard: 4 stat tiles (Total Clients, Wills Completed, Pending Actions, Revenue MTD), a tab switcher (Clients/Completed/Pending) that doesn't actually filter anything, and a table of `MOCK_CLIENTS` (5 hard-coded rows). "Create Will for Client" and "Open Draft" both just jump into the same wizard with default state — no per-client data loading.
+### 4.5 Lawyer Portal (`LawyerLoginView` → `LawyerPortal`)
+- The header's "Lawyer Portal" button leads to `LawyerLoginView` first — an
+  email + password form. Like the OTP flow, this is a client-side-only gate:
+  it accepts any syntactically valid email plus a non-empty password (no
+  server call, no real credential check). An empty/invalid submission shows
+  an inline error and stays on the login screen.
+- `LawyerPortal`: purely presentational mock dashboard: 4 stat tiles (Total Clients, Wills Completed, Pending Actions, Revenue MTD), a tab switcher (Clients/Completed/Pending) that doesn't actually filter anything, and a table of `MOCK_CLIENTS` (5 hard-coded rows). "Create Will for Client" and "Open Draft" both just jump into the same wizard with default state — no per-client data loading.
 
 ## 5. Data model (all defined at top of `App.tsx`)
 
@@ -204,16 +265,21 @@ npm run preview     # serve the dist/ build locally
 npm run deploy      # predeploy runs build automatically, then gh-pages -d dist pushes to gh-pages branch
 ```
 
-`vite.config.ts` sets `base: '/smartwill/'`, i.e. the app is meant to be served from
-`https://<user>.github.io/smartwill/`, consistent with the `gh-pages` deploy script.
+`vite.config.ts` uses a relative `base: './'`, so the same `dist/` build works
+both at a domain root (Vercel, e.g. `https://smartwill-seven.vercel.app/`) and
+under a sub-path (GitHub Pages, `https://<user>.github.io/smartwill/`, via the
+`gh-pages` deploy script). Vercel additionally auto-detects `api/*.ts` files as
+serverless functions alongside the static Vite build — no `vercel.json` needed.
 The `dist/` folder is currently committed to the repo (a built snapshot), which is
 unusual — normally `dist/` would be gitignored and only produced by CI/`gh-pages`.
 
 ## 8. Notable gaps / things to know before extending
 
-- **No backend of any kind.** Signup, OTP, payment, PDF generation, and the lawyer
-  portal's client list are all fully mocked/hard-coded. Anything resembling "save
-  my will" or "email me a copy" does not actually exist yet.
+- **Almost no backend.** Only `api/auth/google.ts` is real (verifies Google
+  Sign-In tokens). Payment, PDF generation, the phone/OTP flow, the lawyer
+  login gate, and the lawyer portal's client list are all still fully
+  mocked/hard-coded. Anything resembling "save my will" or "email me a copy"
+  does not exist yet.
 - **Remaining copy-paste**: within `WizardForms.tsx`, the JSX for optional
   joint/substitute executor blocks (step 2) and main/substitute guardian blocks
   (step 3) still repeats the same ID-type/ID-number/address field trio with only

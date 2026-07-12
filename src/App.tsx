@@ -4,6 +4,7 @@ import { Scale, ArrowRight, ChevronLeft, Check, LogIn, LogOut, Eye } from "lucid
 import { PLANS, ADDONS } from "./data/plans";
 import { DEFAULT_WILL } from "./data/defaultWill";
 import LandingPage from "./components/LandingPage";
+import AuthChoiceView from "./components/AuthChoiceView";
 import SignupView from "./components/SignupView";
 import OtpView from "./components/OtpView";
 import DisclaimerView from "./components/DisclaimerView";
@@ -14,7 +15,7 @@ import LiveDocPreview from "./components/LiveDocPreview";
 import WillDocument from "./components/WillDocument";
 import { allocTotal } from "./utils/allocation";
 import type {
-  AssetCatalogItem, Beneficiary, DisclaimerChecks, Plan, SignupState, ViewName, WillState,
+  AssetCatalogItem, Beneficiary, DisclaimerChecks, GoogleProfile, Plan, SignupState, ViewName, WillState,
 } from "./types";
 
 const WIZARD_STEPS = [
@@ -29,6 +30,7 @@ export default function SmartWill() {
   const [signup, setSignup] = useState<SignupState>({ name:"Arjun Verma", phone:"9876543210", email:"arjun.verma@gmail.com", state:"Maharashtra", terms:false });
   const [otp, setOtp] = useState(["","","","","",""]);
   const [dchecks, setDchecks] = useState<DisclaimerChecks>({ nonMuslim:false, age:false, law:false, tool:false });
+  const [skippedOtp, setSkippedOtp] = useState(false);
   const [wizardStep, setWizardStep] = useState(1);
   const [will, setWill] = useState<WillState>(DEFAULT_WILL);
   const [showWillDoc, setShowWillDoc] = useState(false);
@@ -37,6 +39,13 @@ export default function SmartWill() {
 
   const totalPrice = selectedPlan.price + ADDONS.reduce((s,a) => addons[a.id] ? s+a.price : s, 0);
   const allDchecked = Object.values(dchecks).every(Boolean);
+
+  // Auth
+  const handleGoogleSuccess = (profile: GoogleProfile) => {
+    setSignup(p=>({...p, name: profile.name, email: profile.email}));
+    setSkippedOtp(true);
+    setView("disclaimer");
+  };
 
   // OTP
   const handleOtp = (i: number, v: string) => {
@@ -95,7 +104,7 @@ export default function SmartWill() {
               ):(
                 <>
                   <button onClick={()=>setView("lawyerLogin")} className="flex items-center gap-1.5 text-slate-600 hover:text-slate-900 border border-slate-200 hover:border-slate-300 rounded-lg px-3 py-1.5 text-sm transition-all"><LogIn size={13}/>Lawyer Portal</button>
-                  <button onClick={()=>setView("signup")} className="flex items-center gap-1.5 bg-[#d09d61] hover:bg-[#d7a46a] text-[#020617] rounded-lg px-4 py-2 text-sm font-semibold transition-colors shadow-lg shadow-[#d09d61]/20">Create Your Will <ArrowRight size={13}/></button>
+                  <button onClick={()=>setView("authChoice")} className="flex items-center gap-1.5 bg-[#d09d61] hover:bg-[#d7a46a] text-[#020617] rounded-lg px-4 py-2 text-sm font-semibold transition-colors shadow-lg shadow-[#d09d61]/20">Create Your Will <ArrowRight size={13}/></button>
                 </>
               )}
             </div>
@@ -103,10 +112,11 @@ export default function SmartWill() {
         </header>
       )}
 
-      {view==="landing" && <LandingPage plans={PLANS} addons={ADDONS} selectedPlan={selectedPlan} setSelectedPlan={setSelectedPlan} addonsState={addons} setAddons={setAddons} totalPrice={totalPrice} onStart={()=>setView("signup")}/>}
+      {view==="landing" && <LandingPage plans={PLANS} addons={ADDONS} selectedPlan={selectedPlan} setSelectedPlan={setSelectedPlan} addonsState={addons} setAddons={setAddons} totalPrice={totalPrice} onStart={()=>setView("authChoice")}/>}
+      {view==="authChoice" && <AuthChoiceView onGoogleSuccess={handleGoogleSuccess} onPhone={()=>{setSkippedOtp(false);setView("signup");}} onBack={()=>setView("landing")}/>}
       {view==="signup" && <SignupView signup={signup} setSignup={setSignup} onNext={()=>setView("otp")}/>}
       {view==="otp" && <OtpView otp={otp} handleOtp={handleOtp} otpRefs={otpRefs} phone={signup.phone} onNext={()=>setView("disclaimer")}/>}
-      {view==="disclaimer" && <DisclaimerView dchecks={dchecks} setDchecks={setDchecks} allChecked={allDchecked} onAgree={()=>setView("wizard")} onBack={()=>setView("otp")}/>}
+      {view==="disclaimer" && <DisclaimerView dchecks={dchecks} setDchecks={setDchecks} allChecked={allDchecked} onAgree={()=>setView("wizard")} onBack={()=>setView(skippedOtp?"authChoice":"otp")}/>}
       {view==="lawyerLogin" && <LawyerLoginView onLogin={()=>setView("lawyer")} onBack={()=>setView("landing")}/>}
       {view==="lawyer" && <LawyerPortal onCreateWill={()=>{setWizardStep(1);setView("wizard");}}/>}
 
