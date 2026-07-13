@@ -1,5 +1,6 @@
 {
   "rewrites": [
-    { "source": "/api/auth/google", "destination": "/api/auth/verify" }
+    { "source": "/api/auth/google", "destination": "/api/auth/verify" },
+    { "source": "/api/auth/lawyer-signup", "destination": "/api/auth/lawyer_signup" }
   ]
 }

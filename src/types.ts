@@ -152,7 +152,7 @@ export interface DisclaimerChecks {
   tool: boolean;
 }
 
-export type ViewName = "landing" | "authChoice" | "signup" | "otp" | "disclaimer" | "lawyerLogin" | "lawyer" | "wizard";
+export type ViewName = "landing" | "authChoice" | "signup" | "otp" | "disclaimer" | "lawyerLogin" | "lawyerSignup" | "lawyer" | "wizard";
 
 export interface GoogleProfile {
   name: string;

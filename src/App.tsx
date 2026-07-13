@@ -9,6 +9,7 @@ import SignupView from "./components/SignupView";
 import OtpView from "./components/OtpView";
 import DisclaimerView from "./components/DisclaimerView";
 import LawyerLoginView from "./components/LawyerLoginView";
+import LawyerSignupView from "./components/LawyerSignupView";
 import LawyerPortal from "./components/LawyerPortal";
 import WizardForms from "./components/WizardForms";
 import LiveDocPreview from "./components/LiveDocPreview";
@@ -124,7 +125,8 @@ export default function SmartWill() {
       {view==="signup" && <SignupView signup={signup} setSignup={setSignup} onNext={()=>setView("otp")}/>}
       {view==="otp" && <OtpView otp={otp} handleOtp={handleOtp} otpRefs={otpRefs} phone={signup.phone} onNext={handleOtpVerified}/>}
       {view==="disclaimer" && <DisclaimerView dchecks={dchecks} setDchecks={setDchecks} allChecked={allDchecked} onAgree={()=>setView("wizard")} onBack={()=>setView(skippedOtp?"authChoice":"otp")}/>}
-      {view==="lawyerLogin" && <LawyerLoginView onLogin={()=>setView("lawyer")} onBack={()=>setView("landing")}/>}
+      {view==="lawyerLogin" && <LawyerLoginView onLogin={()=>setView("lawyer")} onBack={()=>setView("landing")} onSignup={()=>setView("lawyerSignup")}/>}
+      {view==="lawyerSignup" && <LawyerSignupView onSignup={()=>setView("lawyer")} onBack={()=>setView("lawyerLogin")}/>}
       {view==="lawyer" && <LawyerPortal onCreateWill={()=>{setWizardStep(1);setView("wizard");}}/>}
 
       {view==="wizard" && (

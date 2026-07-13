@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { Scale, Mail, Lock, LogIn } from "lucide-react";
 
-export default function LawyerLoginView({onLogin,onBack}:{
+export default function LawyerLoginView({onLogin,onBack,onSignup}:{
   onLogin: () => void;
   onBack: () => void;
+  onSignup: () => void;
 }){
   const [email,setEmail]=useState("");
   const [password,setPassword]=useState("");
@@ -46,6 +47,9 @@ export default function LawyerLoginView({onLogin,onBack}:{
           </button>
           <button type="button" onClick={onBack} className="w-full text-slate-500 hover:text-slate-900 text-sm py-1 transition-colors">← Back</button>
         </form>
+        <p className="text-center text-slate-600 text-sm mt-5">
+          New to SmartWill? <button type="button" onClick={onSignup} className="text-[#d09d61] font-semibold hover:text-[#b88442] transition-colors">Sign up</button>
+        </p>
       </div>
     </div>
   );
