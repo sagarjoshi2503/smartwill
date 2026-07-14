@@ -1,5 +1,7 @@
 import os
+import sys
 from datetime import datetime, timezone
+from pathlib import Path
 
 import bcrypt
 from fastapi import FastAPI, Request
@@ -7,6 +9,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pymongo import MongoClient
 from pymongo.errors import DuplicateKeyError, PyMongoError
+
+# Vercel's Python runtime does not reliably add this file's own directory to
+# sys.path, so the bare `import constants` below can't be assumed to resolve
+# on its own — add it explicitly.
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from constants import (
     COLLECTION_NAME,

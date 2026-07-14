@@ -1,10 +1,17 @@
 import os
+import sys
+from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pymongo import MongoClient
 from pymongo.errors import PyMongoError
+
+# Vercel's Python runtime does not reliably add this file's own directory to
+# sys.path, so the bare `import constants` below can't be assumed to resolve
+# on its own — add it explicitly.
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from constants import DATABASE_ERROR_MSG, DB_NAME, LOGIN_COLLECTION_NAME, NOT_CONFIGURED_MSG, ROLE_LAWYER
 
