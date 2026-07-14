@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { Scale, Mail, Lock, LogIn } from "lucide-react";
+import { apiUrl } from "../utils/apiBase";
+import { encodePassword } from "../utils/encode";
 
 export default function LawyerLoginView({onLogin,onBack,onSignup}:{
   onLogin: () => void;
@@ -9,15 +11,31 @@ export default function LawyerLoginView({onLogin,onBack,onSignup}:{
   const [email,setEmail]=useState("");
   const [password,setPassword]=useState("");
   const [error,setError]=useState("");
+  const [submitting,setSubmitting]=useState(false);
   const IC="w-full apv-input rounded-2xl pl-11 pr-4 py-3 text-slate-900 placeholder:text-slate-500 text-sm focus:outline-none transition";
 
   const canSubmit = /\S+@\S+\.\S+/.test(email) && password.length>0;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if(!canSubmit){ setError("Enter a valid email and password to continue."); return; }
     setError("");
-    onLogin();
+    setSubmitting(true);
+    try {
+      const res = await fetch(apiUrl("/api/auth/lawyer-login"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password: encodePassword(password) }),
+      });
+      const isJson = res.headers.get("content-type")?.includes("application/json");
+      const data = isJson ? await res.json() : null;
+      if(!res.ok) throw new Error(data?.error || `Login failed (server returned ${res.status}).`);
+      onLogin();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Login failed.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return(
@@ -42,8 +60,8 @@ export default function LawyerLoginView({onLogin,onBack,onSignup}:{
             </div>
           </div>
           {error&&<p className="text-red-500 text-xs">{error}</p>}
-          <button type="submit" className={`w-full py-3 rounded-full font-bold text-sm transition-all flex items-center justify-center gap-1.5 ${canSubmit?"apv-btn":"bg-slate-200 text-slate-500 cursor-not-allowed"}`}>
-            <LogIn size={14}/>Login to Dashboard
+          <button type="submit" disabled={submitting} className={`w-full py-3 rounded-full font-bold text-sm transition-all flex items-center justify-center gap-1.5 ${canSubmit&&!submitting?"apv-btn":"bg-slate-200 text-slate-500 cursor-not-allowed"}`}>
+            <LogIn size={14}/>{submitting?"Logging in…":"Login to Dashboard"}
           </button>
           <button type="button" onClick={onBack} className="w-full text-slate-500 hover:text-slate-900 text-sm py-1 transition-colors">← Back</button>
         </form>
