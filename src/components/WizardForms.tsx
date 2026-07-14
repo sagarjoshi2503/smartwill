@@ -1,6 +1,7 @@
+import { useState } from "react";
 import {
   User, UserCheck, Baby, Users, Briefcase, BookOpen, Lock, Info, Plus, Trash2,
-  Check, AlertTriangle, CheckCircle, FileText,
+  Check, AlertTriangle, CheckCircle, FileText, Send,
 } from "lucide-react";
 import { ID_TYPES, RELATIONS, MONTHS } from "../data/options";
 import { ASSET_CATALOGUE, COLOR } from "../data/assetCatalogue";
@@ -8,6 +9,8 @@ import StepHeader from "./shared/StepHeader";
 import FormBlock from "./shared/FormBlock";
 import Toggle from "./shared/Toggle";
 import Nav from "./shared/Nav";
+import SubmitToLawyerModal from "./SubmitToLawyerModal";
+import { apiUrl } from "../utils/apiBase";
 import type { AssetCatalogItem, AssetInstance, Beneficiary, WillState } from "../types";
 
 interface WizardFormsProps {
@@ -26,9 +29,10 @@ interface WizardFormsProps {
   onNext: () => void;
   onPrev: () => void;
   onGenerate: () => void;
+  testatorEmail: string;
 }
 
-export default function WizardForms({step,will,setWill,addBene,removeBene,updateBene,addAsset,removeAsset,updateAssetData,updateAssetAlloc,allocTotal,assetAdded,onNext,onPrev,onGenerate}: WizardFormsProps){
+export default function WizardForms({step,will,setWill,addBene,removeBene,updateBene,addAsset,removeAsset,updateAssetData,updateAssetAlloc,allocTotal,assetAdded,onNext,onPrev,onGenerate,testatorEmail}: WizardFormsProps){
   const IC="w-full apv-input rounded-2xl px-3.5 py-2.5 text-slate-900 placeholder:text-slate-500 text-sm focus:outline-none transition";
   const LC="block apv-label mb-1";
   const set=(path: string, v: string | boolean)=>setWill(p=>{
@@ -36,6 +40,31 @@ export default function WizardForms({step,will,setWill,addBene,removeBene,update
     if(keys.length===1) return{...p,[keys[0]]:v} as WillState;
     return{...p,[keys[0]]:{...(p as any)[keys[0]],[keys[1]]:v}} as WillState;
   });
+
+  const [submitStatus,setSubmitStatus]=useState<"idle"|"saving"|"error"|"done">("idle");
+  const [submitError,setSubmitError]=useState("");
+  const [savedWillId,setSavedWillId]=useState<string|null>(null);
+  const [showLawyerModal,setShowLawyerModal]=useState(false);
+
+  const handleSaveAndSubmit = async () => {
+    setSubmitStatus("saving"); setSubmitError("");
+    try {
+      const res = await fetch(apiUrl("/api/will/save"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ will, testatorEmail }),
+      });
+      const isJson = res.headers.get("content-type")?.includes("application/json");
+      const data = isJson ? await res.json() : null;
+      if(!res.ok) throw new Error(data?.error || `Could not save the Will (server returned ${res.status}).`);
+      setSavedWillId(data.willId);
+      setSubmitStatus("done");
+      setShowLawyerModal(true);
+    } catch (err) {
+      setSubmitStatus("error");
+      setSubmitError(err instanceof Error ? err.message : "Could not save the Will.");
+    }
+  };
 
   return(
     <div className="fade-in max-w-[560px] mx-auto">
@@ -426,8 +455,20 @@ export default function WizardForms({step,will,setWill,addBene,removeBene,update
           <button onClick={onGenerate} className="w-full bg-[#d09d61] hover:bg-[#b88442] text-[#020617] font-bold py-3.5 rounded-xl text-sm transition-colors flex items-center justify-center gap-2">
             <FileText size={16}/>Generate Complete Will Document →
           </button>
+          <button onClick={handleSaveAndSubmit} disabled={submitStatus==="saving"}
+            className={`w-full font-bold py-3.5 rounded-xl text-sm transition-colors flex items-center justify-center gap-2 ${submitStatus==="saving"?"bg-slate-700 text-slate-400 cursor-not-allowed":"bg-slate-800 hover:bg-slate-700 text-white"}`}>
+            <Send size={16}/>{submitStatus==="saving"?"Saving…":"Save and Submit to Lawyer for Review"}
+          </button>
+          {submitStatus==="error"&&<p className="text-red-500 text-xs text-center">{submitError}</p>}
           <button onClick={onPrev} className="w-full text-slate-500 hover:text-white text-sm py-2 transition-colors">← Back</button>
         </div>
+      )}
+      {showLawyerModal&&savedWillId&&(
+        <SubmitToLawyerModal
+          willId={savedWillId}
+          onClose={()=>setShowLawyerModal(false)}
+          onAssigned={()=>setShowLawyerModal(false)}
+        />
       )}
     </div>
   );

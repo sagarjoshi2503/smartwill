@@ -166,6 +166,7 @@ export default function SmartWill() {
                 onNext={()=>setWizardStep(s=>Math.min(s+1,6))}
                 onPrev={()=>setWizardStep(s=>Math.max(s-1,1))}
                 onGenerate={()=>setShowWillDoc(true)}
+                testatorEmail={signup.email}
               />
             </div>
             <div className="hidden lg:flex lg:w-[50%] bg-slate-100 p-5 overflow-y-auto items-start justify-center">

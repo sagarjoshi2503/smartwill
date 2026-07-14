@@ -5,7 +5,9 @@ import mongomock
 import pytest
 from fastapi.testclient import TestClient
 
-from auth import lawyer_login as login_module
+from conftest import import_api_module
+
+login_module = import_api_module("auth", "lawyer_login")
 
 URL = "/api/auth/lawyer-login"
 PASSWORD = "password123"

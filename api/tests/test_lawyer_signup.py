@@ -3,7 +3,9 @@ import mongomock
 import pytest
 from fastapi.testclient import TestClient
 
-from auth import lawyer_signup as signup_module
+from conftest import import_api_module
+
+signup_module = import_api_module("auth", "lawyer_signup")
 
 URL = "/api/auth/lawyer-signup"
 VALID_PAYLOAD = {"fullName": "Jane Doe", "email": "jane@lawfirm.com", "password": "password123"}

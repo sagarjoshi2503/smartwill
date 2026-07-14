@@ -1,7 +1,9 @@
 import pytest
 from fastapi.testclient import TestClient
 
-from auth import verify as verify_module
+from conftest import import_api_module
+
+verify_module = import_api_module("auth", "verify")
 
 URL = "/api/auth/google"
 
