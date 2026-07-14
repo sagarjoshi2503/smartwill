@@ -128,13 +128,16 @@ export interface Addon {
   icon: ReactNode;
 }
 
-export interface MockClient {
-  id: number;
+export interface LawyerProfile {
   name: string;
-  phone: string;
-  status: "Draft" | "Notarized" | "Registered";
-  date: string;
-  value: string;
+  email: string;
+}
+
+export interface LawyerClient {
+  willId: string;
+  name: string;
+  contact: string;
+  updatedAt: string | null;
 }
 
 export interface SignupState {

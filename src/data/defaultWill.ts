@@ -1,5 +1,5 @@
 import { today } from "../utils/format";
-import type { WillState, MockClient } from "../types";
+import type { WillState } from "../types";
 
 export const DEFAULT_WILL: WillState = {
   // Section 0 - Identity
@@ -54,11 +54,3 @@ export const DEFAULT_WILL: WillState = {
     { name:"", address:"" },
   ],
 };
-
-export const MOCK_CLIENTS: MockClient[] = [
-  { id:1, name:"Rajesh Kumar Sharma", phone:"+91 98765 43210", status:"Registered", date:"2024-11-20", value:"₹19,999" },
-  { id:2, name:"Priya Mehta", phone:"+91 87654 32109", status:"Notarized", date:"2024-11-28", value:"₹4,999" },
-  { id:3, name:"Vikram Singh Rathore", phone:"+91 76543 21098", status:"Draft", date:"2024-12-01", value:"₹29,999" },
-  { id:4, name:"Sunita Devi Agarwal", phone:"+91 65432 10987", status:"Draft", date:"2024-12-03", value:"₹14,999" },
-  { id:5, name:"Anil Kapoor Joshi", phone:"+91 54321 09876", status:"Notarized", date:"2024-11-15", value:"₹29,999" },
-];

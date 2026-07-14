@@ -16,7 +16,7 @@ import LiveDocPreview from "./components/LiveDocPreview";
 import WillDocument from "./components/WillDocument";
 import { allocTotal } from "./utils/allocation";
 import type {
-  AssetCatalogItem, Beneficiary, DisclaimerChecks, GoogleProfile, Plan, SignupState, ViewName, WillState,
+  AssetCatalogItem, Beneficiary, DisclaimerChecks, GoogleProfile, LawyerProfile, Plan, SignupState, ViewName, WillState,
 } from "./types";
 
 const WIZARD_STEPS = [
@@ -35,6 +35,7 @@ export default function SmartWill() {
   const [wizardStep, setWizardStep] = useState(1);
   const [will, setWill] = useState<WillState>(DEFAULT_WILL);
   const [showWillDoc, setShowWillDoc] = useState(false);
+  const [lawyerProfile, setLawyerProfile] = useState<LawyerProfile | null>(null);
   const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
   const willDocRef = useRef<HTMLDivElement | null>(null);
 
@@ -101,13 +102,15 @@ export default function SmartWill() {
               <span className="text-[9px] font-bold tracking-[0.35em] text-[#924d06] bg-[#f8edd1] border border-[#d09d61] px-1.5 py-0.5 rounded">INDIA</span>
             </div>
             <div className="flex items-center gap-3">
-              {view==="lawyer" ? (
+              {view==="lawyer" && lawyerProfile ? (
                 <>
                   <div className="flex items-center gap-2 bg-slate-100 rounded-lg px-3 py-1.5 text-sm border border-slate-200">
-                    <div className="w-6 h-6 bg-slate-200 rounded-full flex items-center justify-center text-[9px] font-bold text-slate-900">AK</div>
-                    <span className="text-[#d09d61] text-sm">Adv. Anand Kumar</span>
+                    <div className="w-6 h-6 bg-slate-200 rounded-full flex items-center justify-center text-[9px] font-bold text-slate-900">
+                      {lawyerProfile.name.split(" ").slice(0,2).map(n=>n[0]).join("").toUpperCase()}
+                    </div>
+                    <span className="text-[#d09d61] text-sm">Adv. {lawyerProfile.name}</span>
                   </div>
-                  <button onClick={()=>setView("landing")} className="flex items-center gap-1.5 text-slate-600 hover:text-slate-900 text-sm transition-colors"><LogOut size={13}/>Logout</button>
+                  <button onClick={()=>{setLawyerProfile(null);setView("landing");}} className="flex items-center gap-1.5 text-slate-600 hover:text-slate-900 text-sm transition-colors"><LogOut size={13}/>Logout</button>
                 </>
               ):(
                 <>
@@ -125,9 +128,9 @@ export default function SmartWill() {
       {view==="signup" && <SignupView signup={signup} setSignup={setSignup} onNext={()=>setView("otp")}/>}
       {view==="otp" && <OtpView otp={otp} handleOtp={handleOtp} otpRefs={otpRefs} phone={signup.phone} onNext={handleOtpVerified}/>}
       {view==="disclaimer" && <DisclaimerView dchecks={dchecks} setDchecks={setDchecks} allChecked={allDchecked} onAgree={()=>setView("wizard")} onBack={()=>setView(skippedOtp?"authChoice":"otp")}/>}
-      {view==="lawyerLogin" && <LawyerLoginView onLogin={()=>setView("lawyer")} onBack={()=>setView("landing")} onSignup={()=>setView("lawyerSignup")}/>}
-      {view==="lawyerSignup" && <LawyerSignupView onSignup={()=>setView("lawyer")} onBack={()=>setView("lawyerLogin")}/>}
-      {view==="lawyer" && <LawyerPortal onCreateWill={()=>{setWizardStep(1);setView("wizard");}}/>}
+      {view==="lawyerLogin" && <LawyerLoginView onLogin={(lawyer)=>{setLawyerProfile(lawyer);setView("lawyer");}} onBack={()=>setView("landing")} onSignup={()=>setView("lawyerSignup")}/>}
+      {view==="lawyerSignup" && <LawyerSignupView onSignup={(lawyer)=>{setLawyerProfile(lawyer);setView("lawyer");}} onBack={()=>setView("lawyerLogin")}/>}
+      {view==="lawyer" && lawyerProfile && <LawyerPortal lawyer={lawyerProfile} onCreateWill={()=>{setWizardStep(1);setView("wizard");}}/>}
 
       {view==="wizard" && (
         <div className="flex flex-col h-screen bg-slate-100 fade-in">

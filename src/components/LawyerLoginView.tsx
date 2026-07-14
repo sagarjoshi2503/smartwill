@@ -2,9 +2,10 @@ import { useState } from "react";
 import { Scale, Mail, Lock, LogIn } from "lucide-react";
 import { apiUrl } from "../utils/apiBase";
 import { encodePassword } from "../utils/encode";
+import type { LawyerProfile } from "../types";
 
 export default function LawyerLoginView({onLogin,onBack,onSignup}:{
-  onLogin: () => void;
+  onLogin: (lawyer: LawyerProfile) => void;
   onBack: () => void;
   onSignup: () => void;
 }){
@@ -30,7 +31,7 @@ export default function LawyerLoginView({onLogin,onBack,onSignup}:{
       const isJson = res.headers.get("content-type")?.includes("application/json");
       const data = isJson ? await res.json() : null;
       if(!res.ok) throw new Error(data?.error || `Login failed (server returned ${res.status}).`);
-      onLogin();
+      onLogin({ name: data.name, email: data.email });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed.");
     } finally {

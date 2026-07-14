@@ -60,6 +60,10 @@ app.add_api_route(
     "/api/will/assign-lawyer", import_endpoint("will", "assign_lawyer", "assign_lawyer"),
     methods=["POST"], tags=["will"], summary="Submit a saved Will to a lawyer for review",
 )
+app.add_api_route(
+    "/api/will/lawyer-wills", import_endpoint("will", "lawyer_wills", "list_lawyer_wills"),
+    methods=["GET"], tags=["will"], summary="List the Wills assigned to a lawyer",
+)
 
 
 async def swagger_ui() -> HTMLResponse:

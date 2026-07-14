@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { Scale, User, Mail, Lock, UserPlus } from "lucide-react";
 import { apiUrl } from "../utils/apiBase";
+import type { LawyerProfile } from "../types";
 
 export default function LawyerSignupView({onSignup,onBack}:{
-  onSignup: () => void;
+  onSignup: (lawyer: LawyerProfile) => void;
   onBack: () => void;
 }){
   const [fullName,setFullName]=useState("");
@@ -33,7 +34,7 @@ export default function LawyerSignupView({onSignup,onBack}:{
       const isJson = res.headers.get("content-type")?.includes("application/json");
       const data = isJson ? await res.json() : null;
       if(!res.ok) throw new Error(data?.error || `Signup failed (server returned ${res.status}).`);
-      onSignup();
+      onSignup({ name: data.name, email: data.email });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Signup failed.");
     } finally {

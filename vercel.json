@@ -4,6 +4,7 @@
     { "source": "/api/auth/lawyer-signup", "destination": "/api/auth/lawyer_signup" },
     { "source": "/api/auth/lawyer-login", "destination": "/api/auth/lawyer_login" },
     { "source": "/api/will/assign-lawyer", "destination": "/api/will/assign_lawyer" },
+    { "source": "/api/will/lawyer-wills", "destination": "/api/will/lawyer_wills" },
     { "source": "/docs", "destination": "/api/docs" },
     { "source": "/openapi.json", "destination": "/api/docs" }
   ]
