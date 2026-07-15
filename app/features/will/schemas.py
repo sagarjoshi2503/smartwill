@@ -1,0 +1,34 @@
+from pydantic import BaseModel
+
+
+class SaveWillResponse(BaseModel):
+    willId: str
+
+
+class LawyerOut(BaseModel):
+    name: str
+    email: str
+
+
+class LawyersResponse(BaseModel):
+    lawyers: list[LawyerOut]
+
+
+class AssignLawyerResponse(BaseModel):
+    willId: str
+    lawyerEmail: str
+
+
+class ClientOut(BaseModel):
+    willId: str
+    name: str
+    contact: str
+    updatedAt: str | None
+
+
+class ClientsResponse(BaseModel):
+    clients: list[ClientOut]
+
+
+class ErrorResponse(BaseModel):
+    error: str
