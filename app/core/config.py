@@ -14,6 +14,14 @@ class Settings(BaseSettings):
     vite_google_client_id: str | None = None
     google_client_id: str | None = None
 
+    # Recipient notified whenever a testator submits their Will for review.
+    admin_review_email: str = "anup@prabhuverlekar.com"
+
+    # Resend (https://resend.com) transactional email API, used to send that
+    # notification. Both must be set for email to actually go out.
+    resend_api_key: str | None = None
+    resend_from_email: str | None = None
+
     @property
     def google_id(self) -> str | None:
         return self.vite_google_client_id or self.google_client_id

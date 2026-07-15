@@ -7,7 +7,6 @@ from app.core.exceptions import AppError
 from app.shared import messages
 
 COLLECTION_NAME = "login"
-ROLE_LAWYER = "lawyer"
 
 
 def _collection(db: Database):
@@ -29,7 +28,6 @@ def insert_lawyer(db: Database, full_name: str, email: str, password_hash: str) 
             "fullName": full_name,
             "email": email,
             "passwordHash": password_hash,
-            "role": ROLE_LAWYER,
             "createdAt": datetime.now(timezone.utc),
         })
     except DuplicateKeyError:

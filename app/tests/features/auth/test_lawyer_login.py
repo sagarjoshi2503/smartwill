@@ -14,9 +14,9 @@ def encode(password: str) -> str:
     return base64.b64encode(password.encode("utf-8")).decode("utf-8")
 
 
-def seed_lawyer(fake_db, email="jane@lawfirm.com", role="lawyer"):
+def seed_lawyer(fake_db, email="jane@lawfirm.com"):
     password_hash = bcrypt.hashpw(PASSWORD.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
-    fake_db["login"].insert_one({"fullName": "Jane Doe", "email": email, "passwordHash": password_hash, "role": role})
+    fake_db["login"].insert_one({"fullName": "Jane Doe", "email": email, "passwordHash": password_hash})
 
 
 # --- positive scenarios ---
@@ -47,13 +47,6 @@ def test_login_rejects_unknown_email(client, fake_db):
     res = client.post(URL, json={"email": "nobody@lawfirm.com", "password": encode(PASSWORD)})
     assert res.status_code == 401
     assert res.json() == {"error": messages.INVALID_LOGIN_CREDENTIALS}
-
-
-def test_login_rejects_non_lawyer_role(client, fake_db):
-    seed_lawyer(fake_db, email="client@lawfirm.com", role="client")
-    res = client.post(URL, json={"email": "client@lawfirm.com", "password": encode(PASSWORD)})
-    assert res.status_code == 403
-    assert res.json() == {"error": messages.NOT_A_LAWYER_ACCOUNT}
 
 
 def test_login_rejects_invalid_email_format(client):

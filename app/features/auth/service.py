@@ -7,8 +7,6 @@ from app.features.auth import repository
 from app.shared import messages
 from app.shared.validators import is_valid_email, normalize_email
 
-ROLE_LAWYER = repository.ROLE_LAWYER
-
 
 def verify_google_signin(body: dict, settings: Settings) -> dict:
     client_id = settings.google_id
@@ -58,8 +56,5 @@ def login_lawyer(db: Database, body: dict) -> dict:
     user = repository.find_by_email(db, email)
     if not user or not verify_password(password, user["passwordHash"]):
         raise AppError(401, messages.INVALID_LOGIN_CREDENTIALS)
-
-    if user.get("role") != ROLE_LAWYER:
-        raise AppError(403, messages.NOT_A_LAWYER_ACCOUNT)
 
     return {"name": user["fullName"], "email": user["email"]}

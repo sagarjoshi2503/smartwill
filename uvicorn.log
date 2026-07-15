@@ -1,32 +1,25 @@
 INFO:     Will watch for changes in these directories: ['C:\\Gitlab\\smartwill\\smartwill']
 INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
-INFO:     Started reloader process [21472] using WatchFiles
-INFO:     Started server process [2952]
+INFO:     Started reloader process [11764] using WatchFiles
+INFO:     Started server process [6112]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
-INFO:     127.0.0.1:56037 - "GET / HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:56039 - "GET /api/will/lawyers HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56038 - "GET / HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:56048 - "OPTIONS /api/auth/lawyer-login HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56048 - "POST /api/auth/lawyer-login HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56048 - "GET /api/will/lawyer-wills?email=sagar.a.joshi%40gmail.com HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56049 - "GET /api/will/lawyer-wills?email=sagar.a.joshi%40gmail.com HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56058 - "OPTIONS /api/auth/lawyer-signup HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56058 - "POST /api/auth/lawyer-signup HTTP/1.1" 201 Created
-INFO:     127.0.0.1:56058 - "GET /api/will/lawyer-wills?email=z%40z.com HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56059 - "GET /api/will/lawyer-wills?email=z%40z.com HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56060 - "OPTIONS /api/will/save HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56060 - "POST /api/will/save HTTP/1.1" 201 Created
-INFO:     127.0.0.1:56060 - "GET /api/will/lawyers HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56060 - "GET /api/will/lawyers HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56061 - "OPTIONS /api/will/assign-lawyer HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56061 - "POST /api/will/assign-lawyer HTTP/1.1" 201 Created
-INFO:     127.0.0.1:56062 - "POST /api/auth/lawyer-login HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56062 - "GET /api/will/lawyer-wills?email=z%40z.com HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56063 - "GET /api/will/lawyer-wills?email=z%40z.com HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56083 - "OPTIONS /api/auth/google HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56083 - "POST /api/auth/google HTTP/1.1" 401 Unauthorized
-WARNING:  WatchFiles detected changes in 'app\shared\messages.py'. Reloading...
- INFO:     127.0.0.1:56667 - "GET /api/will/lawyers HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56951 - "GET / HTTP/1.1" 404 Not Found
-INFO:     127.0.0.1:64462 - "GET / HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:50185 - "GET /api/will/lawyer-wills HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50203 - "OPTIONS /api/auth/lawyer-signup HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50203 - "POST /api/auth/lawyer-signup HTTP/1.1" 201 Created
+INFO:     127.0.0.1:50203 - "GET /api/will/lawyer-wills HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50203 - "GET /api/will/lawyer-wills HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50204 - "OPTIONS /api/will/save HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50204 - "POST /api/will/save HTTP/1.1" 201 Created
+INFO:     127.0.0.1:50205 - "OPTIONS /api/auth/lawyer-login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50205 - "POST /api/auth/lawyer-login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50205 - "GET /api/will/lawyer-wills HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50205 - "GET /api/will/lawyer-wills HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50232 - "POST /api/will/save HTTP/1.1" 201 Created
+INFO:     127.0.0.1:50234 - "POST /api/auth/lawyer-login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50234 - "GET /api/will/lawyer-wills HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50235 - "GET /api/will/lawyer-wills HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50236 - "POST /api/auth/lawyer-login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50236 - "GET /api/will/lawyer-wills HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50236 - "GET /api/will/lawyer-wills HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50238 - "POST /api/will/save HTTP/1.1" 201 Created

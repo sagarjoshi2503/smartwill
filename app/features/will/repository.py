@@ -5,9 +5,7 @@ from app.core.exceptions import AppError
 from app.shared import messages
 
 WILL_COLLECTION_NAME = "will"
-LOGIN_COLLECTION_NAME = "login"
-LAWYERWILL_COLLECTION_NAME = "lawyerwill"
-ROLE_LAWYER = "lawyer"
+ADMINWILL_COLLECTION_NAME = "adminwill"
 
 
 def insert_will(db: Database, document: dict) -> None:
@@ -17,39 +15,15 @@ def insert_will(db: Database, document: dict) -> None:
         raise AppError(500, messages.DATABASE_UNAVAILABLE)
 
 
-def find_lawyers(db: Database) -> list[dict]:
+def insert_admin_will(db: Database, document: dict) -> None:
     try:
-        docs = db[LOGIN_COLLECTION_NAME].find({"role": ROLE_LAWYER}, {"_id": 0, "fullName": 1, "email": 1})
-        return [{"name": d.get("fullName", ""), "email": d.get("email", "")} for d in docs]
+        db[ADMINWILL_COLLECTION_NAME].insert_one(document)
     except PyMongoError:
         raise AppError(500, messages.DATABASE_UNAVAILABLE)
 
 
-def find_lawyer_by_email(db: Database, email: str) -> dict | None:
+def find_wills_by_status(db: Database, status: str) -> list[dict]:
     try:
-        return db[LOGIN_COLLECTION_NAME].find_one({"email": email, "role": ROLE_LAWYER})
-    except PyMongoError:
-        raise AppError(500, messages.DATABASE_UNAVAILABLE)
-
-
-def insert_lawyer_will(db: Database, document: dict) -> None:
-    try:
-        db[LAWYERWILL_COLLECTION_NAME].insert_one(document)
-    except PyMongoError:
-        raise AppError(500, messages.DATABASE_UNAVAILABLE)
-
-
-def find_will_ids_for_lawyer(db: Database, lawyer_email: str) -> list[str]:
-    try:
-        return [d["willId"] for d in db[LAWYERWILL_COLLECTION_NAME].find({"lawyerEmail": lawyer_email}, {"willId": 1})]
-    except PyMongoError:
-        raise AppError(500, messages.DATABASE_UNAVAILABLE)
-
-
-def find_wills_by_ids(db: Database, will_ids: list[str]) -> list[dict]:
-    if not will_ids:
-        return []
-    try:
-        return list(db[WILL_COLLECTION_NAME].find({"willId": {"$in": will_ids}}))
+        return list(db[WILL_COLLECTION_NAME].find({"status": status}))
     except PyMongoError:
         raise AppError(500, messages.DATABASE_UNAVAILABLE)

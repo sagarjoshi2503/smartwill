@@ -44,7 +44,7 @@ export default function LawyerLoginView({onLogin,onBack,onSignup}:{
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <div className="w-14 h-14 bg-[#d09d61]/15 border border-[#d09d61]/20 rounded-3xl flex items-center justify-center mx-auto mb-4"><Scale size={22} className="text-[#d09d61]"/></div>
-          <h2 className="text-3xl font-black text-slate-900 serif">Lawyer Portal Login</h2>
+          <h2 className="text-3xl font-black text-slate-900 serif">Admin Portal Login</h2>
           <p className="text-slate-600 text-sm mt-2">Sign in to manage your clients' Wills</p>
         </div>
         <form onSubmit={handleSubmit} className="apv-card p-6 space-y-4">

@@ -3,17 +3,17 @@ from datetime import datetime, timezone
 
 from pymongo.database import Database
 
+from app.core.config import Settings
 from app.core.exceptions import AppError
 from app.features.will import repository
-from app.shared import messages
-from app.shared.validators import is_valid_email, normalize_email
+from app.shared import email, messages
 
 STATUS_DRAFT = "Draft"
 STATUS_PENDING_REVIEW = "PendingReview"
 ALLOWED_STATUSES = {STATUS_DRAFT, STATUS_PENDING_REVIEW}
 
 
-def save_will(db: Database, body: dict) -> dict:
+def save_will(db: Database, body: dict, settings: Settings) -> dict:
     if not isinstance(body, dict) or not body:
         raise AppError(400, messages.WILL_DATA_REQUIRED)
 
@@ -31,42 +31,43 @@ def save_will(db: Database, body: dict) -> dict:
         "submittedAt": datetime.now(timezone.utc),
     }
     repository.insert_will(db, document)
+
+    if status == STATUS_PENDING_REVIEW:
+        _submit_for_admin_review(db, settings, document)
+
     return {"willId": will_id, "status": status}
 
 
-def list_lawyers(db: Database) -> dict:
-    return {"lawyers": repository.find_lawyers(db)}
-
-
-def assign_lawyer(db: Database, body: dict) -> dict:
-    will_id = (body.get("willId") or "").strip()
-    lawyer_email = normalize_email(body.get("lawyerEmail"))
-
-    if not will_id:
-        raise AppError(400, messages.WILL_ID_REQUIRED)
-    if not is_valid_email(lawyer_email):
-        raise AppError(400, messages.INVALID_LAWYER_EMAIL)
-
-    lawyer = repository.find_lawyer_by_email(db, lawyer_email)
-    if not lawyer:
-        raise AppError(404, messages.LAWYER_NOT_FOUND)
-
-    repository.insert_lawyer_will(db, {
-        "willId": will_id,
-        "lawyerEmail": lawyer_email,
+def _submit_for_admin_review(db: Database, settings: Settings, document: dict) -> None:
+    # Every review submission always goes to the single configured admin
+    # reviewer — there's no lawyer-selection step anymore.
+    repository.insert_admin_will(db, {
+        "willId": document["willId"],
+        "adminEmail": settings.admin_review_email,
         "assignedAt": datetime.now(timezone.utc),
     })
-    return {"willId": will_id, "lawyerEmail": lawyer_email}
+
+    testator = (document.get("will") or {}).get("testator") or {}
+    testator_name = testator.get("fullName") or "Unknown"
+    testator_email = document.get("testatorEmail") or "Unknown"
+    email.send_email(
+        settings,
+        to=settings.admin_review_email,
+        subject=f"New Will submitted for review — {testator_name}",
+        html=(
+            f"<p>A new Will has been submitted for review.</p>"
+            f"<ul>"
+            f"<li><strong>Testator:</strong> {testator_name}</li>"
+            f"<li><strong>Testator email:</strong> {testator_email}</li>"
+            f"<li><strong>Will ID:</strong> {document['willId']}</li>"
+            f"</ul>"
+        ),
+    )
 
 
-def list_lawyer_wills(db: Database, email: str) -> dict:
-    email = normalize_email(email)
-    if not is_valid_email(email):
-        raise AppError(400, messages.INVALID_LAWYER_EMAIL)
-
-    will_ids = repository.find_will_ids_for_lawyer(db, email)
+def list_admin_wills(db: Database) -> dict:
     clients = []
-    for w in repository.find_wills_by_ids(db, will_ids):
+    for w in repository.find_wills_by_status(db, STATUS_PENDING_REVIEW):
         testator = (w.get("will") or {}).get("testator") or {}
         submitted_at = w.get("submittedAt")
         clients.append({

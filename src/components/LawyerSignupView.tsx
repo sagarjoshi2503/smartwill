@@ -52,14 +52,14 @@ export default function LawyerSignupView({onSignup,onBack,onGoToLogin}:{
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <div className="w-14 h-14 bg-[#d09d61]/15 border border-[#d09d61]/20 rounded-3xl flex items-center justify-center mx-auto mb-4"><Scale size={22} className="text-[#d09d61]"/></div>
-          <h2 className="text-3xl font-black text-slate-900 serif">Lawyer Portal Signup</h2>
+          <h2 className="text-3xl font-black text-slate-900 serif">Admin Portal Signup</h2>
           <p className="text-slate-600 text-sm mt-2">Create an account to manage your clients' Wills</p>
         </div>
         <form onSubmit={handleSubmit} className="apv-card p-6 space-y-4">
           <div>
             <label className="block apv-label mb-2">Full Name</label>
             <div className="relative"><User size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"/>
-              <input type="text" value={fullName} onChange={e=>{setFullName(e.target.value);setError("");setAlreadySignedUp(false);}} placeholder="Adv. Jane Doe" className={IC} autoComplete="name"/>
+              <input type="text" value={fullName} onChange={e=>{setFullName(e.target.value);setError("");setAlreadySignedUp(false);}} placeholder="Jane Doe" className={IC} autoComplete="name"/>
             </div>
           </div>
           <div>

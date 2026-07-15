@@ -18,7 +18,7 @@ def test_signup_success_stores_hashed_password(client, fake_db):
 
     doc = fake_db["login"].find_one({"email": "jane@lawfirm.com"})
     assert doc["fullName"] == "Jane Doe"
-    assert doc["role"] == "lawyer"
+    assert "role" not in doc
     assert doc["passwordHash"] != "password123"
     assert bcrypt.checkpw(b"password123", doc["passwordHash"].encode("utf-8"))
 

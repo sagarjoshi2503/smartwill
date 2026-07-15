@@ -16,7 +16,7 @@ export default function LawyerPortal({lawyer,onCreateWill}:{
     (async()=>{
       setStatus("loading"); setError("");
       try {
-        const res = await fetch(apiUrl(`/api/will/lawyer-wills?email=${encodeURIComponent(lawyer.email)}`));
+        const res = await fetch(apiUrl("/api/will/lawyer-wills"));
         const isJson = res.headers.get("content-type")?.includes("application/json");
         const data = isJson ? await res.json() : null;
         if(!res.ok) throw new Error(data?.error || `Could not load clients (server returned ${res.status}).`);
@@ -30,15 +30,15 @@ export default function LawyerPortal({lawyer,onCreateWill}:{
       }
     })();
     return ()=>{ cancelled=true; };
-  },[lawyer.email]);
+  },[]);
 
   return(
     <div className="fade-in min-h-[calc(100vh-58px)] bg-slate-100">
       <div className="max-w-6xl mx-auto px-5 py-8">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h2 className="text-xl font-bold text-slate-900 serif">Lawyer Dashboard</h2>
-            <p className="text-slate-600 text-sm">Adv. {lawyer.name} · {lawyer.email}</p>
+            <h2 className="text-xl font-bold text-slate-900 serif">Admin Dashboard</h2>
+            <p className="text-slate-600 text-sm">{lawyer.name} · {lawyer.email}</p>
           </div>
           <button onClick={onCreateWill} className="apv-btn flex items-center gap-2 py-2 px-4 rounded-xl text-sm font-semibold">
             <Plus size={14}/>Create Will for Client
@@ -57,7 +57,7 @@ export default function LawyerPortal({lawyer,onCreateWill}:{
           {status==="loading" && <p className="text-slate-500 text-sm px-5 py-6">Loading clients…</p>}
           {status==="error" && <p className="text-red-500 text-xs px-5 py-6">{error}</p>}
           {status==="ready" && clients.length===0 && (
-            <p className="text-slate-500 text-sm px-5 py-6">No Wills have been submitted to you for review yet.</p>
+            <p className="text-slate-500 text-sm px-5 py-6">No Wills have been submitted for review yet.</p>
           )}
           {status==="ready" && clients.length>0 && (
             <table className="w-full">

@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback } from "react";
-import { Scale, ArrowRight, ChevronLeft, Check, LogIn, LogOut, Eye } from "lucide-react";
+import { Scale, ArrowRight, ChevronLeft, Check, LogIn, LogOut, Eye, Save } from "lucide-react";
 
 import { PLANS, ADDONS } from "./data/plans";
 import { DEFAULT_WILL } from "./data/defaultWill";
@@ -15,6 +15,7 @@ import WizardForms from "./components/WizardForms";
 import LiveDocPreview from "./components/LiveDocPreview";
 import WillDocument from "./components/WillDocument";
 import { allocTotal } from "./utils/allocation";
+import { apiUrl } from "./utils/apiBase";
 import type {
   AssetCatalogItem, Beneficiary, DisclaimerChecks, GoogleProfile, LawyerProfile, Plan, SignupState, ViewName, WillState,
 } from "./types";
@@ -36,6 +37,8 @@ export default function SmartWill() {
   const [will, setWill] = useState<WillState>(DEFAULT_WILL);
   const [showWillDoc, setShowWillDoc] = useState(false);
   const [lawyerProfile, setLawyerProfile] = useState<LawyerProfile | null>(null);
+  const [draftStatus, setDraftStatus] = useState<"idle" | "saving" | "error" | "done">("idle");
+  const [draftError, setDraftError] = useState("");
   const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
   const willDocRef = useRef<HTMLDivElement | null>(null);
 
@@ -81,6 +84,27 @@ export default function SmartWill() {
   const assetAdded = (id: string) => will.assets.some(a=>a.typeId===id);
   const residualBene = will.beneficiaries.find(b=>String(b.id)===String(will.residualBeneId));
 
+  // Save as draft
+  const handleSaveDraft = async () => {
+    setDraftStatus("saving"); setDraftError("");
+    try {
+      const res = await fetch(apiUrl("/api/will/save"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ will, testatorEmail: signup.email, status: "Draft" }),
+      });
+      const isJson = res.headers.get("content-type")?.includes("application/json");
+      const data = isJson ? await res.json() : null;
+      if(!res.ok) throw new Error(data?.error || `Could not save the draft (server returned ${res.status}).`);
+      setDraftStatus("done");
+      setTimeout(()=>setDraftStatus("idle"), 2500);
+    } catch (err) {
+      setDraftStatus("error");
+      setDraftError(err instanceof Error ? err.message : "Could not save the draft.");
+      setTimeout(()=>setDraftStatus("idle"), 2500);
+    }
+  };
+
   // Print / Download
   const handlePrint = useCallback(() => window.print(), []);
 
@@ -108,13 +132,13 @@ export default function SmartWill() {
                     <div className="w-6 h-6 bg-slate-200 rounded-full flex items-center justify-center text-[9px] font-bold text-slate-900">
                       {lawyerProfile.name.split(" ").slice(0,2).map(n=>n[0]).join("").toUpperCase()}
                     </div>
-                    <span className="text-[#d09d61] text-sm">Adv. {lawyerProfile.name}</span>
+                    <span className="text-[#d09d61] text-sm">{lawyerProfile.name}</span>
                   </div>
                   <button onClick={()=>{setLawyerProfile(null);setView("landing");}} className="flex items-center gap-1.5 text-slate-600 hover:text-slate-900 text-sm transition-colors"><LogOut size={13}/>Logout</button>
                 </>
               ):(
                 <>
-                  <button onClick={()=>setView("lawyerLogin")} className="flex items-center gap-1.5 text-slate-600 hover:text-slate-900 border border-slate-200 hover:border-slate-300 rounded-lg px-3 py-1.5 text-sm transition-all"><LogIn size={13}/>Lawyer Portal</button>
+                  <button onClick={()=>setView("lawyerLogin")} className="flex items-center gap-1.5 text-slate-600 hover:text-slate-900 border border-slate-200 hover:border-slate-300 rounded-lg px-3 py-1.5 text-sm transition-all"><LogIn size={13}/>Admin Portal</button>
                   <button onClick={()=>setView("authChoice")} className="flex items-center gap-1.5 bg-[#d09d61] hover:bg-[#d7a46a] text-[#020617] rounded-lg px-4 py-2 text-sm font-semibold transition-colors shadow-lg shadow-[#d09d61]/20">Create Your Will <ArrowRight size={13}/></button>
                 </>
               )}
@@ -153,9 +177,15 @@ export default function SmartWill() {
                 </button>
               ))}
             </div>
-            <button onClick={()=>setShowWillDoc(true)} className="flex items-center gap-1.5 text-xs text-[#d09d61] hover:text-[#b6844a] border border-[#d09d61]/30 hover:border-[#d09d61]/60 rounded-lg px-3 py-1.5 transition-all font-semibold">
-              <Eye size={12}/>Generate Will
-            </button>
+            <div className="flex items-center gap-2">
+              <button onClick={handleSaveDraft} disabled={draftStatus==="saving"} title={draftStatus==="error"?draftError:undefined}
+                className={`flex items-center gap-1.5 text-xs rounded-lg px-3 py-1.5 transition-all font-semibold border ${draftStatus==="error"?"text-red-500 border-red-300":draftStatus==="done"?"text-emerald-600 border-emerald-300":"text-slate-600 hover:text-slate-900 border-slate-200 hover:border-slate-300"} ${draftStatus==="saving"?"opacity-60 cursor-not-allowed":""}`}>
+                <Save size={12}/>{draftStatus==="saving"?"Saving…":draftStatus==="done"?"Saved":draftStatus==="error"?"Failed":"Save as Draft"}
+              </button>
+              <button onClick={()=>setShowWillDoc(true)} className="flex items-center gap-1.5 text-xs text-[#d09d61] hover:text-[#b6844a] border border-[#d09d61]/30 hover:border-[#d09d61]/60 rounded-lg px-3 py-1.5 transition-all font-semibold">
+                <Eye size={12}/>Generate Will
+              </button>
+            </div>
           </div>
           {/* Split pane */}
           <div className="flex flex-1 overflow-hidden">

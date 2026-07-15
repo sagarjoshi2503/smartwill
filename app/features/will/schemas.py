@@ -6,20 +6,6 @@ class SaveWillResponse(BaseModel):
     status: str
 
 
-class LawyerOut(BaseModel):
-    name: str
-    email: str
-
-
-class LawyersResponse(BaseModel):
-    lawyers: list[LawyerOut]
-
-
-class AssignLawyerResponse(BaseModel):
-    willId: str
-    lawyerEmail: str
-
-
 class ClientOut(BaseModel):
     willId: str
     name: str

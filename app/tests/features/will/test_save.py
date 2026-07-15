@@ -1,4 +1,5 @@
 from app.core.config import Settings, get_settings
+from app.features.will import service as will_service
 from app.main import app
 from app.shared import messages
 
@@ -53,6 +54,47 @@ def test_save_stores_draft_status(client, fake_db):
 def test_save_stores_pending_review_status(client, fake_db):
     res = client.post(URL, json={**VALID_PAYLOAD, "status": "PendingReview"})
     assert res.json()["status"] == "PendingReview"
+
+
+def test_save_notifies_admin_email_when_submitted_for_review(client, monkeypatch):
+    calls = []
+    monkeypatch.setattr(will_service.email, "send_email", lambda settings, to, subject, html: calls.append((to, subject, html)))
+
+    res = client.post(URL, json={**VALID_PAYLOAD, "status": "PendingReview"})
+
+    assert res.status_code == 201
+    assert len(calls) == 1
+    to, subject, html = calls[0]
+    assert to == "anup@prabhuverlekar.com"
+    assert "Jane Doe" in subject
+    assert res.json()["willId"] in html
+
+
+def test_save_does_not_notify_admin_email_for_draft(client, monkeypatch):
+    calls = []
+    monkeypatch.setattr(will_service.email, "send_email", lambda *a, **k: calls.append(1))
+
+    res = client.post(URL, json={**VALID_PAYLOAD, "status": "Draft"})
+
+    assert res.status_code == 201
+    assert calls == []
+
+
+def test_save_creates_adminwill_entry_when_submitted_for_review(client, fake_db):
+    res = client.post(URL, json={**VALID_PAYLOAD, "status": "PendingReview"})
+
+    assert res.status_code == 201
+    entry = fake_db["adminwill"].find_one({"willId": res.json()["willId"]})
+    assert entry is not None
+    assert entry["adminEmail"] == "anup@prabhuverlekar.com"
+    assert "assignedAt" in entry
+
+
+def test_save_does_not_create_adminwill_entry_for_draft(client, fake_db):
+    res = client.post(URL, json={**VALID_PAYLOAD, "status": "Draft"})
+
+    assert res.status_code == 201
+    assert fake_db["adminwill"].count_documents({}) == 0
 
 
 # --- negative scenarios ---
