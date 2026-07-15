@@ -4,6 +4,7 @@ from pymongo.database import Database
 from pymongo.errors import DuplicateKeyError, PyMongoError
 
 from app.core.exceptions import AppError
+from app.shared import messages
 
 COLLECTION_NAME = "login"
 ROLE_LAWYER = "lawyer"
@@ -19,7 +20,7 @@ def find_by_email(db: Database, email: str) -> dict | None:
     try:
         return db[COLLECTION_NAME].find_one({"email": email})
     except PyMongoError:
-        raise AppError(500, "Could not reach the database. Please try again.")
+        raise AppError(500, messages.DATABASE_UNAVAILABLE)
 
 
 def insert_lawyer(db: Database, full_name: str, email: str, password_hash: str) -> None:
@@ -32,6 +33,6 @@ def insert_lawyer(db: Database, full_name: str, email: str, password_hash: str) 
             "createdAt": datetime.now(timezone.utc),
         })
     except DuplicateKeyError:
-        raise AppError(409, "You're already signed up as a lawyer with this email. Please use the login screen to log in.")
+        raise AppError(409, messages.LAWYER_ALREADY_SIGNED_UP)
     except PyMongoError:
-        raise AppError(500, "Could not reach the database. Please try again.")
+        raise AppError(500, messages.DATABASE_UNAVAILABLE)

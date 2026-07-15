@@ -2,6 +2,7 @@ from datetime import datetime, timezone
 
 from app.core.config import Settings, get_settings
 from app.main import app
+from app.shared import messages
 
 URL = "/api/will/lawyer-wills"
 
@@ -64,13 +65,13 @@ def test_returns_empty_list_when_lawyer_has_no_assigned_wills(client):
 def test_rejects_missing_email(client):
     res = client.get(URL)
     assert res.status_code == 400
-    assert res.json() == {"error": "Enter a valid lawyer email address."}
+    assert res.json() == {"error": messages.INVALID_LAWYER_EMAIL}
 
 
 def test_rejects_invalid_email_format(client):
     res = client.get(URL, params={"email": "not-an-email"})
     assert res.status_code == 400
-    assert res.json() == {"error": "Enter a valid lawyer email address."}
+    assert res.json() == {"error": messages.INVALID_LAWYER_EMAIL}
 
 
 def test_returns_500_when_mongodb_uri_missing():
@@ -79,6 +80,6 @@ def test_returns_500_when_mongodb_uri_missing():
         from fastapi.testclient import TestClient
         res = TestClient(app).get(URL, params={"email": "lawyer@lawfirm.com"})
         assert res.status_code == 500
-        assert "MONGODB_URI" in res.json()["error"]
+        assert res.json() == {"error": messages.MONGODB_NOT_CONFIGURED}
     finally:
         app.dependency_overrides.clear()

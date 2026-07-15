@@ -4,6 +4,7 @@ import pytest
 
 from app.core.exceptions import AppError
 from app.core.security import decode_transport_password, hash_password, verify_password
+from app.shared import messages
 
 
 # --- positive scenarios ---
@@ -30,7 +31,7 @@ def test_decode_transport_password_rejects_malformed_base64():
     with pytest.raises(AppError) as exc_info:
         decode_transport_password("not-valid-base64!!")
     assert exc_info.value.status_code == 400
-    assert exc_info.value.message == "Malformed credentials."
+    assert exc_info.value.message == messages.MALFORMED_CREDENTIALS
 
 
 def test_hash_password_is_salted_so_repeated_hashes_differ():

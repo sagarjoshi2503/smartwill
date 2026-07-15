@@ -45,19 +45,37 @@ export default function WizardForms({step,will,setWill,addBene,removeBene,update
   const [submitError,setSubmitError]=useState("");
   const [savedWillId,setSavedWillId]=useState<string|null>(null);
   const [showLawyerModal,setShowLawyerModal]=useState(false);
+  const [draftStatus,setDraftStatus]=useState<"idle"|"saving"|"error"|"done">("idle");
+  const [draftError,setDraftError]=useState("");
+
+  const saveWill = async (status: "Draft" | "PendingReview") => {
+    const res = await fetch(apiUrl("/api/will/save"), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ will, testatorEmail, status }),
+    });
+    const isJson = res.headers.get("content-type")?.includes("application/json");
+    const data = isJson ? await res.json() : null;
+    if(!res.ok) throw new Error(data?.error || `Could not save the Will (server returned ${res.status}).`);
+    return data.willId as string;
+  };
+
+  const handleSaveDraft = async () => {
+    setDraftStatus("saving"); setDraftError("");
+    try {
+      await saveWill("Draft");
+      setDraftStatus("done");
+    } catch (err) {
+      setDraftStatus("error");
+      setDraftError(err instanceof Error ? err.message : "Could not save the draft.");
+    }
+  };
 
   const handleSaveAndSubmit = async () => {
     setSubmitStatus("saving"); setSubmitError("");
     try {
-      const res = await fetch(apiUrl("/api/will/save"), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ will, testatorEmail }),
-      });
-      const isJson = res.headers.get("content-type")?.includes("application/json");
-      const data = isJson ? await res.json() : null;
-      if(!res.ok) throw new Error(data?.error || `Could not save the Will (server returned ${res.status}).`);
-      setSavedWillId(data.willId);
+      const willId = await saveWill("PendingReview");
+      setSavedWillId(willId);
       setSubmitStatus("done");
       setShowLawyerModal(true);
     } catch (err) {
@@ -452,9 +470,17 @@ export default function WizardForms({step,will,setWill,addBene,removeBene,update
           <div className="bg-[#d09d61]/8 border border-[#d09d61]/20 rounded-xl p-4 text-xs text-[#b88d48]">
             All rest, residue and remainder of my estate shall vest absolutely in <strong>{will.beneficiaries.find(b=>String(b.id)===String(will.residualBeneId))?.name||"Selected Beneficiary"}</strong>.
           </div>
-          <button onClick={onGenerate} className="w-full bg-[#d09d61] hover:bg-[#b88442] text-[#020617] font-bold py-3.5 rounded-xl text-sm transition-colors flex items-center justify-center gap-2">
-            <FileText size={16}/>Generate Complete Will Document →
-          </button>
+          <div className="flex gap-3">
+            <button onClick={handleSaveDraft} disabled={draftStatus==="saving"}
+              className={`flex-1 font-bold py-3.5 rounded-xl text-sm transition-colors flex items-center justify-center gap-2 ${draftStatus==="saving"?"bg-slate-700 text-slate-400 cursor-not-allowed":"bg-slate-800 hover:bg-slate-700 text-white"}`}>
+              {draftStatus==="saving"?"Saving…":"Save as Draft"}
+            </button>
+            <button onClick={onGenerate} className="flex-1 bg-[#d09d61] hover:bg-[#b88442] text-[#020617] font-bold py-3.5 rounded-xl text-sm transition-colors flex items-center justify-center gap-2">
+              <FileText size={16}/>Generate Complete Will Document →
+            </button>
+          </div>
+          {draftStatus==="error"&&<p className="text-red-500 text-xs text-center">{draftError}</p>}
+          {draftStatus==="done"&&<p className="text-emerald-500 text-xs text-center">Draft saved.</p>}
           <button onClick={handleSaveAndSubmit} disabled={submitStatus==="saving"}
             className={`w-full font-bold py-3.5 rounded-xl text-sm transition-colors flex items-center justify-center gap-2 ${submitStatus==="saving"?"bg-slate-700 text-slate-400 cursor-not-allowed":"bg-slate-800 hover:bg-slate-700 text-white"}`}>
             <Send size={16}/>{submitStatus==="saving"?"Saving…":"Save and Submit to Lawyer for Review"}

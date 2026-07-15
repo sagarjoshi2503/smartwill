@@ -5,12 +5,21 @@ from pymongo.database import Database
 
 from app.core.exceptions import AppError
 from app.features.will import repository
+from app.shared import messages
 from app.shared.validators import is_valid_email, normalize_email
+
+STATUS_DRAFT = "Draft"
+STATUS_PENDING_REVIEW = "PendingReview"
+ALLOWED_STATUSES = {STATUS_DRAFT, STATUS_PENDING_REVIEW}
 
 
 def save_will(db: Database, body: dict) -> dict:
     if not isinstance(body, dict) or not body:
-        raise AppError(400, "Will data is required.")
+        raise AppError(400, messages.WILL_DATA_REQUIRED)
+
+    status = body.get("status") or STATUS_PENDING_REVIEW
+    if status not in ALLOWED_STATUSES:
+        raise AppError(400, messages.INVALID_WILL_STATUS)
 
     # willId is always generated server-side (never trusted from the client) so
     # every saved will document gets a fresh, unique identifier.
@@ -18,10 +27,11 @@ def save_will(db: Database, body: dict) -> dict:
     document = {
         **body,
         "willId": will_id,
+        "status": status,
         "submittedAt": datetime.now(timezone.utc),
     }
     repository.insert_will(db, document)
-    return {"willId": will_id}
+    return {"willId": will_id, "status": status}
 
 
 def list_lawyers(db: Database) -> dict:
@@ -33,13 +43,13 @@ def assign_lawyer(db: Database, body: dict) -> dict:
     lawyer_email = normalize_email(body.get("lawyerEmail"))
 
     if not will_id:
-        raise AppError(400, "willId is required.")
+        raise AppError(400, messages.WILL_ID_REQUIRED)
     if not is_valid_email(lawyer_email):
-        raise AppError(400, "Enter a valid lawyer email address.")
+        raise AppError(400, messages.INVALID_LAWYER_EMAIL)
 
     lawyer = repository.find_lawyer_by_email(db, lawyer_email)
     if not lawyer:
-        raise AppError(404, "Selected lawyer account was not found.")
+        raise AppError(404, messages.LAWYER_NOT_FOUND)
 
     repository.insert_lawyer_will(db, {
         "willId": will_id,
@@ -52,7 +62,7 @@ def assign_lawyer(db: Database, body: dict) -> dict:
 def list_lawyer_wills(db: Database, email: str) -> dict:
     email = normalize_email(email)
     if not is_valid_email(email):
-        raise AppError(400, "Enter a valid lawyer email address.")
+        raise AppError(400, messages.INVALID_LAWYER_EMAIL)
 
     will_ids = repository.find_will_ids_for_lawyer(db, email)
     clients = []

@@ -1,5 +1,6 @@
 from app.core.config import Settings, get_settings
 from app.main import app
+from app.shared import messages
 
 URL = "/api/will/assign-lawyer"
 
@@ -43,27 +44,27 @@ def test_assign_lawyer_allows_multiple_lawyers_per_will(client, fake_db):
 def test_assign_lawyer_rejects_missing_will_id(client):
     res = client.post(URL, json={"lawyerEmail": "jane@lawfirm.com"})
     assert res.status_code == 400
-    assert res.json() == {"error": "willId is required."}
+    assert res.json() == {"error": messages.WILL_ID_REQUIRED}
 
 
 def test_assign_lawyer_rejects_invalid_email_format(client):
     res = client.post(URL, json={"willId": "will-123", "lawyerEmail": "not-an-email"})
     assert res.status_code == 400
-    assert res.json() == {"error": "Enter a valid lawyer email address."}
+    assert res.json() == {"error": messages.INVALID_LAWYER_EMAIL}
 
 
 def test_assign_lawyer_rejects_unknown_email(client, fake_db):
     seed_accounts(fake_db)
     res = client.post(URL, json={"willId": "will-123", "lawyerEmail": "nobody@lawfirm.com"})
     assert res.status_code == 404
-    assert res.json() == {"error": "Selected lawyer account was not found."}
+    assert res.json() == {"error": messages.LAWYER_NOT_FOUND}
 
 
 def test_assign_lawyer_rejects_non_lawyer_role(client, fake_db):
     seed_accounts(fake_db)
     res = client.post(URL, json={"willId": "will-123", "lawyerEmail": "client@example.com"})
     assert res.status_code == 404
-    assert res.json() == {"error": "Selected lawyer account was not found."}
+    assert res.json() == {"error": messages.LAWYER_NOT_FOUND}
 
 
 def test_assign_lawyer_returns_500_when_mongodb_uri_missing():
@@ -72,6 +73,6 @@ def test_assign_lawyer_returns_500_when_mongodb_uri_missing():
         from fastapi.testclient import TestClient
         res = TestClient(app).post(URL, json={"willId": "will-123", "lawyerEmail": "jane@lawfirm.com"})
         assert res.status_code == 500
-        assert "MONGODB_URI" in res.json()["error"]
+        assert res.json() == {"error": messages.MONGODB_NOT_CONFIGURED}
     finally:
         app.dependency_overrides.clear()

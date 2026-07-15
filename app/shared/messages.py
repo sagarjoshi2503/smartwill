@@ -1,0 +1,24 @@
+"""User-facing error message strings, centralized so every feature raises
+the same wording for the same failure instead of drifting copies."""
+
+DATABASE_UNAVAILABLE = "Could not reach the database. Please try again."
+MONGODB_NOT_CONFIGURED = "This feature is not configured on the server (missing MONGODB_URI)."
+
+GOOGLE_SIGNIN_NOT_CONFIGURED = "Google Sign-In is not configured on the server (missing GOOGLE_CLIENT_ID)."
+MISSING_ID_TOKEN = "Missing idToken."
+GOOGLE_TOKEN_MISSING_EMAIL = "Google token did not include an email address."
+INVALID_GOOGLE_CREDENTIAL = "Invalid or expired Google credential."
+MALFORMED_CREDENTIALS = "Malformed credentials."
+FULL_NAME_REQUIRED = "Full name is required."
+INVALID_EMAIL = "Enter a valid email address."
+PASSWORD_TOO_SHORT = "Password must be at least 8 characters."
+PASSWORD_REQUIRED = "Password is required."
+INVALID_LOGIN_CREDENTIALS = "Invalid email or password."
+NOT_A_LAWYER_ACCOUNT = "This account is not registered as a lawyer."
+LAWYER_ALREADY_SIGNED_UP = "You're already signed up as a lawyer with this email. Please use the login screen to log in."
+
+WILL_DATA_REQUIRED = "Will data is required."
+INVALID_WILL_STATUS = "Invalid will status."
+WILL_ID_REQUIRED = "willId is required."
+INVALID_LAWYER_EMAIL = "Enter a valid lawyer email address."
+LAWYER_NOT_FOUND = "Selected lawyer account was not found."

@@ -4,6 +4,7 @@ import bcrypt
 
 from app.core.config import Settings, get_settings
 from app.main import app
+from app.shared import messages
 
 URL = "/api/auth/lawyer-login"
 PASSWORD = "password123"
@@ -39,44 +40,44 @@ def test_login_rejects_wrong_password(client, fake_db):
     seed_lawyer(fake_db)
     res = client.post(URL, json={"email": "jane@lawfirm.com", "password": encode("wrongpassword")})
     assert res.status_code == 401
-    assert res.json() == {"error": "Invalid email or password."}
+    assert res.json() == {"error": messages.INVALID_LOGIN_CREDENTIALS}
 
 
 def test_login_rejects_unknown_email(client, fake_db):
     res = client.post(URL, json={"email": "nobody@lawfirm.com", "password": encode(PASSWORD)})
     assert res.status_code == 401
-    assert res.json() == {"error": "Invalid email or password."}
+    assert res.json() == {"error": messages.INVALID_LOGIN_CREDENTIALS}
 
 
 def test_login_rejects_non_lawyer_role(client, fake_db):
     seed_lawyer(fake_db, email="client@lawfirm.com", role="client")
     res = client.post(URL, json={"email": "client@lawfirm.com", "password": encode(PASSWORD)})
     assert res.status_code == 403
-    assert res.json() == {"error": "This account is not registered as a lawyer."}
+    assert res.json() == {"error": messages.NOT_A_LAWYER_ACCOUNT}
 
 
 def test_login_rejects_invalid_email_format(client):
     res = client.post(URL, json={"email": "not-an-email", "password": encode(PASSWORD)})
     assert res.status_code == 400
-    assert res.json() == {"error": "Enter a valid email address."}
+    assert res.json() == {"error": messages.INVALID_EMAIL}
 
 
 def test_login_rejects_missing_password(client):
     res = client.post(URL, json={"email": "jane@lawfirm.com", "password": ""})
     assert res.status_code == 400
-    assert res.json() == {"error": "Password is required."}
+    assert res.json() == {"error": messages.PASSWORD_REQUIRED}
 
 
 def test_login_rejects_non_string_password(client):
     res = client.post(URL, json={"email": "jane@lawfirm.com", "password": 12345})
     assert res.status_code == 400
-    assert res.json() == {"error": "Password is required."}
+    assert res.json() == {"error": messages.PASSWORD_REQUIRED}
 
 
 def test_login_rejects_malformed_base64_password(client):
     res = client.post(URL, json={"email": "jane@lawfirm.com", "password": "not-valid-base64!!"})
     assert res.status_code == 400
-    assert res.json() == {"error": "Malformed credentials."}
+    assert res.json() == {"error": messages.MALFORMED_CREDENTIALS}
 
 
 def test_login_returns_500_when_mongodb_uri_missing():
@@ -85,6 +86,6 @@ def test_login_returns_500_when_mongodb_uri_missing():
         from fastapi.testclient import TestClient
         res = TestClient(app).post(URL, json={"email": "jane@lawfirm.com", "password": encode(PASSWORD)})
         assert res.status_code == 500
-        assert "MONGODB_URI" in res.json()["error"]
+        assert res.json() == {"error": messages.MONGODB_NOT_CONFIGURED}
     finally:
         app.dependency_overrides.clear()

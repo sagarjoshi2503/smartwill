@@ -1,5 +1,6 @@
 from app.core.config import Settings, get_settings
 from app.main import app
+from app.shared import messages
 
 URL = "/api/will/lawyers"
 
@@ -40,6 +41,6 @@ def test_lawyers_returns_500_when_mongodb_uri_missing():
         from fastapi.testclient import TestClient
         res = TestClient(app).get(URL)
         assert res.status_code == 500
-        assert "MONGODB_URI" in res.json()["error"]
+        assert res.json() == {"error": messages.MONGODB_NOT_CONFIGURED}
     finally:
         app.dependency_overrides.clear()

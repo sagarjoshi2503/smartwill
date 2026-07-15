@@ -1,5 +1,6 @@
 from app.core.config import Settings, get_settings
 from app.main import app
+from app.shared import messages
 
 URL = "/api/will/save"
 VALID_PAYLOAD = {"will": {"testator": {"fullName": "Jane Doe"}}, "testatorEmail": "jane@example.com"}
@@ -34,18 +35,44 @@ def test_save_ignores_client_supplied_will_id(client, fake_db):
     assert fake_db["will"].find_one({"willId": server_will_id}) is not None
 
 
+def test_save_defaults_to_pending_review_status_when_omitted(client, fake_db):
+    res = client.post(URL, json=VALID_PAYLOAD)
+    assert res.json()["status"] == "PendingReview"
+    doc = fake_db["will"].find_one({"willId": res.json()["willId"]})
+    assert doc["status"] == "PendingReview"
+
+
+def test_save_stores_draft_status(client, fake_db):
+    res = client.post(URL, json={**VALID_PAYLOAD, "status": "Draft"})
+    assert res.status_code == 201
+    assert res.json()["status"] == "Draft"
+    doc = fake_db["will"].find_one({"willId": res.json()["willId"]})
+    assert doc["status"] == "Draft"
+
+
+def test_save_stores_pending_review_status(client, fake_db):
+    res = client.post(URL, json={**VALID_PAYLOAD, "status": "PendingReview"})
+    assert res.json()["status"] == "PendingReview"
+
+
 # --- negative scenarios ---
 
 def test_save_rejects_empty_body(client):
     res = client.post(URL, json={})
     assert res.status_code == 400
-    assert res.json() == {"error": "Will data is required."}
+    assert res.json() == {"error": messages.WILL_DATA_REQUIRED}
 
 
 def test_save_rejects_malformed_json_body(client):
     res = client.post(URL, content=b"not json", headers={"Content-Type": "application/json"})
     assert res.status_code == 400
-    assert res.json() == {"error": "Will data is required."}
+    assert res.json() == {"error": messages.WILL_DATA_REQUIRED}
+
+
+def test_save_rejects_invalid_status(client):
+    res = client.post(URL, json={**VALID_PAYLOAD, "status": "Bogus"})
+    assert res.status_code == 400
+    assert res.json() == {"error": messages.INVALID_WILL_STATUS}
 
 
 def test_save_returns_500_when_mongodb_uri_missing():
@@ -54,6 +81,6 @@ def test_save_returns_500_when_mongodb_uri_missing():
         from fastapi.testclient import TestClient
         res = TestClient(app).post(URL, json=VALID_PAYLOAD)
         assert res.status_code == 500
-        assert "MONGODB_URI" in res.json()["error"]
+        assert res.json() == {"error": messages.MONGODB_NOT_CONFIGURED}
     finally:
         app.dependency_overrides.clear()

@@ -3,6 +3,7 @@ from pydantic import BaseModel
 
 class SaveWillResponse(BaseModel):
     willId: str
+    status: str
 
 
 class LawyerOut(BaseModel):

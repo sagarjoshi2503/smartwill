@@ -1,8 +1,10 @@
 import pytest
 
 from app.core.config import Settings, get_settings
+from app.core.exceptions import AppError
 from app.features.auth import service
 from app.main import app
+from app.shared import messages
 
 URL = "/api/auth/google"
 
@@ -38,30 +40,29 @@ def test_verify_falls_back_to_email_when_name_missing(client, monkeypatch):
 # --- negative scenarios ---
 
 def test_verify_rejects_invalid_token(client, monkeypatch):
-    from app.core.exceptions import AppError
-    monkeypatch.setattr(service, "verify_google_id_token", fake_verify_raises(AppError(401, "Invalid or expired Google credential.")))
+    monkeypatch.setattr(service, "verify_google_id_token", fake_verify_raises(AppError(401, messages.INVALID_GOOGLE_CREDENTIAL)))
     res = client.post(URL, json={"idToken": "bad-token"})
     assert res.status_code == 401
-    assert res.json() == {"error": "Invalid or expired Google credential."}
+    assert res.json() == {"error": messages.INVALID_GOOGLE_CREDENTIAL}
 
 
 def test_verify_rejects_missing_id_token(client):
     res = client.post(URL, json={})
     assert res.status_code == 400
-    assert res.json() == {"error": "Missing idToken."}
+    assert res.json() == {"error": messages.MISSING_ID_TOKEN}
 
 
 def test_verify_rejects_non_string_id_token(client):
     res = client.post(URL, json={"idToken": 12345})
     assert res.status_code == 400
-    assert res.json() == {"error": "Missing idToken."}
+    assert res.json() == {"error": messages.MISSING_ID_TOKEN}
 
 
 def test_verify_rejects_payload_without_email(client, monkeypatch):
     monkeypatch.setattr(service, "verify_google_id_token", fake_verify({"name": "No Email"}))
     res = client.post(URL, json={"idToken": "good-token"})
     assert res.status_code == 401
-    assert res.json() == {"error": "Google token did not include an email address."}
+    assert res.json() == {"error": messages.GOOGLE_TOKEN_MISSING_EMAIL}
 
 
 def test_verify_returns_500_when_client_id_missing(fake_db):
@@ -70,6 +71,6 @@ def test_verify_returns_500_when_client_id_missing(fake_db):
         from fastapi.testclient import TestClient
         res = TestClient(app).post(URL, json={"idToken": "token"})
         assert res.status_code == 500
-        assert "GOOGLE_CLIENT_ID" in res.json()["error"]
+        assert res.json() == {"error": messages.GOOGLE_SIGNIN_NOT_CONFIGURED}
     finally:
         app.dependency_overrides.clear()
