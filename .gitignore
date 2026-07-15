@@ -23,6 +23,7 @@ yarn-error.log*
 
 # Local env vars (Google OAuth Client ID, etc.)
 .env
+.env.local
 .vercel
 
 # Python (api/*.py serverless functions)
