@@ -52,7 +52,7 @@ def test_signup_rejects_duplicate_email(client):
     client.post(URL, json=VALID_PAYLOAD)
     res = client.post(URL, json={**VALID_PAYLOAD, "fullName": "Someone Else"})
     assert res.status_code == 409
-    assert res.json() == {"error": "An account with this email already exists."}
+    assert res.json() == {"error": "You're already signed up as a lawyer with this email. Please use the login screen to log in."}
 
 
 def test_signup_rejects_duplicate_email_case_insensitively(client):

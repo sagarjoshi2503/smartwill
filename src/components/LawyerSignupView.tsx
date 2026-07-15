@@ -3,15 +3,17 @@ import { Scale, User, Mail, Lock, UserPlus } from "lucide-react";
 import { apiUrl } from "../utils/apiBase";
 import type { LawyerProfile } from "../types";
 
-export default function LawyerSignupView({onSignup,onBack}:{
+export default function LawyerSignupView({onSignup,onBack,onGoToLogin}:{
   onSignup: (lawyer: LawyerProfile) => void;
   onBack: () => void;
+  onGoToLogin: () => void;
 }){
   const [fullName,setFullName]=useState("");
   const [email,setEmail]=useState("");
   const [password,setPassword]=useState("");
   const [confirmPassword,setConfirmPassword]=useState("");
   const [error,setError]=useState("");
+  const [alreadySignedUp,setAlreadySignedUp]=useState(false);
   const [submitting,setSubmitting]=useState(false);
   const IC="w-full apv-input rounded-2xl pl-11 pr-4 py-3 text-slate-900 placeholder:text-slate-500 text-sm focus:outline-none transition";
 
@@ -23,7 +25,7 @@ export default function LawyerSignupView({onSignup,onBack}:{
     if(!/\S+@\S+\.\S+/.test(email)){ setError("Enter a valid email address."); return; }
     if(password.length<8){ setError("Password must be at least 8 characters."); return; }
     if(password!==confirmPassword){ setError("Passwords do not match."); return; }
-    setError("");
+    setError(""); setAlreadySignedUp(false);
     setSubmitting(true);
     try {
       const res = await fetch(apiUrl("/api/auth/lawyer-signup"), {
@@ -33,7 +35,10 @@ export default function LawyerSignupView({onSignup,onBack}:{
       });
       const isJson = res.headers.get("content-type")?.includes("application/json");
       const data = isJson ? await res.json() : null;
-      if(!res.ok) throw new Error(data?.error || `Signup failed (server returned ${res.status}).`);
+      if(!res.ok){
+        if(res.status===409) setAlreadySignedUp(true);
+        throw new Error(data?.error || `Signup failed (server returned ${res.status}).`);
+      }
       onSignup({ name: data.name, email: data.email });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Signup failed.");
@@ -54,28 +59,37 @@ export default function LawyerSignupView({onSignup,onBack}:{
           <div>
             <label className="block apv-label mb-2">Full Name</label>
             <div className="relative"><User size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"/>
-              <input type="text" value={fullName} onChange={e=>{setFullName(e.target.value);setError("");}} placeholder="Adv. Jane Doe" className={IC} autoComplete="name"/>
+              <input type="text" value={fullName} onChange={e=>{setFullName(e.target.value);setError("");setAlreadySignedUp(false);}} placeholder="Adv. Jane Doe" className={IC} autoComplete="name"/>
             </div>
           </div>
           <div>
             <label className="block apv-label mb-2">Email Address</label>
             <div className="relative"><Mail size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"/>
-              <input type="email" value={email} onChange={e=>{setEmail(e.target.value);setError("");}} placeholder="you@lawfirm.com" className={IC} autoComplete="username"/>
+              <input type="email" value={email} onChange={e=>{setEmail(e.target.value);setError("");setAlreadySignedUp(false);}} placeholder="you@lawfirm.com" className={IC} autoComplete="username"/>
             </div>
           </div>
           <div>
             <label className="block apv-label mb-2">Password</label>
             <div className="relative"><Lock size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"/>
-              <input type="password" value={password} onChange={e=>{setPassword(e.target.value);setError("");}} placeholder="At least 8 characters" className={IC} autoComplete="new-password"/>
+              <input type="password" value={password} onChange={e=>{setPassword(e.target.value);setError("");setAlreadySignedUp(false);}} placeholder="At least 8 characters" className={IC} autoComplete="new-password"/>
             </div>
           </div>
           <div>
             <label className="block apv-label mb-2">Confirm Password</label>
             <div className="relative"><Lock size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"/>
-              <input type="password" value={confirmPassword} onChange={e=>{setConfirmPassword(e.target.value);setError("");}} placeholder="Re-enter your password" className={IC} autoComplete="new-password"/>
+              <input type="password" value={confirmPassword} onChange={e=>{setConfirmPassword(e.target.value);setError("");setAlreadySignedUp(false);}} placeholder="Re-enter your password" className={IC} autoComplete="new-password"/>
             </div>
           </div>
-          {error&&<p className="text-red-500 text-xs">{error}</p>}
+          {error&&(
+            <div>
+              <p className="text-red-500 text-xs">{error}</p>
+              {alreadySignedUp&&(
+                <button type="button" onClick={onGoToLogin} className="text-[#d09d61] font-semibold hover:text-[#b88442] transition-colors text-xs mt-1">
+                  Go to Login →
+                </button>
+              )}
+            </div>
+          )}
           <button type="submit" disabled={submitting} className={`w-full py-3 rounded-full font-bold text-sm transition-all flex items-center justify-center gap-1.5 ${canSubmit&&!submitting?"apv-btn":"bg-slate-200 text-slate-500 cursor-not-allowed"}`}>
             <UserPlus size={14}/>{submitting?"Creating Account…":"Create Account"}
           </button>

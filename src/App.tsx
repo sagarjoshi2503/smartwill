@@ -129,7 +129,7 @@ export default function SmartWill() {
       {view==="otp" && <OtpView otp={otp} handleOtp={handleOtp} otpRefs={otpRefs} phone={signup.phone} onNext={handleOtpVerified}/>}
       {view==="disclaimer" && <DisclaimerView dchecks={dchecks} setDchecks={setDchecks} allChecked={allDchecked} onAgree={()=>setView("wizard")} onBack={()=>setView(skippedOtp?"authChoice":"otp")}/>}
       {view==="lawyerLogin" && <LawyerLoginView onLogin={(lawyer)=>{setLawyerProfile(lawyer);setView("lawyer");}} onBack={()=>setView("landing")} onSignup={()=>setView("lawyerSignup")}/>}
-      {view==="lawyerSignup" && <LawyerSignupView onSignup={(lawyer)=>{setLawyerProfile(lawyer);setView("lawyer");}} onBack={()=>setView("lawyerLogin")}/>}
+      {view==="lawyerSignup" && <LawyerSignupView onSignup={(lawyer)=>{setLawyerProfile(lawyer);setView("lawyer");}} onBack={()=>setView("lawyerLogin")} onGoToLogin={()=>setView("lawyerLogin")}/>}
       {view==="lawyer" && lawyerProfile && <LawyerPortal lawyer={lawyerProfile} onCreateWill={()=>{setWizardStep(1);setView("wizard");}}/>}
 
       {view==="wizard" && (
