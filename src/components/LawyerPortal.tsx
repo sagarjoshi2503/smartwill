@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Users, Plus, Edit3, Trash2 } from "lucide-react";
+import { Users, Plus, Edit3, Trash2, Clock, CheckCircle2 } from "lucide-react";
 import { apiUrl } from "../utils/apiBase";
 import type { LawyerClient, LawyerProfile, WillState } from "../types";
 
@@ -27,6 +27,12 @@ export default function LawyerPortal({lawyer,onCreateWill,onReviewWill}:{
   const [deleteError,setDeleteError]=useState("");
   const [reviewingId,setReviewingId]=useState<string|null>(null);
   const [reviewError,setReviewError]=useState("");
+  const [statusFilter,setStatusFilter]=useState<"All"|LawyerClient["status"]>("All");
+
+  const pendingReviewCount = clients.filter(c=>c.status==="PendingReview").length;
+  const completedCount = clients.filter(c=>c.status==="Completed").length;
+  const draftCount = clients.filter(c=>c.status==="Draft").length;
+  const filteredClients = statusFilter==="All" ? clients : clients.filter(c=>c.status===statusFilter);
 
   useEffect(()=>{
     let cancelled=false;
@@ -92,24 +98,54 @@ export default function LawyerPortal({lawyer,onCreateWill,onReviewWill}:{
             <Plus size={14}/>Create Will for Client
           </button>
         </div>
-        <div className="bg-white border border-slate-200 rounded-xl p-4 w-fit mb-6">
-          <div className="text-slate-600 mb-2"><Users size={17}/></div>
-          <div className="text-2xl font-bold text-slate-900 serif">{status==="ready"?clients.length:"—"}</div>
-          <div className="text-slate-600 text-xs">Total Clients</div>
+        <div className="flex flex-wrap gap-4 mb-6">
+          <div className="bg-white border border-slate-200 rounded-xl p-4 w-fit">
+            <div className="text-slate-600 mb-2"><Users size={17}/></div>
+            <div className="text-2xl font-bold text-slate-900 serif">{status==="ready"?clients.length:"—"}</div>
+            <div className="text-slate-600 text-xs">Total Clients</div>
+          </div>
+          <div className="bg-white border border-slate-200 rounded-xl p-4 w-fit">
+            <div className="text-[#b6844a] mb-2"><Clock size={17}/></div>
+            <div className="text-2xl font-bold text-slate-900 serif">{status==="ready"?pendingReviewCount:"—"}</div>
+            <div className="text-slate-600 text-xs">Pending Review</div>
+          </div>
+          <div className="bg-white border border-slate-200 rounded-xl p-4 w-fit">
+            <div className="text-emerald-600 mb-2"><CheckCircle2 size={17}/></div>
+            <div className="text-2xl font-bold text-slate-900 serif">{status==="ready"?completedCount:"—"}</div>
+            <div className="text-slate-600 text-xs">Completed</div>
+          </div>
         </div>
         {deleteError&&<p className="text-red-500 text-xs mb-4">{deleteError}</p>}
         {reviewError&&<p className="text-red-500 text-xs mb-4">{reviewError}</p>}
         <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden">
-          <div className="px-5 py-3.5 border-b border-slate-200 flex justify-between items-center">
+          <div className="px-5 py-3.5 border-b border-slate-200 flex flex-wrap gap-3 justify-between items-center">
             <h3 className="text-slate-900 font-bold serif">Client Will Tracker</h3>
-            <span className="text-slate-500 text-xs">{status==="ready"?`${clients.length} clients`:""}</span>
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-1.5">
+                {([
+                  {v:"All",label:"All",count:clients.length},
+                  {v:"Draft",label:"Draft",count:draftCount},
+                  {v:"PendingReview",label:"Pending Review",count:pendingReviewCount},
+                  {v:"Completed",label:"Completed",count:completedCount},
+                ] as const).map(f=>(
+                  <button key={f.v} onClick={()=>setStatusFilter(f.v)}
+                    className={`text-[10px] font-bold px-2.5 py-1 rounded-full border transition-colors ${statusFilter===f.v?"bg-[#d09d61] text-[#020617] border-[#d09d61] hover:bg-[#d09d61] hover:text-[#020617]":"bg-white text-slate-600 border-slate-200 hover:border-slate-300"}`}>
+                    {f.label} <span className="opacity-70">{f.count}</span>
+                  </button>
+                ))}
+              </div>
+              <span className="text-slate-500 text-xs">{status==="ready"?`${filteredClients.length} of ${clients.length} clients`:""}</span>
+            </div>
           </div>
           {status==="loading" && <p className="text-slate-500 text-sm px-5 py-6">Loading clients…</p>}
           {status==="error" && <p className="text-red-500 text-xs px-5 py-6">{error}</p>}
           {status==="ready" && clients.length===0 && (
             <p className="text-slate-500 text-sm px-5 py-6">No Wills have been submitted for review yet.</p>
           )}
-          {status==="ready" && clients.length>0 && (
+          {status==="ready" && clients.length>0 && filteredClients.length===0 && (
+            <p className="text-slate-500 text-sm px-5 py-6">No Wills match this filter.</p>
+          )}
+          {status==="ready" && filteredClients.length>0 && (
             <table className="w-full">
               <thead><tr className="border-b border-slate-800">
                 {["Client","Contact","Updated","Status","Action"].map(h=>(
@@ -117,7 +153,7 @@ export default function LawyerPortal({lawyer,onCreateWill,onReviewWill}:{
                 ))}
               </tr></thead>
               <tbody>
-                {clients.map(c=>(
+                {filteredClients.map(c=>(
                   <tr key={c.willId} className="border-b border-slate-800/50 hover:bg-slate-800/30 transition-colors">
                     <td className="px-5 py-3.5">
                       <div className="flex items-center gap-2.5">
