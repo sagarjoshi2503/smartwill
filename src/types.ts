@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 
 export interface Testator {
+  email: string;
   fullName: string;
   relation: string;
   parentSpouseName: string;
@@ -138,6 +139,15 @@ export interface LawyerClient {
   name: string;
   contact: string;
   updatedAt: string | null;
+  status: "Draft" | "PendingReview" | "Completed";
+}
+
+export interface TestatorWill {
+  willId: string;
+  testatorEmail: string;
+  fullLegalName: string;
+  updatedAt: string | null;
+  status: "Draft" | "PendingReview" | "Completed";
 }
 
 export interface SignupState {
@@ -155,7 +165,7 @@ export interface DisclaimerChecks {
   tool: boolean;
 }
 
-export type ViewName = "landing" | "authChoice" | "signup" | "otp" | "disclaimer" | "lawyerLogin" | "lawyerSignup" | "lawyer" | "wizard";
+export type ViewName = "landing" | "authChoice" | "signup" | "otp" | "disclaimer" | "lawyerLogin" | "lawyerSignup" | "lawyer" | "wizard" | "myWills";
 
 export interface GoogleProfile {
   name: string;

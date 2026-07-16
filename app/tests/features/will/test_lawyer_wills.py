@@ -32,6 +32,17 @@ def test_returns_all_wills_submitted_for_review(client, fake_db):
     assert names == {"Jane Doe", "John Roe"}
 
 
+def test_includes_status_for_each_will(client, fake_db):
+    seed_will(fake_db, "will-1", "Jane Doe", "jane@example.com", datetime(2026, 1, 1, tzinfo=timezone.utc), status="PendingReview")
+    seed_will(fake_db, "will-2", "Draft Client", "draft@example.com", datetime(2026, 1, 1, tzinfo=timezone.utc), status="Draft")
+    seed_will(fake_db, "will-3", "Done Client", "done@example.com", datetime(2026, 1, 1, tzinfo=timezone.utc), status="Completed")
+
+    res = client.get(URL)
+
+    statuses = {c["name"]: c["status"] for c in res.json()["clients"]}
+    assert statuses == {"Jane Doe": "PendingReview", "Draft Client": "Draft", "Done Client": "Completed"}
+
+
 def test_returns_multiple_wills_sorted_most_recent_first(client, fake_db):
     seed_will(fake_db, "will-1", "Older Client", "older@example.com", datetime(2026, 1, 1, tzinfo=timezone.utc))
     seed_will(fake_db, "will-2", "Newer Client", "newer@example.com", datetime(2026, 2, 1, tzinfo=timezone.utc))
@@ -49,15 +60,6 @@ def test_returns_empty_list_when_no_wills_submitted(client):
 
 
 # --- negative scenarios ---
-
-def test_excludes_draft_wills(client, fake_db):
-    seed_will(fake_db, "will-1", "Draft Client", "draft@example.com", datetime(2026, 1, 1, tzinfo=timezone.utc), status="Draft")
-
-    res = client.get(URL)
-
-    assert res.status_code == 200
-    assert res.json() == {"clients": []}
-
 
 def test_returns_500_when_mongodb_uri_missing():
     app.dependency_overrides[get_settings] = lambda: Settings(mongodb_uri=None)

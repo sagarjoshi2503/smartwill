@@ -9,7 +9,7 @@ export const DEFAULT_WILL: WillState = {
   // signDay/Month/Year default to today's real date since that's simply correct,
   // not placeholder demo data.
   testator: {
-    fullName:"", relation:"son", parentSpouseName:"",
+    email:"", fullName:"", relation:"son", parentSpouseName:"",
     age:"", address:"",
     idType:"PAN Card", idNumber:"", country:"India",
     signPlace:"", signDay:String(today.day), signMonth:today.month, signYear:String(today.year),

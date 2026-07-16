@@ -27,13 +27,44 @@ def test_save_generates_unique_will_ids_across_requests(client):
     assert res1.json()["willId"] != res2.json()["willId"]
 
 
-def test_save_ignores_client_supplied_will_id(client, fake_db):
-    res = client.post(URL, json={**VALID_PAYLOAD, "willId": "attacker-supplied-id"})
-    assert res.status_code == 201
-    server_will_id = res.json()["willId"]
-    assert server_will_id != "attacker-supplied-id"
-    assert fake_db["will"].find_one({"willId": "attacker-supplied-id"}) is None
-    assert fake_db["will"].find_one({"willId": server_will_id}) is not None
+def test_save_updates_existing_draft_when_will_id_provided(client, fake_db):
+    first = client.post(URL, json={**VALID_PAYLOAD, "status": "Draft"})
+    will_id = first.json()["willId"]
+
+    updated_payload = {
+        "will": {"testator": {"fullName": "Jane Updated"}},
+        "testatorEmail": "jane@example.com",
+        "status": "Draft",
+        "willId": will_id,
+    }
+    second = client.post(URL, json=updated_payload)
+
+    assert second.status_code == 201
+    assert second.json()["willId"] == will_id
+    assert fake_db["will"].count_documents({}) == 1
+    doc = fake_db["will"].find_one({"willId": will_id})
+    assert doc["will"]["testator"]["fullName"] == "Jane Updated"
+
+
+def test_save_preserves_created_at_across_updates(client, fake_db):
+    first = client.post(URL, json={**VALID_PAYLOAD, "status": "Draft"})
+    will_id = first.json()["willId"]
+    created_at = fake_db["will"].find_one({"willId": will_id})["createdAt"]
+
+    client.post(URL, json={**VALID_PAYLOAD, "status": "Draft", "willId": will_id})
+
+    assert fake_db["will"].find_one({"willId": will_id})["createdAt"] == created_at
+
+
+def test_save_can_transition_an_existing_draft_to_pending_review(client, fake_db):
+    first = client.post(URL, json={**VALID_PAYLOAD, "status": "Draft"})
+    will_id = first.json()["willId"]
+
+    second = client.post(URL, json={**VALID_PAYLOAD, "status": "PendingReview", "willId": will_id})
+
+    assert second.status_code == 201
+    assert second.json()["status"] == "PendingReview"
+    assert fake_db["will"].find_one({"willId": will_id})["status"] == "PendingReview"
 
 
 def test_save_defaults_to_pending_review_status_when_omitted(client, fake_db):
@@ -115,6 +146,49 @@ def test_save_rejects_invalid_status(client):
     res = client.post(URL, json={**VALID_PAYLOAD, "status": "Bogus"})
     assert res.status_code == 400
     assert res.json() == {"error": messages.INVALID_WILL_STATUS}
+
+
+def test_save_rejects_missing_testator_email(client):
+    res = client.post(URL, json={"will": {"testator": {"fullName": "Jane Doe"}}})
+    assert res.status_code == 400
+    assert res.json() == {"error": messages.INVALID_TESTATOR_EMAIL}
+
+
+def test_save_rejects_invalid_testator_email(client):
+    res = client.post(URL, json={**VALID_PAYLOAD, "testatorEmail": "not-an-email"})
+    assert res.status_code == 400
+    assert res.json() == {"error": messages.INVALID_TESTATOR_EMAIL}
+
+
+def test_save_rejects_unknown_will_id(client):
+    res = client.post(URL, json={**VALID_PAYLOAD, "willId": "does-not-exist"})
+    assert res.status_code == 404
+    assert res.json() == {"error": messages.WILL_NOT_FOUND}
+
+
+def test_save_rejects_updating_will_owned_by_a_different_testator(client, fake_db):
+    first = client.post(URL, json={**VALID_PAYLOAD, "status": "Draft"})
+    will_id = first.json()["willId"]
+
+    res = client.post(URL, json={
+        "will": {"testator": {"fullName": "Someone Else"}},
+        "testatorEmail": "someone-else@example.com",
+        "status": "Draft",
+        "willId": will_id,
+    })
+
+    assert res.status_code == 403
+    assert res.json() == {"error": messages.WILL_ACCESS_DENIED}
+
+
+def test_save_rejects_editing_a_will_pending_review(client, fake_db):
+    first = client.post(URL, json={**VALID_PAYLOAD, "status": "PendingReview"})
+    will_id = first.json()["willId"]
+
+    res = client.post(URL, json={**VALID_PAYLOAD, "status": "Draft", "willId": will_id})
+
+    assert res.status_code == 403
+    assert res.json() == {"error": messages.WILL_LOCKED_FOR_REVIEW}
 
 
 def test_save_returns_500_when_mongodb_uri_missing():

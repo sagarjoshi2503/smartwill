@@ -1,15 +1,32 @@
 import { useEffect, useState } from "react";
-import { Users, Plus, Edit3 } from "lucide-react";
+import { Users, Plus, Edit3, Trash2 } from "lucide-react";
 import { apiUrl } from "../utils/apiBase";
-import type { LawyerClient, LawyerProfile } from "../types";
+import type { LawyerClient, LawyerProfile, WillState } from "../types";
 
-export default function LawyerPortal({lawyer,onCreateWill}:{
+const STATUS_STYLE: Record<LawyerClient["status"], string> = {
+  Draft: "bg-slate-100 text-slate-600 border-slate-200",
+  PendingReview: "bg-[#d09d61]/10 text-[#b6844a] border-[#d09d61]/30",
+  Completed: "bg-emerald-50 text-emerald-600 border-emerald-200",
+};
+
+const STATUS_LABEL: Record<LawyerClient["status"], string> = {
+  Draft: "Draft",
+  PendingReview: "Pending Review",
+  Completed: "Completed",
+};
+
+export default function LawyerPortal({lawyer,onCreateWill,onReviewWill}:{
   lawyer: LawyerProfile;
   onCreateWill: () => void;
+  onReviewWill: (willId: string, will: WillState) => void;
 }){
   const [clients,setClients]=useState<LawyerClient[]>([]);
   const [status,setStatus]=useState<"loading"|"ready"|"error">("loading");
   const [error,setError]=useState("");
+  const [deletingId,setDeletingId]=useState<string|null>(null);
+  const [deleteError,setDeleteError]=useState("");
+  const [reviewingId,setReviewingId]=useState<string|null>(null);
+  const [reviewError,setReviewError]=useState("");
 
   useEffect(()=>{
     let cancelled=false;
@@ -32,6 +49,37 @@ export default function LawyerPortal({lawyer,onCreateWill}:{
     return ()=>{ cancelled=true; };
   },[]);
 
+  const handleReview = async (willId: string) => {
+    setReviewingId(willId); setReviewError("");
+    try {
+      const res = await fetch(apiUrl(`/api/will/admin/${willId}`));
+      const isJson = res.headers.get("content-type")?.includes("application/json");
+      const data = isJson ? await res.json() : null;
+      if(!res.ok) throw new Error(data?.error || `Could not load this Will (server returned ${res.status}).`);
+      onReviewWill(data.willId, data.will as WillState);
+    } catch (err) {
+      setReviewError(err instanceof Error ? err.message : "Could not load this Will.");
+    } finally {
+      setReviewingId(null);
+    }
+  };
+
+  const handleDelete = async (willId: string) => {
+    if(!window.confirm("Delete this Will? This cannot be undone.")) return;
+    setDeletingId(willId); setDeleteError("");
+    try {
+      const res = await fetch(apiUrl(`/api/will/admin/${willId}`), { method: "DELETE" });
+      const isJson = res.headers.get("content-type")?.includes("application/json");
+      const data = isJson ? await res.json() : null;
+      if(!res.ok) throw new Error(data?.error || `Could not delete this Will (server returned ${res.status}).`);
+      setClients(p=>p.filter(c=>c.willId!==willId));
+    } catch (err) {
+      setDeleteError(err instanceof Error ? err.message : "Could not delete this Will.");
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
   return(
     <div className="fade-in min-h-[calc(100vh-58px)] bg-slate-100">
       <div className="max-w-6xl mx-auto px-5 py-8">
@@ -49,6 +97,8 @@ export default function LawyerPortal({lawyer,onCreateWill}:{
           <div className="text-2xl font-bold text-slate-900 serif">{status==="ready"?clients.length:"—"}</div>
           <div className="text-slate-600 text-xs">Total Clients</div>
         </div>
+        {deleteError&&<p className="text-red-500 text-xs mb-4">{deleteError}</p>}
+        {reviewError&&<p className="text-red-500 text-xs mb-4">{reviewError}</p>}
         <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden">
           <div className="px-5 py-3.5 border-b border-slate-200 flex justify-between items-center">
             <h3 className="text-slate-900 font-bold serif">Client Will Tracker</h3>
@@ -62,7 +112,7 @@ export default function LawyerPortal({lawyer,onCreateWill}:{
           {status==="ready" && clients.length>0 && (
             <table className="w-full">
               <thead><tr className="border-b border-slate-800">
-                {["Client","Contact","Updated","Action"].map(h=>(
+                {["Client","Contact","Updated","Status","Action"].map(h=>(
                   <th key={h} className="px-5 py-3 text-left text-[10px] font-bold text-slate-500 uppercase tracking-widest">{h}</th>
                 ))}
               </tr></thead>
@@ -80,9 +130,19 @@ export default function LawyerPortal({lawyer,onCreateWill}:{
                     <td className="px-5 py-3.5 text-slate-500 text-sm">{c.contact}</td>
                     <td className="px-5 py-3.5 text-slate-500 text-xs">{c.updatedAt?new Date(c.updatedAt).toLocaleDateString():"—"}</td>
                     <td className="px-5 py-3.5">
-                      <button onClick={onCreateWill} className="flex items-center gap-1.5 text-[#d09d61] hover:text-[#b88442] text-xs font-semibold transition-colors">
-                        <Edit3 size={11}/>Open Draft
-                      </button>
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${STATUS_STYLE[c.status]}`}>{STATUS_LABEL[c.status]}</span>
+                    </td>
+                    <td className="px-5 py-3.5">
+                      <div className="flex items-center gap-3">
+                        <button onClick={()=>handleReview(c.willId)} disabled={c.status==="Draft"||reviewingId===c.willId}
+                          className="flex items-center gap-1.5 text-[#d09d61] hover:text-[#b88442] text-xs font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                          <Edit3 size={11}/>{reviewingId===c.willId?"Opening…":"Review"}
+                        </button>
+                        <button onClick={()=>handleDelete(c.willId)} disabled={deletingId===c.willId}
+                          className="flex items-center gap-1.5 text-red-500 hover:text-red-600 text-xs font-semibold transition-colors disabled:opacity-50">
+                          <Trash2 size={11}/>Delete
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}

@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { Scale, ArrowRight, ChevronLeft, Check, LogIn, LogOut, Eye, Save } from "lucide-react";
 
 import { PLANS, ADDONS } from "./data/plans";
@@ -11,6 +11,7 @@ import DisclaimerView from "./components/DisclaimerView";
 import LawyerLoginView from "./components/LawyerLoginView";
 import LawyerSignupView from "./components/LawyerSignupView";
 import LawyerPortal from "./components/LawyerPortal";
+import TestatorWillsView from "./components/TestatorWillsView";
 import WizardForms from "./components/WizardForms";
 import LiveDocPreview from "./components/LiveDocPreview";
 import WillDocument from "./components/WillDocument";
@@ -25,16 +26,25 @@ const WIZARD_STEPS = [
   {n:4,label:"Beneficiaries"},{n:5,label:"Assets"},{n:6,label:"Residual & Instructions"},
 ];
 
+const ADMIN_PATH = "/admin";
+const isAdminView = (v: ViewName) => v==="lawyerLogin" || v==="lawyerSignup" || v==="lawyer";
+
 export default function SmartWill() {
-  const [view, setView] = useState<ViewName>("landing");
+  // Deep-linking: loading /admin directly (typed in the address bar, or a
+  // bookmark) opens the Admin Portal login screen instead of the landing page.
+  const [view, setView] = useState<ViewName>(() =>
+    window.location.pathname===ADMIN_PATH ? "lawyerLogin" : "landing"
+  );
   const [selectedPlan, setSelectedPlan] = useState<Plan>(PLANS[1]);
   const [addons, setAddons] = useState<Record<string, boolean>>({});
   const [signup, setSignup] = useState<SignupState>({ name:"Arjun Verma", phone:"9876543210", email:"arjun.verma@gmail.com", state:"Maharashtra", terms:false });
   const [otp, setOtp] = useState(["","","","","",""]);
   const [dchecks, setDchecks] = useState<DisclaimerChecks>({ nonMuslim:false, age:false, law:false, tool:false });
-  const [skippedOtp, setSkippedOtp] = useState(false);
   const [wizardStep, setWizardStep] = useState(1);
   const [will, setWill] = useState<WillState>(DEFAULT_WILL);
+  const [editingWillId, setEditingWillId] = useState<string | null>(null);
+  const [adminReviewMode, setAdminReviewMode] = useState(false);
+  const [testatorEmailEditable, setTestatorEmailEditable] = useState(false);
   const [showWillDoc, setShowWillDoc] = useState(false);
   const [lawyerProfile, setLawyerProfile] = useState<LawyerProfile | null>(null);
   const [draftStatus, setDraftStatus] = useState<"idle" | "saving" | "error" | "done">("idle");
@@ -45,14 +55,34 @@ export default function SmartWill() {
   const totalPrice = selectedPlan.price + ADDONS.reduce((s,a) => addons[a.id] ? s+a.price : s, 0);
   const allDchecked = Object.values(dchecks).every(Boolean);
 
+  // Keep the URL in sync with admin-portal navigation so /admin is
+  // shareable/bookmarkable and the browser back/forward buttons work.
+  useEffect(() => {
+    const onAdminPath = window.location.pathname===ADMIN_PATH;
+    if(isAdminView(view) && !onAdminPath) window.history.pushState({}, "", ADMIN_PATH);
+    else if(!isAdminView(view) && onAdminPath) window.history.pushState({}, "", "/");
+  }, [view]);
+
+  useEffect(() => {
+    const onPopState = () => {
+      const onAdminPath = window.location.pathname===ADMIN_PATH;
+      setView(v => {
+        if(onAdminPath) return isAdminView(v) ? v : "lawyerLogin";
+        return isAdminView(v) ? "landing" : v;
+      });
+    };
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, []);
+
   // Auth
   const handleGoogleSuccess = (profile: GoogleProfile) => {
     setSignup(p=>({...p, name: profile.name, email: profile.email}));
     // Google Sign-In only ever gives us name + email — no phone or state, so
     // those two Testator fields are left for the user to fill in themselves.
-    setWill(p=>({...p, testator: {...p.testator, fullName: profile.name}}));
-    setSkippedOtp(true);
-    setView("disclaimer");
+    // The email stays editable in the wizard (see WizardForms Step 1).
+    setWill(p=>({...p, testator: {...p.testator, fullName: profile.name, email: profile.email}}));
+    setView("myWills");
   };
 
   // OTP
@@ -62,8 +92,54 @@ export default function SmartWill() {
     if(v && i<5) otpRefs.current[i+1]?.focus();
   };
   const handleOtpVerified = () => {
-    setWill(p=>({...p, testator: {...p.testator, fullName: signup.name}}));
+    setWill(p=>({...p, testator: {...p.testator, fullName: signup.name, email: signup.email}}));
+    setView("myWills");
+  };
+
+  // My Wills — create / edit
+  const mergeWithDefaults = (fetched: Partial<WillState>): WillState => ({
+    ...DEFAULT_WILL,
+    ...fetched,
+    testator: {...DEFAULT_WILL.testator, ...(fetched.testator||{})},
+    executor: {...DEFAULT_WILL.executor, ...(fetched.executor||{})},
+    guardian: {...DEFAULT_WILL.guardian, ...(fetched.guardian||{})},
+  });
+  const handleCreateNewWill = () => {
+    setWill({...DEFAULT_WILL, testator: {...DEFAULT_WILL.testator, fullName: signup.name, email: signup.email}});
+    setEditingWillId(null);
+    setAdminReviewMode(false);
+    setTestatorEmailEditable(false);
+    setDchecks({ nonMuslim:false, age:false, law:false, tool:false });
+    setWizardStep(1);
     setView("disclaimer");
+  };
+  const handleEditWill = (willId: string, fetchedWill: WillState) => {
+    setWill(mergeWithDefaults(fetchedWill));
+    setEditingWillId(willId);
+    setAdminReviewMode(false);
+    setTestatorEmailEditable(false);
+    setWizardStep(1);
+    setView("wizard");
+  };
+  const handleViewWill = (_willId: string, fetchedWill: WillState) => {
+    setWill(mergeWithDefaults(fetchedWill));
+    setShowWillDoc(true);
+  };
+  const handleAdminCreateWill = () => {
+    setWill({...DEFAULT_WILL, testator: {...DEFAULT_WILL.testator, fullName:"", email:""}});
+    setEditingWillId(null);
+    setAdminReviewMode(false);
+    setTestatorEmailEditable(true);
+    setWizardStep(1);
+    setView("wizard");
+  };
+  const handleAdminReviewWill = (willId: string, fetchedWill: WillState) => {
+    setWill(mergeWithDefaults(fetchedWill));
+    setEditingWillId(willId);
+    setAdminReviewMode(true);
+    setTestatorEmailEditable(false);
+    setWizardStep(1);
+    setView("wizard");
   };
 
   // Beneficiary ops
@@ -91,11 +167,12 @@ export default function SmartWill() {
       const res = await fetch(apiUrl("/api/will/save"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ will, testatorEmail: signup.email, status: "Draft" }),
+        body: JSON.stringify({ will, testatorEmail: will.testator.email, status: "Draft", willId: editingWillId }),
       });
       const isJson = res.headers.get("content-type")?.includes("application/json");
       const data = isJson ? await res.json() : null;
       if(!res.ok) throw new Error(data?.error || `Could not save the draft (server returned ${res.status}).`);
+      setEditingWillId(data.willId);
       setDraftStatus("done");
       setTimeout(()=>setDraftStatus("idle"), 2500);
     } catch (err) {
@@ -148,20 +225,21 @@ export default function SmartWill() {
       )}
 
       {view==="landing" && <LandingPage plans={PLANS} addons={ADDONS} selectedPlan={selectedPlan} setSelectedPlan={setSelectedPlan} addonsState={addons} setAddons={setAddons} totalPrice={totalPrice} onStart={()=>setView("authChoice")}/>}
-      {view==="authChoice" && <AuthChoiceView onGoogleSuccess={handleGoogleSuccess} onPhone={()=>{setSkippedOtp(false);setView("signup");}} onBack={()=>setView("landing")}/>}
+      {view==="authChoice" && <AuthChoiceView onGoogleSuccess={handleGoogleSuccess} onPhone={()=>setView("signup")} onBack={()=>setView("landing")}/>}
       {view==="signup" && <SignupView signup={signup} setSignup={setSignup} onNext={()=>setView("otp")}/>}
       {view==="otp" && <OtpView otp={otp} handleOtp={handleOtp} otpRefs={otpRefs} phone={signup.phone} onNext={handleOtpVerified}/>}
-      {view==="disclaimer" && <DisclaimerView dchecks={dchecks} setDchecks={setDchecks} allChecked={allDchecked} onAgree={()=>setView("wizard")} onBack={()=>setView(skippedOtp?"authChoice":"otp")}/>}
+      {view==="disclaimer" && <DisclaimerView dchecks={dchecks} setDchecks={setDchecks} allChecked={allDchecked} onAgree={()=>setView("wizard")} onBack={()=>setView("myWills")}/>}
+      {view==="myWills" && <TestatorWillsView email={signup.email} onCreateNew={handleCreateNewWill} onEditWill={handleEditWill} onViewWill={handleViewWill}/>}
       {view==="lawyerLogin" && <LawyerLoginView onLogin={(lawyer)=>{setLawyerProfile(lawyer);setView("lawyer");}} onBack={()=>setView("landing")} onSignup={()=>setView("lawyerSignup")}/>}
       {view==="lawyerSignup" && <LawyerSignupView onSignup={(lawyer)=>{setLawyerProfile(lawyer);setView("lawyer");}} onBack={()=>setView("lawyerLogin")} onGoToLogin={()=>setView("lawyerLogin")}/>}
-      {view==="lawyer" && lawyerProfile && <LawyerPortal lawyer={lawyerProfile} onCreateWill={()=>{setWizardStep(1);setView("wizard");}}/>}
+      {view==="lawyer" && lawyerProfile && <LawyerPortal lawyer={lawyerProfile} onCreateWill={handleAdminCreateWill} onReviewWill={handleAdminReviewWill}/>}
 
       {view==="wizard" && (
         <div className="flex flex-col h-screen bg-slate-100 fade-in">
           {/* Wizard bar */}
           <div className="flex-none bg-white/95 border-b border-slate-200 px-4 h-[60px] flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <button onClick={()=>setView("landing")} className="text-slate-600 hover:text-slate-900 transition-colors"><ChevronLeft size={16}/></button>
+              <button onClick={()=>setView(lawyerProfile?"lawyer":(signup.email?"myWills":"landing"))} className="text-slate-600 hover:text-slate-900 transition-colors"><ChevronLeft size={16}/></button>
               <div className="w-8 h-8 bg-[#d09d61] rounded-2xl flex items-center justify-center shadow-lg shadow-[#d09d61]/15"><Scale size={12} className="text-[#020617]"/></div>
               <div>
                 <div className="text-slate-900 font-semibold serif text-sm">SmartWill</div>
@@ -178,10 +256,12 @@ export default function SmartWill() {
               ))}
             </div>
             <div className="flex items-center gap-2">
-              <button onClick={handleSaveDraft} disabled={draftStatus==="saving"} title={draftStatus==="error"?draftError:undefined}
-                className={`flex items-center gap-1.5 text-xs rounded-lg px-3 py-1.5 transition-all font-semibold border ${draftStatus==="error"?"text-red-500 border-red-300":draftStatus==="done"?"text-emerald-600 border-emerald-300":"text-slate-600 hover:text-slate-900 border-slate-200 hover:border-slate-300"} ${draftStatus==="saving"?"opacity-60 cursor-not-allowed":""}`}>
-                <Save size={12}/>{draftStatus==="saving"?"Saving…":draftStatus==="done"?"Saved":draftStatus==="error"?"Failed":"Save as Draft"}
-              </button>
+              {!adminReviewMode && (
+                <button onClick={handleSaveDraft} disabled={draftStatus==="saving"} title={draftStatus==="error"?draftError:undefined}
+                  className={`flex items-center gap-1.5 text-xs rounded-lg px-3 py-1.5 transition-all font-semibold border ${draftStatus==="error"?"text-red-500 border-red-300":draftStatus==="done"?"text-emerald-600 border-emerald-300":"text-slate-600 hover:text-slate-900 border-slate-200 hover:border-slate-300"} ${draftStatus==="saving"?"opacity-60 cursor-not-allowed":""}`}>
+                  <Save size={12}/>{draftStatus==="saving"?"Saving…":draftStatus==="done"?"Saved":draftStatus==="error"?"Failed":"Save as Draft"}
+                </button>
+              )}
               <button onClick={()=>setShowWillDoc(true)} className="flex items-center gap-1.5 text-xs text-[#d09d61] hover:text-[#b6844a] border border-[#d09d61]/30 hover:border-[#d09d61]/60 rounded-lg px-3 py-1.5 transition-all font-semibold">
                 <Eye size={12}/>Generate Will
               </button>
@@ -199,7 +279,14 @@ export default function SmartWill() {
                 onNext={()=>setWizardStep(s=>Math.min(s+1,6))}
                 onPrev={()=>setWizardStep(s=>Math.max(s-1,1))}
                 onGenerate={()=>setShowWillDoc(true)}
-                testatorEmail={signup.email}
+                willId={editingWillId}
+                adminReview={adminReviewMode}
+                testatorEmailEditable={testatorEmailEditable}
+                onSaved={(willId,status)=>{
+                  setEditingWillId(willId);
+                  if(status==="PendingReview") setTimeout(()=>setView("myWills"), 900);
+                  if(status==="Completed") setTimeout(()=>setView("lawyer"), 900);
+                }}
               />
             </div>
             <div className="hidden lg:flex lg:w-[50%] bg-slate-100 p-5 overflow-y-auto items-start justify-center">

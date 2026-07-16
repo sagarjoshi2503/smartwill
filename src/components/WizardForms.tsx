@@ -28,10 +28,13 @@ interface WizardFormsProps {
   onNext: () => void;
   onPrev: () => void;
   onGenerate: () => void;
-  testatorEmail: string;
+  willId: string | null;
+  onSaved: (willId: string, status: string) => void;
+  adminReview?: boolean;
+  testatorEmailEditable?: boolean;
 }
 
-export default function WizardForms({step,will,setWill,addBene,removeBene,updateBene,addAsset,removeAsset,updateAssetData,updateAssetAlloc,allocTotal,assetAdded,onNext,onPrev,onGenerate,testatorEmail}: WizardFormsProps){
+export default function WizardForms({step,will,setWill,addBene,removeBene,updateBene,addAsset,removeAsset,updateAssetData,updateAssetAlloc,allocTotal,assetAdded,onNext,onPrev,onGenerate,willId,onSaved,adminReview,testatorEmailEditable}: WizardFormsProps){
   const IC="w-full apv-input rounded-2xl px-3.5 py-2.5 text-slate-900 placeholder:text-slate-500 text-sm focus:outline-none transition";
   const LC="block apv-label mb-1";
   const set=(path: string, v: string | boolean)=>setWill(p=>{
@@ -46,15 +49,22 @@ export default function WizardForms({step,will,setWill,addBene,removeBene,update
   const handleSaveAndSubmit = async () => {
     setSubmitStatus("saving"); setSubmitError("");
     try {
-      const res = await fetch(apiUrl("/api/will/save"), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ will, testatorEmail, status: "PendingReview" }),
-      });
+      const res = adminReview && willId
+        ? await fetch(apiUrl(`/api/will/admin/${willId}/complete`), {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ will }),
+          })
+        : await fetch(apiUrl("/api/will/save"), {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ will, testatorEmail: will.testator.email, status: "PendingReview", willId }),
+          });
       const isJson = res.headers.get("content-type")?.includes("application/json");
       const data = isJson ? await res.json() : null;
       if(!res.ok) throw new Error(data?.error || `Could not save the Will (server returned ${res.status}).`);
       setSubmitStatus("done");
+      onSaved(data.willId, data.status);
     } catch (err) {
       setSubmitStatus("error");
       setSubmitError(err instanceof Error ? err.message : "Could not save the Will.");
@@ -69,10 +79,16 @@ export default function WizardForms({step,will,setWill,addBene,removeBene,update
           <StepHeader icon={<User size={17}/>} title="Testator Details" sub="Section I — Your identity & declaration of fitness"/>
           <div className="bg-slate-100 border border-slate-200 rounded-xl p-3.5 text-xs text-slate-600 flex items-start gap-2"><Info size={13} className="mt-0.5 shrink-0"/>You declare that you are of sound mind and executing this Will voluntarily, free from coercion or undue influence.</div>
           <div>
-            <label className={LC}>Full Legal Name <span className="text-red-400 normal-case text-[9px]">(Locked)</span></label>
-            <div className="relative"><Lock size={11} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-600"/>
-              <input value={will.testator.fullName} onChange={e=>set("testator.fullName",e.target.value)} className={IC+" pr-8"} placeholder="As per Aadhaar / PAN"/>
+            <label className={LC}>Testator Email Address {!testatorEmailEditable&&<span className="text-red-400 normal-case text-[9px]">(Locked)</span>}</label>
+            <div className="relative">
+              {!testatorEmailEditable&&<Lock size={11} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-600"/>}
+              <input type="email" value={will.testator.email} onChange={e=>set("testator.email",e.target.value)} disabled={!testatorEmailEditable}
+                className={IC+(!testatorEmailEditable?" pr-8 cursor-not-allowed text-slate-500":"")} placeholder="you@example.com"/>
             </div>
+          </div>
+          <div>
+            <label className={LC}>Full Legal Name</label>
+            <input value={will.testator.fullName} onChange={e=>set("testator.fullName",e.target.value)} className={IC} placeholder="As per Aadhaar / PAN"/>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
@@ -450,14 +466,14 @@ export default function WizardForms({step,will,setWill,addBene,removeBene,update
           <div className="flex flex-col gap-3">
             <button onClick={handleSaveAndSubmit} disabled={submitStatus==="saving"}
               className={`w-full font-bold py-3.5 rounded-xl text-sm transition-colors flex items-center justify-center gap-2 whitespace-nowrap ${submitStatus==="saving"?"bg-slate-700 text-slate-400 cursor-not-allowed":"bg-slate-800 hover:bg-slate-700 text-white"}`}>
-              <Send size={16} className="shrink-0"/>{submitStatus==="saving"?"Saving…":"Save and Submit for Review"}
+              <Send size={16} className="shrink-0"/>{submitStatus==="saving"?"Saving…":adminReview?"Save and Complete Review":"Save and Submit for Review"}
             </button>
             <button onClick={onGenerate} className="w-full bg-[#d09d61] hover:bg-[#b88442] text-[#020617] font-bold py-3.5 rounded-xl text-sm transition-colors flex items-center justify-center gap-2 whitespace-nowrap">
               <FileText size={16} className="shrink-0"/>Generate Complete Will Document <span aria-hidden="true">→</span>
             </button>
           </div>
           {submitStatus==="error"&&<p className="text-red-500 text-xs text-center">{submitError}</p>}
-          {submitStatus==="done"&&<p className="text-emerald-500 text-xs text-center">Will submitted for review.</p>}
+          {submitStatus==="done"&&<p className="text-emerald-500 text-xs text-center">{adminReview?"Review completed.":"Will submitted for review."}</p>}
           <button onClick={onPrev} className="w-full text-slate-500 hover:text-white text-sm py-2 transition-colors">← Back</button>
         </div>
       )}

@@ -1,0 +1,52 @@
+INFO:     Will watch for changes in these directories: ['C:\\Gitlab\\smartwill\\smartwill']
+INFO:     Uvicorn running on http://127.0.0.1:8030 (Press CTRL+C to quit)
+INFO:     Started reloader process [17880] using WatchFiles
+INFO:     Started server process [15924]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     127.0.0.1:56601 - "GET /api/will/lawyer-wills HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56684 - "GET / HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:56684 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:56707 - "OPTIONS /api/auth/lawyer-login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56707 - "POST /api/auth/lawyer-login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56707 - "GET /api/will/lawyer-wills HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56707 - "GET /api/will/lawyer-wills HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56726 - "GET /api/will/lawyer-wills HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56727 - "GET /api/will/lawyer-wills HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56729 - "GET /api/will/my-wills?email=arjun.verma%40gmail.com HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56730 - "GET /api/will/my-wills?email=arjun.verma%40gmail.com HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56734 - "OPTIONS /api/will/save HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56734 - "POST /api/will/save HTTP/1.1" 201 Created
+INFO:     127.0.0.1:56734 - "GET /api/will/my-wills?email=arjun.verma%40gmail.com HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56736 - "GET /api/will/my-wills?email=arjun.verma%40gmail.com HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56739 - "GET /api/will/my-wills?email=arjun.verma%40gmail.com HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56739 - "GET /api/will/my-wills?email=arjun.verma%40gmail.com HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56740 - "GET /api/will/my-wills?email=arjun.verma%40gmail.com HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56741 - "GET /api/will/my-wills?email=arjun.verma%40gmail.com HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56742 - "GET /api/will/9cfbbd3a-f620-40a6-8b16-62e5bd791dd0?email=arjun.verma%40gmail.com HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56742 - "GET /api/will/my-wills?email=arjun.verma%40gmail.com HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56743 - "GET /api/will/my-wills?email=arjun.verma%40gmail.com HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56744 - "GET /api/will/my-wills?email=arjun.verma%40gmail.com HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56745 - "GET /api/will/my-wills?email=arjun.verma%40gmail.com HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56819 - "OPTIONS /api/auth/lawyer-login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56819 - "POST /api/auth/lawyer-login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56819 - "GET /api/will/lawyer-wills HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56820 - "GET /api/will/lawyer-wills HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56821 - "GET /api/will/admin/9cfbbd3a-f620-40a6-8b16-62e5bd791dd0 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56822 - "GET /api/will/lawyer-wills HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56823 - "GET /api/will/lawyer-wills HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56824 - "GET /api/will/admin/83081401-e87a-45e1-8b16-595c13528f05 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56825 - "GET /api/will/lawyer-wills HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56826 - "GET /api/will/lawyer-wills HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56864 - "GET /api/will/my-wills?email=sagar.verma%40gmail.com HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56865 - "GET /api/will/my-wills?email=sagar.verma%40gmail.com HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56867 - "POST /api/will/save HTTP/1.1" 201 Created
+INFO:     127.0.0.1:56867 - "GET /api/will/my-wills?email=sagar.verma%40gmail.com HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56869 - "GET /api/will/my-wills?email=sagar.verma%40gmail.com HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56870 - "GET /api/will/59855256-2245-47fa-8f7c-6a1e8518b5b3?email=sagar.verma%40gmail.com HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56871 - "GET /api/will/my-wills?email=sagar.verma%40gmail.com HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56872 - "GET /api/will/my-wills?email=sagar.verma%40gmail.com HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56883 - "POST /api/will/save HTTP/1.1" 201 Created
+INFO:     127.0.0.1:56883 - "POST /api/will/save HTTP/1.1" 201 Created
+INFO:     127.0.0.1:56883 - "GET /api/will/my-wills?email=sagar.verma%40gmail.com HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56885 - "GET /api/will/my-wills?email=sagar.verma%40gmail.com HTTP/1.1" 200 OK

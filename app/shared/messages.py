@@ -18,3 +18,7 @@ LAWYER_ALREADY_SIGNED_UP = "You're already signed up as a lawyer with this email
 
 WILL_DATA_REQUIRED = "Will data is required."
 INVALID_WILL_STATUS = "Invalid will status."
+INVALID_TESTATOR_EMAIL = "Enter a valid testator email address."
+WILL_NOT_FOUND = "Will not found."
+WILL_ACCESS_DENIED = "You do not have permission to access this Will."
+WILL_LOCKED_FOR_REVIEW = "This Will is pending review and cannot be edited."
