@@ -13,6 +13,13 @@ def complete_admin_url(will_id: str) -> str:
     return f"/api/will/admin/{will_id}/complete"
 
 
+def send_back_admin_url(will_id: str) -> str:
+    return f"/api/will/admin/{will_id}/send-back"
+
+
+ADMIN_SAVE_URL = "/api/will/admin/save"
+
+
 def save_will(client, status="PendingReview", email="jane@example.com", full_name="Jane Doe"):
     res = client.post(SAVE_URL, json={
         "will": {"testator": {"fullName": full_name}},
@@ -102,3 +109,76 @@ def test_admin_complete_returns_500_when_mongodb_uri_missing():
         assert res.json() == {"error": messages.MONGODB_NOT_CONFIGURED}
     finally:
         app.dependency_overrides.clear()
+
+
+def test_admin_complete_stores_reviewer_email(client, fake_db):
+    will_id = save_will(client, status="PendingReview")
+
+    client.post(complete_admin_url(will_id), json={"reviewerEmail": "Reviewer@Example.com"})
+
+    doc = fake_db["will"].find_one({"willId": will_id})
+    assert doc["reviewerEmail"] == "reviewer@example.com"
+
+
+# --- POST /api/will/admin/save ---
+
+def test_admin_save_creates_will_as_completed_directly(client, fake_db):
+    res = client.post(ADMIN_SAVE_URL, json={
+        "will": {"testator": {"fullName": "New Client"}},
+        "testatorEmail": "client@example.com",
+        "status": "Completed",
+        "reviewerEmail": "anup@prabhuverlekar.com",
+    })
+
+    assert res.status_code == 201
+    body = res.json()
+    assert body["status"] == "Completed"
+    doc = fake_db["will"].find_one({"willId": body["willId"]})
+    assert doc["status"] == "Completed"
+    assert doc["reviewerEmail"] == "anup@prabhuverlekar.com"
+    # Directly-completed admin saves never go through the review inbox.
+    assert fake_db["adminwill"].find_one({"willId": body["willId"]}) is None
+
+
+def test_admin_save_still_allows_pending_review_status(client):
+    res = client.post(ADMIN_SAVE_URL, json={
+        "will": {}, "testatorEmail": "client@example.com", "status": "PendingReview",
+    })
+    assert res.status_code == 201
+
+
+def test_admin_save_rejects_invalid_status(client):
+    res = client.post(ADMIN_SAVE_URL, json={
+        "will": {}, "testatorEmail": "client@example.com", "status": "Bogus",
+    })
+    assert res.status_code == 400
+    assert res.json() == {"error": messages.INVALID_WILL_STATUS}
+
+
+# --- POST /api/will/admin/{will_id}/send-back ---
+
+def test_send_back_reverts_status_to_draft_and_stores_comments(client, fake_db):
+    will_id = save_will(client, status="PendingReview")
+
+    res = client.post(send_back_admin_url(will_id), json={"comments": "Please fix the executor section."})
+
+    assert res.status_code == 200
+    assert res.json() == {"willId": will_id, "status": "Draft"}
+    doc = fake_db["will"].find_one({"willId": will_id})
+    assert doc["status"] == "Draft"
+    assert doc["adminComments"] == "Please fix the executor section."
+
+
+def test_send_back_requires_comments(client, fake_db):
+    will_id = save_will(client, status="PendingReview")
+
+    res = client.post(send_back_admin_url(will_id), json={"comments": "   "})
+
+    assert res.status_code == 400
+    assert res.json() == {"error": messages.COMMENTS_REQUIRED}
+
+
+def test_send_back_rejects_unknown_will_id(client):
+    res = client.post(send_back_admin_url("does-not-exist"), json={"comments": "Fix this"})
+    assert res.status_code == 404
+    assert res.json() == {"error": messages.WILL_NOT_FOUND}

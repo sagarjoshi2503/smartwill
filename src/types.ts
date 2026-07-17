@@ -167,6 +167,8 @@ export interface DisclaimerChecks {
 
 export type ViewName = "landing" | "authChoice" | "signup" | "otp" | "disclaimer" | "lawyerLogin" | "lawyerSignup" | "lawyer" | "wizard" | "myWills";
 
+export type WillStatus = "Draft" | "PendingReview" | "Completed";
+
 export interface GoogleProfile {
   name: string;
   email: string;

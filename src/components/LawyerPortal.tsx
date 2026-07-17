@@ -18,7 +18,7 @@ const STATUS_LABEL: Record<LawyerClient["status"], string> = {
 export default function LawyerPortal({lawyer,onCreateWill,onReviewWill}:{
   lawyer: LawyerProfile;
   onCreateWill: () => void;
-  onReviewWill: (willId: string, will: WillState) => void;
+  onReviewWill: (willId: string, will: WillState, status: LawyerClient["status"]) => void;
 }){
   const [clients,setClients]=useState<LawyerClient[]>([]);
   const [status,setStatus]=useState<"loading"|"ready"|"error">("loading");
@@ -62,7 +62,7 @@ export default function LawyerPortal({lawyer,onCreateWill,onReviewWill}:{
       const isJson = res.headers.get("content-type")?.includes("application/json");
       const data = isJson ? await res.json() : null;
       if(!res.ok) throw new Error(data?.error || `Could not load this Will (server returned ${res.status}).`);
-      onReviewWill(data.willId, data.will as WillState);
+      onReviewWill(data.willId, data.will as WillState, data.status as LawyerClient["status"]);
     } catch (err) {
       setReviewError(err instanceof Error ? err.message : "Could not load this Will.");
     } finally {

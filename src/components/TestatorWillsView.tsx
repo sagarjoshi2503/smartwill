@@ -18,7 +18,7 @@ const STATUS_LABEL: Record<TestatorWill["status"], string> = {
 export default function TestatorWillsView({email,onCreateNew,onEditWill,onViewWill}:{
   email: string;
   onCreateNew: () => void;
-  onEditWill: (willId: string, will: WillState) => void;
+  onEditWill: (willId: string, will: WillState, adminComments?: string) => void;
   onViewWill: (willId: string, will: WillState) => void;
 }){
   const [wills,setWills]=useState<TestatorWill[]>([]);
@@ -27,18 +27,19 @@ export default function TestatorWillsView({email,onCreateNew,onEditWill,onViewWi
   const [busyId,setBusyId]=useState<string|null>(null);
   const [actionError,setActionError]=useState("");
 
-  const fetchWill = async (willId: string): Promise<WillState> => {
+  const fetchWill = async (willId: string): Promise<{ will: WillState; adminComments?: string }> => {
     const res = await fetch(apiUrl(`/api/will/${willId}?email=${encodeURIComponent(email)}`));
     const isJson = res.headers.get("content-type")?.includes("application/json");
     const data = isJson ? await res.json() : null;
     if(!res.ok) throw new Error(data?.error || `Could not load this Will (server returned ${res.status}).`);
-    return data.will as WillState;
+    return { will: data.will as WillState, adminComments: data.adminComments || undefined };
   };
 
   const handleEdit = async (willId: string) => {
     setBusyId(willId); setActionError("");
     try {
-      onEditWill(willId, await fetchWill(willId));
+      const { will, adminComments } = await fetchWill(willId);
+      onEditWill(willId, will, adminComments);
     } catch (err) {
       setActionError(err instanceof Error ? err.message : "Could not load this Will.");
     } finally {
@@ -49,7 +50,8 @@ export default function TestatorWillsView({email,onCreateNew,onEditWill,onViewWi
   const handleView = async (willId: string) => {
     setBusyId(willId); setActionError("");
     try {
-      onViewWill(willId, await fetchWill(willId));
+      const { will } = await fetchWill(willId);
+      onViewWill(willId, will);
     } catch (err) {
       setActionError(err instanceof Error ? err.message : "Could not load this Will.");
     } finally {

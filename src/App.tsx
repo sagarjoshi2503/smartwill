@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from "react";
-import { Scale, ArrowRight, ChevronLeft, Check, LogIn, LogOut, Eye, Save } from "lucide-react";
+import { Scale, ArrowRight, ChevronLeft, Check, LogIn, LogOut, Eye, Save, RotateCcw } from "lucide-react";
 
 import { PLANS, ADDONS } from "./data/plans";
 import { DEFAULT_WILL } from "./data/defaultWill";
@@ -44,11 +44,18 @@ export default function SmartWill() {
   const [will, setWill] = useState<WillState>(DEFAULT_WILL);
   const [editingWillId, setEditingWillId] = useState<string | null>(null);
   const [adminReviewMode, setAdminReviewMode] = useState(false);
+  const [adminReviewStatus, setAdminReviewStatus] = useState<string | null>(null);
+  const [adminCreateMode, setAdminCreateMode] = useState(false);
   const [testatorEmailEditable, setTestatorEmailEditable] = useState(false);
+  const [activeAdminComments, setActiveAdminComments] = useState("");
   const [showWillDoc, setShowWillDoc] = useState(false);
   const [lawyerProfile, setLawyerProfile] = useState<LawyerProfile | null>(null);
   const [draftStatus, setDraftStatus] = useState<"idle" | "saving" | "error" | "done">("idle");
   const [draftError, setDraftError] = useState("");
+  const [sendBackOpen, setSendBackOpen] = useState(false);
+  const [sendBackComments, setSendBackComments] = useState("");
+  const [sendBackStatus, setSendBackStatus] = useState<"idle" | "sending" | "error">("idle");
+  const [sendBackError, setSendBackError] = useState("");
   const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
   const willDocRef = useRef<HTMLDivElement | null>(null);
 
@@ -108,16 +115,22 @@ export default function SmartWill() {
     setWill({...DEFAULT_WILL, testator: {...DEFAULT_WILL.testator, fullName: signup.name, email: signup.email}});
     setEditingWillId(null);
     setAdminReviewMode(false);
+    setAdminReviewStatus(null);
+    setAdminCreateMode(false);
     setTestatorEmailEditable(false);
+    setActiveAdminComments("");
     setDchecks({ nonMuslim:false, age:false, law:false, tool:false });
     setWizardStep(1);
     setView("disclaimer");
   };
-  const handleEditWill = (willId: string, fetchedWill: WillState) => {
+  const handleEditWill = (willId: string, fetchedWill: WillState, adminComments?: string) => {
     setWill(mergeWithDefaults(fetchedWill));
     setEditingWillId(willId);
     setAdminReviewMode(false);
+    setAdminReviewStatus(null);
+    setAdminCreateMode(false);
     setTestatorEmailEditable(false);
+    setActiveAdminComments(adminComments || "");
     setWizardStep(1);
     setView("wizard");
   };
@@ -129,17 +142,49 @@ export default function SmartWill() {
     setWill({...DEFAULT_WILL, testator: {...DEFAULT_WILL.testator, fullName:"", email:""}});
     setEditingWillId(null);
     setAdminReviewMode(false);
+    setAdminReviewStatus(null);
+    setAdminCreateMode(true);
     setTestatorEmailEditable(true);
+    setActiveAdminComments("");
     setWizardStep(1);
     setView("wizard");
   };
-  const handleAdminReviewWill = (willId: string, fetchedWill: WillState) => {
+  const handleAdminReviewWill = (willId: string, fetchedWill: WillState, status: string) => {
     setWill(mergeWithDefaults(fetchedWill));
     setEditingWillId(willId);
     setAdminReviewMode(true);
+    setAdminReviewStatus(status);
+    setAdminCreateMode(false);
     setTestatorEmailEditable(false);
+    setActiveAdminComments("");
+    setSendBackOpen(false);
+    setSendBackComments("");
+    setSendBackStatus("idle");
     setWizardStep(1);
     setView("wizard");
+  };
+
+  // Admin — send a PendingReview Will back to the testator with comments
+  const handleSendBack = async () => {
+    if(!editingWillId || !sendBackComments.trim()) return;
+    setSendBackStatus("sending"); setSendBackError("");
+    try {
+      const res = await fetch(apiUrl(`/api/will/admin/${editingWillId}/send-back`), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ comments: sendBackComments }),
+      });
+      const isJson = res.headers.get("content-type")?.includes("application/json");
+      const data = isJson ? await res.json() : null;
+      if(!res.ok) throw new Error(data?.error || `Could not send this Will back (server returned ${res.status}).`);
+      setSendBackOpen(false);
+      setSendBackComments("");
+      setSendBackStatus("idle");
+      setTimeout(()=>setView("lawyer"), 300);
+    } catch (err) {
+      setSendBackStatus("error");
+      setSendBackError(err instanceof Error ? err.message : "Could not send this Will back.");
+    }
   };
 
   // Beneficiary ops
@@ -262,6 +307,31 @@ export default function SmartWill() {
                   <Save size={12}/>{draftStatus==="saving"?"Saving…":draftStatus==="done"?"Saved":draftStatus==="error"?"Failed":"Save as Draft"}
                 </button>
               )}
+              {adminReviewMode && adminReviewStatus==="PendingReview" && (
+                <div className="relative">
+                  <button onClick={()=>setSendBackOpen(o=>!o)}
+                    className="flex items-center gap-1.5 text-xs text-red-500 hover:text-red-600 border border-red-200 hover:border-red-300 rounded-lg px-3 py-1.5 transition-all font-semibold">
+                    <RotateCcw size={12}/>Send Back to Testator
+                  </button>
+                  {sendBackOpen && (
+                    <div className="absolute left-0 top-full mt-2 w-72 bg-white border border-slate-200 rounded-xl shadow-xl p-3.5 z-50">
+                      <p className="text-slate-900 text-xs font-semibold mb-2">Send back for changes</p>
+                      <textarea value={sendBackComments} onChange={e=>setSendBackComments(e.target.value)} rows={3}
+                        placeholder="Explain what needs to change…"
+                        className="w-full apv-input rounded-xl px-3 py-2 text-slate-900 placeholder:text-slate-500 text-xs focus:outline-none transition resize-none"/>
+                      {sendBackStatus==="error" && <p className="text-red-500 text-[10px] mt-1">{sendBackError}</p>}
+                      <div className="flex items-center gap-2 mt-2.5">
+                        <button onClick={handleSendBack} disabled={sendBackStatus==="sending"||!sendBackComments.trim()}
+                          className="flex-1 bg-red-500 hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-semibold rounded-lg py-1.5 transition-colors">
+                          {sendBackStatus==="sending"?"Sending…":"Send Back"}
+                        </button>
+                        <button onClick={()=>{setSendBackOpen(false);setSendBackComments("");setSendBackStatus("idle");}}
+                          className="text-slate-500 hover:text-slate-900 text-xs px-2">Cancel</button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
               <button onClick={()=>setShowWillDoc(true)} className="flex items-center gap-1.5 text-xs text-[#d09d61] hover:text-[#b6844a] border border-[#d09d61]/30 hover:border-[#d09d61]/60 rounded-lg px-3 py-1.5 transition-all font-semibold">
                 <Eye size={12}/>Generate Will
               </button>
@@ -281,7 +351,10 @@ export default function SmartWill() {
                 onGenerate={()=>setShowWillDoc(true)}
                 willId={editingWillId}
                 adminReview={adminReviewMode}
+                adminComplete={adminCreateMode}
                 testatorEmailEditable={testatorEmailEditable}
+                reviewerEmail={lawyerProfile?.email}
+                adminComments={activeAdminComments}
                 onSaved={(willId,status)=>{
                   setEditingWillId(willId);
                   if(status==="PendingReview") setTimeout(()=>setView("myWills"), 900);

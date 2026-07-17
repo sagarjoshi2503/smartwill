@@ -35,6 +35,7 @@ class WillDetailResponse(BaseModel):
     will: dict
     testatorEmail: str
     status: str
+    adminComments: str | None = None
 
 
 class DeleteWillResponse(BaseModel):

@@ -28,6 +28,21 @@ async def save(request: Request, db: Database = Depends(get_db), settings: Setti
     return service.save_will(db, body or {}, settings)
 
 
+@router.post(
+    "/admin/save", response_model=SaveWillResponse, status_code=201,
+    responses={**ERROR_RESPONSES, 404: {"model": ErrorResponse}},
+    summary="Admin creates or updates a Will directly (e.g. save-and-complete for a client)",
+)
+async def save_admin(request: Request, db: Database = Depends(get_db), settings: Settings = Depends(get_settings)):
+    try:
+        body = await request.json()
+    except Exception:
+        body = None
+    if not isinstance(body, dict):
+        body = None
+    return service.save_will(db, body or {}, settings, is_admin=True)
+
+
 @router.get(
     "/lawyer-wills", response_model=ClientsResponse, responses={500: {"model": ErrorResponse}},
     summary="List all Wills submitted for admin review",
@@ -66,6 +81,23 @@ async def complete_will_admin(will_id: str, request: Request, db: Database = Dep
     if not isinstance(body, dict):
         body = {}
     return service.admin_complete_will(db, will_id, body)
+
+
+@router.post(
+    "/admin/{will_id}/send-back", response_model=SaveWillResponse,
+    responses={**ERROR_RESPONSES, 404: {"model": ErrorResponse}},
+    summary="Admin sends a Will back to the testator with comments, reverting it to Draft",
+)
+async def send_back_will_admin(
+    will_id: str, request: Request, db: Database = Depends(get_db), settings: Settings = Depends(get_settings),
+):
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
+    if not isinstance(body, dict):
+        body = {}
+    return service.admin_send_back_will(db, will_id, body.get("comments") or "", settings)
 
 
 @router.delete(

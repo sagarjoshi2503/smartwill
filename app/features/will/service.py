@@ -17,12 +17,13 @@ ALLOWED_STATUSES = {STATUS_DRAFT, STATUS_PENDING_REVIEW}
 TESTATOR_WILL_VISIBILITY_DAYS = 30
 
 
-def save_will(db: Database, body: dict, settings: Settings) -> dict:
+def save_will(db: Database, body: dict, settings: Settings, is_admin: bool = False) -> dict:
     if not isinstance(body, dict) or not body:
         raise AppError(400, messages.WILL_DATA_REQUIRED)
 
     status = body.get("status") or STATUS_PENDING_REVIEW
-    if status not in ALLOWED_STATUSES:
+    allowed_statuses = ALLOWED_STATUSES | ({STATUS_COMPLETED} if is_admin else set())
+    if status not in allowed_statuses:
         raise AppError(400, messages.INVALID_WILL_STATUS)
 
     testator_email = normalize_email(body.get("testatorEmail"))
@@ -36,10 +37,14 @@ def save_will(db: Database, body: dict, settings: Settings) -> dict:
         existing = repository.find_will_by_id(db, will_id)
         if not existing:
             raise AppError(404, messages.WILL_NOT_FOUND)
-        if normalize_email(existing.get("testatorEmail")) != testator_email:
-            raise AppError(403, messages.WILL_ACCESS_DENIED)
-        if existing.get("status") == STATUS_PENDING_REVIEW:
-            raise AppError(403, messages.WILL_LOCKED_FOR_REVIEW)
+        # Admin-driven saves bypass the ownership/lock checks below, the same
+        # way the other /admin/... endpoints do — an admin can complete any
+        # Will regardless of who submitted it or its current status.
+        if not is_admin:
+            if normalize_email(existing.get("testatorEmail")) != testator_email:
+                raise AppError(403, messages.WILL_ACCESS_DENIED)
+            if existing.get("status") == STATUS_PENDING_REVIEW:
+                raise AppError(403, messages.WILL_LOCKED_FOR_REVIEW)
         created_at = existing.get("createdAt", now)
     else:
         # willId is always generated server-side when creating a new Will
@@ -56,6 +61,10 @@ def save_will(db: Database, body: dict, settings: Settings) -> dict:
         "createdAt": created_at,
         "submittedAt": now,
     }
+    if is_admin and status == STATUS_COMPLETED:
+        reviewer_email = normalize_email(body.get("reviewerEmail")) if body.get("reviewerEmail") else None
+        if reviewer_email:
+            document["reviewerEmail"] = reviewer_email
     repository.upsert_will(db, will_id, document)
 
     if status == STATUS_PENDING_REVIEW:
@@ -146,6 +155,7 @@ def get_will_for_edit(db: Database, will_id: str, email: str) -> dict:
         "will": document.get("will") or {},
         "testatorEmail": document.get("testatorEmail") or "",
         "status": document.get("status") or STATUS_DRAFT,
+        "adminComments": document.get("adminComments"),
     }
 
 
@@ -160,6 +170,7 @@ def get_will_as_admin(db: Database, will_id: str) -> dict:
         "will": document.get("will") or {},
         "testatorEmail": document.get("testatorEmail") or "",
         "status": document.get("status") or STATUS_DRAFT,
+        "adminComments": document.get("adminComments"),
     }
 
 
@@ -169,14 +180,53 @@ def admin_complete_will(db: Database, will_id: str, body: dict) -> dict:
         raise AppError(404, messages.WILL_NOT_FOUND)
 
     updated_will = body.get("will") if isinstance(body, dict) else None
+    reviewer_email = None
+    if isinstance(body, dict) and body.get("reviewerEmail"):
+        reviewer_email = normalize_email(body.get("reviewerEmail"))
     document = {
         **document,
         **({"will": updated_will} if updated_will is not None else {}),
         "status": STATUS_COMPLETED,
         "submittedAt": datetime.now(timezone.utc),
+        **({"reviewerEmail": reviewer_email} if reviewer_email else {}),
     }
     repository.upsert_will(db, will_id, document)
     return {"willId": will_id, "status": STATUS_COMPLETED}
+
+
+def admin_send_back_will(db: Database, will_id: str, comments: str, settings: Settings) -> dict:
+    comments = (comments or "").strip()
+    if not comments:
+        raise AppError(400, messages.COMMENTS_REQUIRED)
+
+    document = repository.find_will_by_id(db, will_id)
+    if not document:
+        raise AppError(404, messages.WILL_NOT_FOUND)
+
+    document = {
+        **document,
+        "status": STATUS_DRAFT,
+        "adminComments": comments,
+        "submittedAt": datetime.now(timezone.utc),
+    }
+    repository.upsert_will(db, will_id, document)
+
+    testator_email = document.get("testatorEmail")
+    testator_name = (document.get("will") or {}).get("testator", {}).get("fullName") or "there"
+    if testator_email:
+        email.send_email(
+            settings,
+            to=testator_email,
+            subject="Your Will needs a few changes",
+            html=(
+                f"<p>Hi {testator_name},</p>"
+                f"<p>Your Will submission has been reviewed and needs some changes before it can be completed:</p>"
+                f"<p>{comments}</p>"
+                f"<p>Please log back in to update and resubmit your Will.</p>"
+            ),
+        )
+
+    return {"willId": will_id, "status": STATUS_DRAFT}
 
 
 def delete_will_as_admin(db: Database, will_id: str) -> dict:
