@@ -33,11 +33,12 @@ interface WizardFormsProps {
   adminReview?: boolean;
   adminComplete?: boolean;
   testatorEmailEditable?: boolean;
+  viewOnly?: boolean;
   reviewerEmail?: string;
   adminComments?: string;
 }
 
-export default function WizardForms({step,will,setWill,addBene,removeBene,updateBene,addAsset,removeAsset,updateAssetData,updateAssetAlloc,allocTotal,assetAdded,onNext,onPrev,onGenerate,willId,onSaved,adminReview,adminComplete,testatorEmailEditable,reviewerEmail,adminComments}: WizardFormsProps){
+export default function WizardForms({step,will,setWill,addBene,removeBene,updateBene,addAsset,removeAsset,updateAssetData,updateAssetAlloc,allocTotal,assetAdded,onNext,onPrev,onGenerate,willId,onSaved,adminReview,adminComplete,testatorEmailEditable,viewOnly,reviewerEmail,adminComments}: WizardFormsProps){
   const IC="w-full apv-input rounded-2xl px-3.5 py-2.5 text-slate-900 placeholder:text-slate-500 text-sm focus:outline-none transition";
   const LC="block apv-label mb-1";
   const set=(path: string, v: string | boolean)=>setWill(p=>{
@@ -479,8 +480,9 @@ export default function WizardForms({step,will,setWill,addBene,removeBene,update
             All rest, residue and remainder of my estate shall vest absolutely in <strong>{will.beneficiaries.find(b=>String(b.id)===String(will.residualBeneId))?.name||"Selected Beneficiary"}</strong>.
           </div>
           <div className="flex flex-col gap-3">
-            <button onClick={handleSaveAndSubmit} disabled={submitStatus==="saving"}
-              className={`w-full font-bold py-3.5 rounded-xl text-sm transition-colors flex items-center justify-center gap-2 whitespace-nowrap ${submitStatus==="saving"?"bg-slate-700 text-slate-400 cursor-not-allowed":"bg-slate-800 hover:bg-slate-700 text-white"}`}>
+            <button onClick={handleSaveAndSubmit} disabled={submitStatus==="saving"||viewOnly}
+              title={viewOnly?"Viewing a submitted Will — saving is disabled":undefined}
+              className={`w-full font-bold py-3.5 rounded-xl text-sm transition-colors flex items-center justify-center gap-2 whitespace-nowrap ${submitStatus==="saving"||viewOnly?"bg-slate-700 text-slate-400 cursor-not-allowed":"bg-slate-800 hover:bg-slate-700 text-white"}`}>
               <Send size={16} className="shrink-0"/>{submitStatus==="saving"?"Saving…":(adminReview||adminComplete)?"Save and Complete Review":"Save and Submit for Review"}
             </button>
             <button onClick={onGenerate} className="w-full bg-[#d09d61] hover:bg-[#b88442] text-[#020617] font-bold py-3.5 rounded-xl text-sm transition-colors flex items-center justify-center gap-2 whitespace-nowrap">

@@ -47,6 +47,7 @@ export default function SmartWill() {
   const [adminReviewStatus, setAdminReviewStatus] = useState<string | null>(null);
   const [adminCreateMode, setAdminCreateMode] = useState(false);
   const [testatorEmailEditable, setTestatorEmailEditable] = useState(false);
+  const [viewOnlyMode, setViewOnlyMode] = useState(false);
   const [activeAdminComments, setActiveAdminComments] = useState("");
   const [showWillDoc, setShowWillDoc] = useState(false);
   const [adminProfile, setAdminProfile] = useState<AdminProfile | null>(null);
@@ -118,6 +119,7 @@ export default function SmartWill() {
     setAdminReviewStatus(null);
     setAdminCreateMode(false);
     setTestatorEmailEditable(false);
+    setViewOnlyMode(false);
     setActiveAdminComments("");
     setDchecks({ nonMuslim:false, age:false, law:false, tool:false });
     setWizardStep(1);
@@ -130,13 +132,22 @@ export default function SmartWill() {
     setAdminReviewStatus(null);
     setAdminCreateMode(false);
     setTestatorEmailEditable(false);
+    setViewOnlyMode(false);
     setActiveAdminComments(adminComments || "");
     setWizardStep(1);
     setView("wizard");
   };
-  const handleViewWill = (_willId: string, fetchedWill: WillState) => {
+  const handleViewWill = (willId: string, fetchedWill: WillState) => {
     setWill(mergeWithDefaults(fetchedWill));
-    setShowWillDoc(true);
+    setEditingWillId(willId);
+    setAdminReviewMode(false);
+    setAdminReviewStatus(null);
+    setAdminCreateMode(false);
+    setTestatorEmailEditable(false);
+    setViewOnlyMode(true);
+    setActiveAdminComments("");
+    setWizardStep(1);
+    setView("wizard");
   };
   const handleAdminCreateWill = () => {
     setWill({...DEFAULT_WILL, testator: {...DEFAULT_WILL.testator, fullName:"", email:""}});
@@ -145,6 +156,7 @@ export default function SmartWill() {
     setAdminReviewStatus(null);
     setAdminCreateMode(true);
     setTestatorEmailEditable(true);
+    setViewOnlyMode(false);
     setActiveAdminComments("");
     setWizardStep(1);
     setView("wizard");
@@ -156,6 +168,7 @@ export default function SmartWill() {
     setAdminReviewStatus(status);
     setAdminCreateMode(false);
     setTestatorEmailEditable(false);
+    setViewOnlyMode(false);
     setActiveAdminComments("");
     setSendBackOpen(false);
     setSendBackComments("");
@@ -302,8 +315,9 @@ export default function SmartWill() {
             </div>
             <div className="flex items-center gap-2">
               {!adminReviewMode && (
-                <button onClick={handleSaveDraft} disabled={draftStatus==="saving"} title={draftStatus==="error"?draftError:undefined}
-                  className={`flex items-center gap-1.5 text-xs rounded-lg px-3 py-1.5 transition-all font-semibold border ${draftStatus==="error"?"text-red-500 border-red-300":draftStatus==="done"?"text-emerald-600 border-emerald-300":"text-slate-600 hover:text-slate-900 border-slate-200 hover:border-slate-300"} ${draftStatus==="saving"?"opacity-60 cursor-not-allowed":""}`}>
+                <button onClick={handleSaveDraft} disabled={draftStatus==="saving"||viewOnlyMode}
+                  title={viewOnlyMode?"Viewing a submitted Will — saving is disabled":draftStatus==="error"?draftError:undefined}
+                  className={`flex items-center gap-1.5 text-xs rounded-lg px-3 py-1.5 transition-all font-semibold border ${draftStatus==="error"?"text-red-500 border-red-300":draftStatus==="done"?"text-emerald-600 border-emerald-300":"text-slate-600 hover:text-slate-900 border-slate-200 hover:border-slate-300"} ${draftStatus==="saving"||viewOnlyMode?"opacity-60 cursor-not-allowed":""}`}>
                   <Save size={12}/>{draftStatus==="saving"?"Saving…":draftStatus==="done"?"Saved":draftStatus==="error"?"Failed":"Save as Draft"}
                 </button>
               )}
@@ -353,6 +367,7 @@ export default function SmartWill() {
                 adminReview={adminReviewMode}
                 adminComplete={adminCreateMode}
                 testatorEmailEditable={testatorEmailEditable}
+                viewOnly={viewOnlyMode}
                 reviewerEmail={adminProfile?.email}
                 adminComments={activeAdminComments}
                 onSaved={(willId,status)=>{
