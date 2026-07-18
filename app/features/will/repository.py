@@ -38,7 +38,7 @@ def find_all_wills(db: Database) -> list[dict]:
 
 def find_wills_by_testator_email_since(db: Database, email: str, since) -> list[dict]:
     try:
-        return list(db[WILL_COLLECTION_NAME].find({"testatorEmail": email, "createdAt": {"$gte": since}}))
+        return list(db[WILL_COLLECTION_NAME].find({"testatorEmail": email, "updatedAt": {"$gte": since}}))
     except PyMongoError:
         raise AppError(500, messages.DATABASE_UNAVAILABLE)
 

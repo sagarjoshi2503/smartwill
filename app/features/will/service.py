@@ -59,7 +59,7 @@ def save_will(db: Database, body: dict, settings: Settings, is_admin: bool = Fal
         "testatorEmail": testator_email,
         "status": status,
         "createdAt": created_at,
-        "submittedAt": now,
+        "updatedAt": now,
     }
     if is_admin and status == STATUS_COMPLETED:
         reviewer_email = normalize_email(body.get("reviewerEmail")) if body.get("reviewerEmail") else None
@@ -104,12 +104,12 @@ def list_admin_wills(db: Database) -> dict:
     clients = []
     for w in repository.find_all_wills(db):
         testator = (w.get("will") or {}).get("testator") or {}
-        submitted_at = w.get("submittedAt")
+        updated_at = w.get("updatedAt")
         clients.append({
             "willId": w.get("willId"),
             "name": testator.get("fullName") or "",
             "contact": w.get("testatorEmail") or "",
-            "updatedAt": submitted_at.isoformat() if submitted_at else None,
+            "updatedAt": updated_at.isoformat() if updated_at else None,
             "status": w.get("status") or STATUS_DRAFT,
         })
 
@@ -126,7 +126,7 @@ def list_testator_wills(db: Database, email: str) -> dict:
     wills = []
     for w in repository.find_wills_by_testator_email_since(db, email, cutoff):
         testator = (w.get("will") or {}).get("testator") or {}
-        updated_at = w.get("submittedAt")
+        updated_at = w.get("updatedAt")
         wills.append({
             "willId": w.get("willId"),
             "testatorEmail": w.get("testatorEmail") or "",
@@ -187,7 +187,7 @@ def admin_complete_will(db: Database, will_id: str, body: dict) -> dict:
         **document,
         **({"will": updated_will} if updated_will is not None else {}),
         "status": STATUS_COMPLETED,
-        "submittedAt": datetime.now(timezone.utc),
+        "updatedAt": datetime.now(timezone.utc),
         **({"reviewerEmail": reviewer_email} if reviewer_email else {}),
     }
     repository.upsert_will(db, will_id, document)
@@ -207,7 +207,7 @@ def admin_send_back_will(db: Database, will_id: str, comments: str, settings: Se
         **document,
         "status": STATUS_DRAFT,
         "adminComments": comments,
-        "submittedAt": datetime.now(timezone.utc),
+        "updatedAt": datetime.now(timezone.utc),
     }
     repository.upsert_will(db, will_id, document)
 

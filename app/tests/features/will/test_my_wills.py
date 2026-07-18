@@ -7,13 +7,13 @@ from app.shared import messages
 URL = "/api/will/my-wills"
 
 
-def seed_will(fake_db, will_id, full_name, testator_email, created_at, status="Draft"):
+def seed_will(fake_db, will_id, full_name, testator_email, created_at, status="Draft", updated_at=None):
     fake_db["will"].insert_one({
         "willId": will_id,
         "will": {"testator": {"fullName": full_name}},
         "testatorEmail": testator_email,
         "createdAt": created_at,
-        "submittedAt": created_at,
+        "updatedAt": updated_at if updated_at is not None else created_at,
         "status": status,
     })
 
@@ -75,9 +75,35 @@ def test_returns_empty_list_when_testator_has_no_wills(client):
 
 # --- negative scenarios ---
 
-def test_excludes_wills_created_more_than_30_days_ago(client, fake_db):
+def test_excludes_wills_last_submitted_more_than_30_days_ago(client, fake_db):
     now = datetime.now(timezone.utc)
     seed_will(fake_db, "will-1", "Old Will", "jane@example.com", now - timedelta(days=31))
+
+    res = client.get(URL, params={"email": "jane@example.com"})
+
+    assert res.status_code == 200
+    assert res.json() == {"wills": []}
+
+
+def test_keeps_a_will_created_long_ago_but_edited_within_30_days(client, fake_db):
+    now = datetime.now(timezone.utc)
+    seed_will(
+        fake_db, "will-1", "Old Draft, Recently Edited", "jane@example.com",
+        created_at=now - timedelta(days=60), updated_at=now - timedelta(days=5),
+    )
+
+    res = client.get(URL, params={"email": "jane@example.com"})
+
+    assert res.status_code == 200
+    assert len(res.json()["wills"]) == 1
+
+
+def test_excludes_a_recently_created_will_not_touched_in_30_days(client, fake_db):
+    now = datetime.now(timezone.utc)
+    seed_will(
+        fake_db, "will-1", "Stale Will", "jane@example.com",
+        created_at=now - timedelta(days=5), updated_at=now - timedelta(days=31),
+    )
 
     res = client.get(URL, params={"email": "jane@example.com"})
 

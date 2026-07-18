@@ -18,7 +18,7 @@ def test_save_success_returns_generated_will_id(client, fake_db):
     doc = fake_db["will"].find_one({"willId": will_id})
     assert doc["testatorEmail"] == "jane@example.com"
     assert doc["will"]["testator"]["fullName"] == "Jane Doe"
-    assert "submittedAt" in doc
+    assert "updatedAt" in doc
 
 
 def test_save_generates_unique_will_ids_across_requests(client):

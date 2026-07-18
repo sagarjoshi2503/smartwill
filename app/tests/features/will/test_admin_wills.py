@@ -7,12 +7,12 @@ from app.shared import messages
 URL = "/api/will/admin-wills"
 
 
-def seed_will(fake_db, will_id, full_name, testator_email, submitted_at, status="PendingReview"):
+def seed_will(fake_db, will_id, full_name, testator_email, updated_at, status="PendingReview"):
     fake_db["will"].insert_one({
         "willId": will_id,
         "will": {"testator": {"fullName": full_name}},
         "testatorEmail": testator_email,
-        "submittedAt": submitted_at,
+        "updatedAt": updated_at,
         "status": status,
     })
 
