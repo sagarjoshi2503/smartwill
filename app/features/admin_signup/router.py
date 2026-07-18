@@ -4,13 +4,13 @@ from pymongo.database import Database
 from app.core.db import get_db
 from app.features.admin_signup import service
 from app.features.admin_signup.schemas import AuthResponse, ErrorResponse
-from app.shared.constants import HTTP_BAD_REQUEST, HTTP_CONFLICT, HTTP_CREATED, HTTP_INTERNAL_SERVER_ERROR
+from app.shared.constants import HTTP_BAD_REQUEST, HTTP_CONFLICT, HTTP_CREATED, HTTP_SERVER_ERROR
 
 router = APIRouter(prefix="/api/auth", tags=["admin-signup"])
 
 ERROR_RESPONSES = {
     HTTP_BAD_REQUEST: {"model": ErrorResponse},
-    HTTP_INTERNAL_SERVER_ERROR: {"model": ErrorResponse},
+    HTTP_SERVER_ERROR: {"model": ErrorResponse},
 }
 
 

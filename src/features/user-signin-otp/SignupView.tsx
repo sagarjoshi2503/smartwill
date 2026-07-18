@@ -1,5 +1,9 @@
 import { User, Phone, Mail, MapPin, Check } from "lucide-react";
 import { STATES } from "../../data/options";
+import {
+  COUNTRY_CODE_PREFIX, LBL_EMAIL, LBL_LEGAL_NAME, LBL_MOBILE, LBL_STATE,
+  PHONE_MASK_DIGITS,
+} from "../../constants";
 import type { SignupState } from "../../types";
 
 export default function SignupView({signup,setSignup,onNext}:{
@@ -17,7 +21,7 @@ export default function SignupView({signup,setSignup,onNext}:{
           <p className="text-slate-600 text-sm mt-2">Start your Will in under 2 minutes</p>
         </div>
         <div className="apv-card p-6 space-y-4">
-          {[{k:"name",l:"Full Legal Name",t:"text",icon:<User size={14}/>,p:"As per Aadhaar / PAN"},{k:"phone",l:"Mobile Number",t:"tel",icon:<Phone size={14}/>,p:"10-digit number"},{k:"email",l:"Email",t:"email",icon:<Mail size={14}/>,p:"For Will delivery"}].map(f=>(
+          {[{k:"name",l:LBL_LEGAL_NAME,t:"text",icon:<User size={14}/>,p:"As per Aadhaar / PAN"},{k:"phone",l:LBL_MOBILE,t:"tel",icon:<Phone size={14}/>,p:"10-digit number"},{k:"email",l:LBL_EMAIL,t:"email",icon:<Mail size={14}/>,p:"For Will delivery"}].map(f=>(
             <div key={f.k}>
               <label className="block apv-label mb-2">{f.l}</label>
               <div className="relative"><div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">{f.icon}</div>
@@ -26,7 +30,7 @@ export default function SignupView({signup,setSignup,onNext}:{
             </div>
           ))}
           <div>
-            <label className="block apv-label mb-2">State of Residence</label>
+            <label className="block apv-label mb-2">{LBL_STATE}</label>
             <div className="relative"><MapPin size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"/>
               <select value={signup.state} onChange={e=>setSignup(p=>({...p,state:e.target.value}))} className={IC+" appearance-none"}>
                 {STATES.map(s=><option key={s}>{s}</option>)}
@@ -40,7 +44,7 @@ export default function SignupView({signup,setSignup,onNext}:{
             <span className="text-slate-600 text-sm">I agree to the <span className="text-[#d09d61]">Terms of Service</span> and <span className="text-[#d09d61]">Privacy Policy</span></span>
           </label>
           <button onClick={()=>signup.terms&&onNext()} className={`w-full py-3 rounded-full font-bold text-sm transition-all ${signup.terms?"apv-btn":"bg-slate-200 text-slate-500 cursor-not-allowed"}`}>
-            Send OTP to +91 {signup.phone.slice(0,5)||"XXXXX"}XXXXX
+            Send OTP to {COUNTRY_CODE_PREFIX}{signup.phone.slice(0,PHONE_MASK_DIGITS)||"XXXXX"}XXXXX
           </button>
         </div>
       </div>

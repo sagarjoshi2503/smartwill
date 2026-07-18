@@ -40,13 +40,13 @@ def test_login_rejects_wrong_password(client, fake_db):
     seed_admin(fake_db)
     res = client.post(URL, json={"email": "jane@lawfirm.com", "password": encode("wrongpassword")})
     assert res.status_code == 401
-    assert res.json() == {"error": constants.INVALID_LOGIN_CREDENTIALS}
+    assert res.json() == {"error": constants.BAD_LOGIN_CREDS}
 
 
 def test_login_rejects_unknown_email(client, fake_db):
     res = client.post(URL, json={"email": "nobody@lawfirm.com", "password": encode(PASSWORD)})
     assert res.status_code == 401
-    assert res.json() == {"error": constants.INVALID_LOGIN_CREDENTIALS}
+    assert res.json() == {"error": constants.BAD_LOGIN_CREDS}
 
 
 def test_login_rejects_invalid_email_format(client):

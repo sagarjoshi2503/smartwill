@@ -17,6 +17,12 @@ import LiveDocPreview from "./features/create-will/LiveDocPreview";
 import WillDocument from "./features/create-will/WillDocument";
 import { allocTotal } from "./utils/allocation";
 import { apiUrl } from "./utils/apiBase";
+import {
+  ADMIN_PATH, API_FLAGS, API_WILL_SAVE, apiPathSendBack,
+  OTP_LENGTH, STATUS_DRAFT, STATUS_PENDING_REVIEW, STATUS_COMPLETED,
+  SEND_BACK_REDIRECT_MS, DRAFT_RESET_MS, WIZARD_REDIRECT_MS,
+  MSG_VIEW_ONLY, MSG_SAVING, BTN_SAVE_AS_DRAFT,
+} from "./constants";
 import type {
   AdminProfile, AssetCatalogItem, Beneficiary, DisclaimerChecks, GoogleProfile, Plan, SignupState, ViewName, WillState,
 } from "./types";
@@ -26,7 +32,6 @@ const WIZARD_STEPS = [
   {n:4,label:"Beneficiaries"},{n:5,label:"Assets"},{n:6,label:"Residual & Instructions"},
 ];
 
-const ADMIN_PATH = "/admin";
 const isAdminView = (v: ViewName) => v==="adminLogin" || v==="adminSignup" || v==="admin";
 
 export default function SmartWill() {
@@ -38,7 +43,7 @@ export default function SmartWill() {
   const [selectedPlan, setSelectedPlan] = useState<Plan>(PLANS[1]);
   const [addons, setAddons] = useState<Record<string, boolean>>({});
   const [signup, setSignup] = useState<SignupState>({ name:"Arjun Verma", phone:"9876543210", email:"arjun.verma@gmail.com", state:"Maharashtra", terms:false });
-  const [otp, setOtp] = useState(["","","","","",""]);
+  const [otp, setOtp] = useState<string[]>(Array(OTP_LENGTH).fill(""));
   const [dchecks, setDchecks] = useState<DisclaimerChecks>({ nonMuslim:false, age:false, law:false, tool:false });
   const [wizardStep, setWizardStep] = useState(1);
   const [will, setWill] = useState<WillState>(DEFAULT_WILL);
@@ -89,7 +94,7 @@ export default function SmartWill() {
   // only controls whether the nav button is shown.
   useEffect(() => {
     let cancelled = false;
-    fetch("/api/flags")
+    fetch(API_FLAGS)
       .then(res => res.ok ? res.json() : { enabled: false })
       .then(data => { if(!cancelled) setShowAdminButton(!!data?.enabled); })
       .catch(() => {});
@@ -110,7 +115,7 @@ export default function SmartWill() {
   const handleOtp = (i: number, v: string) => {
     if(!/^\d?$/.test(v)) return;
     const n=[...otp]; n[i]=v; setOtp(n);
-    if(v && i<5) otpRefs.current[i+1]?.focus();
+    if(v && i<OTP_LENGTH-1) otpRefs.current[i+1]?.focus();
   };
   const handleOtpVerified = () => {
     setWill(p=>({...p, testator: {...p.testator, fullName: signup.name, email: signup.email}}));
@@ -195,7 +200,7 @@ export default function SmartWill() {
     if(!editingWillId || !sendBackComments.trim()) return;
     setSendBackStatus("sending"); setSendBackError("");
     try {
-      const res = await fetch(apiUrl(`/api/will/admin/${editingWillId}/send-back`), {
+      const res = await fetch(apiUrl(apiPathSendBack(editingWillId)), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ comments: sendBackComments }),
@@ -206,7 +211,7 @@ export default function SmartWill() {
       setSendBackOpen(false);
       setSendBackComments("");
       setSendBackStatus("idle");
-      setTimeout(()=>setView("admin"), 300);
+      setTimeout(()=>setView("admin"), SEND_BACK_REDIRECT_MS);
     } catch (err) {
       setSendBackStatus("error");
       setSendBackError(err instanceof Error ? err.message : "Could not send this Will back.");
@@ -235,21 +240,21 @@ export default function SmartWill() {
   const handleSaveDraft = async () => {
     setDraftStatus("saving"); setDraftError("");
     try {
-      const res = await fetch(apiUrl("/api/will/save"), {
+      const res = await fetch(apiUrl(API_WILL_SAVE), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ will, testatorEmail: will.testator.email, status: "Draft", willId: editingWillId }),
+        body: JSON.stringify({ will, testatorEmail: will.testator.email, status: STATUS_DRAFT, willId: editingWillId }),
       });
       const isJson = res.headers.get("content-type")?.includes("application/json");
       const data = isJson ? await res.json() : null;
       if(!res.ok) throw new Error(data?.error || `Could not save the draft (server returned ${res.status}).`);
       setEditingWillId(data.willId);
       setDraftStatus("done");
-      setTimeout(()=>setDraftStatus("idle"), 2500);
+      setTimeout(()=>setDraftStatus("idle"), DRAFT_RESET_MS);
     } catch (err) {
       setDraftStatus("error");
       setDraftError(err instanceof Error ? err.message : "Could not save the draft.");
-      setTimeout(()=>setDraftStatus("idle"), 2500);
+      setTimeout(()=>setDraftStatus("idle"), DRAFT_RESET_MS);
     }
   };
 
@@ -331,12 +336,12 @@ export default function SmartWill() {
             <div className="flex items-center gap-2">
               {!adminReviewMode && (
                 <button onClick={handleSaveDraft} disabled={draftStatus==="saving"||viewOnlyMode}
-                  title={viewOnlyMode?"Viewing a submitted Will — saving is disabled":draftStatus==="error"?draftError:undefined}
+                  title={viewOnlyMode?MSG_VIEW_ONLY:draftStatus==="error"?draftError:undefined}
                   className={`flex items-center gap-1.5 text-xs rounded-lg px-3 py-1.5 transition-all font-semibold border ${draftStatus==="error"?"text-red-500 border-red-300":draftStatus==="done"?"text-emerald-600 border-emerald-300":"text-slate-600 hover:text-slate-900 border-slate-200 hover:border-slate-300"} ${draftStatus==="saving"||viewOnlyMode?"opacity-60 cursor-not-allowed":""}`}>
-                  <Save size={12}/>{draftStatus==="saving"?"Saving…":draftStatus==="done"?"Saved":draftStatus==="error"?"Failed":"Save as Draft"}
+                  <Save size={12}/>{draftStatus==="saving"?MSG_SAVING:draftStatus==="done"?"Saved":draftStatus==="error"?"Failed":BTN_SAVE_AS_DRAFT}
                 </button>
               )}
-              {adminReviewMode && adminReviewStatus==="PendingReview" && (
+              {adminReviewMode && adminReviewStatus===STATUS_PENDING_REVIEW && (
                 <div className="relative">
                   <button onClick={()=>setSendBackOpen(o=>!o)}
                     className="flex items-center gap-1.5 text-xs text-red-500 hover:text-red-600 border border-red-200 hover:border-red-300 rounded-lg px-3 py-1.5 transition-all font-semibold">
@@ -388,8 +393,8 @@ export default function SmartWill() {
                 adminComments={activeAdminComments}
                 onSaved={(willId,status)=>{
                   setEditingWillId(willId);
-                  if(status==="PendingReview") setTimeout(()=>setView("myWills"), 900);
-                  if(status==="Completed") setTimeout(()=>setView("admin"), 900);
+                  if(status===STATUS_PENDING_REVIEW) setTimeout(()=>setView("myWills"), WIZARD_REDIRECT_MS);
+                  if(status===STATUS_COMPLETED) setTimeout(()=>setView("admin"), WIZARD_REDIRECT_MS);
                 }}
               />
             </div>

@@ -36,7 +36,7 @@ def test_signup_rejects_duplicate_email(client):
     client.post(URL, json=VALID_PAYLOAD)
     res = client.post(URL, json={**VALID_PAYLOAD, "fullName": "Someone Else"})
     assert res.status_code == 409
-    assert res.json() == {"error": constants.ADMIN_ALREADY_SIGNED_UP}
+    assert res.json() == {"error": constants.ADMIN_EXISTS}
 
 
 def test_signup_rejects_duplicate_email_case_insensitively(client):

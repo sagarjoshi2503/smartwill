@@ -161,31 +161,31 @@ def test_save_does_not_create_adminwill_entry_for_draft(client, fake_db):
 def test_save_rejects_empty_body(client):
     res = client.post(URL, json={})
     assert res.status_code == 400
-    assert res.json() == {"error": constants.WILL_DATA_REQUIRED}
+    assert res.json() == {"error": constants.WILL_REQUIRED}
 
 
 def test_save_rejects_malformed_json_body(client):
     res = client.post(URL, content=b"not json", headers={"Content-Type": "application/json"})
     assert res.status_code == 400
-    assert res.json() == {"error": constants.WILL_DATA_REQUIRED}
+    assert res.json() == {"error": constants.WILL_REQUIRED}
 
 
 def test_save_rejects_invalid_status(client):
     res = client.post(URL, json={**VALID_PAYLOAD, "status": "Bogus"})
     assert res.status_code == 400
-    assert res.json() == {"error": constants.INVALID_WILL_STATUS}
+    assert res.json() == {"error": constants.BAD_WILL_STATUS}
 
 
 def test_save_rejects_missing_testator_email(client):
     res = client.post(URL, json={"will": {"testator": {"fullName": "Jane Doe"}}})
     assert res.status_code == 400
-    assert res.json() == {"error": constants.INVALID_TESTATOR_EMAIL}
+    assert res.json() == {"error": constants.BAD_TESTATOR_EMAIL}
 
 
 def test_save_rejects_invalid_testator_email(client):
     res = client.post(URL, json={**VALID_PAYLOAD, "testatorEmail": "not-an-email"})
     assert res.status_code == 400
-    assert res.json() == {"error": constants.INVALID_TESTATOR_EMAIL}
+    assert res.json() == {"error": constants.BAD_TESTATOR_EMAIL}
 
 
 def test_save_rejects_unknown_will_id(client):
@@ -216,7 +216,7 @@ def test_save_rejects_editing_a_will_pending_review(client, fake_db):
     res = client.post(URL, json={**VALID_PAYLOAD, "status": "Draft", "willId": will_id})
 
     assert res.status_code == 403
-    assert res.json() == {"error": constants.WILL_LOCKED_FOR_REVIEW}
+    assert res.json() == {"error": constants.WILL_LOCKED}
 
 
 def test_save_returns_500_when_mongodb_uri_missing():

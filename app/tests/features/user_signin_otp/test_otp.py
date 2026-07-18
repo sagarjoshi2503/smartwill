@@ -17,7 +17,7 @@ def test_request_otp_returns_expiry(client):
 def test_request_otp_rejects_short_phone(client):
     res = client.post(REQUEST_URL, json={"phone": "123"})
     assert res.status_code == 400
-    assert res.json() == {"error": constants.INVALID_PHONE_NUMBER}
+    assert res.json() == {"error": constants.BAD_PHONE}
 
 
 def test_verify_otp_succeeds_with_correct_code(client):
@@ -43,4 +43,4 @@ def test_verify_otp_rejects_when_none_requested(client):
     res = client.post(VERIFY_URL, json={"phone": "9999999999", "code": "123456"})
 
     assert res.status_code == 400
-    assert res.json() == {"error": constants.OTP_NOT_REQUESTED}
+    assert res.json() == {"error": constants.OTP_MISSING}

@@ -2,7 +2,7 @@ import requests
 
 from app.core.config import Settings
 from app.core.logging import get_logger
-from app.shared.constants import EMAIL_REQUEST_TIMEOUT_SECONDS, RESEND_API_URL
+from app.shared.constants import EMAIL_TIMEOUT_SEC, RESEND_API_URL
 
 logger = get_logger(__name__)
 
@@ -20,7 +20,7 @@ def send_email(settings: Settings, to: str, subject: str, html: str) -> None:
             RESEND_API_URL,
             headers={"Authorization": f"Bearer {settings.resend_api_key}"},
             json={"from": settings.resend_from_email, "to": [to], "subject": subject, "html": html},
-            timeout=EMAIL_REQUEST_TIMEOUT_SECONDS,
+            timeout=EMAIL_TIMEOUT_SEC,
         )
     except requests.RequestException:
         logger.warning("Failed to send email to %s", to, exc_info=True)

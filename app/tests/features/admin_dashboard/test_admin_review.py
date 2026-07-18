@@ -164,7 +164,7 @@ def test_admin_save_rejects_invalid_status(client):
         "will": {}, "testatorEmail": "client@example.com", "status": "Bogus",
     })
     assert res.status_code == 400
-    assert res.json() == {"error": constants.INVALID_WILL_STATUS}
+    assert res.json() == {"error": constants.BAD_WILL_STATUS}
 
 
 # --- POST /api/will/admin/{will_id}/send-back ---

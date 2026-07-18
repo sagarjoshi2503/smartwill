@@ -10,6 +10,13 @@ import FormBlock from "../../components/shared/FormBlock";
 import Toggle from "../../components/shared/Toggle";
 import Nav from "../../components/shared/Nav";
 import { apiUrl } from "../../utils/apiBase";
+import {
+  API_WILL_SAVE, API_ADMIN_SAVE, apiPathComplete,
+  LBL_LEGAL_NAME, LBL_FULL_NAME, LBL_ID_TYPE, LBL_ID_NUMBER, LBL_ADDRESS,
+  TIP_NO_ID_SAVED, MSG_VIEW_ONLY, MSG_SAVING,
+  BTN_COMPLETE_REVIEW, BTN_SUBMIT_REVIEW,
+  STATUS_COMPLETED, STATUS_PENDING_REVIEW,
+} from "../../constants";
 import type { AssetCatalogItem, AssetInstance, Beneficiary, WillState } from "../../types";
 
 interface WizardFormsProps {
@@ -55,21 +62,21 @@ export default function WizardForms({step,will,setWill,addBene,removeBene,update
     setSubmitStatus("saving"); setSubmitError("");
     try {
       const res = adminReview && willId
-        ? await fetch(apiUrl(`/api/will/admin/${willId}/complete`), {
+        ? await fetch(apiUrl(apiPathComplete(willId)), {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ will, reviewerEmail }),
           })
         : adminComplete
-        ? await fetch(apiUrl("/api/will/admin/save"), {
+        ? await fetch(apiUrl(API_ADMIN_SAVE), {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ will, testatorEmail: will.testator.email, status: "Completed", willId, reviewerEmail }),
+            body: JSON.stringify({ will, testatorEmail: will.testator.email, status: STATUS_COMPLETED, willId, reviewerEmail }),
           })
-        : await fetch(apiUrl("/api/will/save"), {
+        : await fetch(apiUrl(API_WILL_SAVE), {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ will, testatorEmail: will.testator.email, status: "PendingReview", willId }),
+            body: JSON.stringify({ will, testatorEmail: will.testator.email, status: STATUS_PENDING_REVIEW, willId }),
           });
       const isJson = res.headers.get("content-type")?.includes("application/json");
       const data = isJson ? await res.json() : null;
@@ -104,7 +111,7 @@ export default function WizardForms({step,will,setWill,addBene,removeBene,update
             </div>
           </div>
           <div>
-            <label className={LC}>Full Legal Name</label>
+            <label className={LC}>{LBL_LEGAL_NAME}</label>
             <input value={will.testator.fullName} onChange={e=>set("testator.fullName",e.target.value)} className={IC} placeholder="As per Aadhaar / PAN"/>
           </div>
           <div className="grid grid-cols-2 gap-3">
@@ -128,12 +135,12 @@ export default function WizardForms({step,will,setWill,addBene,removeBene,update
           <div><label className={LC}>Permanent Residential Address</label>
             <textarea value={will.testator.address} onChange={e=>set("testator.address",e.target.value)} rows={2} className={IC+" resize-none"}/></div>
           <div className="grid grid-cols-2 gap-3">
-            <div><label className={LC}>ID Type</label>
+            <div><label className={LC}>{LBL_ID_TYPE}</label>
               <select value={will.testator.idType} onChange={e=>set("testator.idType",e.target.value)} className={IC+" appearance-none"}>
                 {ID_TYPES.map(t=><option key={t}>{t}</option>)}
               </select>
             </div>
-            <div><label className={LC}>ID Number</label><input value={will.testator.idNumber} onChange={e=>set("testator.idNumber",e.target.value)} className={IC} placeholder="ID number" title="No ID Number will be saved in database"/></div>
+            <div><label className={LC}>{LBL_ID_NUMBER}</label><input value={will.testator.idNumber} onChange={e=>set("testator.idNumber",e.target.value)} className={IC} placeholder="ID number" title={TIP_NO_ID_SAVED}/></div>
           </div>
           <div className="grid grid-cols-3 gap-2">
             <div><label className={LC}>Day</label><input value={will.testator.signDay} onChange={e=>set("testator.signDay",e.target.value)} className={IC} placeholder="DD"/></div>
@@ -156,12 +163,12 @@ export default function WizardForms({step,will,setWill,addBene,removeBene,update
           <FormBlock title="Primary Executor">
             <div><label className={LC}>Executor's Full Name</label><input value={will.executor.name} onChange={e=>set("executor.name",e.target.value)} className={IC}/></div>
             <div className="grid grid-cols-2 gap-3">
-              <div><label className={LC}>ID Type</label>
+              <div><label className={LC}>{LBL_ID_TYPE}</label>
                 <select value={will.executor.idType} onChange={e=>set("executor.idType",e.target.value)} className={IC+" appearance-none"}>
                   {ID_TYPES.map(t=><option key={t}>{t}</option>)}
                 </select>
               </div>
-              <div><label className={LC}>ID Number</label><input value={will.executor.idNumber} onChange={e=>set("executor.idNumber",e.target.value)} className={IC} title="No ID Number will be saved in database"/></div>
+              <div><label className={LC}>{LBL_ID_NUMBER}</label><input value={will.executor.idNumber} onChange={e=>set("executor.idNumber",e.target.value)} className={IC} title={TIP_NO_ID_SAVED}/></div>
             </div>
             <div><label className={LC}>Residential Address</label><textarea value={will.executor.address} onChange={e=>set("executor.address",e.target.value)} rows={2} className={IC+" resize-none"}/></div>
             <div><label className={LC}>Relationship to Testator</label>
@@ -185,23 +192,23 @@ export default function WizardForms({step,will,setWill,addBene,removeBene,update
           <Toggle label="Add Joint Executor (Optional)" checked={will.executor.hasJoint} onChange={v=>set("executor.hasJoint",v)}/>
           {will.executor.hasJoint&&(
             <FormBlock title="Joint Executor">
-              <div><label className={LC}>Full Name</label><input value={will.executor.jointName} onChange={e=>set("executor.jointName",e.target.value)} className={IC} placeholder="Joint executor name"/></div>
+              <div><label className={LC}>{LBL_FULL_NAME}</label><input value={will.executor.jointName} onChange={e=>set("executor.jointName",e.target.value)} className={IC} placeholder="Joint executor name"/></div>
               <div className="grid grid-cols-2 gap-3">
-                <div><label className={LC}>ID Type</label><select value={will.executor.jointIdType} onChange={e=>set("executor.jointIdType",e.target.value)} className={IC+" appearance-none"}>{ID_TYPES.map(t=><option key={t}>{t}</option>)}</select></div>
-                <div><label className={LC}>ID Number</label><input value={will.executor.jointIdNumber} onChange={e=>set("executor.jointIdNumber",e.target.value)} className={IC} title="No ID Number will be saved in database"/></div>
+                <div><label className={LC}>{LBL_ID_TYPE}</label><select value={will.executor.jointIdType} onChange={e=>set("executor.jointIdType",e.target.value)} className={IC+" appearance-none"}>{ID_TYPES.map(t=><option key={t}>{t}</option>)}</select></div>
+                <div><label className={LC}>{LBL_ID_NUMBER}</label><input value={will.executor.jointIdNumber} onChange={e=>set("executor.jointIdNumber",e.target.value)} className={IC} title={TIP_NO_ID_SAVED}/></div>
               </div>
-              <div><label className={LC}>Address</label><textarea value={will.executor.jointAddress} onChange={e=>set("executor.jointAddress",e.target.value)} rows={2} className={IC+" resize-none"}/></div>
+              <div><label className={LC}>{LBL_ADDRESS}</label><textarea value={will.executor.jointAddress} onChange={e=>set("executor.jointAddress",e.target.value)} rows={2} className={IC+" resize-none"}/></div>
             </FormBlock>
           )}
           <Toggle label="Add Substitute Executor (Recommended)" checked={will.executor.hasSubstitute} onChange={v=>set("executor.hasSubstitute",v)}/>
           {will.executor.hasSubstitute&&(
             <FormBlock title="Substitute Executor">
-              <div><label className={LC}>Full Name</label><input value={will.executor.subName} onChange={e=>set("executor.subName",e.target.value)} className={IC} placeholder="Substitute executor name"/></div>
+              <div><label className={LC}>{LBL_FULL_NAME}</label><input value={will.executor.subName} onChange={e=>set("executor.subName",e.target.value)} className={IC} placeholder="Substitute executor name"/></div>
               <div className="grid grid-cols-2 gap-3">
-                <div><label className={LC}>ID Type</label><select value={will.executor.subIdType} onChange={e=>set("executor.subIdType",e.target.value)} className={IC+" appearance-none"}>{ID_TYPES.map(t=><option key={t}>{t}</option>)}</select></div>
-                <div><label className={LC}>ID Number</label><input value={will.executor.subIdNumber} onChange={e=>set("executor.subIdNumber",e.target.value)} className={IC} title="No ID Number will be saved in database"/></div>
+                <div><label className={LC}>{LBL_ID_TYPE}</label><select value={will.executor.subIdType} onChange={e=>set("executor.subIdType",e.target.value)} className={IC+" appearance-none"}>{ID_TYPES.map(t=><option key={t}>{t}</option>)}</select></div>
+                <div><label className={LC}>{LBL_ID_NUMBER}</label><input value={will.executor.subIdNumber} onChange={e=>set("executor.subIdNumber",e.target.value)} className={IC} title={TIP_NO_ID_SAVED}/></div>
               </div>
-              <div><label className={LC}>Address</label><textarea value={will.executor.subAddress} onChange={e=>set("executor.subAddress",e.target.value)} rows={2} className={IC+" resize-none"}/></div>
+              <div><label className={LC}>{LBL_ADDRESS}</label><textarea value={will.executor.subAddress} onChange={e=>set("executor.subAddress",e.target.value)} rows={2} className={IC+" resize-none"}/></div>
             </FormBlock>
           )}
           <Nav onNext={onNext} onPrev={onPrev}/>
@@ -220,22 +227,22 @@ export default function WizardForms({step,will,setWill,addBene,removeBene,update
           {will.guardian.hasMinors&&(
             <>
               <FormBlock title="Main Guardian">
-                <div><label className={LC}>Full Name</label><input value={will.guardian.name} onChange={e=>set("guardian.name",e.target.value)} className={IC} placeholder="Guardian's name"/></div>
+                <div><label className={LC}>{LBL_FULL_NAME}</label><input value={will.guardian.name} onChange={e=>set("guardian.name",e.target.value)} className={IC} placeholder="Guardian's name"/></div>
                 <div className="grid grid-cols-2 gap-3">
-                  <div><label className={LC}>ID Type</label><select value={will.guardian.idType} onChange={e=>set("guardian.idType",e.target.value)} className={IC+" appearance-none"}>{ID_TYPES.map(t=><option key={t}>{t}</option>)}</select></div>
-                  <div><label className={LC}>ID Number</label><input value={will.guardian.idNumber} onChange={e=>set("guardian.idNumber",e.target.value)} className={IC} title="No ID Number will be saved in database"/></div>
+                  <div><label className={LC}>{LBL_ID_TYPE}</label><select value={will.guardian.idType} onChange={e=>set("guardian.idType",e.target.value)} className={IC+" appearance-none"}>{ID_TYPES.map(t=><option key={t}>{t}</option>)}</select></div>
+                  <div><label className={LC}>{LBL_ID_NUMBER}</label><input value={will.guardian.idNumber} onChange={e=>set("guardian.idNumber",e.target.value)} className={IC} title={TIP_NO_ID_SAVED}/></div>
                 </div>
-                <div><label className={LC}>Address</label><textarea value={will.guardian.address} onChange={e=>set("guardian.address",e.target.value)} rows={2} className={IC+" resize-none"}/></div>
+                <div><label className={LC}>{LBL_ADDRESS}</label><textarea value={will.guardian.address} onChange={e=>set("guardian.address",e.target.value)} rows={2} className={IC+" resize-none"}/></div>
               </FormBlock>
               <Toggle label="Add Substitute Guardian" checked={will.guardian.hasSubstitute} onChange={v=>set("guardian.hasSubstitute",v)}/>
               {will.guardian.hasSubstitute&&(
                 <FormBlock title="Substitute Guardian">
-                  <div><label className={LC}>Full Name</label><input value={will.guardian.subName} onChange={e=>set("guardian.subName",e.target.value)} className={IC} placeholder="Substitute guardian name"/></div>
+                  <div><label className={LC}>{LBL_FULL_NAME}</label><input value={will.guardian.subName} onChange={e=>set("guardian.subName",e.target.value)} className={IC} placeholder="Substitute guardian name"/></div>
                   <div className="grid grid-cols-2 gap-3">
-                    <div><label className={LC}>ID Type</label><select value={will.guardian.subIdType} onChange={e=>set("guardian.subIdType",e.target.value)} className={IC+" appearance-none"}>{ID_TYPES.map(t=><option key={t}>{t}</option>)}</select></div>
-                    <div><label className={LC}>ID Number</label><input value={will.guardian.subIdNumber} onChange={e=>set("guardian.subIdNumber",e.target.value)} className={IC} title="No ID Number will be saved in database"/></div>
+                    <div><label className={LC}>{LBL_ID_TYPE}</label><select value={will.guardian.subIdType} onChange={e=>set("guardian.subIdType",e.target.value)} className={IC+" appearance-none"}>{ID_TYPES.map(t=><option key={t}>{t}</option>)}</select></div>
+                    <div><label className={LC}>{LBL_ID_NUMBER}</label><input value={will.guardian.subIdNumber} onChange={e=>set("guardian.subIdNumber",e.target.value)} className={IC} title={TIP_NO_ID_SAVED}/></div>
                   </div>
-                  <div><label className={LC}>Address</label><textarea value={will.guardian.subAddress} onChange={e=>set("guardian.subAddress",e.target.value)} rows={2} className={IC+" resize-none"}/></div>
+                  <div><label className={LC}>{LBL_ADDRESS}</label><textarea value={will.guardian.subAddress} onChange={e=>set("guardian.subAddress",e.target.value)} rows={2} className={IC+" resize-none"}/></div>
                 </FormBlock>
               )}
             </>
@@ -256,7 +263,7 @@ export default function WizardForms({step,will,setWill,addBene,removeBene,update
                   {will.beneficiaries.length>1&&<button onClick={()=>removeBene(b.id)} className="text-red-500 hover:text-red-600"><Trash2 size={13}/></button>}
                 </div>
                 <div className="grid grid-cols-2 gap-2.5">
-                  <div><label className={LC}>Full Name</label><input value={b.name} onChange={e=>updateBene(b.id,"name",e.target.value)} className={IC} placeholder="Full name"/></div>
+                  <div><label className={LC}>{LBL_FULL_NAME}</label><input value={b.name} onChange={e=>updateBene(b.id,"name",e.target.value)} className={IC} placeholder="Full name"/></div>
                   <div><label className={LC}>Relation</label>
                     <select value={b.relation} onChange={e=>updateBene(b.id,"relation",e.target.value)} className={IC+" appearance-none"}>
                       {RELATIONS.map(r=><option key={r}>{r}</option>)}
@@ -451,12 +458,12 @@ export default function WizardForms({step,will,setWill,addBene,removeBene,update
               </select>
             </div>
             <div className="grid grid-cols-2 gap-3 mt-2.5">
-              <div><label className={LC}>ID Type</label>
+              <div><label className={LC}>{LBL_ID_TYPE}</label>
                 <select value={will.residualIdType} onChange={e=>setWill(p=>({...p,residualIdType:e.target.value}))} className={IC+" appearance-none"}>
                   {ID_TYPES.map(t=><option key={t}>{t}</option>)}
                 </select>
               </div>
-              <div><label className={LC}>ID Number</label><input value={will.residualIdNumber} onChange={e=>setWill(p=>({...p,residualIdNumber:e.target.value}))} className={IC} placeholder="ID number" title="No ID Number will be saved in database"/></div>
+              <div><label className={LC}>{LBL_ID_NUMBER}</label><input value={will.residualIdNumber} onChange={e=>setWill(p=>({...p,residualIdNumber:e.target.value}))} className={IC} placeholder="ID number" title={TIP_NO_ID_SAVED}/></div>
             </div>
           </FormBlock>
           <FormBlock title="Section VI — Special Non-Asset Instructions">
@@ -481,11 +488,11 @@ export default function WizardForms({step,will,setWill,addBene,removeBene,update
             All rest, residue and remainder of my estate shall vest absolutely in <strong>{will.beneficiaries.find(b=>String(b.id)===String(will.residualBeneId))?.name||"Selected Beneficiary"}</strong>.
           </div>
           <div className="flex flex-col gap-3">
-            {willStatus!=="Completed"&&(
+            {willStatus!==STATUS_COMPLETED&&(
               <button onClick={handleSaveAndSubmit} disabled={submitStatus==="saving"||viewOnly}
-                title={viewOnly?"Viewing a submitted Will — saving is disabled":undefined}
+                title={viewOnly?MSG_VIEW_ONLY:undefined}
                 className={`w-full font-bold py-3.5 rounded-xl text-sm transition-colors flex items-center justify-center gap-2 whitespace-nowrap ${submitStatus==="saving"||viewOnly?"bg-slate-700 text-slate-400 cursor-not-allowed":"bg-slate-800 hover:bg-slate-700 text-white"}`}>
-                <Send size={16} className="shrink-0"/>{submitStatus==="saving"?"Saving…":(adminReview||adminComplete)?"Save and Complete Review":"Save and Submit for Review"}
+                <Send size={16} className="shrink-0"/>{submitStatus==="saving"?MSG_SAVING:(adminReview||adminComplete)?BTN_COMPLETE_REVIEW:BTN_SUBMIT_REVIEW}
               </button>
             )}
             <button onClick={onGenerate} className="w-full bg-[#d09d61] hover:bg-[#b88442] text-[#020617] font-bold py-3.5 rounded-xl text-sm transition-colors flex items-center justify-center gap-2 whitespace-nowrap">

@@ -10,7 +10,7 @@ HTTP_UNAUTHORIZED = 401
 HTTP_FORBIDDEN = 403
 HTTP_NOT_FOUND = 404
 HTTP_CONFLICT = 409
-HTTP_INTERNAL_SERVER_ERROR = 500
+HTTP_SERVER_ERROR = 500
 
 # --- App metadata ---
 APP_TITLE = "SmartWill API"
@@ -29,9 +29,10 @@ STATUS_COMPLETED = "Completed"
 
 # --- Business rules ---
 MIN_PASSWORD_LENGTH = 8
-TESTATOR_WILL_VISIBILITY_DAYS = 30
+WILL_VISIBLE_DAYS = 30
 OTP_LENGTH = 6
 OTP_TTL_SECONDS = 300
+OTP_PHONE_MIN = 10
 
 # --- CORS ---
 CORS_ALLOW_ORIGINS = ["*"]
@@ -40,8 +41,8 @@ CORS_ALLOW_HEADERS = ["Content-Type"]
 
 # --- Email (Resend) ---
 RESEND_API_URL = "https://api.resend.com/emails"
-EMAIL_REQUEST_TIMEOUT_SECONDS = 10
-DEFAULT_ADMIN_REVIEW_EMAIL = "anup@prabhuverlekar.com"
+EMAIL_TIMEOUT_SEC = 10
+DEFAULT_ADMIN_EMAIL = "anup@prabhuverlekar.com"
 
 # --- Validation ---
 EMAIL_REGEX_PATTERN = r"^\S+@\S+\.\S+$"
@@ -53,27 +54,61 @@ LOG_FORMAT = "%(asctime)s %(levelname)s %(name)s: %(message)s"
 DATABASE_UNAVAILABLE = "Could not reach the database. Please try again."
 MONGODB_NOT_CONFIGURED = "This feature is not configured on the server (missing MONGODB_URI)."
 
-GOOGLE_SIGNIN_NOT_CONFIGURED = "Google Sign-In is not configured on the server (missing GOOGLE_CLIENT_ID)."
+GOOGLE_NOT_CONFIGURED = "Google Sign-In is not configured on the server (missing GOOGLE_CLIENT_ID)."
 MISSING_ID_TOKEN = "Missing idToken."
-GOOGLE_TOKEN_MISSING_EMAIL = "Google token did not include an email address."
-INVALID_GOOGLE_CREDENTIAL = "Invalid or expired Google credential."
+GOOGLE_NO_EMAIL = "Google token did not include an email address."
+BAD_GOOGLE_CRED = "Invalid or expired Google credential."
 MALFORMED_CREDENTIALS = "Malformed credentials."
 FULL_NAME_REQUIRED = "Full name is required."
 INVALID_EMAIL = "Enter a valid email address."
 PASSWORD_TOO_SHORT = "Password must be at least 8 characters."
 PASSWORD_REQUIRED = "Password is required."
-INVALID_LOGIN_CREDENTIALS = "Invalid email or password."
-ADMIN_ALREADY_SIGNED_UP = "You're already signed up as an admin with this email. Please use the login screen to log in."
+BAD_LOGIN_CREDS = "Invalid email or password."
+ADMIN_EXISTS = "You're already signed up as an admin with this email. Please use the login screen to log in."
 
-INVALID_PHONE_NUMBER = "Enter a valid mobile number."
-OTP_NOT_REQUESTED = "Request an OTP before attempting to verify it."
+BAD_PHONE = "Enter a valid mobile number."
+OTP_MISSING = "Request an OTP before attempting to verify it."
 OTP_EXPIRED = "This OTP has expired. Please request a new one."
 INVALID_OTP = "The OTP you entered is incorrect."
 
-WILL_DATA_REQUIRED = "Will data is required."
-INVALID_WILL_STATUS = "Invalid will status."
-INVALID_TESTATOR_EMAIL = "Enter a valid testator email address."
+WILL_REQUIRED = "Will data is required."
+BAD_WILL_STATUS = "Invalid will status."
+BAD_TESTATOR_EMAIL = "Enter a valid testator email address."
 WILL_NOT_FOUND = "Will not found."
 WILL_ACCESS_DENIED = "You do not have permission to access this Will."
-WILL_LOCKED_FOR_REVIEW = "This Will is pending review and cannot be edited."
+WILL_LOCKED = "This Will is pending review and cannot be edited."
 COMMENTS_REQUIRED = "Enter comments explaining what needs to change."
+
+# --- Document/request field names ---
+FLD_EMAIL = "email"
+FLD_PASSWORD = "password"
+FLD_PWD_HASH = "passwordHash"
+FLD_FULL_NAME = "fullName"
+FLD_NAME = "name"
+FLD_ID_TOKEN = "idToken"
+FLD_PHONE = "phone"
+FLD_CODE = "code"
+FLD_COMMENTS = "comments"
+FLD_WILL_ID = "willId"
+FLD_TESTATOR_EMAIL = "testatorEmail"
+FLD_STATUS = "status"
+FLD_CREATED_AT = "createdAt"
+FLD_UPDATED_AT = "updatedAt"
+FLD_WILL = "will"
+FLD_REVIEWER_EMAIL = "reviewerEmail"
+FLD_ADMIN_COMMENTS = "adminComments"
+FLD_TESTATOR = "testator"
+FLD_EXECUTOR = "executor"
+FLD_GUARDIAN = "guardian"
+FLD_ID_NUMBER = "idNumber"
+FLD_JOINT_ID = "jointIdNumber"
+FLD_SUB_ID = "subIdNumber"
+FLD_RESIDUAL_ID = "residualIdNumber"
+
+# --- Fallback values ---
+UNKNOWN_NAME = "Unknown"
+DEFAULT_GREETING = "there"
+
+# --- Email content ---
+SUBMIT_SUBJECT_TMPL = "New Will submitted for review — {testator_name}"
+SENT_BACK_SUBJECT = "Your Will needs a few changes"

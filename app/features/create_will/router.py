@@ -7,11 +7,11 @@ from app.features.create_will import service
 from app.features.create_will.schemas import (
     DeleteWillResponse, ErrorResponse, SaveWillResponse, TestatorWillsResponse, WillDetailResponse,
 )
-from app.shared.constants import HTTP_BAD_REQUEST, HTTP_CREATED, HTTP_FORBIDDEN, HTTP_INTERNAL_SERVER_ERROR, HTTP_NOT_FOUND
+from app.shared.constants import HTTP_BAD_REQUEST, HTTP_CREATED, HTTP_FORBIDDEN, HTTP_SERVER_ERROR, HTTP_NOT_FOUND
 
 router = APIRouter(prefix="/api/will", tags=["create-will"])
 
-ERROR_RESPONSES = {HTTP_BAD_REQUEST: {"model": ErrorResponse}, HTTP_INTERNAL_SERVER_ERROR: {"model": ErrorResponse}}
+ERROR_RESPONSES = {HTTP_BAD_REQUEST: {"model": ErrorResponse}, HTTP_SERVER_ERROR: {"model": ErrorResponse}}
 
 
 @router.post(

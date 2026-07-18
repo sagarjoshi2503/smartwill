@@ -1,18 +1,16 @@
 import { useEffect, useState } from "react";
 import { FileText, Plus, Edit3, Eye, Trash2, Clock } from "lucide-react";
 import { apiUrl } from "../../utils/apiBase";
+import {
+  API_MY_WILLS, apiPathWill, CONFIRM_DELETE_WILL, ERR_LOAD_WILL,
+  ERR_DELETE_WILL, STATUS_DRAFT, STATUS_LBL, WILL_VISIBLE_DAYS,
+} from "../../constants";
 import type { TestatorWill, WillState } from "../../types";
 
 const STATUS_STYLE: Record<TestatorWill["status"], string> = {
   Draft: "bg-slate-100 text-slate-600 border-slate-200",
   PendingReview: "bg-[#d09d61]/10 text-[#b6844a] border-[#d09d61]/30",
   Completed: "bg-emerald-50 text-emerald-600 border-emerald-200",
-};
-
-const STATUS_LABEL: Record<TestatorWill["status"], string> = {
-  Draft: "Draft",
-  PendingReview: "Pending Review",
-  Completed: "Completed",
 };
 
 export default function TestatorWillsView({email,onCreateNew,onEditWill,onViewWill}:{
@@ -28,7 +26,7 @@ export default function TestatorWillsView({email,onCreateNew,onEditWill,onViewWi
   const [actionError,setActionError]=useState("");
 
   const fetchWill = async (willId: string): Promise<{ will: WillState; adminComments?: string }> => {
-    const res = await fetch(apiUrl(`/api/will/${willId}?email=${encodeURIComponent(email)}`));
+    const res = await fetch(apiUrl(`${apiPathWill(willId)}?email=${encodeURIComponent(email)}`));
     const isJson = res.headers.get("content-type")?.includes("application/json");
     const data = isJson ? await res.json() : null;
     if(!res.ok) throw new Error(data?.error || `Could not load this Will (server returned ${res.status}).`);
@@ -41,7 +39,7 @@ export default function TestatorWillsView({email,onCreateNew,onEditWill,onViewWi
       const { will, adminComments } = await fetchWill(willId);
       onEditWill(willId, will, adminComments);
     } catch (err) {
-      setActionError(err instanceof Error ? err.message : "Could not load this Will.");
+      setActionError(err instanceof Error ? err.message : ERR_LOAD_WILL);
     } finally {
       setBusyId(null);
     }
@@ -53,23 +51,23 @@ export default function TestatorWillsView({email,onCreateNew,onEditWill,onViewWi
       const { will } = await fetchWill(willId);
       onViewWill(willId, will);
     } catch (err) {
-      setActionError(err instanceof Error ? err.message : "Could not load this Will.");
+      setActionError(err instanceof Error ? err.message : ERR_LOAD_WILL);
     } finally {
       setBusyId(null);
     }
   };
 
   const handleDelete = async (willId: string) => {
-    if(!window.confirm("Delete this Will? This cannot be undone.")) return;
+    if(!window.confirm(CONFIRM_DELETE_WILL)) return;
     setBusyId(willId); setActionError("");
     try {
-      const res = await fetch(apiUrl(`/api/will/${willId}?email=${encodeURIComponent(email)}`), { method: "DELETE" });
+      const res = await fetch(apiUrl(`${apiPathWill(willId)}?email=${encodeURIComponent(email)}`), { method: "DELETE" });
       const isJson = res.headers.get("content-type")?.includes("application/json");
       const data = isJson ? await res.json() : null;
       if(!res.ok) throw new Error(data?.error || `Could not delete this Will (server returned ${res.status}).`);
       setWills(p=>p.filter(w=>w.willId!==willId));
     } catch (err) {
-      setActionError(err instanceof Error ? err.message : "Could not delete this Will.");
+      setActionError(err instanceof Error ? err.message : ERR_DELETE_WILL);
     } finally {
       setBusyId(null);
     }
@@ -80,7 +78,7 @@ export default function TestatorWillsView({email,onCreateNew,onEditWill,onViewWi
     (async()=>{
       setStatus("loading"); setError("");
       try {
-        const res = await fetch(apiUrl(`/api/will/my-wills?email=${encodeURIComponent(email)}`));
+        const res = await fetch(apiUrl(`${API_MY_WILLS}?email=${encodeURIComponent(email)}`));
         const isJson = res.headers.get("content-type")?.includes("application/json");
         const data = isJson ? await res.json() : null;
         if(!res.ok) throw new Error(data?.error || `Could not load your Wills (server returned ${res.status}).`);
@@ -109,7 +107,7 @@ export default function TestatorWillsView({email,onCreateNew,onEditWill,onViewWi
           </button>
         </div>
         <div className="bg-amber-50 border border-amber-200 rounded-xl p-3.5 text-xs text-amber-700 flex items-start gap-2 mb-6">
-          <Clock size={13} className="mt-0.5 shrink-0"/>Wills created more than 30 days ago will be deleted from the system.
+          <Clock size={13} className="mt-0.5 shrink-0"/>Wills created more than {WILL_VISIBLE_DAYS} days ago will be deleted from the system.
         </div>
         {actionError&&<p className="text-red-500 text-xs mb-4">{actionError}</p>}
         <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden">
@@ -139,7 +137,7 @@ export default function TestatorWillsView({email,onCreateNew,onEditWill,onViewWi
                     <td className="px-5 py-3.5 text-slate-900 text-sm font-medium">{w.fullLegalName||"Unnamed"}</td>
                     <td className="px-5 py-3.5 text-slate-500 text-xs">{w.updatedAt?new Date(w.updatedAt).toLocaleDateString():"—"}</td>
                     <td className="px-5 py-3.5">
-                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${STATUS_STYLE[w.status]}`}>{STATUS_LABEL[w.status]}</span>
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${STATUS_STYLE[w.status]}`}>{STATUS_LBL[w.status]}</span>
                     </td>
                     <td className="px-5 py-3.5">
                       <div className="flex items-center gap-3">
@@ -147,7 +145,7 @@ export default function TestatorWillsView({email,onCreateNew,onEditWill,onViewWi
                           className="flex items-center gap-1.5 text-slate-600 hover:text-slate-900 text-xs font-semibold transition-colors disabled:opacity-50">
                           <Eye size={11}/>View
                         </button>
-                        {w.status==="Draft" ? (
+                        {w.status===STATUS_DRAFT ? (
                           <button onClick={()=>handleEdit(w.willId)} disabled={busyId===w.willId}
                             className="flex items-center gap-1.5 text-[#d09d61] hover:text-[#b88442] text-xs font-semibold transition-colors disabled:opacity-50">
                             <Edit3 size={11}/>Edit

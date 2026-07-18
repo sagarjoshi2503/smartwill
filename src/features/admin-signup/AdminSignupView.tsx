@@ -1,6 +1,10 @@
 import { useState } from "react";
 import { Scale, User, Mail, Lock, UserPlus } from "lucide-react";
 import { apiUrl } from "../../utils/apiBase";
+import {
+  API_ADMIN_SIGNUP, LBL_EMAIL_ADDR, LBL_FULL_NAME, LBL_PASSWORD,
+  MIN_PASSWORD_LENGTH, PH_LAWFIRM_EMAIL, BTN_CREATE_ACCOUNT,
+} from "../../constants";
 import type { AdminProfile } from "../../types";
 
 export default function AdminSignupView({onSignup,onBack,onGoToLogin}:{
@@ -17,18 +21,18 @@ export default function AdminSignupView({onSignup,onBack,onGoToLogin}:{
   const [submitting,setSubmitting]=useState(false);
   const IC="w-full apv-input rounded-2xl pl-11 pr-4 py-3 text-slate-900 placeholder:text-slate-500 text-sm focus:outline-none transition";
 
-  const canSubmit = fullName.trim().length>0 && /\S+@\S+\.\S+/.test(email) && password.length>=8 && confirmPassword.length>0;
+  const canSubmit = fullName.trim().length>0 && /\S+@\S+\.\S+/.test(email) && password.length>=MIN_PASSWORD_LENGTH && confirmPassword.length>0;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if(!fullName.trim()){ setError("Enter your full name."); return; }
     if(!/\S+@\S+\.\S+/.test(email)){ setError("Enter a valid email address."); return; }
-    if(password.length<8){ setError("Password must be at least 8 characters."); return; }
+    if(password.length<MIN_PASSWORD_LENGTH){ setError(`Password must be at least ${MIN_PASSWORD_LENGTH} characters.`); return; }
     if(password!==confirmPassword){ setError("Passwords do not match."); return; }
     setError(""); setAlreadySignedUp(false);
     setSubmitting(true);
     try {
-      const res = await fetch(apiUrl("/api/auth/admin-signup"), {
+      const res = await fetch(apiUrl(API_ADMIN_SIGNUP), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ fullName: fullName.trim(), email, password }),
@@ -57,21 +61,21 @@ export default function AdminSignupView({onSignup,onBack,onGoToLogin}:{
         </div>
         <form onSubmit={handleSubmit} className="apv-card p-6 space-y-4">
           <div>
-            <label className="block apv-label mb-2">Full Name</label>
+            <label className="block apv-label mb-2">{LBL_FULL_NAME}</label>
             <div className="relative"><User size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"/>
               <input type="text" value={fullName} onChange={e=>{setFullName(e.target.value);setError("");setAlreadySignedUp(false);}} placeholder="Jane Doe" className={IC} autoComplete="name"/>
             </div>
           </div>
           <div>
-            <label className="block apv-label mb-2">Email Address</label>
+            <label className="block apv-label mb-2">{LBL_EMAIL_ADDR}</label>
             <div className="relative"><Mail size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"/>
-              <input type="email" value={email} onChange={e=>{setEmail(e.target.value);setError("");setAlreadySignedUp(false);}} placeholder="you@lawfirm.com" className={IC} autoComplete="username"/>
+              <input type="email" value={email} onChange={e=>{setEmail(e.target.value);setError("");setAlreadySignedUp(false);}} placeholder={PH_LAWFIRM_EMAIL} className={IC} autoComplete="username"/>
             </div>
           </div>
           <div>
-            <label className="block apv-label mb-2">Password</label>
+            <label className="block apv-label mb-2">{LBL_PASSWORD}</label>
             <div className="relative"><Lock size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"/>
-              <input type="password" value={password} onChange={e=>{setPassword(e.target.value);setError("");setAlreadySignedUp(false);}} placeholder="At least 8 characters" className={IC} autoComplete="new-password"/>
+              <input type="password" value={password} onChange={e=>{setPassword(e.target.value);setError("");setAlreadySignedUp(false);}} placeholder={`At least ${MIN_PASSWORD_LENGTH} characters`} className={IC} autoComplete="new-password"/>
             </div>
           </div>
           <div>
@@ -91,7 +95,7 @@ export default function AdminSignupView({onSignup,onBack,onGoToLogin}:{
             </div>
           )}
           <button type="submit" disabled={submitting} className={`w-full py-3 rounded-full font-bold text-sm transition-all flex items-center justify-center gap-1.5 ${canSubmit&&!submitting?"apv-btn":"bg-slate-200 text-slate-500 cursor-not-allowed"}`}>
-            <UserPlus size={14}/>{submitting?"Creating Account…":"Create Account"}
+            <UserPlus size={14}/>{submitting?"Creating Account…":BTN_CREATE_ACCOUNT}
           </button>
           <button type="button" onClick={onBack} className="w-full text-slate-500 hover:text-slate-900 text-sm py-1 transition-colors">← Back</button>
         </form>

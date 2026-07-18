@@ -10,11 +10,9 @@ from datetime import datetime, timedelta, timezone
 from app.core.exceptions import AppError
 from app.features.user_signin_otp import repository
 from app.shared.constants import (
-    HTTP_BAD_REQUEST, INVALID_OTP, INVALID_PHONE_NUMBER, OTP_EXPIRED, OTP_LENGTH, OTP_NOT_REQUESTED,
-    OTP_TTL_SECONDS,
+    FLD_CODE, FLD_PHONE, HTTP_BAD_REQUEST, INVALID_OTP, BAD_PHONE, OTP_EXPIRED, OTP_LENGTH,
+    OTP_MISSING, OTP_PHONE_MIN, OTP_TTL_SECONDS,
 )
-
-PHONE_REGEX_MIN_DIGITS = 10
 
 
 def _normalize_phone(phone: str) -> str:
@@ -22,9 +20,9 @@ def _normalize_phone(phone: str) -> str:
 
 
 def request_otp(body: dict) -> dict:
-    phone = _normalize_phone((body or {}).get("phone", ""))
-    if len(phone) < PHONE_REGEX_MIN_DIGITS:
-        raise AppError(HTTP_BAD_REQUEST, INVALID_PHONE_NUMBER)
+    phone = _normalize_phone((body or {}).get(FLD_PHONE, ""))
+    if len(phone) < OTP_PHONE_MIN:
+        raise AppError(HTTP_BAD_REQUEST, BAD_PHONE)
 
     code = "".join(str(random.randint(0, 9)) for _ in range(OTP_LENGTH))
     expires_at = datetime.now(timezone.utc) + timedelta(seconds=OTP_TTL_SECONDS)
@@ -34,15 +32,15 @@ def request_otp(body: dict) -> dict:
 
 
 def verify_otp(body: dict) -> dict:
-    phone = _normalize_phone((body or {}).get("phone", ""))
-    code = ((body or {}).get("code") or "").strip()
+    phone = _normalize_phone((body or {}).get(FLD_PHONE, ""))
+    code = ((body or {}).get(FLD_CODE) or "").strip()
 
-    if len(phone) < PHONE_REGEX_MIN_DIGITS:
-        raise AppError(HTTP_BAD_REQUEST, INVALID_PHONE_NUMBER)
+    if len(phone) < OTP_PHONE_MIN:
+        raise AppError(HTTP_BAD_REQUEST, BAD_PHONE)
 
     entry = repository.get_otp(phone)
     if not entry:
-        raise AppError(HTTP_BAD_REQUEST, OTP_NOT_REQUESTED)
+        raise AppError(HTTP_BAD_REQUEST, OTP_MISSING)
 
     saved_code, expires_at = entry
     if datetime.now(timezone.utc) > expires_at:

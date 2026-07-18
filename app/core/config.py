@@ -2,7 +2,7 @@ from functools import lru_cache
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-from app.shared.constants import DEFAULT_ADMIN_REVIEW_EMAIL
+from app.shared.constants import DEFAULT_ADMIN_EMAIL
 
 
 class Settings(BaseSettings):
@@ -17,7 +17,7 @@ class Settings(BaseSettings):
     google_client_id: str | None = None
 
     # Recipient notified whenever a testator submits their Will for review.
-    admin_review_email: str = DEFAULT_ADMIN_REVIEW_EMAIL
+    admin_review_email: str = DEFAULT_ADMIN_EMAIL
 
     # Resend (https://resend.com) transactional email API, used to send that
     # notification. Both must be set for email to actually go out.

@@ -5,25 +5,26 @@ from pymongo.errors import DuplicateKeyError, PyMongoError
 
 from app.core.exceptions import AppError
 from app.shared.constants import (
-    ADMIN_ALREADY_SIGNED_UP, DATABASE_UNAVAILABLE, HTTP_CONFLICT, HTTP_INTERNAL_SERVER_ERROR, LOGIN_COLLECTION_NAME,
+    ADMIN_EXISTS, DATABASE_UNAVAILABLE, FLD_CREATED_AT, FLD_EMAIL, FLD_FULL_NAME,
+    FLD_PWD_HASH, HTTP_CONFLICT, HTTP_SERVER_ERROR, LOGIN_COLLECTION_NAME,
 )
 
 
 def _collection(db: Database):
     collection = db[LOGIN_COLLECTION_NAME]
-    collection.create_index("email", unique=True)
+    collection.create_index(FLD_EMAIL, unique=True)
     return collection
 
 
 def insert_admin(db: Database, full_name: str, email: str, password_hash: str) -> None:
     try:
         _collection(db).insert_one({
-            "fullName": full_name,
-            "email": email,
-            "passwordHash": password_hash,
-            "createdAt": datetime.now(timezone.utc),
+            FLD_FULL_NAME: full_name,
+            FLD_EMAIL: email,
+            FLD_PWD_HASH: password_hash,
+            FLD_CREATED_AT: datetime.now(timezone.utc),
         })
     except DuplicateKeyError:
-        raise AppError(HTTP_CONFLICT, ADMIN_ALREADY_SIGNED_UP)
+        raise AppError(HTTP_CONFLICT, ADMIN_EXISTS)
     except PyMongoError:
-        raise AppError(HTTP_INTERNAL_SERVER_ERROR, DATABASE_UNAVAILABLE)
+        raise AppError(HTTP_SERVER_ERROR, DATABASE_UNAVAILABLE)

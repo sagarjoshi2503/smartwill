@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Scale, Phone, ArrowRight } from "lucide-react";
 import GoogleSignInButton from "../features/user-signin-gmail/GoogleSignInButton";
 import { apiUrl } from "../utils/apiBase";
+import { API_GOOGLE } from "../constants";
 import type { GoogleProfile } from "../types";
 
 export default function AuthChoiceView({onGoogleSuccess,onPhone,onBack}:{
@@ -15,7 +16,7 @@ export default function AuthChoiceView({onGoogleSuccess,onPhone,onBack}:{
   const handleCredential = async (idToken: string) => {
     setStatus("verifying"); setError("");
     try {
-      const res = await fetch(apiUrl("/api/auth/google"), {
+      const res = await fetch(apiUrl(API_GOOGLE), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ idToken }),

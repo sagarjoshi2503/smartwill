@@ -40,10 +40,10 @@ def test_verify_falls_back_to_email_when_name_missing(client, monkeypatch):
 # --- negative scenarios ---
 
 def test_verify_rejects_invalid_token(client, monkeypatch):
-    monkeypatch.setattr(service, "verify_google_id_token", fake_verify_raises(AppError(401, constants.INVALID_GOOGLE_CREDENTIAL)))
+    monkeypatch.setattr(service, "verify_google_id_token", fake_verify_raises(AppError(401, constants.BAD_GOOGLE_CRED)))
     res = client.post(URL, json={"idToken": "bad-token"})
     assert res.status_code == 401
-    assert res.json() == {"error": constants.INVALID_GOOGLE_CREDENTIAL}
+    assert res.json() == {"error": constants.BAD_GOOGLE_CRED}
 
 
 def test_verify_rejects_missing_id_token(client):
@@ -62,7 +62,7 @@ def test_verify_rejects_payload_without_email(client, monkeypatch):
     monkeypatch.setattr(service, "verify_google_id_token", fake_verify({"name": "No Email"}))
     res = client.post(URL, json={"idToken": "good-token"})
     assert res.status_code == 401
-    assert res.json() == {"error": constants.GOOGLE_TOKEN_MISSING_EMAIL}
+    assert res.json() == {"error": constants.GOOGLE_NO_EMAIL}
 
 
 def test_verify_returns_500_when_client_id_missing(fake_db):
@@ -71,6 +71,6 @@ def test_verify_returns_500_when_client_id_missing(fake_db):
         from fastapi.testclient import TestClient
         res = TestClient(app).post(URL, json={"idToken": "token"})
         assert res.status_code == 500
-        assert res.json() == {"error": constants.GOOGLE_SIGNIN_NOT_CONFIGURED}
+        assert res.json() == {"error": constants.GOOGLE_NOT_CONFIGURED}
     finally:
         app.dependency_overrides.clear()

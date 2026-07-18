@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Scale, Mail, Lock, LogIn } from "lucide-react";
 import { apiUrl } from "../../utils/apiBase";
 import { encodePassword } from "../../utils/encode";
+import { API_ADMIN_LOGIN, LBL_EMAIL_ADDR, LBL_PASSWORD, PH_LAWFIRM_EMAIL } from "../../constants";
 import type { AdminProfile } from "../../types";
 
 export default function AdminLoginView({onLogin,onBack,onSignup}:{
@@ -23,7 +24,7 @@ export default function AdminLoginView({onLogin,onBack,onSignup}:{
     setError("");
     setSubmitting(true);
     try {
-      const res = await fetch(apiUrl("/api/auth/admin-login"), {
+      const res = await fetch(apiUrl(API_ADMIN_LOGIN), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password: encodePassword(password) }),
@@ -49,13 +50,13 @@ export default function AdminLoginView({onLogin,onBack,onSignup}:{
         </div>
         <form onSubmit={handleSubmit} className="apv-card p-6 space-y-4">
           <div>
-            <label className="block apv-label mb-2">Email Address</label>
+            <label className="block apv-label mb-2">{LBL_EMAIL_ADDR}</label>
             <div className="relative"><Mail size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"/>
-              <input type="email" value={email} onChange={e=>setEmail(e.target.value)} placeholder="you@lawfirm.com" className={IC} autoComplete="username"/>
+              <input type="email" value={email} onChange={e=>setEmail(e.target.value)} placeholder={PH_LAWFIRM_EMAIL} className={IC} autoComplete="username"/>
             </div>
           </div>
           <div>
-            <label className="block apv-label mb-2">Password</label>
+            <label className="block apv-label mb-2">{LBL_PASSWORD}</label>
             <div className="relative"><Lock size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"/>
               <input type="password" value={password} onChange={e=>setPassword(e.target.value)} placeholder="Enter your password" className={IC} autoComplete="current-password"/>
             </div>

@@ -114,13 +114,13 @@ def test_excludes_a_recently_created_will_not_touched_in_30_days(client, fake_db
 def test_rejects_missing_email(client):
     res = client.get(URL)
     assert res.status_code == 400
-    assert res.json() == {"error": constants.INVALID_TESTATOR_EMAIL}
+    assert res.json() == {"error": constants.BAD_TESTATOR_EMAIL}
 
 
 def test_rejects_invalid_email_format(client):
     res = client.get(URL, params={"email": "not-an-email"})
     assert res.status_code == 400
-    assert res.json() == {"error": constants.INVALID_TESTATOR_EMAIL}
+    assert res.json() == {"error": constants.BAD_TESTATOR_EMAIL}
 
 
 def test_returns_500_when_mongodb_uri_missing():
