@@ -12,7 +12,7 @@ export const STATUS_COMPLETED = "Completed" as const;
 export const ADMIN_PATH = "/admin";
 
 // --- API paths (pass to utils/apiBase's apiUrl()) ---
-export const API_FLAGS = "/api/flags";
+export const API_FLAGS = "/api/flags?key=show-admin-button";
 export const API_GOOGLE = "/api/auth/google";
 export const API_ADMIN_LOGIN = "/api/auth/admin-login";
 export const API_ADMIN_SIGNUP = "/api/auth/admin-signup";
