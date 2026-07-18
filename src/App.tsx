@@ -368,6 +368,7 @@ export default function SmartWill() {
                 adminComplete={adminCreateMode}
                 testatorEmailEditable={testatorEmailEditable}
                 viewOnly={viewOnlyMode}
+                willStatus={adminReviewStatus}
                 reviewerEmail={adminProfile?.email}
                 adminComments={activeAdminComments}
                 onSaved={(willId,status)=>{
