@@ -33,6 +33,7 @@ WILL_VISIBLE_DAYS = 30
 OTP_LENGTH = 6
 OTP_TTL_SECONDS = 300
 OTP_PHONE_MIN = 10
+OTP_COUNTRY_CODE = "+91"
 
 # --- CORS ---
 CORS_ALLOW_ORIGINS = ["*"]
@@ -43,6 +44,10 @@ CORS_ALLOW_HEADERS = ["Content-Type"]
 RESEND_API_URL = "https://api.resend.com/emails"
 EMAIL_TIMEOUT_SEC = 10
 DEFAULT_ADMIN_EMAIL = "anup@prabhuverlekar.com"
+
+# --- SMS (Twilio) ---
+TWILIO_FROM_NUMBER = "+17154074664"
+OTP_SMS_TMPL = "Your SmartWill OTP is {code}. It expires in 5 minutes."
 
 # --- Validation ---
 EMAIL_REGEX_PATTERN = r"^\S+@\S+\.\S+$"

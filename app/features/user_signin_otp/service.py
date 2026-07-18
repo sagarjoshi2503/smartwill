@@ -1,17 +1,20 @@
-"""Stub OTP sign-in flow: generates and checks a numeric code held in memory.
+"""OTP sign-in flow: generates a numeric code, delivers it by SMS via Twilio
+(app.shared.sms), and checks it against an in-memory store.
 
-There's no real SMS delivery yet — the generated code is only returned to
-the caller so it can be wired up to an actual provider later, matching the
-current frontend demo (which accepts any fully-filled 6-digit code)."""
+The store is in-process only (see repository.py) — it doesn't survive a
+process restart and won't work across multiple server instances. That's a
+placeholder until a persistent (e.g. Redis) store is wired up."""
 
 import random
 from datetime import datetime, timedelta, timezone
 
+from app.core.config import Settings
 from app.core.exceptions import AppError
 from app.features.user_signin_otp import repository
+from app.shared import sms
 from app.shared.constants import (
-    FLD_CODE, FLD_PHONE, HTTP_BAD_REQUEST, INVALID_OTP, BAD_PHONE, OTP_EXPIRED, OTP_LENGTH,
-    OTP_MISSING, OTP_PHONE_MIN, OTP_TTL_SECONDS,
+    FLD_CODE, FLD_PHONE, HTTP_BAD_REQUEST, INVALID_OTP, BAD_PHONE, OTP_COUNTRY_CODE, OTP_EXPIRED, OTP_LENGTH,
+    OTP_MISSING, OTP_PHONE_MIN, OTP_SMS_TMPL, OTP_TTL_SECONDS,
 )
 
 
@@ -19,7 +22,7 @@ def _normalize_phone(phone: str) -> str:
     return "".join(ch for ch in (phone or "") if ch.isdigit())
 
 
-def request_otp(body: dict) -> dict:
+def request_otp(body: dict, settings: Settings) -> dict:
     phone = _normalize_phone((body or {}).get(FLD_PHONE, ""))
     if len(phone) < OTP_PHONE_MIN:
         raise AppError(HTTP_BAD_REQUEST, BAD_PHONE)
@@ -27,6 +30,8 @@ def request_otp(body: dict) -> dict:
     code = "".join(str(random.randint(0, 9)) for _ in range(OTP_LENGTH))
     expires_at = datetime.now(timezone.utc) + timedelta(seconds=OTP_TTL_SECONDS)
     repository.save_otp(phone, code, expires_at)
+
+    sms.send_sms(settings, to=f"{OTP_COUNTRY_CODE}{phone}", body=OTP_SMS_TMPL.format(code=code))
 
     return {"phone": phone, "expiresInSeconds": OTP_TTL_SECONDS}
 

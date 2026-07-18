@@ -1,6 +1,8 @@
+import { useState } from "react";
 import { Phone } from "lucide-react";
 import type { MutableRefObject } from "react";
-import { COUNTRY_CODE_PREFIX, OTP_DEMO_DIGITS, PHONE_MASK_DIGITS } from "../../constants";
+import { apiUrl } from "../../utils/apiBase";
+import { API_OTP_VERIFY, COUNTRY_CODE_PREFIX, ERR_VERIFY_OTP, MSG_VERIFYING_OTP, PHONE_MASK_DIGITS } from "../../constants";
 
 export default function OtpView({otp,handleOtp,otpRefs,phone,onNext}:{
   otp: string[];
@@ -9,6 +11,29 @@ export default function OtpView({otp,handleOtp,otpRefs,phone,onNext}:{
   phone: string;
   onNext: () => void;
 }){
+  const [verifying,setVerifying]=useState(false);
+  const [error,setError]=useState("");
+
+  const handleVerify = async () => {
+    if(!otp.every(Boolean)||verifying) return;
+    setVerifying(true); setError("");
+    try {
+      const res = await fetch(apiUrl(API_OTP_VERIFY), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone, code: otp.join("") }),
+      });
+      const isJson = res.headers.get("content-type")?.includes("application/json");
+      const data = isJson ? await res.json() : null;
+      if(!res.ok) throw new Error(data?.error || `Could not verify OTP (server returned ${res.status}).`);
+      onNext();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : ERR_VERIFY_OTP);
+    } finally {
+      setVerifying(false);
+    }
+  };
+
   return(
     <div className="fade-in min-h-[calc(100vh-58px)] bg-slate-100 flex items-center justify-center px-4">
       <div className="w-full max-w-xs apv-card p-8 text-center">
@@ -22,8 +47,10 @@ export default function OtpView({otp,handleOtp,otpRefs,phone,onNext}:{
               className="w-12 h-14 apv-input rounded-2xl text-center text-slate-900 text-lg font-bold focus:outline-none"/>
           ))}
         </div>
-        <p className="text-slate-500 text-xs mb-4">Demo: <span className="text-[#d09d61] cursor-pointer" onClick={()=>{const a=OTP_DEMO_DIGITS;otpRefs.current.forEach((r,i)=>{if(r)r.value=a[i]});handleOtp(0,a[0]);handleOtp(1,a[1]);handleOtp(2,a[2]);handleOtp(3,a[3]);handleOtp(4,a[4]);handleOtp(5,a[5]);}}>Auto-fill {OTP_DEMO_DIGITS.join("")}</span></p>
-        <button onClick={()=>otp.every(Boolean)&&onNext()} className={`w-full py-3 rounded-full font-bold text-sm transition-all ${otp.every(Boolean)?"apv-btn":"bg-slate-200 text-slate-500 cursor-not-allowed"}`}>Verify & Continue</button>
+        {error&&<p className="text-red-500 text-xs mb-4">{error}</p>}
+        <button onClick={handleVerify} disabled={!otp.every(Boolean)||verifying} className={`w-full py-3 rounded-full font-bold text-sm transition-all ${otp.every(Boolean)&&!verifying?"apv-btn":"bg-slate-200 text-slate-500 cursor-not-allowed"}`}>
+          {verifying?MSG_VERIFYING_OTP:"Verify & Continue"}
+        </button>
       </div>
     </div>
   );

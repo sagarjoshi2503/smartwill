@@ -2,7 +2,7 @@ from functools import lru_cache
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-from app.shared.constants import DEFAULT_ADMIN_EMAIL
+from app.shared.constants import DEFAULT_ADMIN_EMAIL, TWILIO_FROM_NUMBER
 
 
 class Settings(BaseSettings):
@@ -23,6 +23,14 @@ class Settings(BaseSettings):
     # notification. Both must be set for email to actually go out.
     resend_api_key: str | None = None
     resend_from_email: str | None = None
+
+    # Twilio (https://twilio.com), used to deliver OTP codes by SMS during
+    # phone sign-in. account_sid and auth_token (secrets) must still be set
+    # for SMS to actually go out; from_number defaults to the project's
+    # provisioned Twilio number.
+    twilio_account_sid: str | None = None
+    twilio_auth_token: str | None = None
+    twilio_from_number: str = TWILIO_FROM_NUMBER
 
     @property
     def google_id(self) -> str | None:

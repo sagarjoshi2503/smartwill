@@ -20,6 +20,8 @@ export const API_WILL_SAVE = "/api/will/save";
 export const API_ADMIN_SAVE = "/api/will/admin/save";
 export const API_ADMIN_WILLS = "/api/will/admin-wills";
 export const API_MY_WILLS = "/api/will/my-wills";
+export const API_OTP_REQUEST = "/api/auth/otp/request";
+export const API_OTP_VERIFY = "/api/auth/otp/verify";
 export const apiPathWill = (willId: string): string => `/api/will/${willId}`;
 export const apiPathAdminWill = (willId: string): string => `/api/will/admin/${willId}`;
 export const apiPathSendBack = (willId: string): string => `/api/will/admin/${willId}/send-back`;
@@ -31,7 +33,6 @@ export const WILL_VISIBLE_DAYS = 30;
 export const OTP_LENGTH = 6;
 export const PHONE_MASK_DIGITS = 5;
 export const COUNTRY_CODE_PREFIX = "+91 ";
-export const OTP_DEMO_DIGITS = ["1", "2", "3", "4", "5", "6"];
 
 // --- UI timing (milliseconds) ---
 export const SEND_BACK_REDIRECT_MS = 300;
@@ -73,3 +74,7 @@ export const MSG_SAVING = "Saving…";
 export const CONFIRM_DELETE_WILL = "Delete this Will? This cannot be undone.";
 export const ERR_LOAD_WILL = "Could not load this Will.";
 export const ERR_DELETE_WILL = "Could not delete this Will.";
+export const ERR_SEND_OTP = "Could not send OTP.";
+export const ERR_VERIFY_OTP = "Could not verify OTP.";
+export const MSG_SENDING_OTP = "Sending OTP…";
+export const MSG_VERIFYING_OTP = "Verifying…";
