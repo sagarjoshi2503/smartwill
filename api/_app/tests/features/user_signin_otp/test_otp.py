@@ -1,5 +1,4 @@
 from _app.features.user_signin_otp import repository
-from _app.main import app
 from _app.shared import constants
 
 REQUEST_URL = "/api/auth/otp/request"

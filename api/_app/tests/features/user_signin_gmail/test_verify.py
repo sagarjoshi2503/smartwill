@@ -1,5 +1,3 @@
-import pytest
-
 from _app.core.config import Settings, get_settings
 from _app.core.exceptions import AppError
 from _app.features.user_signin_gmail import service

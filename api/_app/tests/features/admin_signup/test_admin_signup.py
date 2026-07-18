@@ -1,7 +1,6 @@
 import bcrypt
 
 from _app.core.config import Settings, get_settings
-from _app.core.db import get_db
 from _app.main import app
 from _app.shared import constants
 

@@ -3,7 +3,6 @@ throughout the FastAPI backend, centralized here instead of being scattered
 as inline literals or duplicated wording."""
 
 # --- HTTP status codes ---
-HTTP_OK = 200
 HTTP_CREATED = 201
 HTTP_BAD_REQUEST = 400
 HTTP_UNAUTHORIZED = 401

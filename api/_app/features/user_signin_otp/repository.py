@@ -4,7 +4,7 @@ This is a placeholder until a real SMS provider and persistent (e.g. Redis)
 store are wired up — codes are kept in memory only, so they don't survive a
 process restart and won't work across multiple server instances."""
 
-from datetime import datetime, timezone
+from datetime import datetime
 
 _otps: dict[str, tuple[str, datetime]] = {}
 
