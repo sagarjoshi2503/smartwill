@@ -44,6 +44,7 @@ export default function SmartWill() {
   const [addons, setAddons] = useState<Record<string, boolean>>({});
   const [signup, setSignup] = useState<SignupState>({ name:"", phone:"", email:"", state:"", terms:false });
   const [otp, setOtp] = useState<string[]>(Array(OTP_LENGTH).fill(""));
+  const [testatorAuthenticated, setTestatorAuthenticated] = useState(false);
   const [dchecks, setDchecks] = useState<DisclaimerChecks>({ nonMuslim:false, age:false, law:false, tool:false });
   const [wizardStep, setWizardStep] = useState(1);
   const [will, setWill] = useState<WillState>(DEFAULT_WILL);
@@ -108,7 +109,21 @@ export default function SmartWill() {
     // those two Testator fields are left for the user to fill in themselves.
     // The email stays editable in the wizard (see WizardForms Step 1).
     setWill(p=>({...p, testator: {...p.testator, fullName: profile.name, email: profile.email}}));
+    setTestatorAuthenticated(true);
     setView("myWills");
+  };
+
+  const handleTestatorLogout = () => {
+    setTestatorAuthenticated(false);
+    setSignup({ name:"", phone:"", email:"", state:"", terms:false });
+    setOtp(Array(OTP_LENGTH).fill(""));
+    setWill(DEFAULT_WILL);
+    setEditingWillId(null);
+    setWizardStep(1);
+    setViewOnlyMode(false);
+    setTestatorEmailEditable(false);
+    setActiveAdminComments("");
+    setView("landing");
   };
 
   // OTP
@@ -119,6 +134,7 @@ export default function SmartWill() {
   };
   const handleOtpVerified = () => {
     setWill(p=>({...p, testator: {...p.testator, fullName: signup.name, email: signup.email}}));
+    setTestatorAuthenticated(true);
     setView("myWills");
   };
 
@@ -288,6 +304,16 @@ export default function SmartWill() {
                     <span className="text-[#d09d61] text-sm">{adminProfile.name}</span>
                   </div>
                   <button onClick={()=>{setAdminProfile(null);setView("landing");}} className="flex items-center gap-1.5 text-slate-600 hover:text-slate-900 text-sm transition-colors"><LogOut size={13}/>Logout</button>
+                </>
+              ):testatorAuthenticated && !isAdminView(view) ? (
+                <>
+                  <div className="flex items-center gap-2 bg-slate-100 rounded-lg px-3 py-1.5 text-sm border border-slate-200">
+                    <div className="w-6 h-6 bg-slate-200 rounded-full flex items-center justify-center text-[9px] font-bold text-slate-900">
+                      {(signup.name||signup.email).split(" ").slice(0,2).map(n=>n[0]).join("").toUpperCase()}
+                    </div>
+                    <span className="text-[#d09d61] text-sm">{signup.name||signup.email}</span>
+                  </div>
+                  <button onClick={handleTestatorLogout} className="flex items-center gap-1.5 text-slate-600 hover:text-slate-900 text-sm transition-colors"><LogOut size={13}/>Logout</button>
                 </>
               ):(
                 <>
