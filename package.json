@@ -12,8 +12,10 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@flags-sdk/vercel": "^1.4.5",
     "@vercel/analytics": "^2.0.1",
     "@vercel/speed-insights": "^2.0.0",
+    "flags": "^4.2.0",
     "lucide-react": "^0.402.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"

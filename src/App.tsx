@@ -57,6 +57,7 @@ export default function SmartWill() {
   const [sendBackComments, setSendBackComments] = useState("");
   const [sendBackStatus, setSendBackStatus] = useState<"idle" | "sending" | "error">("idle");
   const [sendBackError, setSendBackError] = useState("");
+  const [showAdminButton, setShowAdminButton] = useState(false);
   const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
   const willDocRef = useRef<HTMLDivElement | null>(null);
 
@@ -81,6 +82,18 @@ export default function SmartWill() {
     };
     window.addEventListener("popstate", onPopState);
     return () => window.removeEventListener("popstate", onPopState);
+  }, []);
+
+  // Admin Portal button on the header is gated behind the "show-admin-button"
+  // Vercel Flag. The /admin deep-link route stays reachable regardless — this
+  // only controls whether the nav button is shown.
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/flags")
+      .then(res => res.ok ? res.json() : { enabled: false })
+      .then(data => { if(!cancelled) setShowAdminButton(!!data?.enabled); })
+      .catch(() => {});
+    return () => { cancelled = true; };
   }, []);
 
   // Auth
@@ -273,7 +286,9 @@ export default function SmartWill() {
                 </>
               ):(
                 <>
-                  <button onClick={()=>setView("adminLogin")} className="flex items-center gap-1.5 text-slate-600 hover:text-slate-900 border border-slate-200 hover:border-slate-300 rounded-lg px-3 py-1.5 text-sm transition-all"><LogIn size={13}/>Admin Portal</button>
+                  {showAdminButton && (
+                    <button onClick={()=>setView("adminLogin")} className="flex items-center gap-1.5 text-slate-600 hover:text-slate-900 border border-slate-200 hover:border-slate-300 rounded-lg px-3 py-1.5 text-sm transition-all"><LogIn size={13}/>Admin Portal</button>
+                  )}
                   <button onClick={()=>setView("authChoice")} className="flex items-center gap-1.5 bg-[#d09d61] hover:bg-[#d7a46a] text-[#020617] rounded-lg px-4 py-2 text-sm font-semibold transition-colors shadow-lg shadow-[#d09d61]/20">Create Your Will <ArrowRight size={13}/></button>
                 </>
               )}
