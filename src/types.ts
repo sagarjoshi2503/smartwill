@@ -129,12 +129,12 @@ export interface Addon {
   icon: ReactNode;
 }
 
-export interface LawyerProfile {
+export interface AdminProfile {
   name: string;
   email: string;
 }
 
-export interface LawyerClient {
+export interface AdminClient {
   willId: string;
   name: string;
   contact: string;
@@ -165,7 +165,7 @@ export interface DisclaimerChecks {
   tool: boolean;
 }
 
-export type ViewName = "landing" | "authChoice" | "signup" | "otp" | "disclaimer" | "lawyerLogin" | "lawyerSignup" | "lawyer" | "wizard" | "myWills";
+export type ViewName = "landing" | "authChoice" | "signup" | "otp" | "disclaimer" | "adminLogin" | "adminSignup" | "admin" | "wizard" | "myWills";
 
 export type WillStatus = "Draft" | "PendingReview" | "Completed";
 

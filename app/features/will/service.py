@@ -75,7 +75,7 @@ def save_will(db: Database, body: dict, settings: Settings, is_admin: bool = Fal
 
 def _submit_for_admin_review(db: Database, settings: Settings, document: dict) -> None:
     # Every review submission always goes to the single configured admin
-    # reviewer — there's no lawyer-selection step anymore.
+    # reviewer — there's no admin-selection step anymore.
     repository.insert_admin_will(db, {
         "willId": document["willId"],
         "adminEmail": settings.admin_review_email,

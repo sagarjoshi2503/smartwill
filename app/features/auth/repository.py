@@ -22,7 +22,7 @@ def find_by_email(db: Database, email: str) -> dict | None:
         raise AppError(500, messages.DATABASE_UNAVAILABLE)
 
 
-def insert_lawyer(db: Database, full_name: str, email: str, password_hash: str) -> None:
+def insert_admin(db: Database, full_name: str, email: str, password_hash: str) -> None:
     try:
         _collection(db).insert_one({
             "fullName": full_name,
@@ -31,6 +31,6 @@ def insert_lawyer(db: Database, full_name: str, email: str, password_hash: str) 
             "createdAt": datetime.now(timezone.utc),
         })
     except DuplicateKeyError:
-        raise AppError(409, messages.LAWYER_ALREADY_SIGNED_UP)
+        raise AppError(409, messages.ADMIN_ALREADY_SIGNED_UP)
     except PyMongoError:
         raise AppError(500, messages.DATABASE_UNAVAILABLE)

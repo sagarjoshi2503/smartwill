@@ -6,7 +6,7 @@ from app.core.config import Settings, get_settings
 from app.main import app
 from app.shared import messages
 
-URL = "/api/auth/lawyer-login"
+URL = "/api/auth/admin-login"
 PASSWORD = "password123"
 
 
@@ -14,7 +14,7 @@ def encode(password: str) -> str:
     return base64.b64encode(password.encode("utf-8")).decode("utf-8")
 
 
-def seed_lawyer(fake_db, email="jane@lawfirm.com"):
+def seed_admin(fake_db, email="jane@lawfirm.com"):
     password_hash = bcrypt.hashpw(PASSWORD.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
     fake_db["login"].insert_one({"fullName": "Jane Doe", "email": email, "passwordHash": password_hash})
 
@@ -22,14 +22,14 @@ def seed_lawyer(fake_db, email="jane@lawfirm.com"):
 # --- positive scenarios ---
 
 def test_login_success_with_correct_credentials(client, fake_db):
-    seed_lawyer(fake_db)
+    seed_admin(fake_db)
     res = client.post(URL, json={"email": "jane@lawfirm.com", "password": encode(PASSWORD)})
     assert res.status_code == 200
     assert res.json() == {"name": "Jane Doe", "email": "jane@lawfirm.com"}
 
 
 def test_login_is_case_insensitive_on_email(client, fake_db):
-    seed_lawyer(fake_db)
+    seed_admin(fake_db)
     res = client.post(URL, json={"email": "JANE@LawFirm.com", "password": encode(PASSWORD)})
     assert res.status_code == 200
 
@@ -37,7 +37,7 @@ def test_login_is_case_insensitive_on_email(client, fake_db):
 # --- negative scenarios ---
 
 def test_login_rejects_wrong_password(client, fake_db):
-    seed_lawyer(fake_db)
+    seed_admin(fake_db)
     res = client.post(URL, json={"email": "jane@lawfirm.com", "password": encode("wrongpassword")})
     assert res.status_code == 401
     assert res.json() == {"error": messages.INVALID_LOGIN_CREDENTIALS}

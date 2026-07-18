@@ -2,10 +2,10 @@ import { useState } from "react";
 import { Scale, Mail, Lock, LogIn } from "lucide-react";
 import { apiUrl } from "../utils/apiBase";
 import { encodePassword } from "../utils/encode";
-import type { LawyerProfile } from "../types";
+import type { AdminProfile } from "../types";
 
-export default function LawyerLoginView({onLogin,onBack,onSignup}:{
-  onLogin: (lawyer: LawyerProfile) => void;
+export default function AdminLoginView({onLogin,onBack,onSignup}:{
+  onLogin: (admin: AdminProfile) => void;
   onBack: () => void;
   onSignup: () => void;
 }){
@@ -23,7 +23,7 @@ export default function LawyerLoginView({onLogin,onBack,onSignup}:{
     setError("");
     setSubmitting(true);
     try {
-      const res = await fetch(apiUrl("/api/auth/lawyer-login"), {
+      const res = await fetch(apiUrl("/api/auth/admin-login"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password: encodePassword(password) }),

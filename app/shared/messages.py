@@ -14,7 +14,7 @@ INVALID_EMAIL = "Enter a valid email address."
 PASSWORD_TOO_SHORT = "Password must be at least 8 characters."
 PASSWORD_REQUIRED = "Password is required."
 INVALID_LOGIN_CREDENTIALS = "Invalid email or password."
-LAWYER_ALREADY_SIGNED_UP = "You're already signed up as a lawyer with this email. Please use the login screen to log in."
+ADMIN_ALREADY_SIGNED_UP = "You're already signed up as an admin with this email. Please use the login screen to log in."
 
 WILL_DATA_REQUIRED = "Will data is required."
 INVALID_WILL_STATUS = "Invalid will status."

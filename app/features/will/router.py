@@ -44,10 +44,10 @@ async def save_admin(request: Request, db: Database = Depends(get_db), settings:
 
 
 @router.get(
-    "/lawyer-wills", response_model=ClientsResponse, responses={500: {"model": ErrorResponse}},
+    "/admin-wills", response_model=ClientsResponse, responses={500: {"model": ErrorResponse}},
     summary="List all Wills submitted for admin review",
 )
-async def lawyer_wills(db: Database = Depends(get_db)):
+async def admin_wills(db: Database = Depends(get_db)):
     return service.list_admin_wills(db)
 
 

@@ -8,9 +8,9 @@ import AuthChoiceView from "./components/AuthChoiceView";
 import SignupView from "./components/SignupView";
 import OtpView from "./components/OtpView";
 import DisclaimerView from "./components/DisclaimerView";
-import LawyerLoginView from "./components/LawyerLoginView";
-import LawyerSignupView from "./components/LawyerSignupView";
-import LawyerPortal from "./components/LawyerPortal";
+import AdminLoginView from "./components/AdminLoginView";
+import AdminSignupView from "./components/AdminSignupView";
+import AdminPortal from "./components/AdminPortal";
 import TestatorWillsView from "./components/TestatorWillsView";
 import WizardForms from "./components/WizardForms";
 import LiveDocPreview from "./components/LiveDocPreview";
@@ -18,7 +18,7 @@ import WillDocument from "./components/WillDocument";
 import { allocTotal } from "./utils/allocation";
 import { apiUrl } from "./utils/apiBase";
 import type {
-  AssetCatalogItem, Beneficiary, DisclaimerChecks, GoogleProfile, LawyerProfile, Plan, SignupState, ViewName, WillState,
+  AdminProfile, AssetCatalogItem, Beneficiary, DisclaimerChecks, GoogleProfile, Plan, SignupState, ViewName, WillState,
 } from "./types";
 
 const WIZARD_STEPS = [
@@ -27,13 +27,13 @@ const WIZARD_STEPS = [
 ];
 
 const ADMIN_PATH = "/admin";
-const isAdminView = (v: ViewName) => v==="lawyerLogin" || v==="lawyerSignup" || v==="lawyer";
+const isAdminView = (v: ViewName) => v==="adminLogin" || v==="adminSignup" || v==="admin";
 
 export default function SmartWill() {
   // Deep-linking: loading /admin directly (typed in the address bar, or a
   // bookmark) opens the Admin Portal login screen instead of the landing page.
   const [view, setView] = useState<ViewName>(() =>
-    window.location.pathname===ADMIN_PATH ? "lawyerLogin" : "landing"
+    window.location.pathname===ADMIN_PATH ? "adminLogin" : "landing"
   );
   const [selectedPlan, setSelectedPlan] = useState<Plan>(PLANS[1]);
   const [addons, setAddons] = useState<Record<string, boolean>>({});
@@ -49,7 +49,7 @@ export default function SmartWill() {
   const [testatorEmailEditable, setTestatorEmailEditable] = useState(false);
   const [activeAdminComments, setActiveAdminComments] = useState("");
   const [showWillDoc, setShowWillDoc] = useState(false);
-  const [lawyerProfile, setLawyerProfile] = useState<LawyerProfile | null>(null);
+  const [adminProfile, setAdminProfile] = useState<AdminProfile | null>(null);
   const [draftStatus, setDraftStatus] = useState<"idle" | "saving" | "error" | "done">("idle");
   const [draftError, setDraftError] = useState("");
   const [sendBackOpen, setSendBackOpen] = useState(false);
@@ -74,7 +74,7 @@ export default function SmartWill() {
     const onPopState = () => {
       const onAdminPath = window.location.pathname===ADMIN_PATH;
       setView(v => {
-        if(onAdminPath) return isAdminView(v) ? v : "lawyerLogin";
+        if(onAdminPath) return isAdminView(v) ? v : "adminLogin";
         return isAdminView(v) ? "landing" : v;
       });
     };
@@ -180,7 +180,7 @@ export default function SmartWill() {
       setSendBackOpen(false);
       setSendBackComments("");
       setSendBackStatus("idle");
-      setTimeout(()=>setView("lawyer"), 300);
+      setTimeout(()=>setView("admin"), 300);
     } catch (err) {
       setSendBackStatus("error");
       setSendBackError(err instanceof Error ? err.message : "Could not send this Will back.");
@@ -248,19 +248,19 @@ export default function SmartWill() {
               <span className="text-[9px] font-bold tracking-[0.35em] text-[#924d06] bg-[#f8edd1] border border-[#d09d61] px-1.5 py-0.5 rounded">INDIA</span>
             </div>
             <div className="flex items-center gap-3">
-              {view==="lawyer" && lawyerProfile ? (
+              {view==="admin" && adminProfile ? (
                 <>
                   <div className="flex items-center gap-2 bg-slate-100 rounded-lg px-3 py-1.5 text-sm border border-slate-200">
                     <div className="w-6 h-6 bg-slate-200 rounded-full flex items-center justify-center text-[9px] font-bold text-slate-900">
-                      {lawyerProfile.name.split(" ").slice(0,2).map(n=>n[0]).join("").toUpperCase()}
+                      {adminProfile.name.split(" ").slice(0,2).map(n=>n[0]).join("").toUpperCase()}
                     </div>
-                    <span className="text-[#d09d61] text-sm">{lawyerProfile.name}</span>
+                    <span className="text-[#d09d61] text-sm">{adminProfile.name}</span>
                   </div>
-                  <button onClick={()=>{setLawyerProfile(null);setView("landing");}} className="flex items-center gap-1.5 text-slate-600 hover:text-slate-900 text-sm transition-colors"><LogOut size={13}/>Logout</button>
+                  <button onClick={()=>{setAdminProfile(null);setView("landing");}} className="flex items-center gap-1.5 text-slate-600 hover:text-slate-900 text-sm transition-colors"><LogOut size={13}/>Logout</button>
                 </>
               ):(
                 <>
-                  <button onClick={()=>setView("lawyerLogin")} className="flex items-center gap-1.5 text-slate-600 hover:text-slate-900 border border-slate-200 hover:border-slate-300 rounded-lg px-3 py-1.5 text-sm transition-all"><LogIn size={13}/>Admin Portal</button>
+                  <button onClick={()=>setView("adminLogin")} className="flex items-center gap-1.5 text-slate-600 hover:text-slate-900 border border-slate-200 hover:border-slate-300 rounded-lg px-3 py-1.5 text-sm transition-all"><LogIn size={13}/>Admin Portal</button>
                   <button onClick={()=>setView("authChoice")} className="flex items-center gap-1.5 bg-[#d09d61] hover:bg-[#d7a46a] text-[#020617] rounded-lg px-4 py-2 text-sm font-semibold transition-colors shadow-lg shadow-[#d09d61]/20">Create Your Will <ArrowRight size={13}/></button>
                 </>
               )}
@@ -275,16 +275,16 @@ export default function SmartWill() {
       {view==="otp" && <OtpView otp={otp} handleOtp={handleOtp} otpRefs={otpRefs} phone={signup.phone} onNext={handleOtpVerified}/>}
       {view==="disclaimer" && <DisclaimerView dchecks={dchecks} setDchecks={setDchecks} allChecked={allDchecked} onAgree={()=>setView("wizard")} onBack={()=>setView("myWills")}/>}
       {view==="myWills" && <TestatorWillsView email={signup.email} onCreateNew={handleCreateNewWill} onEditWill={handleEditWill} onViewWill={handleViewWill}/>}
-      {view==="lawyerLogin" && <LawyerLoginView onLogin={(lawyer)=>{setLawyerProfile(lawyer);setView("lawyer");}} onBack={()=>setView("landing")} onSignup={()=>setView("lawyerSignup")}/>}
-      {view==="lawyerSignup" && <LawyerSignupView onSignup={(lawyer)=>{setLawyerProfile(lawyer);setView("lawyer");}} onBack={()=>setView("lawyerLogin")} onGoToLogin={()=>setView("lawyerLogin")}/>}
-      {view==="lawyer" && lawyerProfile && <LawyerPortal lawyer={lawyerProfile} onCreateWill={handleAdminCreateWill} onReviewWill={handleAdminReviewWill}/>}
+      {view==="adminLogin" && <AdminLoginView onLogin={(admin)=>{setAdminProfile(admin);setView("admin");}} onBack={()=>setView("landing")} onSignup={()=>setView("adminSignup")}/>}
+      {view==="adminSignup" && <AdminSignupView onSignup={(admin)=>{setAdminProfile(admin);setView("admin");}} onBack={()=>setView("adminLogin")} onGoToLogin={()=>setView("adminLogin")}/>}
+      {view==="admin" && adminProfile && <AdminPortal admin={adminProfile} onCreateWill={handleAdminCreateWill} onReviewWill={handleAdminReviewWill}/>}
 
       {view==="wizard" && (
         <div className="flex flex-col h-screen bg-slate-100 fade-in">
           {/* Wizard bar */}
           <div className="flex-none bg-white/95 border-b border-slate-200 px-4 h-[60px] flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <button onClick={()=>setView(lawyerProfile?"lawyer":(signup.email?"myWills":"landing"))} className="text-slate-600 hover:text-slate-900 transition-colors"><ChevronLeft size={16}/></button>
+              <button onClick={()=>setView(adminProfile?"admin":(signup.email?"myWills":"landing"))} className="text-slate-600 hover:text-slate-900 transition-colors"><ChevronLeft size={16}/></button>
               <div className="w-8 h-8 bg-[#d09d61] rounded-2xl flex items-center justify-center shadow-lg shadow-[#d09d61]/15"><Scale size={12} className="text-[#020617]"/></div>
               <div>
                 <div className="text-slate-900 font-semibold serif text-sm">SmartWill</div>
@@ -353,12 +353,12 @@ export default function SmartWill() {
                 adminReview={adminReviewMode}
                 adminComplete={adminCreateMode}
                 testatorEmailEditable={testatorEmailEditable}
-                reviewerEmail={lawyerProfile?.email}
+                reviewerEmail={adminProfile?.email}
                 adminComments={activeAdminComments}
                 onSaved={(willId,status)=>{
                   setEditingWillId(willId);
                   if(status==="PendingReview") setTimeout(()=>setView("myWills"), 900);
-                  if(status==="Completed") setTimeout(()=>setView("lawyer"), 900);
+                  if(status==="Completed") setTimeout(()=>setView("admin"), 900);
                 }}
               />
             </div>

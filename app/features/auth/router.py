@@ -28,30 +28,30 @@ async def verify_google(request: Request, settings: Settings = Depends(get_setti
 
 
 @router.post(
-    "/lawyer-signup", response_model=AuthResponse, status_code=201,
+    "/admin-signup", response_model=AuthResponse, status_code=201,
     responses={**ERROR_RESPONSES, 409: {"model": ErrorResponse}},
-    summary="Create a Lawyer Portal account",
+    summary="Create an Admin Portal account",
 )
-async def lawyer_signup(request: Request, db: Database = Depends(get_db)):
+async def admin_signup(request: Request, db: Database = Depends(get_db)):
     try:
         body = await request.json()
     except Exception:
         body = {}
     if not isinstance(body, dict):
         body = {}
-    return service.signup_lawyer(db, body)
+    return service.signup_admin(db, body)
 
 
 @router.post(
-    "/lawyer-login", response_model=AuthResponse,
+    "/admin-login", response_model=AuthResponse,
     responses={**ERROR_RESPONSES, 403: {"model": ErrorResponse}},
-    summary="Log in to the Lawyer Portal",
+    summary="Log in to the Admin Portal",
 )
-async def lawyer_login(request: Request, db: Database = Depends(get_db)):
+async def admin_login(request: Request, db: Database = Depends(get_db)):
     try:
         body = await request.json()
     except Exception:
         body = {}
     if not isinstance(body, dict):
         body = {}
-    return service.login_lawyer(db, body)
+    return service.login_admin(db, body)

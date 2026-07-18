@@ -4,7 +4,7 @@ from app.core.config import Settings, get_settings
 from app.main import app
 from app.shared import messages
 
-URL = "/api/will/lawyer-wills"
+URL = "/api/will/admin-wills"
 
 
 def seed_will(fake_db, will_id, full_name, testator_email, submitted_at, status="PendingReview"):

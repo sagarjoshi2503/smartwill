@@ -88,7 +88,7 @@ def test_admin_complete_updates_status_in_will_tracker_list(client, fake_db):
 
     client.post(complete_admin_url(will_id), json={})
 
-    res = client.get("/api/will/lawyer-wills")
+    res = client.get("/api/will/admin-wills")
     matching = [c for c in res.json()["clients"] if c["willId"] == will_id]
     assert len(matching) == 1
     assert matching[0]["status"] == "Completed"

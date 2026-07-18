@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { Scale, User, Mail, Lock, UserPlus } from "lucide-react";
 import { apiUrl } from "../utils/apiBase";
-import type { LawyerProfile } from "../types";
+import type { AdminProfile } from "../types";
 
-export default function LawyerSignupView({onSignup,onBack,onGoToLogin}:{
-  onSignup: (lawyer: LawyerProfile) => void;
+export default function AdminSignupView({onSignup,onBack,onGoToLogin}:{
+  onSignup: (admin: AdminProfile) => void;
   onBack: () => void;
   onGoToLogin: () => void;
 }){
@@ -28,7 +28,7 @@ export default function LawyerSignupView({onSignup,onBack,onGoToLogin}:{
     setError(""); setAlreadySignedUp(false);
     setSubmitting(true);
     try {
-      const res = await fetch(apiUrl("/api/auth/lawyer-signup"), {
+      const res = await fetch(apiUrl("/api/auth/admin-signup"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ fullName: fullName.trim(), email, password }),

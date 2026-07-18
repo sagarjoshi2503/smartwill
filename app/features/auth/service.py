@@ -26,7 +26,7 @@ def verify_google_signin(body: dict, settings: Settings) -> dict:
     return {"name": payload.get("name") or email, "email": email}
 
 
-def signup_lawyer(db: Database, body: dict) -> dict:
+def signup_admin(db: Database, body: dict) -> dict:
     full_name = (body.get("fullName") or "").strip()
     email = normalize_email(body.get("email"))
     password = body.get("password")
@@ -38,11 +38,11 @@ def signup_lawyer(db: Database, body: dict) -> dict:
     if not isinstance(password, str) or len(password) < 8:
         raise AppError(400, messages.PASSWORD_TOO_SHORT)
 
-    repository.insert_lawyer(db, full_name, email, hash_password(password))
+    repository.insert_admin(db, full_name, email, hash_password(password))
     return {"name": full_name, "email": email}
 
 
-def login_lawyer(db: Database, body: dict) -> dict:
+def login_admin(db: Database, body: dict) -> dict:
     email = normalize_email(body.get("email"))
     encoded_password = body.get("password")
 

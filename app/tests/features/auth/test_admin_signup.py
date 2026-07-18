@@ -5,7 +5,7 @@ from app.core.db import get_db
 from app.main import app
 from app.shared import messages
 
-URL = "/api/auth/lawyer-signup"
+URL = "/api/auth/admin-signup"
 VALID_PAYLOAD = {"fullName": "Jane Doe", "email": "jane@lawfirm.com", "password": "password123"}
 
 
@@ -36,7 +36,7 @@ def test_signup_rejects_duplicate_email(client):
     client.post(URL, json=VALID_PAYLOAD)
     res = client.post(URL, json={**VALID_PAYLOAD, "fullName": "Someone Else"})
     assert res.status_code == 409
-    assert res.json() == {"error": messages.LAWYER_ALREADY_SIGNED_UP}
+    assert res.json() == {"error": messages.ADMIN_ALREADY_SIGNED_UP}
 
 
 def test_signup_rejects_duplicate_email_case_insensitively(client):

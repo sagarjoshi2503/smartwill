@@ -33,6 +33,6 @@ describe("apiUrl", () => {
   it("does not alter the path itself, only the prefix", async () => {
     vi.stubEnv("VITE_API_BASE_URL", "https://example.com");
     const { apiUrl } = await import("./apiBase");
-    expect(apiUrl("/api/will/lawyer-wills?email=a@b.com")).toBe("https://example.com/api/will/lawyer-wills?email=a@b.com");
+    expect(apiUrl("/api/will/admin-wills?email=a@b.com")).toBe("https://example.com/api/will/admin-wills?email=a@b.com");
   });
 });

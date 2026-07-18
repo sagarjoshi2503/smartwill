@@ -1,33 +1,33 @@
 import { useEffect, useState } from "react";
 import { Users, Plus, Edit3, Trash2, Clock, CheckCircle2 } from "lucide-react";
 import { apiUrl } from "../utils/apiBase";
-import type { LawyerClient, LawyerProfile, WillState } from "../types";
+import type { AdminClient, AdminProfile, WillState } from "../types";
 
-const STATUS_STYLE: Record<LawyerClient["status"], string> = {
+const STATUS_STYLE: Record<AdminClient["status"], string> = {
   Draft: "bg-slate-100 text-slate-600 border-slate-200",
   PendingReview: "bg-[#d09d61]/10 text-[#b6844a] border-[#d09d61]/30",
   Completed: "bg-emerald-50 text-emerald-600 border-emerald-200",
 };
 
-const STATUS_LABEL: Record<LawyerClient["status"], string> = {
+const STATUS_LABEL: Record<AdminClient["status"], string> = {
   Draft: "Draft",
   PendingReview: "Pending Review",
   Completed: "Completed",
 };
 
-export default function LawyerPortal({lawyer,onCreateWill,onReviewWill}:{
-  lawyer: LawyerProfile;
+export default function AdminPortal({admin,onCreateWill,onReviewWill}:{
+  admin: AdminProfile;
   onCreateWill: () => void;
-  onReviewWill: (willId: string, will: WillState, status: LawyerClient["status"]) => void;
+  onReviewWill: (willId: string, will: WillState, status: AdminClient["status"]) => void;
 }){
-  const [clients,setClients]=useState<LawyerClient[]>([]);
+  const [clients,setClients]=useState<AdminClient[]>([]);
   const [status,setStatus]=useState<"loading"|"ready"|"error">("loading");
   const [error,setError]=useState("");
   const [deletingId,setDeletingId]=useState<string|null>(null);
   const [deleteError,setDeleteError]=useState("");
   const [reviewingId,setReviewingId]=useState<string|null>(null);
   const [reviewError,setReviewError]=useState("");
-  const [statusFilter,setStatusFilter]=useState<"All"|LawyerClient["status"]>("All");
+  const [statusFilter,setStatusFilter]=useState<"All"|AdminClient["status"]>("All");
 
   const pendingReviewCount = clients.filter(c=>c.status==="PendingReview").length;
   const completedCount = clients.filter(c=>c.status==="Completed").length;
@@ -39,7 +39,7 @@ export default function LawyerPortal({lawyer,onCreateWill,onReviewWill}:{
     (async()=>{
       setStatus("loading"); setError("");
       try {
-        const res = await fetch(apiUrl("/api/will/lawyer-wills"));
+        const res = await fetch(apiUrl("/api/will/admin-wills"));
         const isJson = res.headers.get("content-type")?.includes("application/json");
         const data = isJson ? await res.json() : null;
         if(!res.ok) throw new Error(data?.error || `Could not load clients (server returned ${res.status}).`);
@@ -62,7 +62,7 @@ export default function LawyerPortal({lawyer,onCreateWill,onReviewWill}:{
       const isJson = res.headers.get("content-type")?.includes("application/json");
       const data = isJson ? await res.json() : null;
       if(!res.ok) throw new Error(data?.error || `Could not load this Will (server returned ${res.status}).`);
-      onReviewWill(data.willId, data.will as WillState, data.status as LawyerClient["status"]);
+      onReviewWill(data.willId, data.will as WillState, data.status as AdminClient["status"]);
     } catch (err) {
       setReviewError(err instanceof Error ? err.message : "Could not load this Will.");
     } finally {
@@ -92,7 +92,7 @@ export default function LawyerPortal({lawyer,onCreateWill,onReviewWill}:{
         <div className="flex items-center justify-between mb-6">
           <div>
             <h2 className="text-xl font-bold text-slate-900 serif">Admin Dashboard</h2>
-            <p className="text-slate-600 text-sm">{lawyer.name} · {lawyer.email}</p>
+            <p className="text-slate-600 text-sm">{admin.name} · {admin.email}</p>
           </div>
           <button onClick={onCreateWill} className="apv-btn flex items-center gap-2 py-2 px-4 rounded-xl text-sm font-semibold">
             <Plus size={14}/>Create Will for Client
