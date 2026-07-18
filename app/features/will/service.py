@@ -17,6 +17,25 @@ ALLOWED_STATUSES = {STATUS_DRAFT, STATUS_PENDING_REVIEW}
 TESTATOR_WILL_VISIBILITY_DAYS = 30
 
 
+def _redact_id_numbers(will_data: dict) -> dict:
+    """ID numbers (Aadhaar/PAN/etc.) are sensitive and only needed transiently
+    in the browser to render the generated Will document — they must never be
+    persisted to the database."""
+    if not isinstance(will_data, dict):
+        return will_data
+
+    redacted = dict(will_data)
+    if isinstance(redacted.get("testator"), dict):
+        redacted["testator"] = {**redacted["testator"], "idNumber": ""}
+    if isinstance(redacted.get("executor"), dict):
+        redacted["executor"] = {**redacted["executor"], "idNumber": "", "jointIdNumber": "", "subIdNumber": ""}
+    if isinstance(redacted.get("guardian"), dict):
+        redacted["guardian"] = {**redacted["guardian"], "idNumber": "", "subIdNumber": ""}
+    if "residualIdNumber" in redacted:
+        redacted["residualIdNumber"] = ""
+    return redacted
+
+
 def save_will(db: Database, body: dict, settings: Settings, is_admin: bool = False) -> dict:
     if not isinstance(body, dict) or not body:
         raise AppError(400, messages.WILL_DATA_REQUIRED)
@@ -55,6 +74,7 @@ def save_will(db: Database, body: dict, settings: Settings, is_admin: bool = Fal
 
     document = {
         **body,
+        "will": _redact_id_numbers(body.get("will") or {}),
         "willId": will_id,
         "testatorEmail": testator_email,
         "status": status,
@@ -185,7 +205,7 @@ def admin_complete_will(db: Database, will_id: str, body: dict) -> dict:
         reviewer_email = normalize_email(body.get("reviewerEmail"))
     document = {
         **document,
-        **({"will": updated_will} if updated_will is not None else {}),
+        **({"will": _redact_id_numbers(updated_will)} if updated_will is not None else {}),
         "status": STATUS_COMPLETED,
         "updatedAt": datetime.now(timezone.utc),
         **({"reviewerEmail": reviewer_email} if reviewer_email else {}),

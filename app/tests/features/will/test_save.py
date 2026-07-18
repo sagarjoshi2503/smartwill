@@ -21,6 +21,34 @@ def test_save_success_returns_generated_will_id(client, fake_db):
     assert "updatedAt" in doc
 
 
+def test_save_strips_id_numbers_before_persisting(client, fake_db):
+    payload = {
+        "will": {
+            "testator": {"fullName": "Jane Doe", "idNumber": "AAAAA1111A"},
+            "executor": {"name": "Bob", "idNumber": "BBBBB2222B", "jointIdNumber": "CCCCC3333C", "subIdNumber": "DDDDD4444D"},
+            "guardian": {"name": "Carol", "idNumber": "EEEEE5555E", "subIdNumber": "FFFFF6666F"},
+            "residualIdNumber": "GGGGG7777G",
+        },
+        "testatorEmail": "jane@example.com",
+    }
+
+    res = client.post(URL, json=payload)
+
+    assert res.status_code == 201
+    doc = fake_db["will"].find_one({"willId": res.json()["willId"]})
+    assert doc["will"]["testator"]["idNumber"] == ""
+    assert doc["will"]["executor"]["idNumber"] == ""
+    assert doc["will"]["executor"]["jointIdNumber"] == ""
+    assert doc["will"]["executor"]["subIdNumber"] == ""
+    assert doc["will"]["guardian"]["idNumber"] == ""
+    assert doc["will"]["guardian"]["subIdNumber"] == ""
+    assert doc["will"]["residualIdNumber"] == ""
+    # Non-ID fields must survive redaction untouched.
+    assert doc["will"]["testator"]["fullName"] == "Jane Doe"
+    assert doc["will"]["executor"]["name"] == "Bob"
+    assert doc["will"]["guardian"]["name"] == "Carol"
+
+
 def test_save_generates_unique_will_ids_across_requests(client):
     res1 = client.post(URL, json=VALID_PAYLOAD)
     res2 = client.post(URL, json=VALID_PAYLOAD)
