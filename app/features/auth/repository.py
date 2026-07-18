@@ -4,22 +4,22 @@ from pymongo.database import Database
 from pymongo.errors import DuplicateKeyError, PyMongoError
 
 from app.core.exceptions import AppError
-from app.shared import messages
-
-COLLECTION_NAME = "login"
+from app.shared.constants import (
+    ADMIN_ALREADY_SIGNED_UP, DATABASE_UNAVAILABLE, HTTP_CONFLICT, HTTP_INTERNAL_SERVER_ERROR, LOGIN_COLLECTION_NAME,
+)
 
 
 def _collection(db: Database):
-    collection = db[COLLECTION_NAME]
+    collection = db[LOGIN_COLLECTION_NAME]
     collection.create_index("email", unique=True)
     return collection
 
 
 def find_by_email(db: Database, email: str) -> dict | None:
     try:
-        return db[COLLECTION_NAME].find_one({"email": email})
+        return db[LOGIN_COLLECTION_NAME].find_one({"email": email})
     except PyMongoError:
-        raise AppError(500, messages.DATABASE_UNAVAILABLE)
+        raise AppError(HTTP_INTERNAL_SERVER_ERROR, DATABASE_UNAVAILABLE)
 
 
 def insert_admin(db: Database, full_name: str, email: str, password_hash: str) -> None:
@@ -31,6 +31,6 @@ def insert_admin(db: Database, full_name: str, email: str, password_hash: str) -
             "createdAt": datetime.now(timezone.utc),
         })
     except DuplicateKeyError:
-        raise AppError(409, messages.ADMIN_ALREADY_SIGNED_UP)
+        raise AppError(HTTP_CONFLICT, ADMIN_ALREADY_SIGNED_UP)
     except PyMongoError:
-        raise AppError(500, messages.DATABASE_UNAVAILABLE)
+        raise AppError(HTTP_INTERNAL_SERVER_ERROR, DATABASE_UNAVAILABLE)

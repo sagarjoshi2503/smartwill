@@ -1,6 +1,8 @@
 import re
 
-EMAIL_RE = re.compile(r"^\S+@\S+\.\S+$")
+from app.shared.constants import EMAIL_REGEX_PATTERN
+
+EMAIL_RE = re.compile(EMAIL_REGEX_PATTERN)
 
 
 def is_valid_email(email: str) -> bool:

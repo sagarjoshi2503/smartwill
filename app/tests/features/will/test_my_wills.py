@@ -2,7 +2,7 @@ from datetime import datetime, timedelta, timezone
 
 from app.core.config import Settings, get_settings
 from app.main import app
-from app.shared import messages
+from app.shared import constants
 
 URL = "/api/will/my-wills"
 
@@ -114,13 +114,13 @@ def test_excludes_a_recently_created_will_not_touched_in_30_days(client, fake_db
 def test_rejects_missing_email(client):
     res = client.get(URL)
     assert res.status_code == 400
-    assert res.json() == {"error": messages.INVALID_TESTATOR_EMAIL}
+    assert res.json() == {"error": constants.INVALID_TESTATOR_EMAIL}
 
 
 def test_rejects_invalid_email_format(client):
     res = client.get(URL, params={"email": "not-an-email"})
     assert res.status_code == 400
-    assert res.json() == {"error": messages.INVALID_TESTATOR_EMAIL}
+    assert res.json() == {"error": constants.INVALID_TESTATOR_EMAIL}
 
 
 def test_returns_500_when_mongodb_uri_missing():
@@ -129,6 +129,6 @@ def test_returns_500_when_mongodb_uri_missing():
         from fastapi.testclient import TestClient
         res = TestClient(app).get(URL, params={"email": "jane@example.com"})
         assert res.status_code == 500
-        assert res.json() == {"error": messages.MONGODB_NOT_CONFIGURED}
+        assert res.json() == {"error": constants.MONGODB_NOT_CONFIGURED}
     finally:
         app.dependency_overrides.clear()

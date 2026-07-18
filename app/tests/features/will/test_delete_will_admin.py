@@ -1,6 +1,6 @@
 from app.core.config import Settings, get_settings
 from app.main import app
-from app.shared import messages
+from app.shared import constants
 
 SAVE_URL = "/api/will/save"
 
@@ -61,7 +61,7 @@ def test_admin_delete_also_removes_adminwill_entries(client, fake_db):
 def test_admin_delete_rejects_unknown_will_id(client):
     res = client.delete(admin_delete_url("does-not-exist"))
     assert res.status_code == 404
-    assert res.json() == {"error": messages.WILL_NOT_FOUND}
+    assert res.json() == {"error": constants.WILL_NOT_FOUND}
 
 
 def test_admin_delete_returns_500_when_mongodb_uri_missing():
@@ -70,6 +70,6 @@ def test_admin_delete_returns_500_when_mongodb_uri_missing():
         from fastapi.testclient import TestClient
         res = TestClient(app).delete(admin_delete_url("some-id"))
         assert res.status_code == 500
-        assert res.json() == {"error": messages.MONGODB_NOT_CONFIGURED}
+        assert res.json() == {"error": constants.MONGODB_NOT_CONFIGURED}
     finally:
         app.dependency_overrides.clear()

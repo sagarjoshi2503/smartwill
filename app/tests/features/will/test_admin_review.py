@@ -1,6 +1,6 @@
 from app.core.config import Settings, get_settings
 from app.main import app
-from app.shared import messages
+from app.shared import constants
 
 SAVE_URL = "/api/will/save"
 
@@ -46,7 +46,7 @@ def test_admin_get_returns_the_will_regardless_of_owner(client, fake_db):
 def test_admin_get_rejects_unknown_will_id(client):
     res = client.get(get_admin_url("does-not-exist"))
     assert res.status_code == 404
-    assert res.json() == {"error": messages.WILL_NOT_FOUND}
+    assert res.json() == {"error": constants.WILL_NOT_FOUND}
 
 
 # --- POST /api/will/admin/{will_id}/complete ---
@@ -109,7 +109,7 @@ def test_admin_complete_updates_status_in_will_tracker_list(client, fake_db):
 def test_admin_complete_rejects_unknown_will_id(client):
     res = client.post(complete_admin_url("does-not-exist"), json={})
     assert res.status_code == 404
-    assert res.json() == {"error": messages.WILL_NOT_FOUND}
+    assert res.json() == {"error": constants.WILL_NOT_FOUND}
 
 
 def test_admin_complete_returns_500_when_mongodb_uri_missing():
@@ -118,7 +118,7 @@ def test_admin_complete_returns_500_when_mongodb_uri_missing():
         from fastapi.testclient import TestClient
         res = TestClient(app).post(complete_admin_url("some-id"), json={})
         assert res.status_code == 500
-        assert res.json() == {"error": messages.MONGODB_NOT_CONFIGURED}
+        assert res.json() == {"error": constants.MONGODB_NOT_CONFIGURED}
     finally:
         app.dependency_overrides.clear()
 
@@ -164,7 +164,7 @@ def test_admin_save_rejects_invalid_status(client):
         "will": {}, "testatorEmail": "client@example.com", "status": "Bogus",
     })
     assert res.status_code == 400
-    assert res.json() == {"error": messages.INVALID_WILL_STATUS}
+    assert res.json() == {"error": constants.INVALID_WILL_STATUS}
 
 
 # --- POST /api/will/admin/{will_id}/send-back ---
@@ -187,10 +187,10 @@ def test_send_back_requires_comments(client, fake_db):
     res = client.post(send_back_admin_url(will_id), json={"comments": "   "})
 
     assert res.status_code == 400
-    assert res.json() == {"error": messages.COMMENTS_REQUIRED}
+    assert res.json() == {"error": constants.COMMENTS_REQUIRED}
 
 
 def test_send_back_rejects_unknown_will_id(client):
     res = client.post(send_back_admin_url("does-not-exist"), json={"comments": "Fix this"})
     assert res.status_code == 404
-    assert res.json() == {"error": messages.WILL_NOT_FOUND}
+    assert res.json() == {"error": constants.WILL_NOT_FOUND}

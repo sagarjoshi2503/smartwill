@@ -1,7 +1,7 @@
 from app.core.config import Settings, get_settings
 from app.features.will import service as will_service
 from app.main import app
-from app.shared import messages
+from app.shared import constants
 
 URL = "/api/will/save"
 VALID_PAYLOAD = {"will": {"testator": {"fullName": "Jane Doe"}}, "testatorEmail": "jane@example.com"}
@@ -161,37 +161,37 @@ def test_save_does_not_create_adminwill_entry_for_draft(client, fake_db):
 def test_save_rejects_empty_body(client):
     res = client.post(URL, json={})
     assert res.status_code == 400
-    assert res.json() == {"error": messages.WILL_DATA_REQUIRED}
+    assert res.json() == {"error": constants.WILL_DATA_REQUIRED}
 
 
 def test_save_rejects_malformed_json_body(client):
     res = client.post(URL, content=b"not json", headers={"Content-Type": "application/json"})
     assert res.status_code == 400
-    assert res.json() == {"error": messages.WILL_DATA_REQUIRED}
+    assert res.json() == {"error": constants.WILL_DATA_REQUIRED}
 
 
 def test_save_rejects_invalid_status(client):
     res = client.post(URL, json={**VALID_PAYLOAD, "status": "Bogus"})
     assert res.status_code == 400
-    assert res.json() == {"error": messages.INVALID_WILL_STATUS}
+    assert res.json() == {"error": constants.INVALID_WILL_STATUS}
 
 
 def test_save_rejects_missing_testator_email(client):
     res = client.post(URL, json={"will": {"testator": {"fullName": "Jane Doe"}}})
     assert res.status_code == 400
-    assert res.json() == {"error": messages.INVALID_TESTATOR_EMAIL}
+    assert res.json() == {"error": constants.INVALID_TESTATOR_EMAIL}
 
 
 def test_save_rejects_invalid_testator_email(client):
     res = client.post(URL, json={**VALID_PAYLOAD, "testatorEmail": "not-an-email"})
     assert res.status_code == 400
-    assert res.json() == {"error": messages.INVALID_TESTATOR_EMAIL}
+    assert res.json() == {"error": constants.INVALID_TESTATOR_EMAIL}
 
 
 def test_save_rejects_unknown_will_id(client):
     res = client.post(URL, json={**VALID_PAYLOAD, "willId": "does-not-exist"})
     assert res.status_code == 404
-    assert res.json() == {"error": messages.WILL_NOT_FOUND}
+    assert res.json() == {"error": constants.WILL_NOT_FOUND}
 
 
 def test_save_rejects_updating_will_owned_by_a_different_testator(client, fake_db):
@@ -206,7 +206,7 @@ def test_save_rejects_updating_will_owned_by_a_different_testator(client, fake_d
     })
 
     assert res.status_code == 403
-    assert res.json() == {"error": messages.WILL_ACCESS_DENIED}
+    assert res.json() == {"error": constants.WILL_ACCESS_DENIED}
 
 
 def test_save_rejects_editing_a_will_pending_review(client, fake_db):
@@ -216,7 +216,7 @@ def test_save_rejects_editing_a_will_pending_review(client, fake_db):
     res = client.post(URL, json={**VALID_PAYLOAD, "status": "Draft", "willId": will_id})
 
     assert res.status_code == 403
-    assert res.json() == {"error": messages.WILL_LOCKED_FOR_REVIEW}
+    assert res.json() == {"error": constants.WILL_LOCKED_FOR_REVIEW}
 
 
 def test_save_returns_500_when_mongodb_uri_missing():
@@ -225,6 +225,6 @@ def test_save_returns_500_when_mongodb_uri_missing():
         from fastapi.testclient import TestClient
         res = TestClient(app).post(URL, json=VALID_PAYLOAD)
         assert res.status_code == 500
-        assert res.json() == {"error": messages.MONGODB_NOT_CONFIGURED}
+        assert res.json() == {"error": constants.MONGODB_NOT_CONFIGURED}
     finally:
         app.dependency_overrides.clear()

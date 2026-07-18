@@ -1,6 +1,6 @@
 from app.core.config import Settings, get_settings
 from app.main import app
-from app.shared import messages
+from app.shared import constants
 
 SAVE_URL = "/api/will/save"
 
@@ -47,7 +47,7 @@ def test_is_case_insensitive_on_email(client, fake_db):
 def test_rejects_unknown_will_id(client):
     res = client.get(will_url("does-not-exist"), params={"email": "jane@example.com"})
     assert res.status_code == 404
-    assert res.json() == {"error": messages.WILL_NOT_FOUND}
+    assert res.json() == {"error": constants.WILL_NOT_FOUND}
 
 
 def test_rejects_wrong_owner_email(client, fake_db):
@@ -61,13 +61,13 @@ def test_rejects_wrong_owner_email(client, fake_db):
     res = client.get(will_url(will_id), params={"email": "someone-else@example.com"})
 
     assert res.status_code == 403
-    assert res.json() == {"error": messages.WILL_ACCESS_DENIED}
+    assert res.json() == {"error": constants.WILL_ACCESS_DENIED}
 
 
 def test_rejects_invalid_email_format(client):
     res = client.get(will_url("some-id"), params={"email": "not-an-email"})
     assert res.status_code == 400
-    assert res.json() == {"error": messages.INVALID_TESTATOR_EMAIL}
+    assert res.json() == {"error": constants.INVALID_TESTATOR_EMAIL}
 
 
 def test_returns_500_when_mongodb_uri_missing():
@@ -76,6 +76,6 @@ def test_returns_500_when_mongodb_uri_missing():
         from fastapi.testclient import TestClient
         res = TestClient(app).get(will_url("some-id"), params={"email": "jane@example.com"})
         assert res.status_code == 500
-        assert res.json() == {"error": messages.MONGODB_NOT_CONFIGURED}
+        assert res.json() == {"error": constants.MONGODB_NOT_CONFIGURED}
     finally:
         app.dependency_overrides.clear()

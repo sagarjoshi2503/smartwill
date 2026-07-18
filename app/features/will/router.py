@@ -7,15 +7,18 @@ from app.features.will import service
 from app.features.will.schemas import (
     ClientsResponse, DeleteWillResponse, ErrorResponse, SaveWillResponse, TestatorWillsResponse, WillDetailResponse,
 )
+from app.shared.constants import (
+    HTTP_BAD_REQUEST, HTTP_CREATED, HTTP_FORBIDDEN, HTTP_INTERNAL_SERVER_ERROR, HTTP_NOT_FOUND,
+)
 
 router = APIRouter(prefix="/api/will", tags=["will"])
 
-ERROR_RESPONSES = {400: {"model": ErrorResponse}, 500: {"model": ErrorResponse}}
+ERROR_RESPONSES = {HTTP_BAD_REQUEST: {"model": ErrorResponse}, HTTP_INTERNAL_SERVER_ERROR: {"model": ErrorResponse}}
 
 
 @router.post(
-    "/save", response_model=SaveWillResponse, status_code=201,
-    responses={**ERROR_RESPONSES, 403: {"model": ErrorResponse}, 404: {"model": ErrorResponse}},
+    "/save", response_model=SaveWillResponse, status_code=HTTP_CREATED,
+    responses={**ERROR_RESPONSES, HTTP_FORBIDDEN: {"model": ErrorResponse}, HTTP_NOT_FOUND: {"model": ErrorResponse}},
     summary="Save a drafted Will, or update an existing Draft by willId",
 )
 async def save(request: Request, db: Database = Depends(get_db), settings: Settings = Depends(get_settings)):
@@ -29,8 +32,8 @@ async def save(request: Request, db: Database = Depends(get_db), settings: Setti
 
 
 @router.post(
-    "/admin/save", response_model=SaveWillResponse, status_code=201,
-    responses={**ERROR_RESPONSES, 404: {"model": ErrorResponse}},
+    "/admin/save", response_model=SaveWillResponse, status_code=HTTP_CREATED,
+    responses={**ERROR_RESPONSES, HTTP_NOT_FOUND: {"model": ErrorResponse}},
     summary="Admin creates or updates a Will directly (e.g. save-and-complete for a client)",
 )
 async def save_admin(request: Request, db: Database = Depends(get_db), settings: Settings = Depends(get_settings)):
@@ -44,7 +47,7 @@ async def save_admin(request: Request, db: Database = Depends(get_db), settings:
 
 
 @router.get(
-    "/admin-wills", response_model=ClientsResponse, responses={500: {"model": ErrorResponse}},
+    "/admin-wills", response_model=ClientsResponse, responses={HTTP_INTERNAL_SERVER_ERROR: {"model": ErrorResponse}},
     summary="List all Wills submitted for admin review",
 )
 async def admin_wills(db: Database = Depends(get_db)):
@@ -61,7 +64,7 @@ async def my_wills(email: str = Query(""), db: Database = Depends(get_db)):
 
 @router.get(
     "/admin/{will_id}", response_model=WillDetailResponse,
-    responses={500: {"model": ErrorResponse}, 404: {"model": ErrorResponse}},
+    responses={HTTP_INTERNAL_SERVER_ERROR: {"model": ErrorResponse}, HTTP_NOT_FOUND: {"model": ErrorResponse}},
     summary="Fetch any Will for admin review (no ownership check)",
 )
 async def get_will_admin(will_id: str, db: Database = Depends(get_db)):
@@ -70,7 +73,7 @@ async def get_will_admin(will_id: str, db: Database = Depends(get_db)):
 
 @router.post(
     "/admin/{will_id}/complete", response_model=SaveWillResponse,
-    responses={500: {"model": ErrorResponse}, 404: {"model": ErrorResponse}},
+    responses={HTTP_INTERNAL_SERVER_ERROR: {"model": ErrorResponse}, HTTP_NOT_FOUND: {"model": ErrorResponse}},
     summary="Admin completes review of a Will",
 )
 async def complete_will_admin(will_id: str, request: Request, db: Database = Depends(get_db)):
@@ -85,7 +88,7 @@ async def complete_will_admin(will_id: str, request: Request, db: Database = Dep
 
 @router.post(
     "/admin/{will_id}/send-back", response_model=SaveWillResponse,
-    responses={**ERROR_RESPONSES, 404: {"model": ErrorResponse}},
+    responses={**ERROR_RESPONSES, HTTP_NOT_FOUND: {"model": ErrorResponse}},
     summary="Admin sends a Will back to the testator with comments, reverting it to Draft",
 )
 async def send_back_will_admin(
@@ -102,7 +105,7 @@ async def send_back_will_admin(
 
 @router.delete(
     "/admin/{will_id}", response_model=DeleteWillResponse,
-    responses={500: {"model": ErrorResponse}, 404: {"model": ErrorResponse}},
+    responses={HTTP_INTERNAL_SERVER_ERROR: {"model": ErrorResponse}, HTTP_NOT_FOUND: {"model": ErrorResponse}},
     summary="Delete any Will (admin reviewer action)",
 )
 async def delete_will_admin(will_id: str, db: Database = Depends(get_db)):
@@ -111,7 +114,7 @@ async def delete_will_admin(will_id: str, db: Database = Depends(get_db)):
 
 @router.get(
     "/{will_id}", response_model=WillDetailResponse,
-    responses={**ERROR_RESPONSES, 403: {"model": ErrorResponse}, 404: {"model": ErrorResponse}},
+    responses={**ERROR_RESPONSES, HTTP_FORBIDDEN: {"model": ErrorResponse}, HTTP_NOT_FOUND: {"model": ErrorResponse}},
     summary="Fetch a single Will owned by the given testator email, for editing",
 )
 async def get_will(will_id: str, email: str = Query(""), db: Database = Depends(get_db)):
@@ -120,7 +123,7 @@ async def get_will(will_id: str, email: str = Query(""), db: Database = Depends(
 
 @router.delete(
     "/{will_id}", response_model=DeleteWillResponse,
-    responses={**ERROR_RESPONSES, 403: {"model": ErrorResponse}, 404: {"model": ErrorResponse}},
+    responses={**ERROR_RESPONSES, HTTP_FORBIDDEN: {"model": ErrorResponse}, HTTP_NOT_FOUND: {"model": ErrorResponse}},
     summary="Delete a Will owned by the given testator email",
 )
 async def delete_will(will_id: str, email: str = Query(""), db: Database = Depends(get_db)):

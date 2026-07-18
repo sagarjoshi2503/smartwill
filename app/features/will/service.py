@@ -6,15 +6,15 @@ from pymongo.database import Database
 from app.core.config import Settings
 from app.core.exceptions import AppError
 from app.features.will import repository
-from app.shared import email, messages
+from app.shared import email
+from app.shared.constants import (
+    COMMENTS_REQUIRED, HTTP_BAD_REQUEST, HTTP_FORBIDDEN, HTTP_NOT_FOUND, INVALID_TESTATOR_EMAIL, INVALID_WILL_STATUS,
+    STATUS_COMPLETED, STATUS_DRAFT, STATUS_PENDING_REVIEW, TESTATOR_WILL_VISIBILITY_DAYS, WILL_ACCESS_DENIED,
+    WILL_DATA_REQUIRED, WILL_LOCKED_FOR_REVIEW, WILL_NOT_FOUND,
+)
 from app.shared.validators import is_valid_email, normalize_email
 
-STATUS_DRAFT = "Draft"
-STATUS_PENDING_REVIEW = "PendingReview"
-STATUS_COMPLETED = "Completed"
 ALLOWED_STATUSES = {STATUS_DRAFT, STATUS_PENDING_REVIEW}
-
-TESTATOR_WILL_VISIBILITY_DAYS = 30
 
 
 def _redact_id_numbers(will_data: dict) -> dict:
@@ -38,16 +38,16 @@ def _redact_id_numbers(will_data: dict) -> dict:
 
 def save_will(db: Database, body: dict, settings: Settings, is_admin: bool = False) -> dict:
     if not isinstance(body, dict) or not body:
-        raise AppError(400, messages.WILL_DATA_REQUIRED)
+        raise AppError(HTTP_BAD_REQUEST, WILL_DATA_REQUIRED)
 
     status = body.get("status") or STATUS_PENDING_REVIEW
     allowed_statuses = ALLOWED_STATUSES | ({STATUS_COMPLETED} if is_admin else set())
     if status not in allowed_statuses:
-        raise AppError(400, messages.INVALID_WILL_STATUS)
+        raise AppError(HTTP_BAD_REQUEST, INVALID_WILL_STATUS)
 
     testator_email = normalize_email(body.get("testatorEmail"))
     if not is_valid_email(testator_email):
-        raise AppError(400, messages.INVALID_TESTATOR_EMAIL)
+        raise AppError(HTTP_BAD_REQUEST, INVALID_TESTATOR_EMAIL)
 
     now = datetime.now(timezone.utc)
     will_id = (body.get("willId") or "").strip()
@@ -55,15 +55,15 @@ def save_will(db: Database, body: dict, settings: Settings, is_admin: bool = Fal
     if will_id:
         existing = repository.find_will_by_id(db, will_id)
         if not existing:
-            raise AppError(404, messages.WILL_NOT_FOUND)
+            raise AppError(HTTP_NOT_FOUND, WILL_NOT_FOUND)
         # Admin-driven saves bypass the ownership/lock checks below, the same
         # way the other /admin/... endpoints do — an admin can complete any
         # Will regardless of who submitted it or its current status.
         if not is_admin:
             if normalize_email(existing.get("testatorEmail")) != testator_email:
-                raise AppError(403, messages.WILL_ACCESS_DENIED)
+                raise AppError(HTTP_FORBIDDEN, WILL_ACCESS_DENIED)
             if existing.get("status") == STATUS_PENDING_REVIEW:
-                raise AppError(403, messages.WILL_LOCKED_FOR_REVIEW)
+                raise AppError(HTTP_FORBIDDEN, WILL_LOCKED_FOR_REVIEW)
         created_at = existing.get("createdAt", now)
     else:
         # willId is always generated server-side when creating a new Will
@@ -140,7 +140,7 @@ def list_admin_wills(db: Database) -> dict:
 def list_testator_wills(db: Database, email: str) -> dict:
     email = normalize_email(email)
     if not is_valid_email(email):
-        raise AppError(400, messages.INVALID_TESTATOR_EMAIL)
+        raise AppError(HTTP_BAD_REQUEST, INVALID_TESTATOR_EMAIL)
 
     cutoff = datetime.now(timezone.utc) - timedelta(days=TESTATOR_WILL_VISIBILITY_DAYS)
     wills = []
@@ -162,13 +162,13 @@ def list_testator_wills(db: Database, email: str) -> dict:
 def get_will_for_edit(db: Database, will_id: str, email: str) -> dict:
     email = normalize_email(email)
     if not is_valid_email(email):
-        raise AppError(400, messages.INVALID_TESTATOR_EMAIL)
+        raise AppError(HTTP_BAD_REQUEST, INVALID_TESTATOR_EMAIL)
 
     document = repository.find_will_by_id(db, will_id)
     if not document:
-        raise AppError(404, messages.WILL_NOT_FOUND)
+        raise AppError(HTTP_NOT_FOUND, WILL_NOT_FOUND)
     if normalize_email(document.get("testatorEmail")) != email:
-        raise AppError(403, messages.WILL_ACCESS_DENIED)
+        raise AppError(HTTP_FORBIDDEN, WILL_ACCESS_DENIED)
 
     return {
         "willId": document["willId"],
@@ -183,7 +183,7 @@ def get_will_as_admin(db: Database, will_id: str) -> dict:
     # No ownership check — the admin reviewer can open any submitted Will.
     document = repository.find_will_by_id(db, will_id)
     if not document:
-        raise AppError(404, messages.WILL_NOT_FOUND)
+        raise AppError(HTTP_NOT_FOUND, WILL_NOT_FOUND)
 
     return {
         "willId": document["willId"],
@@ -197,7 +197,7 @@ def get_will_as_admin(db: Database, will_id: str) -> dict:
 def admin_complete_will(db: Database, will_id: str, body: dict) -> dict:
     document = repository.find_will_by_id(db, will_id)
     if not document:
-        raise AppError(404, messages.WILL_NOT_FOUND)
+        raise AppError(HTTP_NOT_FOUND, WILL_NOT_FOUND)
 
     updated_will = body.get("will") if isinstance(body, dict) else None
     reviewer_email = None
@@ -217,11 +217,11 @@ def admin_complete_will(db: Database, will_id: str, body: dict) -> dict:
 def admin_send_back_will(db: Database, will_id: str, comments: str, settings: Settings) -> dict:
     comments = (comments or "").strip()
     if not comments:
-        raise AppError(400, messages.COMMENTS_REQUIRED)
+        raise AppError(HTTP_BAD_REQUEST, COMMENTS_REQUIRED)
 
     document = repository.find_will_by_id(db, will_id)
     if not document:
-        raise AppError(404, messages.WILL_NOT_FOUND)
+        raise AppError(HTTP_NOT_FOUND, WILL_NOT_FOUND)
 
     document = {
         **document,
@@ -254,7 +254,7 @@ def delete_will_as_admin(db: Database, will_id: str) -> dict:
     # unlike the testator-scoped delete below.
     document = repository.find_will_by_id(db, will_id)
     if not document:
-        raise AppError(404, messages.WILL_NOT_FOUND)
+        raise AppError(HTTP_NOT_FOUND, WILL_NOT_FOUND)
 
     repository.delete_will(db, will_id)
     return {"willId": will_id}
@@ -263,13 +263,13 @@ def delete_will_as_admin(db: Database, will_id: str) -> dict:
 def delete_will_for_testator(db: Database, will_id: str, email: str) -> dict:
     email = normalize_email(email)
     if not is_valid_email(email):
-        raise AppError(400, messages.INVALID_TESTATOR_EMAIL)
+        raise AppError(HTTP_BAD_REQUEST, INVALID_TESTATOR_EMAIL)
 
     document = repository.find_will_by_id(db, will_id)
     if not document:
-        raise AppError(404, messages.WILL_NOT_FOUND)
+        raise AppError(HTTP_NOT_FOUND, WILL_NOT_FOUND)
     if normalize_email(document.get("testatorEmail")) != email:
-        raise AppError(403, messages.WILL_ACCESS_DENIED)
+        raise AppError(HTTP_FORBIDDEN, WILL_ACCESS_DENIED)
 
     # Unlike editing, deletion is allowed regardless of status — a testator
     # can delete a Will that's already PendingReview with the admin.

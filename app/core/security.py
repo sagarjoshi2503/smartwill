@@ -6,7 +6,7 @@ from google.auth.transport import requests as google_requests
 from google.oauth2 import id_token as google_id_token
 
 from app.core.exceptions import AppError
-from app.shared import messages
+from app.shared.constants import HTTP_BAD_REQUEST, HTTP_UNAUTHORIZED, INVALID_GOOGLE_CREDENTIAL, MALFORMED_CREDENTIALS
 
 
 def hash_password(password: str) -> str:
@@ -23,11 +23,11 @@ def decode_transport_password(encoded_password: str) -> str:
     try:
         return base64.b64decode(encoded_password, validate=True).decode("utf-8")
     except (binascii.Error, ValueError, UnicodeDecodeError):
-        raise AppError(400, messages.MALFORMED_CREDENTIALS)
+        raise AppError(HTTP_BAD_REQUEST, MALFORMED_CREDENTIALS)
 
 
 def verify_google_id_token(id_token_value: str, client_id: str) -> dict:
     try:
         return google_id_token.verify_oauth2_token(id_token_value, google_requests.Request(), client_id)
     except Exception:
-        raise AppError(401, messages.INVALID_GOOGLE_CREDENTIAL)
+        raise AppError(HTTP_UNAUTHORIZED, INVALID_GOOGLE_CREDENTIAL)

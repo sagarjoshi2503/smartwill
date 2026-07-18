@@ -6,9 +6,7 @@ from pymongo.database import Database
 
 from app.core.config import Settings, get_settings
 from app.core.exceptions import AppError
-from app.shared import messages
-
-DB_NAME = "smartwill"
+from app.shared.constants import DB_NAME, HTTP_INTERNAL_SERVER_ERROR, MONGODB_NOT_CONFIGURED
 
 
 @lru_cache
@@ -23,5 +21,5 @@ def get_db(settings: Settings = Depends(get_settings)) -> Database:
     Depends on get_settings (rather than calling it directly) so tests can override
     either dependency independently via app.dependency_overrides."""
     if not settings.mongodb_uri:
-        raise AppError(500, messages.MONGODB_NOT_CONFIGURED)
+        raise AppError(HTTP_INTERNAL_SERVER_ERROR, MONGODB_NOT_CONFIGURED)
     return _get_client(settings.mongodb_uri)[DB_NAME]

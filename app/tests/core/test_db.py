@@ -4,7 +4,7 @@ from pymongo.database import Database
 from app.core.config import Settings
 from app.core.db import get_db
 from app.core.exceptions import AppError
-from app.shared import messages
+from app.shared import constants
 
 
 # --- positive scenarios ---
@@ -21,4 +21,4 @@ def test_get_db_raises_when_mongodb_uri_missing():
     with pytest.raises(AppError) as exc_info:
         get_db(settings=Settings(mongodb_uri=None))
     assert exc_info.value.status_code == 500
-    assert exc_info.value.message == messages.MONGODB_NOT_CONFIGURED
+    assert exc_info.value.message == constants.MONGODB_NOT_CONFIGURED

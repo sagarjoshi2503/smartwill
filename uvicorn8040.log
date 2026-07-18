@@ -1,9 +1,6 @@
-INFO:     Started server process [9568]
+INFO:     Started server process [8840]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
 INFO:     Uvicorn running on http://127.0.0.1:8040 (Press CTRL+C to quit)
-INFO:     127.0.0.1:54172 - "GET /api/will/admin-wills HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54187 - "GET /api/will/my-wills?email=sagar.a.joshi%40gmail.com HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54188 - "POST /api/auth/google HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54188 - "GET /api/will/my-wills?email=sagar.a.joshi%40gmail.com HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54190 - "GET /api/will/my-wills?email=sagar.a.joshi%40gmail.com HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56143 - "POST /api/will/save HTTP/1.1" 400 Bad Request
+INFO:     127.0.0.1:56155 - "POST /api/will/save HTTP/1.1" 400 Bad Request

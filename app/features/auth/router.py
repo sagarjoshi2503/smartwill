@@ -5,13 +5,16 @@ from app.core.config import Settings, get_settings
 from app.core.db import get_db
 from app.features.auth import service
 from app.features.auth.schemas import AuthResponse, ErrorResponse
+from app.shared.constants import (
+    HTTP_BAD_REQUEST, HTTP_CONFLICT, HTTP_CREATED, HTTP_FORBIDDEN, HTTP_INTERNAL_SERVER_ERROR, HTTP_UNAUTHORIZED,
+)
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
 ERROR_RESPONSES = {
-    400: {"model": ErrorResponse},
-    401: {"model": ErrorResponse},
-    500: {"model": ErrorResponse},
+    HTTP_BAD_REQUEST: {"model": ErrorResponse},
+    HTTP_UNAUTHORIZED: {"model": ErrorResponse},
+    HTTP_INTERNAL_SERVER_ERROR: {"model": ErrorResponse},
 }
 
 
@@ -28,8 +31,8 @@ async def verify_google(request: Request, settings: Settings = Depends(get_setti
 
 
 @router.post(
-    "/admin-signup", response_model=AuthResponse, status_code=201,
-    responses={**ERROR_RESPONSES, 409: {"model": ErrorResponse}},
+    "/admin-signup", response_model=AuthResponse, status_code=HTTP_CREATED,
+    responses={**ERROR_RESPONSES, HTTP_CONFLICT: {"model": ErrorResponse}},
     summary="Create an Admin Portal account",
 )
 async def admin_signup(request: Request, db: Database = Depends(get_db)):
@@ -44,7 +47,7 @@ async def admin_signup(request: Request, db: Database = Depends(get_db)):
 
 @router.post(
     "/admin-login", response_model=AuthResponse,
-    responses={**ERROR_RESPONSES, 403: {"model": ErrorResponse}},
+    responses={**ERROR_RESPONSES, HTTP_FORBIDDEN: {"model": ErrorResponse}},
     summary="Log in to the Admin Portal",
 )
 async def admin_login(request: Request, db: Database = Depends(get_db)):

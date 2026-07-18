@@ -3,7 +3,7 @@ import bcrypt
 from app.core.config import Settings, get_settings
 from app.core.db import get_db
 from app.main import app
-from app.shared import messages
+from app.shared import constants
 
 URL = "/api/auth/admin-signup"
 VALID_PAYLOAD = {"fullName": "Jane Doe", "email": "jane@lawfirm.com", "password": "password123"}
@@ -36,7 +36,7 @@ def test_signup_rejects_duplicate_email(client):
     client.post(URL, json=VALID_PAYLOAD)
     res = client.post(URL, json={**VALID_PAYLOAD, "fullName": "Someone Else"})
     assert res.status_code == 409
-    assert res.json() == {"error": messages.ADMIN_ALREADY_SIGNED_UP}
+    assert res.json() == {"error": constants.ADMIN_ALREADY_SIGNED_UP}
 
 
 def test_signup_rejects_duplicate_email_case_insensitively(client):
@@ -48,31 +48,31 @@ def test_signup_rejects_duplicate_email_case_insensitively(client):
 def test_signup_rejects_missing_full_name(client):
     res = client.post(URL, json={**VALID_PAYLOAD, "fullName": "   "})
     assert res.status_code == 400
-    assert res.json() == {"error": messages.FULL_NAME_REQUIRED}
+    assert res.json() == {"error": constants.FULL_NAME_REQUIRED}
 
 
 def test_signup_rejects_invalid_email(client):
     res = client.post(URL, json={**VALID_PAYLOAD, "email": "not-an-email"})
     assert res.status_code == 400
-    assert res.json() == {"error": messages.INVALID_EMAIL}
+    assert res.json() == {"error": constants.INVALID_EMAIL}
 
 
 def test_signup_rejects_short_password(client):
     res = client.post(URL, json={**VALID_PAYLOAD, "password": "short"})
     assert res.status_code == 400
-    assert res.json() == {"error": messages.PASSWORD_TOO_SHORT}
+    assert res.json() == {"error": constants.PASSWORD_TOO_SHORT}
 
 
 def test_signup_rejects_non_string_password(client):
     res = client.post(URL, json={**VALID_PAYLOAD, "password": 12345678})
     assert res.status_code == 400
-    assert res.json() == {"error": messages.PASSWORD_TOO_SHORT}
+    assert res.json() == {"error": constants.PASSWORD_TOO_SHORT}
 
 
 def test_signup_rejects_malformed_json_body(client):
     res = client.post(URL, content=b"not json", headers={"Content-Type": "application/json"})
     assert res.status_code == 400
-    assert res.json() == {"error": messages.FULL_NAME_REQUIRED}
+    assert res.json() == {"error": constants.FULL_NAME_REQUIRED}
 
 
 def test_signup_returns_500_when_mongodb_uri_missing():
@@ -81,6 +81,6 @@ def test_signup_returns_500_when_mongodb_uri_missing():
         from fastapi.testclient import TestClient
         res = TestClient(app).post(URL, json=VALID_PAYLOAD)
         assert res.status_code == 500
-        assert res.json() == {"error": messages.MONGODB_NOT_CONFIGURED}
+        assert res.json() == {"error": constants.MONGODB_NOT_CONFIGURED}
     finally:
         app.dependency_overrides.clear()
