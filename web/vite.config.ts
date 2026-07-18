@@ -6,4 +6,12 @@ export default defineConfig({
   // (https://<user>.github.io/smartwill/) and at a host's domain root (Vercel).
   base: './',
   plugins: [react()],
+  test: {
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'html'],
+      include: ['src/**/*.{ts,tsx}'],
+      exclude: ['src/**/*.test.{ts,tsx}', 'src/main.tsx'],
+    },
+  },
 });

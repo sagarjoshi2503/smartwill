@@ -28,3 +28,9 @@ dist/
 __pycache__/
 *.pyc
 .venv*/
+.coverage
+.pytest_cache/
+
+# Coverage reports
+htmlcov/
+coverage/
