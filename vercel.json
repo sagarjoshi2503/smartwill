@@ -1,4 +1,7 @@
 {
+  "installCommand": "cd web && npm install",
+  "buildCommand": "cd web && npm run build",
+  "outputDirectory": "web/dist",
   "rewrites": [
     { "source": "/api/flags", "destination": "/api/flags" },
     { "source": "/api/(.*)", "destination": "/api/index" },
