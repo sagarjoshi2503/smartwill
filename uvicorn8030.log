@@ -64,3 +64,33 @@ INFO:     127.0.0.1:57086 - "GET /api/will/lawyer-wills HTTP/1.1" 200 OK
 INFO:     127.0.0.1:57091 - "GET /api/will/lawyer-wills HTTP/1.1" 200 OK
 INFO:     127.0.0.1:57092 - "GET /api/will/lawyer-wills HTTP/1.1" 200 OK
 INFO:     127.0.0.1:57098 - "GET /api/will/lawyer-wills HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57102 - "GET /api/will/lawyer-wills HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57111 - "POST /api/auth/lawyer-login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57111 - "GET /api/will/lawyer-wills HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57111 - "GET /api/will/lawyer-wills HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57112 - "POST /api/auth/lawyer-login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57112 - "GET /api/will/lawyer-wills HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57113 - "GET /api/will/lawyer-wills HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57114 - "POST /api/auth/lawyer-login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57114 - "GET /api/will/lawyer-wills HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57115 - "GET /api/will/lawyer-wills HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57123 - "POST /api/auth/lawyer-login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57123 - "GET /api/will/lawyer-wills HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57124 - "GET /api/will/lawyer-wills HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57146 - "POST /api/auth/lawyer-login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57146 - "GET /api/will/lawyer-wills HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57146 - "GET /api/will/lawyer-wills HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57147 - "GET /api/will/lawyer-wills HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57149 - "GET /api/will/lawyer-wills HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52699 - "GET / HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:52807 - "OPTIONS /api/auth/lawyer-login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52807 - "POST /api/auth/lawyer-login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52807 - "GET /api/will/lawyer-wills HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52809 - "GET /api/will/lawyer-wills HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52811 - "GET /api/will/admin/213a30a4-8153-46c1-8950-66243cabc231 HTTP/1.1" 200 OK
+WARNING:  WatchFiles detected changes in 'app\shared\messages.py'. Reloading...
+ INFO:     127.0.0.1:53431 - "GET /docs HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53435 - "GET /openapi.json HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53436 - "GET /openapi.json HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53437 - "GET /docs HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53728 - "GET / HTTP/1.1" 404 Not Found

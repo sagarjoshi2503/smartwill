@@ -1,0 +1,44 @@
+INFO:     Started server process [13712]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8040 (Press CTRL+C to quit)
+INFO:     127.0.0.1:53438 - "GET /docs HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53442 - "GET /openapi.json HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53444 - "POST /api/will/admin/save HTTP/1.1" 201 Created
+INFO:     127.0.0.1:53454 - "GET /api/will/admin/d4a44de1-9b5f-43e3-8734-887d6266ed70 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53455 - "POST /api/will/save HTTP/1.1" 201 Created
+INFO:     127.0.0.1:53457 - "POST /api/will/admin/e89ed628-42ef-4b9f-92d4-c40fecc0255c/send-back HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53459 - "GET /api/will/admin/e89ed628-42ef-4b9f-92d4-c40fecc0255c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53461 - "DELETE /api/will/admin/d4a44de1-9b5f-43e3-8734-887d6266ed70 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53462 - "DELETE /api/will/admin/e89ed628-42ef-4b9f-92d4-c40fecc0255c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53739 - "OPTIONS /api/auth/lawyer-login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53739 - "POST /api/auth/lawyer-login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53739 - "GET /api/will/lawyer-wills HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53741 - "GET /api/will/lawyer-wills HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53754 - "OPTIONS /api/will/admin/f444b8e5-dfe0-4985-afa7-9099c7e9499f HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53754 - "DELETE /api/will/admin/f444b8e5-dfe0-4985-afa7-9099c7e9499f HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53755 - "GET /api/will/admin/213a30a4-8153-46c1-8950-66243cabc231 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53756 - "OPTIONS /api/will/admin/213a30a4-8153-46c1-8950-66243cabc231/send-back HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53756 - "POST /api/will/admin/213a30a4-8153-46c1-8950-66243cabc231/send-back HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53756 - "GET /api/will/lawyer-wills HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53758 - "GET /api/will/lawyer-wills HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53759 - "OPTIONS /api/will/save HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53759 - "POST /api/will/save HTTP/1.1" 400 Bad Request
+INFO:     127.0.0.1:53759 - "POST /api/will/save HTTP/1.1" 400 Bad Request
+INFO:     127.0.0.1:53766 - "GET /api/will/lawyer-wills HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53767 - "GET /api/will/lawyer-wills HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53768 - "GET /api/will/my-wills?email=arjun.verma%40gmail.com HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53769 - "GET /api/will/my-wills?email=arjun.verma%40gmail.com HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53770 - "GET /api/will/9cfbbd3a-f620-40a6-8b16-62e5bd791dd0?email=arjun.verma%40gmail.com HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53770 - "GET /api/will/my-wills?email=arjun.verma%40gmail.com HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53771 - "GET /api/will/my-wills?email=arjun.verma%40gmail.com HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53777 - "POST /api/will/save HTTP/1.1" 201 Created
+INFO:     127.0.0.1:53777 - "POST /api/will/save HTTP/1.1" 201 Created
+INFO:     127.0.0.1:53777 - "GET /api/will/my-wills?email=arjun.verma%40gmail.com HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53780 - "GET /api/will/my-wills?email=arjun.verma%40gmail.com HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53780 - "GET /api/will/9cfbbd3a-f620-40a6-8b16-62e5bd791dd0?email=arjun.verma%40gmail.com HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53780 - "GET /api/will/my-wills?email=arjun.verma%40gmail.com HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53781 - "GET /api/will/my-wills?email=arjun.verma%40gmail.com HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53789 - "POST /api/auth/lawyer-login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53789 - "GET /api/will/lawyer-wills HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53790 - "GET /api/will/lawyer-wills HTTP/1.1" 200 OK
