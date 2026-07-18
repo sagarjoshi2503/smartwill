@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Scale, Phone, ArrowRight } from "lucide-react";
-import GoogleSignInButton from "./GoogleSignInButton";
+import GoogleSignInButton from "../features/user-signin-gmail/GoogleSignInButton";
 import { apiUrl } from "../utils/apiBase";
 import type { GoogleProfile } from "../types";
 

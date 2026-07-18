@@ -30,6 +30,8 @@ STATUS_COMPLETED = "Completed"
 # --- Business rules ---
 MIN_PASSWORD_LENGTH = 8
 TESTATOR_WILL_VISIBILITY_DAYS = 30
+OTP_LENGTH = 6
+OTP_TTL_SECONDS = 300
 
 # --- CORS ---
 CORS_ALLOW_ORIGINS = ["*"]
@@ -62,6 +64,11 @@ PASSWORD_TOO_SHORT = "Password must be at least 8 characters."
 PASSWORD_REQUIRED = "Password is required."
 INVALID_LOGIN_CREDENTIALS = "Invalid email or password."
 ADMIN_ALREADY_SIGNED_UP = "You're already signed up as an admin with this email. Please use the login screen to log in."
+
+INVALID_PHONE_NUMBER = "Enter a valid mobile number."
+OTP_NOT_REQUESTED = "Request an OTP before attempting to verify it."
+OTP_EXPIRED = "This OTP has expired. Please request a new one."
+INVALID_OTP = "The OTP you entered is incorrect."
 
 WILL_DATA_REQUIRED = "Will data is required."
 INVALID_WILL_STATUS = "Invalid will status."
