@@ -15,7 +15,8 @@ import {
   LBL_LEGAL_NAME, LBL_FULL_NAME, LBL_ID_TYPE, LBL_ID_NUMBER, LBL_ADDRESS,
   TIP_NO_ID_SAVED, MSG_VIEW_ONLY, MSG_SAVING,
   BTN_COMPLETE_REVIEW, BTN_SUBMIT_REVIEW,
-  STATUS_COMPLETED, STATUS_PENDING_REVIEW,
+  STATUS_COMPLETED, STATUS_DRAFT, STATUS_PENDING_REVIEW,
+  RAZORPAY_PAYMENT_LINK, PENDING_PAYMENT_STORAGE_KEY,
 } from "../../constants";
 import type { AssetCatalogItem, AssetInstance, Beneficiary, WillState } from "../../types";
 
@@ -58,6 +59,15 @@ export default function WizardForms({step,will,setWill,addBene,removeBene,update
   const [submitStatus,setSubmitStatus]=useState<"idle"|"saving"|"error"|"done">("idle");
   const [submitError,setSubmitError]=useState("");
 
+  // Testator submitting for admin review/approval is a paid action. When a
+  // payment link is configured, the Will is saved as Draft (not PendingReview
+  // yet) and the testator is sent to pay — App.tsx flips it to PendingReview
+  // once Razorpay redirects back confirming a successful payment, or leaves
+  // it as Draft if the payment failed/was abandoned. Without a payment link
+  // configured, submission goes straight to PendingReview as before.
+  const isPlainTestatorSubmit = !adminReview && !adminComplete;
+  const gateBehindPayment = isPlainTestatorSubmit && !!RAZORPAY_PAYMENT_LINK;
+
   const handleSaveAndSubmit = async () => {
     setSubmitStatus("saving"); setSubmitError("");
     try {
@@ -76,13 +86,23 @@ export default function WizardForms({step,will,setWill,addBene,removeBene,update
         : await fetch(apiUrl(API_WILL_SAVE), {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ will, testatorEmail: will.testator.email, status: STATUS_PENDING_REVIEW, willId }),
+            body: JSON.stringify({
+              will, testatorEmail: will.testator.email,
+              status: gateBehindPayment ? STATUS_DRAFT : STATUS_PENDING_REVIEW,
+              willId,
+            }),
           });
       const isJson = res.headers.get("content-type")?.includes("application/json");
       const data = isJson ? await res.json() : null;
       if(!res.ok) throw new Error(data?.error || `Could not save the Will (server returned ${res.status}).`);
       setSubmitStatus("done");
       onSaved(data.willId, data.status);
+      if(gateBehindPayment) {
+        sessionStorage.setItem(
+          PENDING_PAYMENT_STORAGE_KEY, JSON.stringify({ willId: data.willId, email: will.testator.email }),
+        );
+        window.location.href = RAZORPAY_PAYMENT_LINK as string;
+      }
     } catch (err) {
       setSubmitStatus("error");
       setSubmitError(err instanceof Error ? err.message : "Could not save the Will.");
@@ -500,7 +520,11 @@ export default function WizardForms({step,will,setWill,addBene,removeBene,update
             </button>
           </div>
           {submitStatus==="error"&&<p className="text-red-500 text-xs text-center">{submitError}</p>}
-          {submitStatus==="done"&&<p className="text-emerald-500 text-xs text-center">{(adminReview||adminComplete)?"Review completed.":"Will submitted for review."}</p>}
+          {submitStatus==="done"&&(
+            <p className="text-emerald-500 text-xs text-center">
+              {(adminReview||adminComplete)?"Review completed.":gateBehindPayment?"Redirecting to payment…":"Will submitted for review."}
+            </p>
+          )}
           <button onClick={onPrev} className="w-full text-slate-500 hover:text-white text-sm py-2 transition-colors">← Back</button>
         </div>
       )}

@@ -11,6 +11,22 @@ export const STATUS_COMPLETED = "Completed" as const;
 // --- Routes ---
 export const ADMIN_PATH = "/admin";
 
+// --- Payments ---
+// Razorpay hosted Payment Link — the testator is sent here after saving a
+// Will for admin review/approval. Configured via env so it can be changed
+// without a code change.
+export const RAZORPAY_PAYMENT_LINK = import.meta.env.VITE_RAZORPAY_PAYMENT_LINK as string | undefined;
+// Razorpay's Payment Link redirect (once configured in the Razorpay
+// Dashboard) appends this query param to the "Redirect URL"; "paid" is the
+// only success value, everything else (or the param being absent) is treated
+// as payment failure/cancellation.
+export const RAZORPAY_STATUS_PARAM = "razorpay_payment_link_status";
+export const RAZORPAY_PAID_STATUS = "paid";
+// sessionStorage key used to remember which Will/testator a payment redirect
+// belongs to, since the Razorpay round-trip is a full page navigation that
+// wipes all in-memory React state.
+export const PENDING_PAYMENT_STORAGE_KEY = "smartwill_pending_payment";
+
 // --- API paths (pass to utils/apiBase's apiUrl()) ---
 export const API_FLAGS = "/api/flags?key=enable-admin-button";
 export const API_GOOGLE = "/api/auth/google";

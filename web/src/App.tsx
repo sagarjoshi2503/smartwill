@@ -18,10 +18,11 @@ import WillDocument from "./features/create-will/WillDocument";
 import { allocTotal } from "./utils/allocation";
 import { apiUrl } from "./utils/apiBase";
 import {
-  ADMIN_PATH, API_FLAGS, API_WILL_SAVE, apiPathSendBack,
+  ADMIN_PATH, API_FLAGS, API_WILL_SAVE, apiPathSendBack, apiPathWill,
   OTP_LENGTH, STATUS_DRAFT, STATUS_PENDING_REVIEW, STATUS_COMPLETED,
   SEND_BACK_REDIRECT_MS, DRAFT_RESET_MS, WIZARD_REDIRECT_MS,
   MSG_VIEW_ONLY, MSG_SAVING, BTN_SAVE_AS_DRAFT,
+  RAZORPAY_STATUS_PARAM, RAZORPAY_PAID_STATUS, PENDING_PAYMENT_STORAGE_KEY,
 } from "./constants";
 import type {
   AdminProfile, AssetCatalogItem, Beneficiary, DisclaimerChecks, GoogleProfile, Plan, SignupState, ViewName, WillState,
@@ -146,6 +147,69 @@ export default function SmartWill() {
     executor: {...DEFAULT_WILL.executor, ...(fetched.executor||{})},
     guardian: {...DEFAULT_WILL.guardian, ...(fetched.guardian||{})},
   });
+
+  // Resume after a Razorpay Payment Link redirect. Submitting for admin
+  // review sends the testator off-site to pay (see WizardForms), which is a
+  // full page navigation — no React state survives it, so the Will/testator
+  // to resume is looked up from sessionStorage and the Will itself re-fetched.
+  // Paid → flip the Will from Draft to PendingReview (this is what actually
+  // notifies the admin). Anything else (failed/cancelled/abandoned) → the
+  // Will stays Draft, exactly as it was saved before the redirect, and the
+  // wizard reopens on its last step with the Submit button visible again.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if(!params.has(RAZORPAY_STATUS_PARAM)) return;
+    const paid = params.get(RAZORPAY_STATUS_PARAM) === RAZORPAY_PAID_STATUS;
+
+    window.history.replaceState({}, "", window.location.pathname);
+
+    const raw = sessionStorage.getItem(PENDING_PAYMENT_STORAGE_KEY);
+    sessionStorage.removeItem(PENDING_PAYMENT_STORAGE_KEY);
+    if(!raw) return;
+    let pending: { willId?: string; email?: string };
+    try { pending = JSON.parse(raw); } catch { return; }
+    if(!pending.willId || !pending.email) return;
+    const { willId, email } = pending as { willId: string; email: string };
+
+    (async () => {
+      const res = await fetch(apiUrl(`${apiPathWill(willId)}?email=${encodeURIComponent(email)}`));
+      const isJson = res.headers.get("content-type")?.includes("application/json");
+      const data = isJson ? await res.json() : null;
+      if(!res.ok) throw new Error(data?.error || "Could not load your Will.");
+      const fetchedWill = mergeWithDefaults(data.will as Partial<WillState>);
+
+      if(paid) {
+        const saveRes = await fetch(apiUrl(API_WILL_SAVE), {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ will: fetchedWill, testatorEmail: email, status: STATUS_PENDING_REVIEW, willId }),
+        });
+        if(!saveRes.ok) throw new Error("Could not submit your Will for review.");
+        setSignup(p=>({...p, email}));
+        setTestatorAuthenticated(true);
+        setEditingWillId(willId);
+        setView("myWills");
+      } else {
+        setWill(fetchedWill);
+        setEditingWillId(willId);
+        setSignup(p=>({...p, email}));
+        setTestatorAuthenticated(true);
+        setAdminReviewMode(false);
+        setAdminReviewStatus(null);
+        setAdminCreateMode(false);
+        setTestatorEmailEditable(false);
+        setViewOnlyMode(false);
+        setActiveAdminComments("");
+        setWizardStep(6);
+        setView("wizard");
+      }
+    })().catch(() => {
+      // Best-effort resume — the Will is already safely saved as Draft
+      // server-side either way, so the testator can always pick up from My Wills.
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const handleCreateNewWill = () => {
     setWill({...DEFAULT_WILL, testator: {...DEFAULT_WILL.testator, fullName: signup.name, email: signup.email}});
     setEditingWillId(null);
