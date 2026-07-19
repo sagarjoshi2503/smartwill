@@ -9,13 +9,14 @@ from _app.main import app
 
 @pytest.fixture
 def fake_db():
-    return mongomock.MongoClient().db.smartwill
+    return mongomock.MongoClient().db["smartwill-dev"]
 
 
 @pytest.fixture
 def configured_settings():
     return Settings(
         mongodb_uri="mongodb://fake",
+        db_name="smartwill-dev",
         vite_google_client_id="fake-client-id.apps.googleusercontent.com",
     )
 

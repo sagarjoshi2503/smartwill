@@ -2,13 +2,18 @@ from functools import lru_cache
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-from _app.shared.constants import DEFAULT_ADMIN_EMAIL, TWILIO_FROM_NUMBER
+from _app.shared.constants import DB_NAME, DEFAULT_ADMIN_EMAIL, TWILIO_FROM_NUMBER
 
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env.local", extra="ignore")
 
     mongodb_uri: str | None = None
+
+    # Lets local dev point at a separate database (e.g. "smartwill-dev") while
+    # Vercel keeps using the existing production db, without touching the
+    # connection string itself.
+    db_name: str = DB_NAME
 
     # Client IDs are not secret, so reusing the same VITE_-prefixed var the
     # frontend uses is fine — it just also needs to be set (without the Vite

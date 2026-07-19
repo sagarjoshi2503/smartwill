@@ -6,7 +6,7 @@ from pymongo.database import Database
 
 from _app.core.config import Settings, get_settings
 from _app.core.exceptions import AppError
-from _app.shared.constants import DB_NAME, HTTP_SERVER_ERROR, MONGODB_NOT_CONFIGURED
+from _app.shared.constants import HTTP_SERVER_ERROR, MONGODB_NOT_CONFIGURED
 
 
 @lru_cache
@@ -22,4 +22,4 @@ def get_db(settings: Settings = Depends(get_settings)) -> Database:
     either dependency independently via app.dependency_overrides."""
     if not settings.mongodb_uri:
         raise AppError(HTTP_SERVER_ERROR, MONGODB_NOT_CONFIGURED)
-    return _get_client(settings.mongodb_uri)[DB_NAME]
+    return _get_client(settings.mongodb_uri)[settings.db_name]

@@ -10,9 +10,9 @@ from _app.shared import constants
 # --- positive scenarios ---
 
 def test_get_db_returns_a_database_when_configured():
-    db = get_db(settings=Settings(mongodb_uri="mongodb://fake"))
+    db = get_db(settings=Settings(mongodb_uri="mongodb://fake", db_name="smartwill-dev"))
     assert isinstance(db, Database)
-    assert db.name == "smartwill"
+    assert db.name == "smartwill-dev"
 
 
 # --- negative scenarios ---
