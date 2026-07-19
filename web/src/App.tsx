@@ -18,7 +18,7 @@ import WillDocument from "./features/create-will/WillDocument";
 import { allocTotal } from "./utils/allocation";
 import { apiUrl } from "./utils/apiBase";
 import {
-  ADMIN_PATH, API_FLAGS, API_WILL_SAVE, apiPathSendBack,
+  ADMIN_PATH, API_FLAGS, API_RAZORPAY_FLAG, API_WILL_SAVE, apiPathSendBack,
   OTP_LENGTH, STATUS_DRAFT, STATUS_PENDING_REVIEW, STATUS_COMPLETED,
   SEND_BACK_REDIRECT_MS, DRAFT_RESET_MS, WIZARD_REDIRECT_MS,
   MSG_VIEW_ONLY, MSG_SAVING, BTN_SAVE_AS_DRAFT,
@@ -64,6 +64,7 @@ export default function SmartWill() {
   const [sendBackStatus, setSendBackStatus] = useState<"idle" | "sending" | "error">("idle");
   const [sendBackError, setSendBackError] = useState("");
   const [showAdminButton, setShowAdminButton] = useState(false);
+  const [razorpayEnabled, setRazorpayEnabled] = useState(false);
   const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
   const willDocRef = useRef<HTMLDivElement | null>(null);
 
@@ -98,6 +99,19 @@ export default function SmartWill() {
     fetch(API_FLAGS)
       .then(res => res.ok ? res.json() : { enabled: false })
       .then(data => { if(!cancelled) setShowAdminButton(!!data?.enabled); })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, []);
+
+  // Razorpay Checkout on Will submission is gated behind the "use-razorpay"
+  // Vercel Flag. When disabled (or unreachable, matching the fail-closed
+  // behavior of the admin-button flag above), no payment option is shown at
+  // all — submitting for review goes straight to PendingReview, unpaid.
+  useEffect(() => {
+    let cancelled = false;
+    fetch(API_RAZORPAY_FLAG)
+      .then(res => res.ok ? res.json() : { enabled: false })
+      .then(data => { if(!cancelled) setRazorpayEnabled(!!data?.enabled); })
       .catch(() => {});
     return () => { cancelled = true; };
   }, []);
@@ -419,6 +433,7 @@ export default function SmartWill() {
                 reviewerEmail={adminProfile?.email}
                 adminComments={activeAdminComments}
                 amount={totalPrice}
+                paymentEnabled={razorpayEnabled}
                 onSaved={(willId,status)=>{
                   setEditingWillId(willId);
                   if(status===STATUS_PENDING_REVIEW) setTimeout(()=>setView("myWills"), WIZARD_REDIRECT_MS);

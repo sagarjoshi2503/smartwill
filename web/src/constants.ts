@@ -19,6 +19,9 @@ export const RAZORPAY_KEY_ID = import.meta.env.VITE_RAZORPAY_KEY_ID as string | 
 
 // --- API paths (pass to utils/apiBase's apiUrl()) ---
 export const API_FLAGS = "/api/flags?key=enable-admin-button";
+// Vercel Flag gating whether Razorpay Checkout is offered at all when
+// submitting a Will for review — see App.tsx and WizardForms.tsx.
+export const API_RAZORPAY_FLAG = "/api/flags?key=use-razorpay";
 export const API_PAYMENTS_CREATE_ORDER = "/api/payments/create-order";
 export const API_PAYMENTS_VERIFY = "/api/payments/verify";
 export const API_GOOGLE = "/api/auth/google";

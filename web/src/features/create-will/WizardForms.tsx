@@ -47,9 +47,10 @@ interface WizardFormsProps {
   adminComments?: string;
   willStatus?: string | null;
   amount?: number;
+  paymentEnabled?: boolean;
 }
 
-export default function WizardForms({step,will,setWill,addBene,removeBene,updateBene,addAsset,removeAsset,updateAssetData,updateAssetAlloc,allocTotal,assetAdded,onNext,onPrev,onGenerate,willId,onSaved,adminReview,adminComplete,testatorEmailEditable,viewOnly,reviewerEmail,adminComments,willStatus,amount}: WizardFormsProps){
+export default function WizardForms({step,will,setWill,addBene,removeBene,updateBene,addAsset,removeAsset,updateAssetData,updateAssetAlloc,allocTotal,assetAdded,onNext,onPrev,onGenerate,willId,onSaved,adminReview,adminComplete,testatorEmailEditable,viewOnly,reviewerEmail,adminComments,willStatus,amount,paymentEnabled}: WizardFormsProps){
   const IC="w-full apv-input rounded-2xl px-3.5 py-2.5 text-slate-900 placeholder:text-slate-500 text-sm focus:outline-none transition";
   const LC="block apv-label mb-1";
   const set=(path: string, v: string | boolean)=>setWill(p=>{
@@ -62,15 +63,19 @@ export default function WizardForms({step,will,setWill,addBene,removeBene,update
   const [submitError,setSubmitError]=useState("");
 
   // Testator submitting for admin review/approval is a paid action, done via
-  // Razorpay Standard Checkout (an in-page modal, no page navigation). The
-  // Will is saved as Draft first; the checkout modal opens on top of it; only
-  // once the payment is created, opened, and its signature verified server-
-  // side does the Will get re-saved as PendingReview (which is what actually
-  // notifies the admin). If the modal is dismissed, the payment fails, or
-  // verification fails, the Will simply stays Draft and the same Submit
-  // button is right there to retry — no navigation ever happened.
+  // Razorpay Standard Checkout (an in-page modal, no page navigation) —
+  // offered only when the "use-razorpay" Vercel Flag is enabled (paymentEnabled,
+  // set in App.tsx) and a publishable key is configured. The Will is saved as
+  // Draft first; the checkout modal opens on top of it; only once the payment
+  // is created, opened, and its signature verified server-side does the Will
+  // get re-saved as PendingReview (which is what actually notifies the
+  // admin). If the modal is dismissed, the payment fails, or verification
+  // fails, the Will simply stays Draft and the same Submit button is right
+  // there to retry — no navigation ever happened. When the flag is disabled,
+  // no payment option is shown at all — submission goes straight to
+  // PendingReview, exactly as if Razorpay were never configured.
   const isPlainTestatorSubmit = !adminReview && !adminComplete;
-  const gateBehindPayment = isPlainTestatorSubmit && !!RAZORPAY_KEY_ID;
+  const gateBehindPayment = isPlainTestatorSubmit && !!RAZORPAY_KEY_ID && !!paymentEnabled;
 
   const submitForReview = async (savedWillId: string) => {
     const res = await fetch(apiUrl(API_WILL_SAVE), {
