@@ -6,6 +6,7 @@ from _app.features.admin_dashboard.router import router as admin_dashboard_route
 from _app.features.admin_signin.router import router as admin_signin_router
 from _app.features.admin_signup.router import router as admin_signup_router
 from _app.features.create_will.router import router as create_will_router
+from _app.features.payments.router import router as payments_router
 from _app.features.user_signin_gmail.router import router as user_signin_gmail_router
 from _app.features.user_signin_otp.router import router as user_signin_otp_router
 from _app.shared.constants import APP_TITLE, APP_VERSION
@@ -25,3 +26,4 @@ app.include_router(user_signin_otp_router)
 # "/admin/{will_id}..." routes.
 app.include_router(admin_dashboard_router)
 app.include_router(create_will_router)
+app.include_router(payments_router)

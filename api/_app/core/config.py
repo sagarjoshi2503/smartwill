@@ -45,6 +45,13 @@ class Settings(BaseSettings):
     twilio_auth_token: str | None = None
     twilio_from_number: str = TWILIO_FROM_NUMBER
 
+    # Razorpay (https://razorpay.com) Standard Checkout. key_id is not secret
+    # (the frontend also needs it, as VITE_RAZORPAY_KEY_ID, to open the
+    # Checkout modal); key_secret signs orders and verifies payment
+    # signatures server-side only — it must never reach the frontend.
+    razorpay_key_id: str | None = None
+    razorpay_key_secret: str | None = None
+
     @property
     def google_id(self) -> str | None:
         return self.vite_google_client_id or self.google_client_id

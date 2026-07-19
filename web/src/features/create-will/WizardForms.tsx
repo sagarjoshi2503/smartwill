@@ -11,14 +11,15 @@ import Toggle from "../../components/shared/Toggle";
 import Nav from "../../components/shared/Nav";
 import { apiUrl } from "../../utils/apiBase";
 import {
-  API_WILL_SAVE, API_ADMIN_SAVE, apiPathComplete,
+  API_WILL_SAVE, API_ADMIN_SAVE, API_PAYMENTS_CREATE_ORDER, API_PAYMENTS_VERIFY, apiPathComplete,
   LBL_LEGAL_NAME, LBL_FULL_NAME, LBL_ID_TYPE, LBL_ID_NUMBER, LBL_ADDRESS,
   TIP_NO_ID_SAVED, MSG_VIEW_ONLY, MSG_SAVING,
   BTN_COMPLETE_REVIEW, BTN_SUBMIT_REVIEW,
   STATUS_COMPLETED, STATUS_DRAFT, STATUS_PENDING_REVIEW,
-  RAZORPAY_PAYMENT_LINK, PENDING_PAYMENT_STORAGE_KEY,
+  RAZORPAY_KEY_ID,
 } from "../../constants";
 import type { AssetCatalogItem, AssetInstance, Beneficiary, WillState } from "../../types";
+import type { RazorpaySuccessResponse } from "../../types/razorpay";
 
 interface WizardFormsProps {
   step: number;
@@ -45,9 +46,10 @@ interface WizardFormsProps {
   reviewerEmail?: string;
   adminComments?: string;
   willStatus?: string | null;
+  amount?: number;
 }
 
-export default function WizardForms({step,will,setWill,addBene,removeBene,updateBene,addAsset,removeAsset,updateAssetData,updateAssetAlloc,allocTotal,assetAdded,onNext,onPrev,onGenerate,willId,onSaved,adminReview,adminComplete,testatorEmailEditable,viewOnly,reviewerEmail,adminComments,willStatus}: WizardFormsProps){
+export default function WizardForms({step,will,setWill,addBene,removeBene,updateBene,addAsset,removeAsset,updateAssetData,updateAssetAlloc,allocTotal,assetAdded,onNext,onPrev,onGenerate,willId,onSaved,adminReview,adminComplete,testatorEmailEditable,viewOnly,reviewerEmail,adminComments,willStatus,amount}: WizardFormsProps){
   const IC="w-full apv-input rounded-2xl px-3.5 py-2.5 text-slate-900 placeholder:text-slate-500 text-sm focus:outline-none transition";
   const LC="block apv-label mb-1";
   const set=(path: string, v: string | boolean)=>setWill(p=>{
@@ -59,14 +61,76 @@ export default function WizardForms({step,will,setWill,addBene,removeBene,update
   const [submitStatus,setSubmitStatus]=useState<"idle"|"saving"|"error"|"done">("idle");
   const [submitError,setSubmitError]=useState("");
 
-  // Testator submitting for admin review/approval is a paid action. When a
-  // payment link is configured, the Will is saved as Draft (not PendingReview
-  // yet) and the testator is sent to pay — App.tsx flips it to PendingReview
-  // once Razorpay redirects back confirming a successful payment, or leaves
-  // it as Draft if the payment failed/was abandoned. Without a payment link
-  // configured, submission goes straight to PendingReview as before.
+  // Testator submitting for admin review/approval is a paid action, done via
+  // Razorpay Standard Checkout (an in-page modal, no page navigation). The
+  // Will is saved as Draft first; the checkout modal opens on top of it; only
+  // once the payment is created, opened, and its signature verified server-
+  // side does the Will get re-saved as PendingReview (which is what actually
+  // notifies the admin). If the modal is dismissed, the payment fails, or
+  // verification fails, the Will simply stays Draft and the same Submit
+  // button is right there to retry — no navigation ever happened.
   const isPlainTestatorSubmit = !adminReview && !adminComplete;
-  const gateBehindPayment = isPlainTestatorSubmit && !!RAZORPAY_PAYMENT_LINK;
+  const gateBehindPayment = isPlainTestatorSubmit && !!RAZORPAY_KEY_ID;
+
+  const submitForReview = async (savedWillId: string) => {
+    const res = await fetch(apiUrl(API_WILL_SAVE), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ will, testatorEmail: will.testator.email, status: STATUS_PENDING_REVIEW, willId: savedWillId }),
+    });
+    const isJson = res.headers.get("content-type")?.includes("application/json");
+    const data = isJson ? await res.json() : null;
+    if(!res.ok) throw new Error(data?.error || "Payment succeeded, but your Will could not be submitted. Please contact support.");
+    setSubmitStatus("done");
+    onSaved(data.willId, data.status);
+  };
+
+  const handlePaymentSuccess = async (savedWillId: string, response: RazorpaySuccessResponse) => {
+    try {
+      const res = await fetch(apiUrl(API_PAYMENTS_VERIFY), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(response),
+      });
+      const isJson = res.headers.get("content-type")?.includes("application/json");
+      const data = isJson ? await res.json() : null;
+      if(!res.ok || !data?.verified) throw new Error(data?.error || "Payment could not be verified.");
+      await submitForReview(savedWillId);
+    } catch (err) {
+      setSubmitStatus("error");
+      setSubmitError(err instanceof Error ? err.message : "Payment verification failed.");
+    }
+  };
+
+  const openCheckout = (savedWillId: string, order: { orderId: string; amount: number; currency: string }) => {
+    if(typeof window.Razorpay !== "function") {
+      setSubmitStatus("error");
+      setSubmitError("Payment gateway failed to load. Please disable any ad blockers and try again.");
+      return;
+    }
+    const rzp = new window.Razorpay({
+      key: RAZORPAY_KEY_ID as string,
+      amount: order.amount,
+      currency: order.currency,
+      order_id: order.orderId,
+      name: "SmartWill",
+      description: "Will submission for admin review",
+      prefill: { name: will.testator.fullName, email: will.testator.email },
+      theme: { color: "#d09d61" },
+      handler: (response) => { handlePaymentSuccess(savedWillId, response); },
+      modal: {
+        ondismiss: () => {
+          setSubmitStatus("error");
+          setSubmitError("Payment was cancelled. Your Will is saved as a Draft — click Submit to try again.");
+        },
+      },
+    });
+    rzp.on("payment.failed", () => {
+      setSubmitStatus("error");
+      setSubmitError("Payment failed. Your Will is saved as a Draft — click Submit to try again.");
+    });
+    rzp.open();
+  };
 
   const handleSaveAndSubmit = async () => {
     setSubmitStatus("saving"); setSubmitError("");
@@ -95,14 +159,22 @@ export default function WizardForms({step,will,setWill,addBene,removeBene,update
       const isJson = res.headers.get("content-type")?.includes("application/json");
       const data = isJson ? await res.json() : null;
       if(!res.ok) throw new Error(data?.error || `Could not save the Will (server returned ${res.status}).`);
+
+      if(gateBehindPayment) {
+        const orderRes = await fetch(apiUrl(API_PAYMENTS_CREATE_ORDER), {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ amount: Math.round((amount||0)*100), receipt: data.willId }),
+        });
+        const orderIsJson = orderRes.headers.get("content-type")?.includes("application/json");
+        const orderData = orderIsJson ? await orderRes.json() : null;
+        if(!orderRes.ok) throw new Error(orderData?.error || "Could not start payment.");
+        openCheckout(data.willId, orderData);
+        return;
+      }
+
       setSubmitStatus("done");
       onSaved(data.willId, data.status);
-      if(gateBehindPayment) {
-        sessionStorage.setItem(
-          PENDING_PAYMENT_STORAGE_KEY, JSON.stringify({ willId: data.willId, email: will.testator.email }),
-        );
-        window.location.href = RAZORPAY_PAYMENT_LINK as string;
-      }
     } catch (err) {
       setSubmitStatus("error");
       setSubmitError(err instanceof Error ? err.message : "Could not save the Will.");
@@ -522,7 +594,7 @@ export default function WizardForms({step,will,setWill,addBene,removeBene,update
           {submitStatus==="error"&&<p className="text-red-500 text-xs text-center">{submitError}</p>}
           {submitStatus==="done"&&(
             <p className="text-emerald-500 text-xs text-center">
-              {(adminReview||adminComplete)?"Review completed.":gateBehindPayment?"Redirecting to payment…":"Will submitted for review."}
+              {(adminReview||adminComplete)?"Review completed.":"Will submitted for review."}
             </p>
           )}
           <button onClick={onPrev} className="w-full text-slate-500 hover:text-white text-sm py-2 transition-colors">← Back</button>

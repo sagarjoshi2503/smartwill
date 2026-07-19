@@ -48,6 +48,12 @@ DEFAULT_ADMIN_EMAIL = "anup@prabhuverlekar.com"
 TWILIO_FROM_NUMBER = "+17154074664"
 OTP_SMS_TMPL = "Your SmartWill OTP is {code}. It expires in 5 minutes."
 
+# --- Payments (Razorpay Standard Checkout) ---
+RAZORPAY_ORDERS_URL = "https://api.razorpay.com/v1/orders"
+RAZORPAY_TIMEOUT_SEC = 10
+RAZORPAY_MIN_AMOUNT_PAISE = 100
+RAZORPAY_DEFAULT_CURRENCY = "INR"
+
 # --- Validation ---
 EMAIL_REGEX_PATTERN = r"^\S+@\S+\.\S+$"
 
@@ -83,6 +89,13 @@ WILL_ACCESS_DENIED = "You do not have permission to access this Will."
 WILL_LOCKED = "This Will is pending review and cannot be edited."
 COMMENTS_REQUIRED = "Enter comments explaining what needs to change."
 
+RAZORPAY_NOT_CONFIGURED = "Payments are not configured on the server (missing Razorpay credentials)."
+RAZORPAY_INVALID_AMOUNT = f"Amount must be at least {RAZORPAY_MIN_AMOUNT_PAISE} paise."
+RAZORPAY_ORDER_FAILED = "Could not create the payment order. Please try again."
+RAZORPAY_AUTH_FAILED = "Payment provider authentication failed."
+RAZORPAY_MISSING_FIELDS = "Missing required payment verification fields."
+RAZORPAY_SIGNATURE_INVALID = "Payment verification failed."
+
 # --- Document/request field names ---
 FLD_EMAIL = "email"
 FLD_PASSWORD = "password"
@@ -108,6 +121,15 @@ FLD_ID_NUMBER = "idNumber"
 FLD_JOINT_ID = "jointIdNumber"
 FLD_SUB_ID = "subIdNumber"
 FLD_RESIDUAL_ID = "residualIdNumber"
+FLD_AMOUNT = "amount"
+FLD_CURRENCY = "currency"
+FLD_RECEIPT = "receipt"
+# Razorpay's own field names, passed straight through unchanged (the
+# Checkout success handler in the browser hands back exactly these keys —
+# translating them to camelCase would just be a source of typos).
+FLD_RAZORPAY_ORDER_ID = "razorpay_order_id"
+FLD_RAZORPAY_PAYMENT_ID = "razorpay_payment_id"
+FLD_RAZORPAY_SIGNATURE = "razorpay_signature"
 
 # --- Fallback values ---
 UNKNOWN_NAME = "Unknown"
