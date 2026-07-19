@@ -25,9 +25,17 @@ class Settings(BaseSettings):
     admin_review_email: str = DEFAULT_ADMIN_EMAIL
 
     # Resend (https://resend.com) transactional email API, used to send that
-    # notification. Both must be set for email to actually go out.
+    # notification. Both must be set for email to actually go out. Which
+    # provider (Resend vs SendGrid, below) actually gets used is decided by
+    # the "use-resend-for-email" / "use-sendgrid-for-email" flags — see
+    # _app/shared/email.py.
     resend_api_key: str | None = None
     resend_from_email: str | None = None
+
+    # SendGrid (https://sendgrid.com) transactional email API — fallback
+    # provider when "use-sendgrid-for-email" is enabled instead of Resend.
+    sendgrid_api_key: str | None = None
+    sendgrid_from_email: str | None = None
 
     # Twilio (https://twilio.com), used to deliver OTP codes by SMS during
     # phone sign-in. account_sid and auth_token (secrets) must still be set
