@@ -35,4 +35,12 @@ describe("apiUrl", () => {
     const { apiUrl } = await import("./apiBase");
     expect(apiUrl("/api/will/admin-wills?email=a@b.com")).toBe("https://example.com/api/will/admin-wills?email=a@b.com");
   });
+
+  it("falls back to same-origin when the env var is unset entirely (not just empty)", async () => {
+    const original = import.meta.env.VITE_API_BASE_URL;
+    delete (import.meta.env as Record<string, unknown>).VITE_API_BASE_URL;
+    const { apiUrl } = await import("./apiBase");
+    expect(apiUrl("/api/auth/google")).toBe("/api/auth/google");
+    (import.meta.env as Record<string, unknown>).VITE_API_BASE_URL = original;
+  });
 });

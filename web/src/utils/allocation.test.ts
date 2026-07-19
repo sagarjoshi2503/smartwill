@@ -97,4 +97,9 @@ describe("formatAllocFull", () => {
     const asset = makeAsset({ allowSplit: true, allocs: { "1": "0" } });
     expect(formatAllocFull(asset, BENEFICIARIES)).toBe("[Allocation not set]");
   });
+
+  it("skips split allocations for a beneficiary id with no match", () => {
+    const asset = makeAsset({ allowSplit: true, allocs: { "1": "60", "99": "40" } });
+    expect(formatAllocFull(asset, BENEFICIARIES)).toBe("Priya Mehta (Daughter) — 60%");
+  });
 });
