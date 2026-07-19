@@ -90,7 +90,7 @@ export default function SmartWill() {
     return () => window.removeEventListener("popstate", onPopState);
   }, []);
 
-  // Admin Portal button on the header is gated behind the "show-admin-button"
+  // Admin Portal button on the header is gated behind the "enable-admin-button"
   // Vercel Flag. The /admin deep-link route stays reachable regardless — this
   // only controls whether the nav button is shown.
   useEffect(() => {

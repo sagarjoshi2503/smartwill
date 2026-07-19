@@ -13,7 +13,7 @@ export default async function handler(req: any, res: any) {
   try {
     const adapter = vercelAdapter();
     const value = await adapter.decide({ key, entities: {} });
-    res.status(200).json({ enabled: value === true || value === "true" });
+    res.status(200).json({ enabled: value === true });
   } catch {
     // Fail closed: if the flag can't be evaluated (e.g. missing FLAGS env
     // var in a given environment), report it as disabled.
