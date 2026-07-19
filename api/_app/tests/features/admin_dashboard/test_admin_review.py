@@ -1,4 +1,5 @@
 from _app.core.config import Settings, get_settings
+from _app.features.admin_dashboard import service as admin_service
 from _app.main import app
 from _app.shared import constants
 
@@ -132,6 +133,22 @@ def test_admin_complete_stores_reviewer_email(client, fake_db):
     assert doc["reviewerEmail"] == "reviewer@example.com"
 
 
+def test_admin_complete_notifies_testator_email(client, monkeypatch):
+    calls = []
+    monkeypatch.setattr(
+        admin_service.email, "send_email", lambda settings, to, subject, html: calls.append((to, subject, html)),
+    )
+    will_id = save_will(client, status="PendingReview", email="jane@example.com")
+    calls.clear()
+
+    client.post(complete_admin_url(will_id), json={})
+
+    assert len(calls) == 1
+    to, subject, html = calls[0]
+    assert to == "jane@example.com"
+    assert subject == constants.REVIEW_COMPLETED_SUBJECT
+
+
 # --- POST /api/will/admin/save ---
 
 def test_admin_save_creates_will_as_completed_directly(client, fake_db):
@@ -179,6 +196,34 @@ def test_send_back_reverts_status_to_draft_and_stores_comments(client, fake_db):
     doc = fake_db["will"].find_one({"willId": will_id})
     assert doc["status"] == "Draft"
     assert doc["adminComments"] == "Please fix the executor section."
+
+
+def test_send_back_creates_adminwill_entry_with_comments(client, fake_db):
+    will_id = save_will(client, status="PendingReview")
+
+    res = client.post(send_back_admin_url(will_id), json={"comments": "Please fix the executor section."})
+
+    assert res.status_code == 200
+    entry = fake_db["adminwill"].find_one({"willId": will_id, "comments": "Please fix the executor section."})
+    assert entry is not None
+    assert "sentBackAt" in entry
+
+
+def test_send_back_notifies_testator_email(client, monkeypatch):
+    calls = []
+    monkeypatch.setattr(
+        admin_service.email, "send_email", lambda settings, to, subject, html: calls.append((to, subject, html)),
+    )
+    will_id = save_will(client, status="PendingReview", email="jane@example.com")
+    calls.clear()
+
+    client.post(send_back_admin_url(will_id), json={"comments": "Please fix the executor section."})
+
+    assert len(calls) == 1
+    to, subject, html = calls[0]
+    assert to == "jane@example.com"
+    assert subject == constants.SENT_BACK_SUBJECT
+    assert "Please fix the executor section." in html
 
 
 def test_send_back_requires_comments(client, fake_db):

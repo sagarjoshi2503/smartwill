@@ -53,14 +53,16 @@ async def get_will_admin(will_id: str, db: Database = Depends(get_db)):
     responses={HTTP_SERVER_ERROR: {"model": ErrorResponse}, HTTP_NOT_FOUND: {"model": ErrorResponse}},
     summary="Admin completes review of a Will",
 )
-async def complete_will_admin(will_id: str, request: Request, db: Database = Depends(get_db)):
+async def complete_will_admin(
+    will_id: str, request: Request, db: Database = Depends(get_db), settings: Settings = Depends(get_settings),
+):
     try:
         body = await request.json()
     except Exception:
         body = {}
     if not isinstance(body, dict):
         body = {}
-    return service.admin_complete_will(db, will_id, body)
+    return service.admin_complete_will(db, will_id, body, settings)
 
 
 @router.post(

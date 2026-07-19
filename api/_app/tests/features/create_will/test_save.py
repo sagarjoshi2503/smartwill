@@ -125,7 +125,9 @@ def test_save_notifies_admin_email_when_submitted_for_review(client, monkeypatch
     assert len(calls) == 1
     to, subject, html = calls[0]
     assert to == "anup@prabhuverlekar.com"
-    assert "Jane Doe" in subject
+    assert subject == constants.SUBMIT_SUBJECT_TMPL.format(testator_name="Jane Doe")
+    assert "Jane Doe" in html
+    assert "jane@example.com" in html
     assert res.json()["willId"] in html
 
 

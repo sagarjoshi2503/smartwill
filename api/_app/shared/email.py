@@ -1,8 +1,7 @@
-import requests
+import resend
 
 from _app.core.config import Settings
 from _app.core.logging import get_logger
-from _app.shared.constants import EMAIL_TIMEOUT_SEC, RESEND_API_URL
 
 logger = get_logger(__name__)
 
@@ -15,12 +14,13 @@ def send_email(settings: Settings, to: str, subject: str, html: str) -> None:
         logger.warning("Email not sent (Resend is not configured): to=%s subject=%s", to, subject)
         return
 
+    resend.api_key = settings.resend_api_key
     try:
-        requests.post(
-            RESEND_API_URL,
-            headers={"Authorization": f"Bearer {settings.resend_api_key}"},
-            json={"from": settings.resend_from_email, "to": [to], "subject": subject, "html": html},
-            timeout=EMAIL_TIMEOUT_SEC,
-        )
-    except requests.RequestException:
+        resend.Emails.send({
+            "from": settings.resend_from_email,
+            "to": [to],
+            "subject": subject,
+            "html": html,
+        })
+    except Exception:
         logger.warning("Failed to send email to %s", to, exc_info=True)

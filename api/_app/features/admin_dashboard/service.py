@@ -8,12 +8,12 @@ from _app.core.exceptions import AppError
 from _app.features.admin_dashboard import repository
 from _app.shared import email
 from _app.shared.constants import (
-    COMMENTS_REQUIRED, DEFAULT_GREETING, FLD_ADMIN_COMMENTS, FLD_CREATED_AT, FLD_EXECUTOR,
+    COMMENTS_REQUIRED, DEFAULT_GREETING, FLD_ADMIN_COMMENTS, FLD_COMMENTS, FLD_CREATED_AT, FLD_EXECUTOR,
     FLD_FULL_NAME, FLD_GUARDIAN, FLD_ID_NUMBER, FLD_JOINT_ID, FLD_RESIDUAL_ID,
     FLD_REVIEWER_EMAIL, FLD_STATUS, FLD_SUB_ID, FLD_TESTATOR, FLD_TESTATOR_EMAIL, FLD_UPDATED_AT,
     FLD_WILL, FLD_WILL_ID, HTTP_BAD_REQUEST, HTTP_NOT_FOUND, BAD_TESTATOR_EMAIL, BAD_WILL_STATUS,
     STATUS_COMPLETED, STATUS_DRAFT, STATUS_PENDING_REVIEW, UNKNOWN_NAME, WILL_REQUIRED, WILL_NOT_FOUND,
-    SENT_BACK_SUBJECT, SUBMIT_SUBJECT_TMPL,
+    REVIEW_COMPLETED_SUBJECT, SENT_BACK_SUBJECT, SUBMIT_SUBJECT_TMPL,
 )
 from _app.shared.validators import is_valid_email, normalize_email
 
@@ -146,7 +146,7 @@ def get_will_as_admin(db: Database, will_id: str) -> dict:
     }
 
 
-def admin_complete_will(db: Database, will_id: str, body: dict) -> dict:
+def admin_complete_will(db: Database, will_id: str, body: dict, settings: Settings) -> dict:
     document = repository.find_will_by_id(db, will_id)
     if not document:
         raise AppError(HTTP_NOT_FOUND, WILL_NOT_FOUND)
@@ -163,6 +163,22 @@ def admin_complete_will(db: Database, will_id: str, body: dict) -> dict:
         **({FLD_REVIEWER_EMAIL: reviewer_email} if reviewer_email else {}),
     }
     repository.upsert_will(db, will_id, document)
+
+    testator_email = document.get(FLD_TESTATOR_EMAIL)
+    testator_name = (
+        (document.get(FLD_WILL) or {}).get(FLD_TESTATOR, {}).get(FLD_FULL_NAME) or DEFAULT_GREETING
+    )
+    if testator_email:
+        email.send_email(
+            settings,
+            to=testator_email,
+            subject=REVIEW_COMPLETED_SUBJECT,
+            html=(
+                f"<p>Hi {testator_name},</p>"
+                f"<p>Your Will has been reviewed and is now complete.</p>"
+            ),
+        )
+
     return {FLD_WILL_ID: will_id, FLD_STATUS: STATUS_COMPLETED}
 
 
@@ -182,6 +198,11 @@ def admin_send_back_will(db: Database, will_id: str, comments: str, settings: Se
         FLD_UPDATED_AT: datetime.now(timezone.utc),
     }
     repository.upsert_will(db, will_id, document)
+    repository.insert_admin_will(db, {
+        FLD_WILL_ID: will_id,
+        FLD_COMMENTS: comments,
+        "sentBackAt": datetime.now(timezone.utc),
+    })
 
     testator_email = document.get(FLD_TESTATOR_EMAIL)
     testator_name = (

@@ -116,3 +116,4 @@ DEFAULT_GREETING = "there"
 # --- Email content ---
 SUBMIT_SUBJECT_TMPL = "New Will submitted for review — {testator_name}"
 SENT_BACK_SUBJECT = "Your Will needs a few changes"
+REVIEW_COMPLETED_SUBJECT = "Review Completed"
