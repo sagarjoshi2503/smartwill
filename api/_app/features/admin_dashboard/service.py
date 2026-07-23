@@ -9,12 +9,13 @@ from _app.features.admin_dashboard import repository
 from _app.shared import email
 from _app.shared.constants import (
     COMMENTS_REQUIRED, DEFAULT_GREETING, FLD_ADMIN_COMMENTS, FLD_COMMENTS, FLD_CREATED_AT, FLD_EXECUTOR,
-    FLD_FULL_NAME, FLD_GUARDIAN, FLD_ID_NUMBER, FLD_JOINT_ID, FLD_RESIDUAL_ID,
-    FLD_REVIEWER_EMAIL, FLD_STATUS, FLD_SUB_ID, FLD_TESTATOR, FLD_TESTATOR_EMAIL, FLD_UPDATED_AT,
-    FLD_WILL, FLD_WILL_ID, HTTP_BAD_REQUEST, HTTP_NOT_FOUND, BAD_TESTATOR_EMAIL, BAD_WILL_STATUS,
-    STATUS_COMPLETED, STATUS_DRAFT, STATUS_PENDING_REVIEW, UNKNOWN_NAME, WILL_REQUIRED, WILL_NOT_FOUND,
-    REVIEW_COMPLETED_SUBJECT, SENT_BACK_SUBJECT, SUBMIT_SUBJECT_TMPL,
+    FLD_FULL_NAME, FLD_GUARDIAN, FLD_ID_NUMBER, FLD_JOINT_ID, FLD_PAYMENT_AMOUNT, FLD_PAYMENT_STATUS,
+    FLD_RESIDUAL_ID, FLD_REVIEWER_EMAIL, FLD_STATUS, FLD_SUB_ID, FLD_TESTATOR, FLD_TESTATOR_EMAIL,
+    FLD_UPDATED_AT, FLD_WILL, FLD_WILL_ID, HTTP_BAD_REQUEST, HTTP_NOT_FOUND, BAD_TESTATOR_EMAIL,
+    BAD_WILL_STATUS, STATUS_COMPLETED, STATUS_DRAFT, STATUS_PENDING_REVIEW, UNKNOWN_NAME, WILL_REQUIRED,
+    WILL_NOT_FOUND, REVIEW_COMPLETED_SUBJECT, SENT_BACK_SUBJECT, SUBMIT_SUBJECT_TMPL,
 )
+from _app.shared.enums import PaymentStatus
 from _app.shared.validators import is_valid_email, normalize_email
 
 ALLOWED_STATUSES = {STATUS_DRAFT, STATUS_PENDING_REVIEW, STATUS_COMPLETED}
@@ -64,18 +65,28 @@ def save_will_as_admin(db: Database, body: dict, settings: Settings) -> dict:
         if not existing:
             raise AppError(HTTP_NOT_FOUND, WILL_NOT_FOUND)
         created_at = existing.get(FLD_CREATED_AT, now)
+        payment_status = existing.get(FLD_PAYMENT_STATUS) or PaymentStatus.NOT_PAID.value
+        payment_amount = existing.get(FLD_PAYMENT_AMOUNT)
     else:
         will_id = str(uuid.uuid4())
         created_at = now
+        payment_status = PaymentStatus.NOT_PAID.value
+        payment_amount = None
 
+    # paymentStatus/paymentAmount are only ever changed by the payments
+    # verification flow (see _app/features/payments), never trusted from the
+    # client here — so they're excluded from the body spread and set
+    # explicitly from the carried-over (or default) values above.
     document = {
-        **body,
+        **{k: v for k, v in body.items() if k not in (FLD_PAYMENT_STATUS, FLD_PAYMENT_AMOUNT)},
         FLD_WILL: _redact_id_numbers(body.get(FLD_WILL) or {}),
         FLD_WILL_ID: will_id,
         FLD_TESTATOR_EMAIL: testator_email,
         FLD_STATUS: status,
         FLD_CREATED_AT: created_at,
         FLD_UPDATED_AT: now,
+        FLD_PAYMENT_STATUS: payment_status,
+        FLD_PAYMENT_AMOUNT: payment_amount,
     }
     if status == STATUS_COMPLETED:
         reviewer_email = normalize_email(body.get(FLD_REVIEWER_EMAIL)) if body.get(FLD_REVIEWER_EMAIL) else None
@@ -125,6 +136,8 @@ def list_admin_wills(db: Database) -> dict:
             "contact": w.get(FLD_TESTATOR_EMAIL) or "",
             FLD_UPDATED_AT: updated_at.isoformat() if updated_at else None,
             FLD_STATUS: w.get(FLD_STATUS) or STATUS_DRAFT,
+            FLD_PAYMENT_STATUS: w.get(FLD_PAYMENT_STATUS) or PaymentStatus.NOT_PAID.value,
+            FLD_PAYMENT_AMOUNT: w.get(FLD_PAYMENT_AMOUNT),
         })
 
     clients.sort(key=lambda c: c["updatedAt"] or "", reverse=True)
@@ -143,6 +156,8 @@ def get_will_as_admin(db: Database, will_id: str) -> dict:
         FLD_TESTATOR_EMAIL: document.get(FLD_TESTATOR_EMAIL) or "",
         FLD_STATUS: document.get(FLD_STATUS) or STATUS_DRAFT,
         FLD_ADMIN_COMMENTS: document.get(FLD_ADMIN_COMMENTS),
+        FLD_PAYMENT_STATUS: document.get(FLD_PAYMENT_STATUS) or PaymentStatus.NOT_PAID.value,
+        FLD_PAYMENT_AMOUNT: document.get(FLD_PAYMENT_AMOUNT),
     }
 
 

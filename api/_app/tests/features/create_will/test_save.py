@@ -2,6 +2,7 @@ from _app.core.config import Settings, get_settings
 from _app.features.create_will import service as will_service
 from _app.main import app
 from _app.shared import constants
+from _app.shared.enums import PaymentStatus
 
 URL = "/api/will/save"
 VALID_PAYLOAD = {"will": {"testator": {"fullName": "Jane Doe"}}, "testatorEmail": "jane@example.com"}
@@ -108,6 +109,32 @@ def test_save_stores_draft_status(client, fake_db):
     assert res.json()["status"] == "Draft"
     doc = fake_db["will"].find_one({"willId": res.json()["willId"]})
     assert doc["status"] == "Draft"
+
+
+def test_save_defaults_payment_status_to_not_paid_on_creation(client, fake_db):
+    res = client.post(URL, json=VALID_PAYLOAD)
+    doc = fake_db["will"].find_one({"willId": res.json()["willId"]})
+    assert doc["paymentStatus"] == PaymentStatus.NOT_PAID.value
+    assert doc["paymentAmount"] is None
+
+
+def test_save_ignores_client_supplied_payment_status(client, fake_db):
+    res = client.post(URL, json={**VALID_PAYLOAD, "paymentStatus": "Paid", "paymentAmount": 99999})
+    doc = fake_db["will"].find_one({"willId": res.json()["willId"]})
+    assert doc["paymentStatus"] == PaymentStatus.NOT_PAID.value
+    assert doc["paymentAmount"] is None
+
+
+def test_save_preserves_payment_status_across_updates(client, fake_db):
+    first = client.post(URL, json={**VALID_PAYLOAD, "status": "Draft"})
+    will_id = first.json()["willId"]
+    fake_db["will"].update_one({"willId": will_id}, {"$set": {"paymentStatus": "Paid", "paymentAmount": 50000}})
+
+    client.post(URL, json={**VALID_PAYLOAD, "status": "Draft", "willId": will_id, "paymentStatus": "Failed"})
+
+    doc = fake_db["will"].find_one({"willId": will_id})
+    assert doc["paymentStatus"] == "Paid"
+    assert doc["paymentAmount"] == 50000
 
 
 def test_save_stores_pending_review_status(client, fake_db):

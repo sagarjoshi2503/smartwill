@@ -24,6 +24,7 @@ export const API_FLAGS = "/api/flags?key=enable-admin-button";
 export const API_RAZORPAY_FLAG = "/api/flags?key=use-razorpay";
 export const API_PAYMENTS_CREATE_ORDER = "/api/payments/create-order";
 export const API_PAYMENTS_VERIFY = "/api/payments/verify";
+export const API_PAYMENTS_MARK_FAILED = "/api/payments/mark-failed";
 export const API_GOOGLE = "/api/auth/google";
 export const API_ADMIN_LOGIN = "/api/auth/admin-login";
 export const API_ADMIN_SIGNUP = "/api/auth/admin-signup";

@@ -11,7 +11,8 @@ import Toggle from "../../components/shared/Toggle";
 import Nav from "../../components/shared/Nav";
 import { apiUrl } from "../../utils/apiBase";
 import {
-  API_WILL_SAVE, API_ADMIN_SAVE, API_PAYMENTS_CREATE_ORDER, API_PAYMENTS_VERIFY, apiPathComplete,
+  API_WILL_SAVE, API_ADMIN_SAVE, API_PAYMENTS_CREATE_ORDER, API_PAYMENTS_VERIFY, API_PAYMENTS_MARK_FAILED,
+  apiPathComplete,
   LBL_LEGAL_NAME, LBL_FULL_NAME, LBL_ID_TYPE, LBL_ID_NUMBER, LBL_ADDRESS,
   TIP_NO_ID_SAVED, MSG_VIEW_ONLY, MSG_SAVING,
   BTN_COMPLETE_REVIEW, BTN_SUBMIT_REVIEW,
@@ -90,12 +91,23 @@ export default function WizardForms({step,will,setWill,addBene,removeBene,update
     onSaved(data.willId, data.status);
   };
 
-  const handlePaymentSuccess = async (savedWillId: string, response: RazorpaySuccessResponse) => {
+  const markPaymentFailed = (savedWillId: string) => {
+    // Fire-and-forget: the testator's Draft stays editable either way, this
+    // is just so the will document doesn't sit at NotPaid forever after a
+    // genuine (failed/cancelled) attempt.
+    fetch(apiUrl(API_PAYMENTS_MARK_FAILED), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ willId: savedWillId }),
+    }).catch(() => {});
+  };
+
+  const handlePaymentSuccess = async (savedWillId: string, orderAmount: number, response: RazorpaySuccessResponse) => {
     try {
       const res = await fetch(apiUrl(API_PAYMENTS_VERIFY), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(response),
+        body: JSON.stringify({ ...response, willId: savedWillId, amount: orderAmount }),
       });
       const isJson = res.headers.get("content-type")?.includes("application/json");
       const data = isJson ? await res.json() : null;
@@ -122,15 +134,17 @@ export default function WizardForms({step,will,setWill,addBene,removeBene,update
       description: "Will submission for admin review",
       prefill: { name: will.testator.fullName, email: will.testator.email },
       theme: { color: "#d09d61" },
-      handler: (response) => { handlePaymentSuccess(savedWillId, response); },
+      handler: (response) => { handlePaymentSuccess(savedWillId, order.amount, response); },
       modal: {
         ondismiss: () => {
+          markPaymentFailed(savedWillId);
           setSubmitStatus("error");
           setSubmitError("Payment was cancelled. Your Will is saved as a Draft — click Submit to try again.");
         },
       },
     });
     rzp.on("payment.failed", () => {
+      markPaymentFailed(savedWillId);
       setSubmitStatus("error");
       setSubmitError("Payment failed. Your Will is saved as a Draft — click Submit to try again.");
     });

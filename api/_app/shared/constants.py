@@ -95,6 +95,7 @@ RAZORPAY_ORDER_FAILED = "Could not create the payment order. Please try again."
 RAZORPAY_AUTH_FAILED = "Payment provider authentication failed."
 RAZORPAY_MISSING_FIELDS = "Missing required payment verification fields."
 RAZORPAY_SIGNATURE_INVALID = "Payment verification failed."
+RAZORPAY_WILL_ID_REQUIRED = "willId is required."
 
 # --- Document/request field names ---
 FLD_EMAIL = "email"
@@ -124,6 +125,8 @@ FLD_RESIDUAL_ID = "residualIdNumber"
 FLD_AMOUNT = "amount"
 FLD_CURRENCY = "currency"
 FLD_RECEIPT = "receipt"
+FLD_PAYMENT_STATUS = "paymentStatus"
+FLD_PAYMENT_AMOUNT = "paymentAmount"
 # Razorpay's own field names, passed straight through unchanged (the
 # Checkout success handler in the browser hands back exactly these keys —
 # translating them to camelCase would just be a source of typos).

@@ -1,5 +1,7 @@
 from pydantic import BaseModel
 
+from _app.shared.enums import PaymentStatus
+
 
 class SaveWillResponse(BaseModel):
     willId: str
@@ -12,6 +14,8 @@ class TestatorWillOut(BaseModel):
     fullLegalName: str
     updatedAt: str | None
     status: str
+    paymentStatus: PaymentStatus
+    paymentAmount: int | None = None
 
 
 class TestatorWillsResponse(BaseModel):
@@ -24,6 +28,8 @@ class WillDetailResponse(BaseModel):
     testatorEmail: str
     status: str
     adminComments: str | None = None
+    paymentStatus: PaymentStatus
+    paymentAmount: int | None = None
 
 
 class DeleteWillResponse(BaseModel):
