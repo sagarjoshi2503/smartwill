@@ -42,7 +42,7 @@ CORS_ALLOW_HEADERS = ["Content-Type"]
 # --- Email (Resend) ---
 RESEND_API_URL = "https://api.resend.com/emails"
 EMAIL_TIMEOUT_SEC = 10
-DEFAULT_ADMIN_EMAIL = "anup@prabhuverlekar.com"
+DEFAULT_ADMIN_EMAIL = "admin@forwardlegacy.co.in"
 
 # --- SMS (Twilio) ---
 TWILIO_FROM_NUMBER = "+17154074664"

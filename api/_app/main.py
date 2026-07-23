@@ -27,3 +27,8 @@ app.include_router(user_signin_otp_router)
 app.include_router(admin_dashboard_router)
 app.include_router(create_will_router)
 app.include_router(payments_router)
+
+
+@app.get("/healthz")
+def healthz():
+    return {"status": "ok"}

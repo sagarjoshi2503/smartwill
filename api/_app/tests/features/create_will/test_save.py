@@ -124,7 +124,7 @@ def test_save_notifies_admin_email_when_submitted_for_review(client, monkeypatch
     assert res.status_code == 201
     assert len(calls) == 1
     to, subject, html = calls[0]
-    assert to == "anup@prabhuverlekar.com"
+    assert to == "admin@forwardlegacy.co.in"
     assert subject == constants.SUBMIT_SUBJECT_TMPL.format(testator_name="Jane Doe")
     assert "Jane Doe" in html
     assert "jane@example.com" in html
@@ -147,7 +147,7 @@ def test_save_creates_adminwill_entry_when_submitted_for_review(client, fake_db)
     assert res.status_code == 201
     entry = fake_db["adminwill"].find_one({"willId": res.json()["willId"]})
     assert entry is not None
-    assert entry["adminEmail"] == "anup@prabhuverlekar.com"
+    assert entry["adminEmail"] == "admin@forwardlegacy.co.in"
     assert "assignedAt" in entry
 
 
