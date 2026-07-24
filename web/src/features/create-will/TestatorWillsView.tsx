@@ -3,7 +3,7 @@ import { FileText, Plus, Edit3, Eye, Trash2, Clock } from "lucide-react";
 import { apiUrl } from "../../utils/apiBase";
 import {
   API_MY_WILLS, apiPathWill, CONFIRM_DELETE_WILL, ERR_LOAD_WILL,
-  ERR_DELETE_WILL, STATUS_DRAFT, STATUS_LBL, WILL_VISIBLE_DAYS,
+  ERR_DELETE_WILL, STATUS_DRAFT, STATUS_PENDING_REVIEW, STATUS_COMPLETED, STATUS_LBL, WILL_VISIBLE_DAYS,
 } from "../../constants";
 import type { TestatorWill, WillState } from "../../types";
 
@@ -24,6 +24,12 @@ export default function TestatorWillsView({email,onCreateNew,onEditWill,onViewWi
   const [error,setError]=useState("");
   const [busyId,setBusyId]=useState<string|null>(null);
   const [actionError,setActionError]=useState("");
+  const [statusFilter,setStatusFilter]=useState<"All"|TestatorWill["status"]>("All");
+
+  const draftCount = wills.filter(w=>w.status===STATUS_DRAFT).length;
+  const pendingReviewCount = wills.filter(w=>w.status===STATUS_PENDING_REVIEW).length;
+  const completedCount = wills.filter(w=>w.status===STATUS_COMPLETED).length;
+  const filteredWills = statusFilter==="All" ? wills : wills.filter(w=>w.status===statusFilter);
 
   const fetchWill = async (willId: string): Promise<{ will: WillState; adminComments?: string }> => {
     const res = await fetch(apiUrl(`${apiPathWill(willId)}?email=${encodeURIComponent(email)}`));
@@ -111,9 +117,24 @@ export default function TestatorWillsView({email,onCreateNew,onEditWill,onViewWi
         </div>
         {actionError&&<p className="text-red-500 text-xs mb-4">{actionError}</p>}
         <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden">
-          <div className="px-5 py-3.5 border-b border-slate-200 flex justify-between items-center">
+          <div className="px-5 py-3.5 border-b border-slate-200 flex flex-wrap gap-3 justify-between items-center">
             <h3 className="text-slate-900 font-bold serif">Your Wills</h3>
-            <span className="text-slate-500 text-xs">{status==="ready"?`${wills.length} Wills`:""}</span>
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-1.5">
+                {([
+                  {v:"All",label:"All",count:wills.length},
+                  {v:STATUS_DRAFT,label:STATUS_LBL[STATUS_DRAFT],count:draftCount},
+                  {v:STATUS_PENDING_REVIEW,label:STATUS_LBL[STATUS_PENDING_REVIEW],count:pendingReviewCount},
+                  {v:STATUS_COMPLETED,label:STATUS_LBL[STATUS_COMPLETED],count:completedCount},
+                ] as const).map(f=>(
+                  <button key={f.v} onClick={()=>setStatusFilter(f.v)}
+                    className={`text-[10px] font-bold px-2.5 py-1 rounded-full border transition-colors ${statusFilter===f.v?"bg-[#d09d61] text-[#020617] border-[#d09d61] hover:bg-[#d09d61] hover:text-[#020617]":"bg-white text-slate-600 border-slate-200 hover:border-slate-300"}`}>
+                    {f.label} <span className="opacity-70">{f.count}</span>
+                  </button>
+                ))}
+              </div>
+              <span className="text-slate-500 text-xs">{status==="ready"?`${filteredWills.length} of ${wills.length} Wills`:""}</span>
+            </div>
           </div>
           {status==="loading" && <p className="text-slate-500 text-sm px-5 py-6">Loading your Wills…</p>}
           {status==="error" && <p className="text-red-500 text-xs px-5 py-6">{error}</p>}
@@ -123,7 +144,10 @@ export default function TestatorWillsView({email,onCreateNew,onEditWill,onViewWi
               <p className="text-slate-500 text-sm">You haven't created any Wills yet.</p>
             </div>
           )}
-          {status==="ready" && wills.length>0 && (
+          {status==="ready" && wills.length>0 && filteredWills.length===0 && (
+            <p className="text-slate-500 text-sm px-5 py-6">No Wills match this filter.</p>
+          )}
+          {status==="ready" && filteredWills.length>0 && (
             <table className="w-full">
               <thead><tr className="border-b border-slate-200">
                 {["Testator Email","Full Legal Name","Updated","Status","Action"].map(h=>(
@@ -131,7 +155,7 @@ export default function TestatorWillsView({email,onCreateNew,onEditWill,onViewWi
                 ))}
               </tr></thead>
               <tbody>
-                {wills.map(w=>(
+                {filteredWills.map(w=>(
                   <tr key={w.willId} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
                     <td className="px-5 py-3.5 text-slate-500 text-sm">{w.testatorEmail}</td>
                     <td className="px-5 py-3.5 text-slate-900 text-sm font-medium">{w.fullLegalName||"Unnamed"}</td>
