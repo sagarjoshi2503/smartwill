@@ -21,7 +21,7 @@ export default function LiveDocPreview({will,residualBene}:{
           <div className="h-px w-16 bg-slate-700 mx-auto mb-0.5"/><div className="h-px w-10 bg-slate-500 mx-auto"/>
         </div>
         <Clause title="DECLARATION">
-          <p className="text-justify">I, <strong>{testator.fullName||"[Name]"}</strong>, {testator.relation} of <strong>{testator.parentSpouseName||"[Parent/Spouse]"}</strong>, aged <strong>{testator.age||"__"}</strong>, residing at <strong>{testator.address||"[Address]"}</strong>, India, holding {testator.idType} No. <strong>{testator.idNumber||"[ID]"}</strong>, hereby declare this to be my Last Will and Testament, revoking all prior Wills.</p>
+          <p className="text-justify">I, <strong>{testator.fullName||"[Name]"}</strong>, having PAN <strong>{testator.pan||"[PAN]"}</strong>, Aadhaar No. <strong>{testator.aadhaarNumber||"[Aadhaar]"}</strong>, {testator.relation} of <strong>{testator.parentSpouseName||"[Parent]"}</strong>, aged <strong>{testator.age||"__"}</strong>, {testator.maritalStatus}, residing at <strong>{testator.address||"[Address]"}</strong>, India{testator.maritalStatus==="married"?<>, married to <strong>{testator.spouseName||"[Spouse]"}</strong></>:""}, hereby declare this to be my Last Will and Testament, revoking all prior Wills.</p>
         </Clause>
         <Clause title="EXECUTOR">
           <p className="text-justify">I appoint <strong>{executor.name||"[Executor]"}</strong> ({executor.relation}), ID: {executor.idType} {executor.idNumber||"[No.]"}, residing at {executor.address||"[Address]"}, as Sole Executor. They shall act <em>{executor.adminType==="jointly"?"jointly":"jointly and severally"}</em>.{executor.hasSubstitute&&executor.subName?` Substitute: ${executor.subName}.`:""}</p>

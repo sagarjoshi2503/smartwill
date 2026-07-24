@@ -6,7 +6,7 @@ import {
   ERR_LOAD_WILL, ERR_DELETE_WILL, STATUS_DRAFT, STATUS_PENDING_REVIEW, STATUS_COMPLETED,
   STATUS_LBL,
 } from "../../constants";
-import type { AdminClient, AdminProfile, WillState } from "../../types";
+import type { AdminClient, AdminProfile, WillState, WillType } from "../../types";
 
 const STATUS_STYLE: Record<AdminClient["status"], string> = {
   Draft: "bg-slate-100 text-slate-600 border-slate-200",
@@ -17,7 +17,7 @@ const STATUS_STYLE: Record<AdminClient["status"], string> = {
 export default function AdminPortal({admin,onCreateWill,onReviewWill}:{
   admin: AdminProfile;
   onCreateWill: () => void;
-  onReviewWill: (willId: string, will: WillState, status: AdminClient["status"]) => void;
+  onReviewWill: (willId: string, will: WillState, status: AdminClient["status"], willType: WillType) => void;
 }){
   const [clients,setClients]=useState<AdminClient[]>([]);
   const [status,setStatus]=useState<"loading"|"ready"|"error">("loading");
@@ -61,7 +61,7 @@ export default function AdminPortal({admin,onCreateWill,onReviewWill}:{
       const isJson = res.headers.get("content-type")?.includes("application/json");
       const data = isJson ? await res.json() : null;
       if(!res.ok) throw new Error(data?.error || `Could not load this Will (server returned ${res.status}).`);
-      onReviewWill(data.willId, data.will as WillState, data.status as AdminClient["status"]);
+      onReviewWill(data.willId, data.will as WillState, data.status as AdminClient["status"], (data.willType || "") as WillType);
     } catch (err) {
       setReviewError(err instanceof Error ? err.message : ERR_LOAD_WILL);
     } finally {

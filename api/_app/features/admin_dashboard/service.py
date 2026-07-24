@@ -8,17 +8,20 @@ from _app.core.exceptions import AppError
 from _app.features.admin_dashboard import repository
 from _app.shared import email
 from _app.shared.constants import (
-    COMMENTS_REQUIRED, DEFAULT_GREETING, FLD_ADMIN_COMMENTS, FLD_COMMENTS, FLD_CREATED_AT, FLD_EXECUTOR,
-    FLD_FULL_NAME, FLD_GUARDIAN, FLD_ID_NUMBER, FLD_JOINT_ID, FLD_PAYMENT_AMOUNT, FLD_PAYMENT_STATUS,
-    FLD_RESIDUAL_ID, FLD_REVIEWER_EMAIL, FLD_STATUS, FLD_SUB_ID, FLD_TESTATOR, FLD_TESTATOR_EMAIL,
-    FLD_UPDATED_AT, FLD_WILL, FLD_WILL_ID, HTTP_BAD_REQUEST, HTTP_NOT_FOUND, BAD_TESTATOR_EMAIL,
-    BAD_WILL_STATUS, STATUS_COMPLETED, STATUS_DRAFT, STATUS_PENDING_REVIEW, UNKNOWN_NAME, WILL_REQUIRED,
-    WILL_NOT_FOUND, REVIEW_COMPLETED_SUBJECT, SENT_BACK_SUBJECT, SUBMIT_SUBJECT_TMPL,
+    COMMENTS_REQUIRED, DEFAULT_GREETING, FLD_AADHAAR_NUMBER, FLD_ADMIN_COMMENTS, FLD_COMMENTS,
+    FLD_CREATED_AT, FLD_CREATED_BY, FLD_EXECUTOR, FLD_FULL_NAME, FLD_GUARDIAN, FLD_ID_NUMBER, FLD_JOINT_ID,
+    FLD_PAN, FLD_PAYMENT_AMOUNT, FLD_PAYMENT_STATUS, FLD_RESIDUAL_ID, FLD_REVIEWER_EMAIL,
+    FLD_SPOUSE_AADHAAR_NUMBER, FLD_STATUS, FLD_SUB_ID, FLD_TESTATOR, FLD_TESTATOR_EMAIL, FLD_UPDATED_AT,
+    FLD_WILL, FLD_WILL_ID, FLD_WILL_TYPE, FLD_WITNESSES, HTTP_BAD_REQUEST, HTTP_NOT_FOUND,
+    BAD_TESTATOR_EMAIL, BAD_WILL_STATUS, BAD_WILL_TYPE, STATUS_COMPLETED, STATUS_DRAFT,
+    STATUS_PENDING_REVIEW, UNKNOWN_NAME, WILL_REQUIRED, WILL_NOT_FOUND, REVIEW_COMPLETED_SUBJECT,
+    SENT_BACK_SUBJECT, SUBMIT_SUBJECT_TMPL,
 )
-from _app.shared.enums import PaymentStatus
+from _app.shared.enums import PaymentStatus, WillType
 from _app.shared.validators import is_valid_email, normalize_email
 
 ALLOWED_STATUSES = {STATUS_DRAFT, STATUS_PENDING_REVIEW, STATUS_COMPLETED}
+ALLOWED_WILL_TYPES = {t.value for t in WillType}
 
 
 def _redact_id_numbers(will_data: dict) -> dict:
@@ -30,7 +33,9 @@ def _redact_id_numbers(will_data: dict) -> dict:
 
     redacted = dict(will_data)
     if isinstance(redacted.get(FLD_TESTATOR), dict):
-        redacted[FLD_TESTATOR] = {**redacted[FLD_TESTATOR], FLD_ID_NUMBER: ""}
+        redacted[FLD_TESTATOR] = {
+            **redacted[FLD_TESTATOR], FLD_PAN: "", FLD_AADHAAR_NUMBER: "", FLD_SPOUSE_AADHAAR_NUMBER: "",
+        }
     if isinstance(redacted.get(FLD_EXECUTOR), dict):
         redacted[FLD_EXECUTOR] = {
             **redacted[FLD_EXECUTOR], FLD_ID_NUMBER: "", FLD_JOINT_ID: "", FLD_SUB_ID: "",
@@ -39,6 +44,10 @@ def _redact_id_numbers(will_data: dict) -> dict:
         redacted[FLD_GUARDIAN] = {**redacted[FLD_GUARDIAN], FLD_ID_NUMBER: "", FLD_SUB_ID: ""}
     if FLD_RESIDUAL_ID in redacted:
         redacted[FLD_RESIDUAL_ID] = ""
+    if isinstance(redacted.get(FLD_WITNESSES), list):
+        redacted[FLD_WITNESSES] = [
+            {**w, FLD_AADHAAR_NUMBER: ""} if isinstance(w, dict) else w for w in redacted[FLD_WITNESSES]
+        ]
     return redacted
 
 
@@ -53,6 +62,10 @@ def save_will_as_admin(db: Database, body: dict, settings: Settings) -> dict:
     if status not in ALLOWED_STATUSES:
         raise AppError(HTTP_BAD_REQUEST, BAD_WILL_STATUS)
 
+    will_type = body.get(FLD_WILL_TYPE) or ""
+    if will_type and will_type not in ALLOWED_WILL_TYPES:
+        raise AppError(HTTP_BAD_REQUEST, BAD_WILL_TYPE)
+
     testator_email = normalize_email(body.get(FLD_TESTATOR_EMAIL))
     if not is_valid_email(testator_email):
         raise AppError(HTTP_BAD_REQUEST, BAD_TESTATOR_EMAIL)
@@ -65,25 +78,36 @@ def save_will_as_admin(db: Database, body: dict, settings: Settings) -> dict:
         if not existing:
             raise AppError(HTTP_NOT_FOUND, WILL_NOT_FOUND)
         created_at = existing.get(FLD_CREATED_AT, now)
+        created_by = existing.get(FLD_CREATED_BY) or testator_email
         payment_status = existing.get(FLD_PAYMENT_STATUS) or PaymentStatus.NOT_PAID.value
         payment_amount = existing.get(FLD_PAYMENT_AMOUNT)
+        will_type = will_type or existing.get(FLD_WILL_TYPE) or ""
     else:
         will_id = str(uuid.uuid4())
         created_at = now
+        # This endpoint is only reachable by an admin (e.g. creating a Will
+        # on a client's behalf), so the admin's own email — sent as
+        # reviewerEmail, the field that already carries the acting admin's
+        # identity elsewhere in this module — is the creator here.
+        created_by = normalize_email(body.get(FLD_REVIEWER_EMAIL)) if body.get(FLD_REVIEWER_EMAIL) else testator_email
         payment_status = PaymentStatus.NOT_PAID.value
         payment_amount = None
 
     # paymentStatus/paymentAmount are only ever changed by the payments
     # verification flow (see _app/features/payments), never trusted from the
     # client here — so they're excluded from the body spread and set
-    # explicitly from the carried-over (or default) values above.
+    # explicitly from the carried-over (or default) values above. createdBy
+    # is likewise never trusted from the client — it's fixed at creation and
+    # never changes across subsequent saves.
     document = {
-        **{k: v for k, v in body.items() if k not in (FLD_PAYMENT_STATUS, FLD_PAYMENT_AMOUNT)},
+        **{k: v for k, v in body.items() if k not in (FLD_PAYMENT_STATUS, FLD_PAYMENT_AMOUNT, FLD_WILL_TYPE, FLD_CREATED_BY)},
         FLD_WILL: _redact_id_numbers(body.get(FLD_WILL) or {}),
         FLD_WILL_ID: will_id,
         FLD_TESTATOR_EMAIL: testator_email,
         FLD_STATUS: status,
+        FLD_WILL_TYPE: will_type,
         FLD_CREATED_AT: created_at,
+        FLD_CREATED_BY: created_by,
         FLD_UPDATED_AT: now,
         FLD_PAYMENT_STATUS: payment_status,
         FLD_PAYMENT_AMOUNT: payment_amount,
@@ -136,6 +160,7 @@ def list_admin_wills(db: Database) -> dict:
             "contact": w.get(FLD_TESTATOR_EMAIL) or "",
             FLD_UPDATED_AT: updated_at.isoformat() if updated_at else None,
             FLD_STATUS: w.get(FLD_STATUS) or STATUS_DRAFT,
+            FLD_WILL_TYPE: w.get(FLD_WILL_TYPE) or "",
             FLD_PAYMENT_STATUS: w.get(FLD_PAYMENT_STATUS) or PaymentStatus.NOT_PAID.value,
             FLD_PAYMENT_AMOUNT: w.get(FLD_PAYMENT_AMOUNT),
         })
@@ -155,6 +180,7 @@ def get_will_as_admin(db: Database, will_id: str) -> dict:
         FLD_WILL: document.get(FLD_WILL) or {},
         FLD_TESTATOR_EMAIL: document.get(FLD_TESTATOR_EMAIL) or "",
         FLD_STATUS: document.get(FLD_STATUS) or STATUS_DRAFT,
+        FLD_WILL_TYPE: document.get(FLD_WILL_TYPE) or "",
         FLD_ADMIN_COMMENTS: document.get(FLD_ADMIN_COMMENTS),
         FLD_PAYMENT_STATUS: document.get(FLD_PAYMENT_STATUS) or PaymentStatus.NOT_PAID.value,
         FLD_PAYMENT_AMOUNT: document.get(FLD_PAYMENT_AMOUNT),

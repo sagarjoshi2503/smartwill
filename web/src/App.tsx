@@ -24,12 +24,12 @@ import {
   MSG_VIEW_ONLY, MSG_SAVING, BTN_SAVE_AS_DRAFT,
 } from "./constants";
 import type {
-  AdminProfile, AssetCatalogItem, Beneficiary, DisclaimerChecks, GoogleProfile, Plan, SignupState, ViewName, WillState,
+  AdminProfile, AssetCatalogItem, Beneficiary, DisclaimerChecks, GoogleProfile, Plan, SignupState, ViewName, WillState, WillType,
 } from "./types";
 
 const WIZARD_STEPS = [
-  {n:1,label:"Testator"},{n:2,label:"Executor"},{n:3,label:"Guardians"},
-  {n:4,label:"Beneficiaries"},{n:5,label:"Assets"},{n:6,label:"Residual & Instructions"},
+  {n:1,label:"Will Type"},{n:2,label:"Testator"},{n:3,label:"Executor"},{n:4,label:"Guardians"},
+  {n:5,label:"Beneficiaries"},{n:6,label:"Assets"},{n:7,label:"Residual & Instructions"},
 ];
 
 const isAdminView = (v: ViewName) => v==="adminLogin" || v==="adminSignup" || v==="admin";
@@ -48,6 +48,7 @@ export default function SmartWill() {
   const [dchecks, setDchecks] = useState<DisclaimerChecks>({ nonMuslim:false, age:false, law:false, tool:false });
   const [wizardStep, setWizardStep] = useState(1);
   const [will, setWill] = useState<WillState>(DEFAULT_WILL);
+  const [willType, setWillType] = useState<WillType>("");
   const [editingWillId, setEditingWillId] = useState<string | null>(null);
   const [adminReviewMode, setAdminReviewMode] = useState(false);
   const [adminReviewStatus, setAdminReviewStatus] = useState<string | null>(null);
@@ -132,6 +133,7 @@ export default function SmartWill() {
     setSignup({ name:"", phone:"", email:"", state:"", terms:false });
     setOtp(Array(OTP_LENGTH).fill(""));
     setWill(DEFAULT_WILL);
+    setWillType("");
     setEditingWillId(null);
     setWizardStep(1);
     setViewOnlyMode(false);
@@ -163,6 +165,7 @@ export default function SmartWill() {
 
   const handleCreateNewWill = () => {
     setWill({...DEFAULT_WILL, testator: {...DEFAULT_WILL.testator, fullName: signup.name, email: signup.email}});
+    setWillType("");
     setEditingWillId(null);
     setAdminReviewMode(false);
     setAdminReviewStatus(null);
@@ -174,8 +177,9 @@ export default function SmartWill() {
     setWizardStep(1);
     setView("disclaimer");
   };
-  const handleEditWill = (willId: string, fetchedWill: WillState, adminComments?: string) => {
+  const handleEditWill = (willId: string, fetchedWill: WillState, fetchedWillType: WillType, adminComments?: string) => {
     setWill(mergeWithDefaults(fetchedWill));
+    setWillType(fetchedWillType);
     setEditingWillId(willId);
     setAdminReviewMode(false);
     setAdminReviewStatus(null);
@@ -186,8 +190,9 @@ export default function SmartWill() {
     setWizardStep(1);
     setView("wizard");
   };
-  const handleViewWill = (willId: string, fetchedWill: WillState) => {
+  const handleViewWill = (willId: string, fetchedWill: WillState, fetchedWillType: WillType) => {
     setWill(mergeWithDefaults(fetchedWill));
+    setWillType(fetchedWillType);
     setEditingWillId(willId);
     setAdminReviewMode(false);
     setAdminReviewStatus(null);
@@ -200,6 +205,7 @@ export default function SmartWill() {
   };
   const handleAdminCreateWill = () => {
     setWill({...DEFAULT_WILL, testator: {...DEFAULT_WILL.testator, fullName:"", email:""}});
+    setWillType("");
     setEditingWillId(null);
     setAdminReviewMode(false);
     setAdminReviewStatus(null);
@@ -210,8 +216,9 @@ export default function SmartWill() {
     setWizardStep(1);
     setView("wizard");
   };
-  const handleAdminReviewWill = (willId: string, fetchedWill: WillState, status: string) => {
+  const handleAdminReviewWill = (willId: string, fetchedWill: WillState, status: string, fetchedWillType: WillType) => {
     setWill(mergeWithDefaults(fetchedWill));
+    setWillType(fetchedWillType);
     setEditingWillId(willId);
     setAdminReviewMode(true);
     setAdminReviewStatus(status);
@@ -222,7 +229,7 @@ export default function SmartWill() {
     setSendBackOpen(false);
     setSendBackComments("");
     setSendBackStatus("idle");
-    setWizardStep(1);
+    setWizardStep(2);
     setView("wizard");
   };
 
@@ -274,7 +281,7 @@ export default function SmartWill() {
       const res = await fetch(apiUrl(API_WILL_SAVE), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ will, testatorEmail: will.testator.email, status: STATUS_DRAFT, willId: editingWillId }),
+        body: JSON.stringify({ will, testatorEmail: will.testator.email, status: STATUS_DRAFT, willId: editingWillId, willType }),
       });
       const isJson = res.headers.get("content-type")?.includes("application/json");
       const data = isJson ? await res.json() : null;
@@ -366,7 +373,7 @@ export default function SmartWill() {
               </div>
             </div>
             <div className="flex items-center gap-1">
-              {WIZARD_STEPS.map(s=>(
+              {WIZARD_STEPS.filter(s=>!(adminReviewMode&&s.n===1)).map(s=>(
                 <button key={s.n} onClick={()=>setWizardStep(s.n)}
                     className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-[10px] font-semibold transition-all ${wizardStep===s.n?"bg-[#d09d61] text-[#020617]":"border border-slate-200 text-slate-600 hover:bg-slate-100 hover:text-slate-900"}`}>
                   {wizardStep>s.n?<Check size={9}/>:<span>{s.n}</span>}
@@ -417,12 +424,13 @@ export default function SmartWill() {
             <div className="w-full lg:w-[50%] overflow-y-auto p-5 bg-slate-50">
               <WizardForms
                 step={wizardStep} will={will} setWill={setWill}
+                willType={willType} setWillType={setWillType}
                 addBene={addBene} removeBene={removeBene} updateBene={updateBene}
                 addAsset={addAsset} removeAsset={removeAsset}
                 updateAssetData={updateAssetData} updateAssetAlloc={updateAssetAlloc}
                 allocTotal={allocTotal} assetAdded={assetAdded}
-                onNext={()=>setWizardStep(s=>Math.min(s+1,6))}
-                onPrev={()=>setWizardStep(s=>Math.max(s-1,1))}
+                onNext={()=>setWizardStep(s=>Math.min(s+1,7))}
+                onPrev={()=>setWizardStep(s=>Math.max(s-1,adminReviewMode?2:1))}
                 onGenerate={()=>setShowWillDoc(true)}
                 willId={editingWillId}
                 adminReview={adminReviewMode}

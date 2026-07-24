@@ -14,6 +14,7 @@ class ClientOut(BaseModel):
     contact: str
     updatedAt: str | None
     status: str
+    willType: str
     paymentStatus: PaymentStatus
     paymentAmount: int | None = None
 
@@ -27,6 +28,7 @@ class WillDetailResponse(BaseModel):
     will: dict
     testatorEmail: str
     status: str
+    willType: str
     adminComments: str | None = None
     paymentStatus: PaymentStatus
     paymentAmount: int | None = None

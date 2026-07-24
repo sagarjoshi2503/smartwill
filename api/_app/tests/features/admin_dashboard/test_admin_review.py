@@ -79,12 +79,12 @@ def test_admin_complete_strips_id_numbers_from_edited_will(client, fake_db):
     will_id = save_will(client, status="PendingReview", full_name="Jane Doe")
 
     res = client.post(complete_admin_url(will_id), json={
-        "will": {"testator": {"fullName": "Jane Doe", "idNumber": "AAAAA1111A"}},
+        "will": {"testator": {"fullName": "Jane Doe", "pan": "AAAAA1111A"}},
     })
 
     assert res.status_code == 200
     doc = fake_db["will"].find_one({"willId": will_id})
-    assert doc["will"]["testator"]["idNumber"] == ""
+    assert doc["will"]["testator"]["pan"] == ""
 
 
 def test_admin_complete_preserves_will_content_when_not_provided(client, fake_db):

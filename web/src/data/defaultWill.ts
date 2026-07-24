@@ -9,9 +9,11 @@ export const DEFAULT_WILL: WillState = {
   // signDay/Month/Year default to today's real date since that's simply correct,
   // not placeholder demo data.
   testator: {
-    email:"", fullName:"", relation:"son", parentSpouseName:"",
-    age:"", address:"",
-    idType:"PAN Card", idNumber:"", country:"India",
+    email:"", fullName:"", pan:"", aadhaarNumber:"",
+    relation:"son", parentSpouseName:"",
+    age:"", maritalStatus:"unmarried", spouseName:"", spouseAadhaarNumber:"",
+    sonCount:"", sonNames:"", daughterCount:"", daughterNames:"",
+    address:"", country:"India",
     signPlace:"", signDay:String(today.day), signMonth:today.month, signYear:String(today.year),
   },
   // Section II - Executor. idType/relation/adminType are left at a neutral
@@ -50,7 +52,7 @@ export const DEFAULT_WILL: WillState = {
   // Witnesses: the Indian Succession Act requires exactly two, so the two slots
   // stay (the UI has no "add witness" control), but with no fabricated identities
   witnesses:[
-    { name:"", address:"" },
-    { name:"", address:"" },
+    { name:"", parentRelation:"son", parentName:"", age:"", maritalStatus:"unmarried", address:"", aadhaarNumber:"" },
+    { name:"", parentRelation:"son", parentName:"", age:"", maritalStatus:"unmarried", address:"", aadhaarNumber:"" },
   ],
 };

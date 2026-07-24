@@ -2,7 +2,7 @@ from _app.core.config import Settings, get_settings
 from _app.features.create_will import service as will_service
 from _app.main import app
 from _app.shared import constants
-from _app.shared.enums import PaymentStatus
+from _app.shared.enums import PaymentStatus, WillType
 
 URL = "/api/will/save"
 VALID_PAYLOAD = {"will": {"testator": {"fullName": "Jane Doe"}}, "testatorEmail": "jane@example.com"}
@@ -25,10 +25,14 @@ def test_save_success_returns_generated_will_id(client, fake_db):
 def test_save_strips_id_numbers_before_persisting(client, fake_db):
     payload = {
         "will": {
-            "testator": {"fullName": "Jane Doe", "idNumber": "AAAAA1111A"},
+            "testator": {
+                "fullName": "Jane Doe", "pan": "AAAAA1111A", "aadhaarNumber": "111122223333",
+                "spouseAadhaarNumber": "444455556666",
+            },
             "executor": {"name": "Bob", "idNumber": "BBBBB2222B", "jointIdNumber": "CCCCC3333C", "subIdNumber": "DDDDD4444D"},
             "guardian": {"name": "Carol", "idNumber": "EEEEE5555E", "subIdNumber": "FFFFF6666F"},
             "residualIdNumber": "GGGGG7777G",
+            "witnesses": [{"name": "Wit One", "aadhaarNumber": "777788889999"}],
         },
         "testatorEmail": "jane@example.com",
     }
@@ -37,17 +41,21 @@ def test_save_strips_id_numbers_before_persisting(client, fake_db):
 
     assert res.status_code == 201
     doc = fake_db["will"].find_one({"willId": res.json()["willId"]})
-    assert doc["will"]["testator"]["idNumber"] == ""
+    assert doc["will"]["testator"]["pan"] == ""
+    assert doc["will"]["testator"]["aadhaarNumber"] == ""
+    assert doc["will"]["testator"]["spouseAadhaarNumber"] == ""
     assert doc["will"]["executor"]["idNumber"] == ""
     assert doc["will"]["executor"]["jointIdNumber"] == ""
     assert doc["will"]["executor"]["subIdNumber"] == ""
     assert doc["will"]["guardian"]["idNumber"] == ""
     assert doc["will"]["guardian"]["subIdNumber"] == ""
     assert doc["will"]["residualIdNumber"] == ""
+    assert doc["will"]["witnesses"][0]["aadhaarNumber"] == ""
     # Non-ID fields must survive redaction untouched.
     assert doc["will"]["testator"]["fullName"] == "Jane Doe"
     assert doc["will"]["executor"]["name"] == "Bob"
     assert doc["will"]["guardian"]["name"] == "Carol"
+    assert doc["will"]["witnesses"][0]["name"] == "Wit One"
 
 
 def test_save_generates_unique_will_ids_across_requests(client):
@@ -135,6 +143,34 @@ def test_save_preserves_payment_status_across_updates(client, fake_db):
     doc = fake_db["will"].find_one({"willId": will_id})
     assert doc["paymentStatus"] == "Paid"
     assert doc["paymentAmount"] == 50000
+
+
+def test_save_defaults_will_type_to_empty_on_creation(client, fake_db):
+    res = client.post(URL, json=VALID_PAYLOAD)
+    doc = fake_db["will"].find_one({"willId": res.json()["willId"]})
+    assert doc["willType"] == ""
+
+
+def test_save_stores_selected_will_type(client, fake_db):
+    res = client.post(URL, json={**VALID_PAYLOAD, "willType": WillType.ALL_INDIA.value})
+    doc = fake_db["will"].find_one({"willId": res.json()["willId"]})
+    assert doc["willType"] == WillType.ALL_INDIA.value
+
+
+def test_save_rejects_invalid_will_type(client, fake_db):
+    res = client.post(URL, json={**VALID_PAYLOAD, "willType": "bogus"})
+    assert res.status_code == 400
+    assert res.json() == {"error": constants.BAD_WILL_TYPE}
+
+
+def test_save_preserves_will_type_when_omitted_on_update(client, fake_db):
+    first = client.post(URL, json={**VALID_PAYLOAD, "status": "Draft", "willType": WillType.GOAN.value})
+    will_id = first.json()["willId"]
+
+    client.post(URL, json={**VALID_PAYLOAD, "status": "Draft", "willId": will_id})
+
+    doc = fake_db["will"].find_one({"willId": will_id})
+    assert doc["willType"] == WillType.GOAN.value
 
 
 def test_save_stores_pending_review_status(client, fake_db):

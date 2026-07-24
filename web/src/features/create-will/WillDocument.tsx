@@ -60,7 +60,13 @@ export default function WillDocument({will,residualBene,onBack,onPrint,willDocRe
 
           {/* Opening */}
           <p className="text-justify mb-6 leading-loose">
-            I, <span className="font-bold underline">{testator.fullName||"_______________________"}</span>, {testator.relation} of <span className="font-bold">{testator.parentSpouseName||"_______________________"}</span>, aged about <span className="font-bold">{testator.age||"___"}</span> years, residing permanently at <span className="font-bold">{testator.address||"_______________________"}</span>, holding {testator.idType} Number: <span className="font-bold">{testator.idNumber||"_______________________"}</span>, do hereby execute, publish, and declare this to be my last Will and Testament (<strong>"Will"</strong>), hereby revoking all prior Wills, codicils, or testamentary dispositions made by me at any time heretofore.
+            I, <span className="font-bold underline">{testator.fullName||"_______________________"}</span>, having PAN <span className="font-bold">{testator.pan||"_______________________"}</span>, Aadhaar No. <span className="font-bold">{testator.aadhaarNumber||"_______________________"}</span>, {testator.relation} of <span className="font-bold">{testator.parentSpouseName||"_______________________"}</span>, aged about <span className="font-bold">{testator.age||"___"}</span> years, {testator.maritalStatus}, residing permanently at <span className="font-bold">{testator.address||"_______________________"}</span>
+            {testator.maritalStatus==="married"&&(
+              <>, I am married to <span className="font-bold">{testator.spouseName||"_______________________"}</span>, bearing Aadhaar No. <span className="font-bold">{testator.spouseAadhaarNumber||"_______________________"}</span>
+                {testator.sonCount&&<> and I have {testator.sonCount} son(s), namely <span className="font-bold">{testator.sonNames||"_______________________"}</span></>}
+                {testator.daughterCount&&<> and {testator.daughterCount} daughter(s), namely <span className="font-bold">{testator.daughterNames||"_______________________"}</span></>}
+              </>
+            )}, do hereby execute, publish, and declare this to be my last Will and Testament (<strong>"Will"</strong>), hereby revoking all prior Wills, codicils, or testamentary dispositions made by me at any time heretofore.
           </p>
 
           {/* SECTION I */}
@@ -218,7 +224,9 @@ export default function WillDocument({will,residualBene,onBack,onPrint,willDocRe
                 <div key={i}>
                   <div className="border-b-2 border-slate-700 pt-10 mb-1"/>
                   <p className="font-bold text-sm">{w.name||`Witness ${i+1}`}</p>
+                  <p className="text-xs text-slate-500 mt-0.5">{w.parentRelation} of {w.parentName||"_______"}, aged {w.age||"___"}, {w.maritalStatus}</p>
                   <p className="text-xs text-slate-500 mt-0.5">{w.address||"Address:"}</p>
+                  <p className="text-xs text-slate-500 mt-0.5">Aadhaar No. {w.aadhaarNumber||"_______________________"}</p>
                   <p className="text-xs text-slate-400 mt-1">Signature of Witness {i+1}</p>
                 </div>
               ))}

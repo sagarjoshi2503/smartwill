@@ -5,7 +5,7 @@ import {
   API_MY_WILLS, apiPathWill, CONFIRM_DELETE_WILL, ERR_LOAD_WILL,
   ERR_DELETE_WILL, STATUS_DRAFT, STATUS_PENDING_REVIEW, STATUS_COMPLETED, STATUS_LBL, WILL_VISIBLE_DAYS,
 } from "../../constants";
-import type { TestatorWill, WillState } from "../../types";
+import type { TestatorWill, WillState, WillType } from "../../types";
 
 const STATUS_STYLE: Record<TestatorWill["status"], string> = {
   Draft: "bg-slate-100 text-slate-600 border-slate-200",
@@ -16,8 +16,8 @@ const STATUS_STYLE: Record<TestatorWill["status"], string> = {
 export default function TestatorWillsView({email,onCreateNew,onEditWill,onViewWill}:{
   email: string;
   onCreateNew: () => void;
-  onEditWill: (willId: string, will: WillState, adminComments?: string) => void;
-  onViewWill: (willId: string, will: WillState) => void;
+  onEditWill: (willId: string, will: WillState, willType: WillType, adminComments?: string) => void;
+  onViewWill: (willId: string, will: WillState, willType: WillType) => void;
 }){
   const [wills,setWills]=useState<TestatorWill[]>([]);
   const [status,setStatus]=useState<"loading"|"ready"|"error">("loading");
@@ -31,19 +31,19 @@ export default function TestatorWillsView({email,onCreateNew,onEditWill,onViewWi
   const completedCount = wills.filter(w=>w.status===STATUS_COMPLETED).length;
   const filteredWills = statusFilter==="All" ? wills : wills.filter(w=>w.status===statusFilter);
 
-  const fetchWill = async (willId: string): Promise<{ will: WillState; adminComments?: string }> => {
+  const fetchWill = async (willId: string): Promise<{ will: WillState; willType: WillType; adminComments?: string }> => {
     const res = await fetch(apiUrl(`${apiPathWill(willId)}?email=${encodeURIComponent(email)}`));
     const isJson = res.headers.get("content-type")?.includes("application/json");
     const data = isJson ? await res.json() : null;
     if(!res.ok) throw new Error(data?.error || `Could not load this Will (server returned ${res.status}).`);
-    return { will: data.will as WillState, adminComments: data.adminComments || undefined };
+    return { will: data.will as WillState, willType: (data.willType || "") as WillType, adminComments: data.adminComments || undefined };
   };
 
   const handleEdit = async (willId: string) => {
     setBusyId(willId); setActionError("");
     try {
-      const { will, adminComments } = await fetchWill(willId);
-      onEditWill(willId, will, adminComments);
+      const { will, willType, adminComments } = await fetchWill(willId);
+      onEditWill(willId, will, willType, adminComments);
     } catch (err) {
       setActionError(err instanceof Error ? err.message : ERR_LOAD_WILL);
     } finally {
@@ -54,8 +54,8 @@ export default function TestatorWillsView({email,onCreateNew,onEditWill,onViewWi
   const handleView = async (willId: string) => {
     setBusyId(willId); setActionError("");
     try {
-      const { will } = await fetchWill(willId);
-      onViewWill(willId, will);
+      const { will, willType } = await fetchWill(willId);
+      onViewWill(willId, will, willType);
     } catch (err) {
       setActionError(err instanceof Error ? err.message : ERR_LOAD_WILL);
     } finally {

@@ -3,12 +3,19 @@ import type { ReactNode } from "react";
 export interface Testator {
   email: string;
   fullName: string;
-  relation: string;
+  pan: string;
+  aadhaarNumber: string;
+  relation: "son" | "daughter";
   parentSpouseName: string;
   age: string;
+  maritalStatus: "unmarried" | "married";
+  spouseName: string;
+  spouseAadhaarNumber: string;
+  sonCount: string;
+  sonNames: string;
+  daughterCount: string;
+  daughterNames: string;
   address: string;
-  idType: string;
-  idNumber: string;
   country: string;
   signPlace: string;
   signDay: string;
@@ -56,7 +63,12 @@ export interface Beneficiary {
 
 export interface Witness {
   name: string;
+  parentRelation: "son" | "daughter" | "wife";
+  parentName: string;
+  age: string;
+  maritalStatus: "unmarried" | "married";
   address: string;
+  aadhaarNumber: string;
 }
 
 export interface AssetField {
@@ -134,12 +146,15 @@ export interface AdminProfile {
   email: string;
 }
 
+export type WillType = "allindia" | "goan" | "successiondeed" | "customwill" | "";
+
 export interface AdminClient {
   willId: string;
   name: string;
   contact: string;
   updatedAt: string | null;
   status: "Draft" | "PendingReview" | "Completed";
+  willType: WillType;
 }
 
 export interface TestatorWill {
@@ -148,6 +163,7 @@ export interface TestatorWill {
   fullLegalName: string;
   updatedAt: string | null;
   status: "Draft" | "PendingReview" | "Completed";
+  willType: WillType;
 }
 
 export interface SignupState {

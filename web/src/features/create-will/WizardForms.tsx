@@ -5,6 +5,7 @@ import {
 } from "lucide-react";
 import { ID_TYPES, RELATIONS, MONTHS } from "../../data/options";
 import { ASSET_CATALOGUE, COLOR } from "../../data/assetCatalogue";
+import { WILL_TYPE_OPTIONS } from "../../data/willTypes";
 import StepHeader from "../../components/shared/StepHeader";
 import FormBlock from "../../components/shared/FormBlock";
 import Toggle from "../../components/shared/Toggle";
@@ -19,13 +20,15 @@ import {
   STATUS_COMPLETED, STATUS_DRAFT, STATUS_PENDING_REVIEW,
   RAZORPAY_KEY_ID,
 } from "../../constants";
-import type { AssetCatalogItem, AssetInstance, Beneficiary, WillState } from "../../types";
+import type { AssetCatalogItem, AssetInstance, Beneficiary, WillState, WillType } from "../../types";
 import type { RazorpaySuccessResponse } from "../../types/razorpay";
 
 interface WizardFormsProps {
   step: number;
   will: WillState;
   setWill: (fn: (p: WillState) => WillState) => void;
+  willType: WillType;
+  setWillType: (t: WillType) => void;
   addBene: () => void;
   removeBene: (id: number) => void;
   updateBene: (id: number, k: keyof Beneficiary, v: string) => void;
@@ -51,7 +54,7 @@ interface WizardFormsProps {
   paymentEnabled?: boolean;
 }
 
-export default function WizardForms({step,will,setWill,addBene,removeBene,updateBene,addAsset,removeAsset,updateAssetData,updateAssetAlloc,allocTotal,assetAdded,onNext,onPrev,onGenerate,willId,onSaved,adminReview,adminComplete,testatorEmailEditable,viewOnly,reviewerEmail,adminComments,willStatus,amount,paymentEnabled}: WizardFormsProps){
+export default function WizardForms({step,will,setWill,willType,setWillType,addBene,removeBene,updateBene,addAsset,removeAsset,updateAssetData,updateAssetAlloc,allocTotal,assetAdded,onNext,onPrev,onGenerate,willId,onSaved,adminReview,adminComplete,testatorEmailEditable,viewOnly,reviewerEmail,adminComments,willStatus,amount,paymentEnabled}: WizardFormsProps){
   const IC="w-full apv-input rounded-2xl px-3.5 py-2.5 text-slate-900 placeholder:text-slate-500 text-sm focus:outline-none transition";
   const LC="block apv-label mb-1";
   const set=(path: string, v: string | boolean)=>setWill(p=>{
@@ -82,7 +85,7 @@ export default function WizardForms({step,will,setWill,addBene,removeBene,update
     const res = await fetch(apiUrl(API_WILL_SAVE), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ will, testatorEmail: will.testator.email, status: STATUS_PENDING_REVIEW, willId: savedWillId }),
+      body: JSON.stringify({ will, testatorEmail: will.testator.email, status: STATUS_PENDING_REVIEW, willId: savedWillId, willType }),
     });
     const isJson = res.headers.get("content-type")?.includes("application/json");
     const data = isJson ? await res.json() : null;
@@ -158,13 +161,13 @@ export default function WizardForms({step,will,setWill,addBene,removeBene,update
         ? await fetch(apiUrl(apiPathComplete(willId)), {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ will, reviewerEmail }),
+            body: JSON.stringify({ will, reviewerEmail, willType }),
           })
         : adminComplete
         ? await fetch(apiUrl(API_ADMIN_SAVE), {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ will, testatorEmail: will.testator.email, status: STATUS_COMPLETED, willId, reviewerEmail }),
+            body: JSON.stringify({ will, testatorEmail: will.testator.email, status: STATUS_COMPLETED, willId, reviewerEmail, willType }),
           })
         : await fetch(apiUrl(API_WILL_SAVE), {
             method: "POST",
@@ -172,7 +175,7 @@ export default function WizardForms({step,will,setWill,addBene,removeBene,update
             body: JSON.stringify({
               will, testatorEmail: will.testator.email,
               status: gateBehindPayment ? STATUS_DRAFT : STATUS_PENDING_REVIEW,
-              willId,
+              willId, willType,
             }),
           });
       const isJson = res.headers.get("content-type")?.includes("application/json");
@@ -202,8 +205,31 @@ export default function WizardForms({step,will,setWill,addBene,removeBene,update
 
   return(
     <div className="fade-in max-w-[560px] mx-auto">
-      {/* ── STEP 1: TESTATOR ─────────────────────────────────── */}
-      {step===1&&(
+      {/* ── STEP 1: WILL TYPE ────────────────────────────────── */}
+      {step===1&&!adminReview&&(
+        <div className="space-y-4">
+          <StepHeader icon={<FileText size={17}/>} title="Select Will Type" sub="Choose the format that applies to you"/>
+          <div className="space-y-3">
+            {WILL_TYPE_OPTIONS.map(opt=>(
+              <label key={opt.id} onClick={()=>!viewOnly&&setWillType(opt.id)}
+                className={`flex items-start gap-3 p-4 rounded-2xl border cursor-pointer transition-all ${willType===opt.id?"border-[#d09d61]/60 bg-[#d09d61]/10":"border-slate-200 hover:border-[#d09d61]/30"} ${viewOnly?"cursor-not-allowed opacity-70":""}`}>
+                <div className={`w-4 h-4 mt-0.5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all ${willType===opt.id?"border-[#d09d61] bg-[#d09d61]":"border-slate-300"}`}>
+                  {willType===opt.id&&<div className="w-1.5 h-1.5 rounded-full bg-white"/>}
+                </div>
+                <div className="text-[#d09d61] mt-0.5">{opt.icon}</div>
+                <div>
+                  <div className="text-slate-900 text-sm font-semibold">{opt.label}</div>
+                  <div className="text-slate-500 text-xs mt-0.5">{opt.description}</div>
+                </div>
+              </label>
+            ))}
+          </div>
+          <Nav onNext={onNext}/>
+        </div>
+      )}
+
+      {/* ── STEP 2: TESTATOR ─────────────────────────────────── */}
+      {step===2&&(
         <div className="space-y-4">
           <StepHeader icon={<User size={17}/>} title="Testator Details" sub="Section I — Your identity & declaration of fitness"/>
           {adminComments&&(
@@ -226,14 +252,18 @@ export default function WizardForms({step,will,setWill,addBene,removeBene,update
             <input value={will.testator.fullName} onChange={e=>set("testator.fullName",e.target.value)} className={IC} placeholder="As per Aadhaar / PAN"/>
           </div>
           <div className="grid grid-cols-2 gap-3">
+            <div><label className={LC}>PAN Number</label><input value={will.testator.pan} onChange={e=>set("testator.pan",e.target.value)} className={IC} placeholder="ABCDE1234F" title={TIP_NO_ID_SAVED}/></div>
+            <div><label className={LC}>Aadhaar Number</label><input value={will.testator.aadhaarNumber} onChange={e=>set("testator.aadhaarNumber",e.target.value)} className={IC} placeholder="XXXX XXXX XXXX" title={TIP_NO_ID_SAVED}/></div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className={LC}>Son / Daughter / Wife of</label>
+              <label className={LC}>Son / Daughter of</label>
               <select value={will.testator.relation} onChange={e=>set("testator.relation",e.target.value)} className={IC+" appearance-none"}>
-                <option value="son">Son of</option><option value="daughter">Daughter of</option><option value="wife">Wife of</option>
+                <option value="son">Son of</option><option value="daughter">Daughter of</option>
               </select>
             </div>
             <div>
-              <label className={LC}>Parent / Spouse Name</label>
+              <label className={LC}>Parent's Name</label>
               <input value={will.testator.parentSpouseName} onChange={e=>set("testator.parentSpouseName",e.target.value)} className={IC}/>
             </div>
           </div>
@@ -245,14 +275,37 @@ export default function WizardForms({step,will,setWill,addBene,removeBene,update
           </div>
           <div><label className={LC}>Permanent Residential Address</label>
             <textarea value={will.testator.address} onChange={e=>set("testator.address",e.target.value)} rows={2} className={IC+" resize-none"}/></div>
-          <div className="grid grid-cols-2 gap-3">
-            <div><label className={LC}>{LBL_ID_TYPE}</label>
-              <select value={will.testator.idType} onChange={e=>set("testator.idType",e.target.value)} className={IC+" appearance-none"}>
-                {ID_TYPES.map(t=><option key={t}>{t}</option>)}
-              </select>
+          <FormBlock title="Marital Status">
+            <div className="flex gap-3">
+              {[{v:"unmarried",l:"Unmarried"},{v:"married",l:"Married"}].map(o=>(
+                <label key={o.v} onClick={()=>set("testator.maritalStatus",o.v)}
+                  className={`flex-1 flex items-center gap-2 p-3 rounded-xl border cursor-pointer transition-all ${will.testator.maritalStatus===o.v?"border-[#d09d61]/50 bg-[#d09d61]/10":"border-slate-200 hover:border-slate-300"}`}>
+                  <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all ${will.testator.maritalStatus===o.v?"border-[#d09d61] bg-[#d09d61]":"border-slate-300"}`}>
+                    {will.testator.maritalStatus===o.v&&<div className="w-1.5 h-1.5 rounded-full bg-white"/>}
+                  </div>
+                  <span className="text-slate-700 text-xs">{o.l}</span>
+                </label>
+              ))}
             </div>
-            <div><label className={LC}>{LBL_ID_NUMBER}</label><input value={will.testator.idNumber} onChange={e=>set("testator.idNumber",e.target.value)} className={IC} placeholder="ID number" title={TIP_NO_ID_SAVED}/></div>
-          </div>
+            {will.testator.maritalStatus==="married"&&(
+              <div className="grid grid-cols-2 gap-3 mt-3">
+                <div><label className={LC}>Spouse's Name</label><input value={will.testator.spouseName} onChange={e=>set("testator.spouseName",e.target.value)} className={IC}/></div>
+                <div><label className={LC}>Spouse's Aadhaar Number</label><input value={will.testator.spouseAadhaarNumber} onChange={e=>set("testator.spouseAadhaarNumber",e.target.value)} className={IC} title={TIP_NO_ID_SAVED}/></div>
+              </div>
+            )}
+          </FormBlock>
+          {will.testator.maritalStatus==="married"&&(
+            <FormBlock title="Children">
+              <div className="grid grid-cols-2 gap-3">
+                <div><label className={LC}>Number of Sons</label><input type="number" min="0" value={will.testator.sonCount} onChange={e=>set("testator.sonCount",e.target.value)} className={IC}/></div>
+                <div><label className={LC}>Son(s) Name(s)</label><input value={will.testator.sonNames} onChange={e=>set("testator.sonNames",e.target.value)} className={IC} placeholder="e.g. Rahul, Rohit"/></div>
+              </div>
+              <div className="grid grid-cols-2 gap-3 mt-2.5">
+                <div><label className={LC}>Number of Daughters</label><input type="number" min="0" value={will.testator.daughterCount} onChange={e=>set("testator.daughterCount",e.target.value)} className={IC}/></div>
+                <div><label className={LC}>Daughter(s) Name(s)</label><input value={will.testator.daughterNames} onChange={e=>set("testator.daughterNames",e.target.value)} className={IC} placeholder="e.g. Priya, Anjali"/></div>
+              </div>
+            </FormBlock>
+          )}
           <div className="grid grid-cols-3 gap-2">
             <div><label className={LC}>Day</label><input value={will.testator.signDay} onChange={e=>set("testator.signDay",e.target.value)} className={IC} placeholder="DD"/></div>
             <div><label className={LC}>Month</label>
@@ -267,8 +320,8 @@ export default function WizardForms({step,will,setWill,addBene,removeBene,update
         </div>
       )}
 
-      {/* ── STEP 2: EXECUTOR ─────────────────────────────────── */}
-      {step===2&&(
+      {/* ── STEP 3: EXECUTOR ─────────────────────────────────── */}
+      {step===3&&(
         <div className="space-y-4">
           <StepHeader icon={<UserCheck size={17}/>} title="Executor Details" sub="Section II — Person who will execute your Will"/>
           <FormBlock title="Primary Executor">
@@ -291,11 +344,12 @@ export default function WizardForms({step,will,setWill,addBene,removeBene,update
           <FormBlock title="Administration Type">
             <div className="flex gap-3">
               {[{v:"jointly",l:"Jointly (Must act together)"},{v:"jointly_severally",l:"Jointly & Severally (May act independently)"}].map(o=>(
-                <label key={o.v} className={`flex-1 flex items-center gap-2 p-3 rounded-xl border cursor-pointer transition-all ${will.executor.adminType===o.v?"border-[#d09d61]/50 bg-[#d09d61]/10":"border-slate-700 hover:border-slate-600"}`}>
+                <label key={o.v} onClick={()=>set("executor.adminType",o.v)}
+                  className={`flex-1 flex items-center gap-2 p-3 rounded-xl border cursor-pointer transition-all ${will.executor.adminType===o.v?"border-[#d09d61]/50 bg-[#d09d61]/10":"border-slate-700 hover:border-slate-600"}`}>
                   <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all ${will.executor.adminType===o.v?"border-[#d09d61] bg-[#d09d61]":"border-slate-600"}`}>
                     {will.executor.adminType===o.v&&<div className="w-1.5 h-1.5 rounded-full bg-white"/>}
                   </div>
-                  <span className="text-slate-700 text-xs" onClick={()=>set("executor.adminType",o.v)}>{o.l}</span>
+                  <span className="text-slate-700 text-xs">{o.l}</span>
                 </label>
               ))}
             </div>
@@ -326,8 +380,8 @@ export default function WizardForms({step,will,setWill,addBene,removeBene,update
         </div>
       )}
 
-      {/* ── STEP 3: GUARDIANS ────────────────────────────────── */}
-      {step===3&&(
+      {/* ── STEP 4: GUARDIANS ────────────────────────────────── */}
+      {step===4&&(
         <div className="space-y-4">
           <StepHeader icon={<Baby size={17}/>} title="Guardian Details" sub="Section III — For minor beneficiaries (optional)"/>
           <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 text-sm text-slate-700 leading-relaxed">
@@ -362,8 +416,8 @@ export default function WizardForms({step,will,setWill,addBene,removeBene,update
         </div>
       )}
 
-      {/* ── STEP 4: BENEFICIARIES ────────────────────────────── */}
-      {step===4&&(
+      {/* ── STEP 5: BENEFICIARIES ────────────────────────────── */}
+      {step===5&&(
         <div className="space-y-4">
           <StepHeader icon={<Users size={17}/>} title="Beneficiaries" sub="People named to receive your assets"/>
           <div className="space-y-3">
@@ -391,8 +445,8 @@ export default function WizardForms({step,will,setWill,addBene,removeBene,update
         </div>
       )}
 
-      {/* ── STEP 5: ASSETS ───────────────────────────────────── */}
-      {step===5&&(
+      {/* ── STEP 6: ASSETS ───────────────────────────────────── */}
+      {step===6&&(
         <div className="space-y-5">
           <StepHeader icon={<Briefcase size={17}/>} title="Asset Selection" sub="Section IV — Click assets to add them to your Will"/>
           {/* Distribution Mode */}
@@ -557,8 +611,8 @@ export default function WizardForms({step,will,setWill,addBene,removeBene,update
         </div>
       )}
 
-      {/* ── STEP 6: RESIDUAL + INSTRUCTIONS ─────────────────── */}
-      {step===6&&(
+      {/* ── STEP 7: RESIDUAL + INSTRUCTIONS ─────────────────── */}
+      {step===7&&(
         <div className="space-y-4">
           <StepHeader icon={<BookOpen size={17}/>} title="Residual Clause & Instructions" sub="Sections V & VI — The final clauses"/>
           <FormBlock title="Section V — Rest & Residue Clause">
@@ -584,16 +638,45 @@ export default function WizardForms({step,will,setWill,addBene,removeBene,update
               placeholder="e.g. My funeral shall be performed according to Hindu rites. I request my family to donate my usable organs..."/>
           </FormBlock>
           <FormBlock title="Witnesses">
-            {will.witnesses.map((w,i)=>(
-              <div key={i} className={`grid grid-cols-2 gap-2.5 ${i>0?"mt-2.5":""}`}>
-                <div><label className={LC}>Witness {i+1} Name</label>
-                  <input value={w.name} onChange={e=>setWill(p=>({...p,witnesses:p.witnesses.map((x,j)=>j===i?{...x,name:e.target.value}:x)}))} className={IC}/>
+            {will.witnesses.map((w,i)=>{
+              const setW=(k: string, v: string)=>setWill(p=>({...p,witnesses:p.witnesses.map((x,j)=>j===i?{...x,[k]:v}:x)}));
+              return(
+                <div key={i} className={i>0?"mt-4 pt-4 border-t border-slate-200":""}>
+                  <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-2">Witness {i+1}</p>
+                  <div className="grid grid-cols-2 gap-2.5">
+                    <div><label className={LC}>Name</label>
+                      <input value={w.name} onChange={e=>setW("name",e.target.value)} className={IC}/>
+                    </div>
+                    <div><label className={LC}>Age (Years)</label>
+                      <input type="number" value={w.age} onChange={e=>setW("age",e.target.value)} className={IC}/>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2.5 mt-2.5">
+                    <div><label className={LC}>Son / Daughter / Wife of</label>
+                      <select value={w.parentRelation} onChange={e=>setW("parentRelation",e.target.value)} className={IC+" appearance-none"}>
+                        <option value="son">Son of</option><option value="daughter">Daughter of</option><option value="wife">Wife of</option>
+                      </select>
+                    </div>
+                    <div><label className={LC}>Parent / Husband's Name</label>
+                      <input value={w.parentName} onChange={e=>setW("parentName",e.target.value)} className={IC}/>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2.5 mt-2.5">
+                    <div><label className={LC}>Marital Status</label>
+                      <select value={w.maritalStatus} onChange={e=>setW("maritalStatus",e.target.value)} className={IC+" appearance-none"}>
+                        <option value="unmarried">Unmarried</option><option value="married">Married</option>
+                      </select>
+                    </div>
+                    <div><label className={LC}>Aadhaar Number</label>
+                      <input value={w.aadhaarNumber} onChange={e=>setW("aadhaarNumber",e.target.value)} className={IC} title={TIP_NO_ID_SAVED}/>
+                    </div>
+                  </div>
+                  <div className="mt-2.5"><label className={LC}>Address</label>
+                    <input value={w.address} onChange={e=>setW("address",e.target.value)} className={IC}/>
+                  </div>
                 </div>
-                <div><label className={LC}>Witness {i+1} Address</label>
-                  <input value={w.address} onChange={e=>setWill(p=>({...p,witnesses:p.witnesses.map((x,j)=>j===i?{...x,address:e.target.value}:x)}))} className={IC}/>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </FormBlock>
           <div className="bg-[#d09d61]/8 border border-[#d09d61]/20 rounded-xl p-4 text-xs text-[#b88d48]">
             All rest, residue and remainder of my estate shall vest absolutely in <strong>{will.beneficiaries.find(b=>String(b.id)===String(will.residualBeneId))?.name||"Selected Beneficiary"}</strong>.
