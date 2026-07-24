@@ -43,7 +43,7 @@ export default function SmartWill() {
   const [view, setView] = useState<ViewName>(() =>
     window.location.pathname===ADMIN_PATH ? "adminLogin" : "landing"
   );
-  const [selectedPlan, setSelectedPlan] = useState<Plan>(PLANS[1]);
+  const [selectedPlan, setSelectedPlan] = useState<Plan>(PLANS[0]);
   const [addons, setAddons] = useState<Record<string, boolean>>({});
   const [signup, setSignup] = useState<SignupState>({ name:"", phone:"", email:"", state:"", terms:false });
   const [otp, setOtp] = useState<string[]>(Array(OTP_LENGTH).fill(""));
@@ -222,7 +222,7 @@ export default function SmartWill() {
   };
   const handleAdminCreateWill = () => {
     setWill({...DEFAULT_WILL, testator: {...DEFAULT_WILL.testator, fullName:"", email:""}});
-    setWillType("");
+    setWillType("allindia");
     setSkipWillTypeStep(false);
     setEditingWillId(null);
     setAdminReviewMode(false);
