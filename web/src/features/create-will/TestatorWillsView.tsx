@@ -5,7 +5,7 @@ import {
   API_MY_WILLS, apiPathWill, CONFIRM_DELETE_WILL, ERR_LOAD_WILL,
   ERR_DELETE_WILL, STATUS_DRAFT, STATUS_PENDING_REVIEW, STATUS_COMPLETED, STATUS_LBL, WILL_VISIBLE_DAYS,
 } from "../../constants";
-import { WILL_TYPE_LBL } from "../../data/willTypes";
+import { WILL_TYPE_LBL_SHORT } from "../../data/willTypes";
 import type { TestatorWill, WillState, WillType } from "../../types";
 
 const STATUS_STYLE: Record<TestatorWill["status"], string> = {
@@ -161,7 +161,7 @@ export default function TestatorWillsView({email,onCreateNew,onEditWill,onViewWi
                     <td className="px-5 py-3.5 text-slate-500 text-sm">{w.testatorEmail}</td>
                     <td className="px-5 py-3.5 text-slate-900 text-sm font-medium">{w.fullLegalName||"Unnamed"}</td>
                     <td className="px-5 py-3.5 text-slate-500 text-xs">{w.updatedAt?new Date(w.updatedAt).toLocaleDateString():"—"}</td>
-                    <td className="px-5 py-3.5 text-slate-500 text-xs">{WILL_TYPE_LBL[w.willType]}</td>
+                    <td className="px-5 py-3.5 text-slate-500 text-xs whitespace-nowrap">{WILL_TYPE_LBL_SHORT[w.willType]}</td>
                     <td className="px-5 py-3.5">
                       <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${STATUS_STYLE[w.status]}`}>{STATUS_LBL[w.status]}</span>
                     </td>

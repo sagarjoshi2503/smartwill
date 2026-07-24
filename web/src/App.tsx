@@ -3,6 +3,7 @@ import { Scale, ArrowRight, ChevronLeft, Check, LogIn, LogOut, Eye, Save, Rotate
 
 import { PLANS, ADDONS } from "./data/plans";
 import { DEFAULT_WILL } from "./data/defaultWill";
+import { WILL_TYPE_LBL_SHORT } from "./data/willTypes";
 import LandingPage from "./components/LandingPage";
 import AuthChoiceView from "./components/AuthChoiceView";
 import SignupView from "./features/user-signin-otp/SignupView";
@@ -171,8 +172,12 @@ export default function SmartWill() {
 
   const handleCreateNewWill = () => {
     setWill({...DEFAULT_WILL, testator: {...DEFAULT_WILL.testator, fullName: signup.name, email: signup.email}});
-    setWillType("");
-    setSkipWillTypeStep(false);
+    // The testator already chose a Will type by picking a plan on the
+    // landing page — carry that through and skip the redundant Will Type
+    // step in the wizard. (Admin-created Wills bypass the landing page
+    // entirely, so they still go through that step — see handleAdminCreateWill.)
+    setWillType(selectedPlan.willType);
+    setSkipWillTypeStep(true);
     setEditingWillId(null);
     setAdminReviewMode(false);
     setAdminReviewStatus(null);
@@ -181,7 +186,7 @@ export default function SmartWill() {
     setViewOnlyMode(false);
     setActiveAdminComments("");
     setDchecks({ nonMuslim:false, age:false, law:false, tool:false });
-    setWizardStep(1);
+    setWizardStep(2);
     setView("disclaimer");
   };
   const handleEditWill = (willId: string, fetchedWill: WillState, fetchedWillType: WillType, adminComments?: string) => {
@@ -380,7 +385,7 @@ export default function SmartWill() {
               <div className="w-8 h-8 bg-[#d09d61] rounded-2xl flex items-center justify-center shadow-lg shadow-[#d09d61]/15"><Scale size={12} className="text-[#020617]"/></div>
               <div>
                 <div className="text-slate-900 font-semibold serif text-sm">SmartWill</div>
-                <div className="text-slate-500 text-[10px]">Will Drafting</div>
+                <div className="text-slate-500 text-[10px]">Will Drafting{willType&&` - ${WILL_TYPE_LBL_SHORT[willType]}`}</div>
               </div>
             </div>
             <div className="flex items-center gap-1">

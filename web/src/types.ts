@@ -132,6 +132,7 @@ export interface Plan {
   icon: ReactNode;
   badge: string | null;
   features: string[];
+  willType: WillType;
 }
 
 export interface Addon {
