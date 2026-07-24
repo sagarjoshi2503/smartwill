@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import type { MutableRefObject } from "react";
 import { ChevronLeft, Scale, Printer, Download } from "lucide-react";
 import { numberToWords } from "../../utils/format";
@@ -17,6 +18,15 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,w
   const {testator,allIndiaAssets,allIndiaResidue,witnesses}=will;
   const blank = "_______________________";
 
+  // The browser's print header uses document.title (Chrome's default "Print
+  // headers and footers" option shows it top-left) — blank it out while this
+  // view is open so the generated document doesn't carry the app's name.
+  useEffect(() => {
+    const original = document.title;
+    document.title = "";
+    return () => { document.title = original; };
+  }, []);
+
   const yearNum = Number(testator.signYear);
   const yearRemainder = Number.isFinite(yearNum) ? yearNum % 100 : NaN;
   const yearWords = Number.isFinite(yearRemainder) ? numberToWords(yearRemainder) : testator.signYear || "____";
@@ -34,11 +44,16 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,w
   return(
     <div className="min-h-screen bg-slate-800 print:bg-white">
       <style>{`
+        .print-sig-footer{display:none;}
         @media print {
           .no-print{display:none!important}
           body{margin:0;padding:0}
-          .will-print-page{box-shadow:none!important;margin:0!important;border-radius:0!important;max-width:100%!important}
+          .will-print-page{box-shadow:none!important;margin:0!important;border-radius:0!important;max-width:100%!important;padding-bottom:2.2cm!important;}
           .page-break{break-before:page}
+          .print-sig-footer{
+            display:block;position:fixed;bottom:0.6cm;left:0;right:0;
+            text-align:center;font-size:9.5pt;color:#555;
+          }
         }
         @import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;0,700;1,400&display=swap');
       `}</style>
@@ -108,7 +123,7 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,w
           {renderAssetList(allIndiaAssets.landPlot,"Land / Plot")}
           <div className="mb-5">{renderAssetList(allIndiaAssets.commercialProperty,"Commercial Property")}</div>
 
-          <p className="font-bold mb-1">C. Motor Vehicles:</p>
+          <p className="font-bold mb-1 page-break">C. Motor Vehicles:</p>
           <div className="mb-5">{renderAssetList(allIndiaAssets.vehicle,"Vehicle / Car")}</div>
 
           <p className="font-bold mb-1">D. Personal & Valuables:</p>
@@ -166,6 +181,8 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,w
               </div>
             ))}
           </div>
+
+          <div className="print-sig-footer">Signature of the Testator/Testatrix {blank}</div>
         </div>
       </div>
     </div>

@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import type { MutableRefObject } from "react";
 import { ChevronLeft, Scale, Printer, Download } from "lucide-react";
 import WillSection from "../../components/shared/WillSection";
@@ -15,6 +16,15 @@ export default function WillDocument({will,residualBene,onBack,onPrint,willDocRe
   const {testator,executor,guardian,beneficiaries,assets}=will;
   const formatAlloc=(asset: AssetInstance)=>formatAllocFull(asset,beneficiaries);
 
+  // The browser's print header uses document.title (Chrome's default "Print
+  // headers and footers" option shows it top-left) — blank it out while this
+  // view is open so the generated document doesn't carry the app's name.
+  useEffect(() => {
+    const original = document.title;
+    document.title = "";
+    return () => { document.title = original; };
+  }, []);
+
   // Group assets by section
   const sectionMap: Record<string, AssetInstance[]> = {A:[],B:[],C:[],D:[],E:[],F:[]};
   assets.forEach(a=>{ if(sectionMap[a.catItem.section]) sectionMap[a.catItem.section].push(a); });
@@ -22,10 +32,15 @@ export default function WillDocument({will,residualBene,onBack,onPrint,willDocRe
   return(
     <div className="min-h-screen bg-slate-800 print:bg-white">
       <style>{`
+        .print-sig-footer{display:none;}
         @media print {
           .no-print{display:none!important}
           body{margin:0;padding:0}
-          .will-print-page{box-shadow:none!important;margin:0!important;border-radius:0!important;max-width:100%!important}
+          .will-print-page{box-shadow:none!important;margin:0!important;border-radius:0!important;max-width:100%!important;padding-bottom:2.2cm!important;}
+          .print-sig-footer{
+            display:block;position:fixed;bottom:0.6cm;left:0;right:0;
+            text-align:center;font-size:9.5pt;color:#555;
+          }
         }
         @import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;0,700;1,400&display=swap');
       `}</style>
@@ -55,7 +70,7 @@ export default function WillDocument({will,residualBene,onBack,onPrint,willDocRe
           <div className="text-center mb-8 pb-6 border-b-2 border-slate-800">
             <p className="text-xs tracking-[0.35em] uppercase text-slate-500 mb-2">Republic of India · Indian Succession Act, 1925</p>
             <h1 className="text-3xl font-bold tracking-widest uppercase mb-1" style={{fontFamily:"'EB Garamond',serif"}}>Last Will and Testament</h1>
-            <div className="flex items-center justify-center gap-3 mt-2"><div className="h-0.5 w-16 bg-slate-800"/><Scale size={16} className="text-slate-600"/><div className="h-0.5 w-16 bg-slate-800"/></div>
+            <div className="flex items-center justify-center gap-3 mt-2"><div className="h-0.5 w-32 bg-slate-800"/></div>
           </div>
 
           {/* Opening */}
@@ -235,9 +250,11 @@ export default function WillDocument({will,residualBene,onBack,onPrint,willDocRe
 
           {/* Footer */}
           <div className="mt-10 pt-5 border-t border-slate-300 text-center">
-            <p className="text-xs text-slate-400">Document generated via SmartWill · Drafted under the Indian Succession Act, 1925 · For legal validity, ensure proper execution before two witnesses</p>
+            <p className="text-xs text-slate-400">Drafted under the Indian Succession Act, 1925 · For legal validity, ensure proper execution before two witnesses</p>
             <p className="text-xs text-slate-400 mt-1">Page 1 of 1 · {today.day} {today.month} {today.year}</p>
           </div>
+
+          <div className="print-sig-footer">Signature of the Testator/Testatrix _______________________</div>
         </div>
       </div>
     </div>
