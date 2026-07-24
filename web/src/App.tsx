@@ -16,6 +16,7 @@ import AdminPortal from "./features/admin-dashboard/AdminPortal";
 import TestatorWillsView from "./features/create-will/TestatorWillsView";
 import WizardForms from "./features/create-will/WizardForms";
 import LiveDocPreview from "./features/create-will/LiveDocPreview";
+import AllIndiaLiveDocPreview from "./features/create-will/AllIndiaLiveDocPreview";
 import WillDocument from "./features/create-will/WillDocument";
 import AllIndiaWillDocument from "./features/create-will/AllIndiaWillDocument";
 import { allocTotal } from "./utils/allocation";
@@ -473,7 +474,7 @@ export default function SmartWill() {
               />
             </div>
             <div className="hidden lg:flex lg:w-[50%] bg-slate-100 p-5 overflow-y-auto items-start justify-center">
-              <LiveDocPreview will={will} residualBene={residualBene}/>
+              {willType==="allindia" ? <AllIndiaLiveDocPreview will={will}/> : <LiveDocPreview will={will} residualBene={residualBene}/>}
             </div>
           </div>
         </div>
