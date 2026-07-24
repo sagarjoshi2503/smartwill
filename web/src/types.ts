@@ -11,10 +11,8 @@ export interface Testator {
   maritalStatus: "unmarried" | "married";
   spouseName: string;
   spouseAadhaarNumber: string;
-  sonCount: string;
-  sonNames: string;
-  daughterCount: string;
-  daughterNames: string;
+  sonNames: string[];
+  daughterNames: string[];
   address: string;
   country: string;
   signPlace: string;
@@ -108,6 +106,35 @@ export interface AssetInstance {
 export type DistributionMode = "global" | "itemized";
 export type GlobalMode = "equal" | "percentage";
 
+export interface AllIndiaAssetItem {
+  description: string;
+  beneficiary: string;
+}
+
+// The seven fixed asset line-items from the All India (Non-Goan) Will PDF
+// template (Sections B-E) — used only when willType==="allindia", instead
+// of the flexible asset catalogue used by other Will types. Each category
+// holds a list since a testator may own more than one of a given type
+// (e.g. two houses).
+export interface AllIndiaAssets {
+  houseFlat: AllIndiaAssetItem[];
+  landPlot: AllIndiaAssetItem[];
+  commercialProperty: AllIndiaAssetItem[];
+  vehicle: AllIndiaAssetItem[];
+  jewellery: AllIndiaAssetItem[];
+  socialMediaDigital: AllIndiaAssetItem[];
+  intellectualProperty: AllIndiaAssetItem[];
+}
+
+// The All India Will's residuary clause allows more than one beneficiary
+// (in equal shares), each identified by relationship + name + Aadhaar,
+// independent of the app's generic Beneficiary list.
+export interface AllIndiaResidueEntry {
+  relation: string;
+  name: string;
+  aadhaarNumber: string;
+}
+
 export interface WillState {
   testator: Testator;
   executor: Executor;
@@ -116,6 +143,8 @@ export interface WillState {
   globalMode: GlobalMode;
   globalPercentages: Record<string, string>;
   assets: AssetInstance[];
+  allIndiaAssets: AllIndiaAssets;
+  allIndiaResidue: AllIndiaResidueEntry[];
   residualBeneId: string;
   residualIdType: string;
   residualIdNumber: string;

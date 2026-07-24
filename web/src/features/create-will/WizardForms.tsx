@@ -295,18 +295,35 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
               </div>
             )}
           </FormBlock>
-          {will.testator.maritalStatus==="married"&&(
-            <FormBlock title="Children">
-              <div className="grid grid-cols-2 gap-3">
-                <div><label className={LC}>Number of Sons</label><input type="number" min="0" value={will.testator.sonCount} onChange={e=>set("testator.sonCount",e.target.value)} className={IC}/></div>
-                <div><label className={LC}>Son(s) Name(s)</label><input value={will.testator.sonNames} onChange={e=>set("testator.sonNames",e.target.value)} className={IC} placeholder="e.g. Rahul, Rohit"/></div>
-              </div>
-              <div className="grid grid-cols-2 gap-3 mt-2.5">
-                <div><label className={LC}>Number of Daughters</label><input type="number" min="0" value={will.testator.daughterCount} onChange={e=>set("testator.daughterCount",e.target.value)} className={IC}/></div>
-                <div><label className={LC}>Daughter(s) Name(s)</label><input value={will.testator.daughterNames} onChange={e=>set("testator.daughterNames",e.target.value)} className={IC} placeholder="e.g. Priya, Anjali"/></div>
-              </div>
-            </FormBlock>
-          )}
+          {will.testator.maritalStatus==="married"&&(()=>{
+            const updateChild=(field: "sonNames"|"daughterNames", idx: number, value: string)=>
+              setWill(p=>({...p, testator:{...p.testator, [field]: p.testator[field].map((n,j)=>j===idx?value:n)}}));
+            const addChild=(field: "sonNames"|"daughterNames")=>
+              setWill(p=>({...p, testator:{...p.testator, [field]: [...p.testator[field], ""]}}));
+            const removeChild=(field: "sonNames"|"daughterNames", idx: number)=>
+              setWill(p=>({...p, testator:{...p.testator, [field]: p.testator[field].filter((_,j)=>j!==idx)}}));
+            return(
+              <FormBlock title="Children">
+                <label className={LC}>Sons</label>
+                {will.testator.sonNames.map((name,i)=>(
+                  <div key={i} className="flex items-center gap-2 mb-2">
+                    <input value={name} onChange={e=>updateChild("sonNames",i,e.target.value)} className={IC} placeholder="Son's full name"/>
+                    {will.testator.sonNames.length>1&&<button onClick={()=>removeChild("sonNames",i)} className="text-red-400 hover:text-red-500 shrink-0"><Trash2 size={14}/></button>}
+                  </div>
+                ))}
+                <button onClick={()=>addChild("sonNames")} className="text-xs text-[#d09d61] hover:text-[#b6844a] font-semibold flex items-center gap-1 mb-4"><Plus size={12}/>Add Son</button>
+
+                <label className={LC}>Daughters</label>
+                {will.testator.daughterNames.map((name,i)=>(
+                  <div key={i} className="flex items-center gap-2 mb-2">
+                    <input value={name} onChange={e=>updateChild("daughterNames",i,e.target.value)} className={IC} placeholder="Daughter's full name"/>
+                    {will.testator.daughterNames.length>1&&<button onClick={()=>removeChild("daughterNames",i)} className="text-red-400 hover:text-red-500 shrink-0"><Trash2 size={14}/></button>}
+                  </div>
+                ))}
+                <button onClick={()=>addChild("daughterNames")} className="text-xs text-[#d09d61] hover:text-[#b6844a] font-semibold flex items-center gap-1"><Plus size={12}/>Add Daughter</button>
+              </FormBlock>
+            );
+          })()}
           <div className="grid grid-cols-3 gap-2">
             <div><label className={LC}>Day</label><input value={will.testator.signDay} onChange={e=>set("testator.signDay",e.target.value)} className={IC} placeholder="DD"/></div>
             <div><label className={LC}>Month</label>
@@ -447,7 +464,65 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
       )}
 
       {/* ── STEP 6: ASSETS ───────────────────────────────────── */}
-      {step===6&&(
+      {step===6&&willType==="allindia"&&(
+        <div className="space-y-5">
+          <StepHeader icon={<Briefcase size={17}/>} title="Asset Selection" sub="Sections B–E — Bequests as per the All India Will format"/>
+          {(()=>{
+            type AllIndiaKey = keyof WillState["allIndiaAssets"];
+            const addItem=(key: AllIndiaKey)=>setWill(p=>({...p, allIndiaAssets:{...p.allIndiaAssets, [key]:[...p.allIndiaAssets[key],{description:"",beneficiary:""}]}}));
+            const removeItem=(key: AllIndiaKey, idx: number)=>setWill(p=>({...p, allIndiaAssets:{...p.allIndiaAssets, [key]:p.allIndiaAssets[key].filter((_,j)=>j!==idx)}}));
+            const setItem=(key: AllIndiaKey, idx: number, field: "description"|"beneficiary", value: string)=>
+              setWill(p=>({...p, allIndiaAssets:{...p.allIndiaAssets, [key]:p.allIndiaAssets[key].map((item,j)=>j===idx?{...item,[field]:value}:item)}}));
+            const Category=({itemKey,label,placeholder}:{itemKey: AllIndiaKey; label: string; placeholder: string})=>(
+              <div>
+                <p className="text-slate-900 text-sm font-semibold mb-2">{label}</p>
+                {will.allIndiaAssets[itemKey].map((item,idx)=>(
+                  <div key={idx} className="grid grid-cols-2 gap-2.5 mb-2.5">
+                    <input value={item.description} onChange={e=>setItem(itemKey,idx,"description",e.target.value)} className={IC} placeholder={placeholder}/>
+                    <div className="flex gap-2">
+                      <input value={item.beneficiary} onChange={e=>setItem(itemKey,idx,"beneficiary",e.target.value)} className={IC} placeholder="Bequeathed to"/>
+                      {will.allIndiaAssets[itemKey].length>1&&<button onClick={()=>removeItem(itemKey,idx)} className="text-red-400 hover:text-red-500 shrink-0"><Trash2 size={14}/></button>}
+                    </div>
+                  </div>
+                ))}
+                <button onClick={()=>addItem(itemKey)} className="text-xs text-[#d09d61] hover:text-[#b6844a] font-semibold flex items-center gap-1"><Plus size={12}/>Add another {label}</button>
+              </div>
+            );
+            return(
+              <>
+                <div className="bg-[#d09d61]/8 border border-[#d09d61]/25 rounded-xl p-4">
+                  <span className="inline-block bg-[#d09d61] text-[#020617] text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full mb-2">Included Automatically</span>
+                  <p className="text-slate-900 text-sm font-semibold mb-1">A. Financial Assets</p>
+                  <p className="text-slate-600 text-xs leading-relaxed">I bequeath all my financial assets — including Bank Accounts, FDs, RDs, PPF, Life Insurance, Stocks, Mutual Funds, Crypto, Digital Wallets, NPS, Bonds, AIF, SIF, and PMS — entirely to the nominees registered in those financial instruments.</p>
+                  <p className="text-[#8a6d3b] text-xs leading-relaxed mt-2.5 pt-2.5 border-t border-dashed border-[#d09d61]/30"><strong>Why we recommend this:</strong> it's advisable to pass on financial assets by nomination rather than by listing individual accounts — nominations stay current automatically as balances and accounts change, so you don't need to update this Will every time. Just keep your nominations up to date.</p>
+                </div>
+                <FormBlock title="B. Immovable Property">
+                  <div className="space-y-4">
+                    <Category itemKey="houseFlat" label="House / Flat" placeholder="Address / description"/>
+                    <Category itemKey="landPlot" label="Land / Plot" placeholder="Address / description"/>
+                    <Category itemKey="commercialProperty" label="Commercial Property" placeholder="Address / description"/>
+                  </div>
+                </FormBlock>
+                <FormBlock title="C. Motor Vehicles">
+                  <Category itemKey="vehicle" label="Vehicle / Car" placeholder="Make, model, registration no."/>
+                </FormBlock>
+                <FormBlock title="D. Personal & Valuables">
+                  <Category itemKey="jewellery" label="Jewellery & Heirlooms" placeholder="Description"/>
+                </FormBlock>
+                <FormBlock title="E. Digital & Miscellaneous Assets">
+                  <div className="space-y-4">
+                    <Category itemKey="socialMediaDigital" label="Social Media / Digital" placeholder="Accounts, digital assets"/>
+                    <Category itemKey="intellectualProperty" label="Intellectual Property" placeholder="Patents, copyrights, etc."/>
+                  </div>
+                </FormBlock>
+              </>
+            );
+          })()}
+          <Nav onNext={onNext} onPrev={onPrev}/>
+        </div>
+      )}
+
+      {step===6&&willType!=="allindia"&&(
         <div className="space-y-5">
           <StepHeader icon={<Briefcase size={17}/>} title="Asset Selection" sub="Section IV — Click assets to add them to your Will"/>
           {/* Distribution Mode */}
@@ -616,28 +691,53 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
       {step===7&&(
         <div className="space-y-4">
           <StepHeader icon={<BookOpen size={17}/>} title="Residual Clause & Instructions" sub="Sections V & VI — The final clauses"/>
-          <FormBlock title="Section V — Rest & Residue Clause">
-            <p className="text-slate-400 text-xs mb-3 leading-relaxed">All property not specifically mentioned in this Will — including future acquisitions or inadvertently omitted assets — shall vest in the residual beneficiary.</p>
-            <div><label className={LC}>Residual Beneficiary</label>
-              <select value={will.residualBeneId} onChange={e=>setWill(p=>({...p,residualBeneId:e.target.value}))} className={IC+" appearance-none"}>
-                {will.beneficiaries.map(b=><option key={b.id} value={String(b.id)}>{b.name||"Unnamed"} ({b.relation})</option>)}
-              </select>
-            </div>
-            <div className="grid grid-cols-2 gap-3 mt-2.5">
-              <div><label className={LC}>{LBL_ID_TYPE}</label>
-                <select value={will.residualIdType} onChange={e=>setWill(p=>({...p,residualIdType:e.target.value}))} className={IC+" appearance-none"}>
-                  {ID_TYPES.map(t=><option key={t}>{t}</option>)}
+          {willType==="allindia"?(
+            <FormBlock title="Section V — Rest & Residue Clause">
+              <p className="text-slate-500 text-xs mb-3 leading-relaxed">Even with careful planning, it's possible to miss mentioning an asset in this Will, or to acquire something new after signing it. A residuary clause is a safety net for exactly this. Any such asset should go to the following (more than one beneficiary shares equally):</p>
+              {will.allIndiaResidue.map((entry,idx)=>{
+                const setEntry=(field: "relation"|"name"|"aadhaarNumber", value: string)=>
+                  setWill(p=>({...p, allIndiaResidue:p.allIndiaResidue.map((e,j)=>j===idx?{...e,[field]:value}:e)}));
+                return(
+                  <div key={idx} className="grid grid-cols-3 gap-2.5 mb-2.5">
+                    <div><label className={LC}>Relationship</label><input value={entry.relation} onChange={e=>setEntry("relation",e.target.value)} className={IC} placeholder="e.g. Brother"/></div>
+                    <div><label className={LC}>Full Name</label><input value={entry.name} onChange={e=>setEntry("name",e.target.value)} className={IC}/></div>
+                    <div className="flex gap-2 items-end">
+                      <div className="flex-1"><label className={LC}>Aadhaar No.</label><input value={entry.aadhaarNumber} onChange={e=>setEntry("aadhaarNumber",e.target.value)} className={IC} title={TIP_NO_ID_SAVED}/></div>
+                      {will.allIndiaResidue.length>1&&<button onClick={()=>setWill(p=>({...p, allIndiaResidue:p.allIndiaResidue.filter((_,j)=>j!==idx)}))} className="text-red-400 hover:text-red-500 shrink-0 mb-2.5"><Trash2 size={14}/></button>}
+                    </div>
+                  </div>
+                );
+              })}
+              <button onClick={()=>setWill(p=>({...p, allIndiaResidue:[...p.allIndiaResidue,{relation:"",name:"",aadhaarNumber:""}]}))}
+                className="text-xs text-[#d09d61] hover:text-[#b6844a] font-semibold flex items-center gap-1"><Plus size={12}/>Add another beneficiary</button>
+            </FormBlock>
+          ):(
+            <FormBlock title="Section V — Rest & Residue Clause">
+              <p className="text-slate-400 text-xs mb-3 leading-relaxed">All property not specifically mentioned in this Will — including future acquisitions or inadvertently omitted assets — shall vest in the residual beneficiary.</p>
+              <div><label className={LC}>Residual Beneficiary</label>
+                <select value={will.residualBeneId} onChange={e=>setWill(p=>({...p,residualBeneId:e.target.value}))} className={IC+" appearance-none"}>
+                  {will.beneficiaries.map(b=><option key={b.id} value={String(b.id)}>{b.name||"Unnamed"} ({b.relation})</option>)}
                 </select>
               </div>
-              <div><label className={LC}>{LBL_ID_NUMBER}</label><input value={will.residualIdNumber} onChange={e=>setWill(p=>({...p,residualIdNumber:e.target.value}))} className={IC} placeholder="ID number" title={TIP_NO_ID_SAVED}/></div>
-            </div>
-          </FormBlock>
+              <div className="grid grid-cols-2 gap-3 mt-2.5">
+                <div><label className={LC}>{LBL_ID_TYPE}</label>
+                  <select value={will.residualIdType} onChange={e=>setWill(p=>({...p,residualIdType:e.target.value}))} className={IC+" appearance-none"}>
+                    {ID_TYPES.map(t=><option key={t}>{t}</option>)}
+                  </select>
+                </div>
+                <div><label className={LC}>{LBL_ID_NUMBER}</label><input value={will.residualIdNumber} onChange={e=>setWill(p=>({...p,residualIdNumber:e.target.value}))} className={IC} placeholder="ID number" title={TIP_NO_ID_SAVED}/></div>
+              </div>
+            </FormBlock>
+          )}
           <FormBlock title="Section VI — Special Non-Asset Instructions">
             <p className="text-slate-400 text-xs mb-2 leading-relaxed">Funeral instructions, organ donation wishes, personal requests, charitable directives, care of pets or dependents, and any other personal directions for your Executor.</p>
             <textarea value={will.specialInstructions} onChange={e=>setWill(p=>({...p,specialInstructions:e.target.value}))} rows={5}
               className={IC+" resize-none"}
               placeholder="e.g. My funeral shall be performed according to Hindu rites. I request my family to donate my usable organs..."/>
           </FormBlock>
+          <div className="bg-[#d09d61]/8 border border-[#d09d61]/25 rounded-xl p-3.5 text-xs text-[#8a6d3b] leading-relaxed">
+            <strong className="text-slate-900">Who can be a witness?</strong> Under the Indian Succession Act, 1925, a Will needs at least two witnesses. Any adult (18+) of sound mind who can sign their own name qualifies — they don't need to know the contents, and don't need to be related to you. Each witness must see you sign (or be told directly that you've signed), then sign it themselves in your presence. Avoid using someone who also inherits under the Will as a witness — for Christians and Parsis this can cancel that person's inheritance. Your executor is allowed to be a witness.
+          </div>
           <FormBlock title="Witnesses">
             {will.witnesses.map((w,i)=>{
               const setW=(k: string, v: string)=>setWill(p=>({...p,witnesses:p.witnesses.map((x,j)=>j===i?{...x,[k]:v}:x)}));

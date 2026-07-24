@@ -12,7 +12,7 @@ export const DEFAULT_WILL: WillState = {
     email:"", fullName:"", pan:"", aadhaarNumber:"",
     relation:"son", parentSpouseName:"",
     age:"", maritalStatus:"unmarried", spouseName:"", spouseAadhaarNumber:"",
-    sonCount:"", sonNames:"", daughterCount:"", daughterNames:"",
+    sonNames:[""], daughterNames:[""],
     address:"", country:"India",
     signPlace:"", signDay:String(today.day), signMonth:today.month, signYear:String(today.year),
   },
@@ -41,6 +41,20 @@ export const DEFAULT_WILL: WillState = {
   globalMode:"equal", // "equal" | "percentage"
   globalPercentages:{}, // beneficiaryId -> pct string
   assets:[], // built by asset picker
+  // Fixed asset line-items from the All India (Non-Goan) Will PDF template —
+  // only used/shown when willType==="allindia".
+  allIndiaAssets:{
+    houseFlat:[{description:"",beneficiary:""}],
+    landPlot:[{description:"",beneficiary:""}],
+    commercialProperty:[{description:"",beneficiary:""}],
+    vehicle:[{description:"",beneficiary:""}],
+    jewellery:[{description:"",beneficiary:""}],
+    socialMediaDigital:[{description:"",beneficiary:""}],
+    intellectualProperty:[{description:"",beneficiary:""}],
+  },
+  // Residuary beneficiaries for the All India Will format (relationship +
+  // name + Aadhaar, more than one allowed) — only used when willType==="allindia".
+  allIndiaResidue:[{relation:"",name:"",aadhaarNumber:""}],
   // Section V - Residual — no beneficiary pre-selected until the user adds one
   residualBeneId:"",
   residualIdType:"Aadhaar Card",

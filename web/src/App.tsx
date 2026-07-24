@@ -17,6 +17,7 @@ import TestatorWillsView from "./features/create-will/TestatorWillsView";
 import WizardForms from "./features/create-will/WizardForms";
 import LiveDocPreview from "./features/create-will/LiveDocPreview";
 import WillDocument from "./features/create-will/WillDocument";
+import AllIndiaWillDocument from "./features/create-will/AllIndiaWillDocument";
 import { allocTotal } from "./utils/allocation";
 import { apiUrl } from "./utils/apiBase";
 import {
@@ -169,6 +170,7 @@ export default function SmartWill() {
     testator: {...DEFAULT_WILL.testator, ...(fetched.testator||{})},
     executor: {...DEFAULT_WILL.executor, ...(fetched.executor||{})},
     guardian: {...DEFAULT_WILL.guardian, ...(fetched.guardian||{})},
+    allIndiaAssets: {...DEFAULT_WILL.allIndiaAssets, ...(fetched.allIndiaAssets||{})},
   });
 
   const handleCreateNewWill = () => {
@@ -316,7 +318,10 @@ export default function SmartWill() {
   // Print / Download
   const handlePrint = useCallback(() => window.print(), []);
 
-  if(showWillDoc) return (
+  if(showWillDoc) return willType==="allindia" ? (
+    <AllIndiaWillDocument will={will} residualBene={residualBene}
+      onBack={()=>setShowWillDoc(false)} onPrint={handlePrint} willDocRef={willDocRef} />
+  ) : (
     <WillDocument will={will} residualBene={residualBene}
       onBack={()=>setShowWillDoc(false)} onPrint={handlePrint} willDocRef={willDocRef} />
   );
