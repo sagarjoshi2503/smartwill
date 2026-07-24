@@ -2,10 +2,10 @@ import { FileText, Landmark, Star, Globe, Users, Award, Home } from "lucide-reac
 import type { Plan, Addon } from "../types";
 
 export const PLANS: Plan[] = [
-  { id: "notarized", name: "Will with Notarization", price: 4999, gradient: "from-slate-700 to-slate-800", icon: <FileText size={18} />, badge: null, features: ["Lawyer-drafted Will","Free notarization","1-year free updates","Digital certified copy","Email support"] },
-  { id: "registered", name: "Will with Registration", price: 19999, gradient: "from-slate-700 to-slate-800", icon: <Landmark size={18} />, badge: "Most Popular", features: ["All Notarized features","Sub-registrar filing","Physical copy courier","1-year legal support","Priority helpline"] },
-  { id: "premium", name: "Premium Will", price: 29999, gradient: "from-[#d09d61] to-[#a37843]", icon: <Star size={18} />, badge: "Best Value", features: ["All Registration features","Doorstep lawyer visit","Doorstep notarization","90-min consultation","3-year support"] },
-  { id: "nri", name: "NRI Will", price: 29999, gradient: "from-violet-800 to-violet-900", icon: <Globe size={18} />, badge: "NRI Special", features: ["120-min consultation","Foreign asset support","Embassy attestation","Multi-jurisdiction docs","Lifetime updates"] },
+  { id: "notarized", name: "Non-Goan (All-India) Will", price: 4999, gradient: "from-slate-700 to-slate-800", icon: <FileText size={18} />, badge: null, features: ["Lawyer-drafted Will","Free notarization","1-year free updates","Digital certified copy","Email support"] },
+  { id: "registered", name: "Goan Will", price: 19999, gradient: "from-slate-700 to-slate-800", icon: <Landmark size={18} />, badge: null, features: ["All Notarized features","Sub-registrar filing","Physical copy courier","1-year legal support","Priority helpline"] },
+  { id: "premium", name: "Premium Will", price: 29999, gradient: "from-[#d09d61] to-[#a37843]", icon: <Star size={18} />, badge: null, features: ["All Registration features","Doorstep lawyer visit","Doorstep notarization","90-min consultation","3-year support"] },
+  { id: "nri", name: "NRI Will", price: 29999, gradient: "from-violet-800 to-violet-900", icon: <Globe size={18} />, badge: null, features: ["120-min consultation","Foreign asset support","Embassy attestation","Multi-jurisdiction docs","Lifetime updates"] },
 ];
 
 export const ADDONS: Addon[] = [
