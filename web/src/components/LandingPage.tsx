@@ -2,7 +2,7 @@ import { Sparkles, ArrowRight, CheckCircle, Check } from "lucide-react";
 import { fmt } from "../utils/format";
 import type { Plan, Addon } from "../types";
 
-export default function LandingPage({plans,addons,selectedPlan,setSelectedPlan,addonsState,setAddons,totalPrice,onStart}:{
+export default function LandingPage({plans,addons,selectedPlan,setSelectedPlan,addonsState,setAddons,totalPrice,onStart,onContactUs}:{
   plans: Plan[];
   addons: Addon[];
   selectedPlan: Plan;
@@ -11,6 +11,7 @@ export default function LandingPage({plans,addons,selectedPlan,setSelectedPlan,a
   setAddons: (fn: (p: Record<string, boolean>) => Record<string, boolean>) => void;
   totalPrice: number;
   onStart: () => void;
+  onContactUs: () => void;
 }){
   return(
     <div className="fade-in">
@@ -32,7 +33,7 @@ export default function LandingPage({plans,addons,selectedPlan,setSelectedPlan,a
           <p className="max-w-3xl mx-auto text-slate-600 text-lg md:text-xl mb-10">AI-assisted drafting · Lawyer-reviewed · Notarized at doorstep</p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-4">
             <button onClick={onStart} className="apv-btn apv-btn-lg">Start Creating Your Will Free <ArrowRight size={18}/></button>
-            <button onClick={onStart} className="apv-btn-alt">Learn More</button>
+            <button onClick={onContactUs} className="apv-btn-alt">Learn More</button>
           </div>
           <p className="text-slate-600 text-xs">No credit card · SSL encrypted · Lawyer reviewed</p>
         </div>
@@ -45,8 +46,10 @@ export default function LandingPage({plans,addons,selectedPlan,setSelectedPlan,a
             <p className="text-slate-600 text-sm mt-3">Transparent pricing · No hidden charges</p>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {plans.map(plan=>(
-              <div key={plan.id} onClick={()=>setSelectedPlan(plan)}
+            {plans.map(plan=>{
+              const isCustomWill = plan.willType==="customwill";
+              return(
+              <div key={plan.id} onClick={()=>isCustomWill?onContactUs():setSelectedPlan(plan)}
                 className={`apv-card relative overflow-hidden cursor-pointer transition-all ${selectedPlan.id===plan.id?"ring-2 ring-[#d09d61]/20":"hover:border-[#d09d61]/25 border border-slate-200"}`}>
                 {plan.badge&&<div className="absolute top-0 right-0 bg-[#d09d61] text-[#020617] text-[9px] font-bold px-3 py-1 rounded-bl-xl">{plan.badge}</div>}
                 <div className={`bg-gradient-to-br ${plan.gradient} p-5`}>
@@ -60,13 +63,14 @@ export default function LandingPage({plans,addons,selectedPlan,setSelectedPlan,a
                   ))}
                 </div>
                 <div className="px-5 pb-5">
-                  <button onClick={e=>{e.stopPropagation();setSelectedPlan(plan);onStart();}}
+                  <button onClick={e=>{e.stopPropagation();if(isCustomWill){onContactUs();return;}setSelectedPlan(plan);onStart();}}
                     className={`w-full py-3 rounded-full text-sm font-semibold transition-all ${selectedPlan.id===plan.id?"bg-[#d09d61] text-[#020617]":"bg-slate-900 hover:bg-slate-800 text-white"}`}>
-                    {selectedPlan.id===plan.id?"✓ Selected":"Select Plan"}
+                    {isCustomWill?"Contact Us":selectedPlan.id===plan.id?"✓ Selected":"Select Plan"}
                   </button>
                 </div>
               </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>

@@ -5,6 +5,7 @@ import { PLANS, ADDONS } from "./data/plans";
 import { DEFAULT_WILL } from "./data/defaultWill";
 import { WILL_TYPE_LBL_SHORT } from "./data/willTypes";
 import LandingPage from "./components/LandingPage";
+import ContactUsView from "./components/ContactUsView";
 import AuthChoiceView from "./components/AuthChoiceView";
 import SignupView from "./features/user-signin-otp/SignupView";
 import OtpView from "./features/user-signin-otp/OtpView";
@@ -366,7 +367,8 @@ export default function SmartWill() {
         </header>
       )}
 
-      {view==="landing" && <LandingPage plans={PLANS} addons={ADDONS} selectedPlan={selectedPlan} setSelectedPlan={setSelectedPlan} addonsState={addons} setAddons={setAddons} totalPrice={totalPrice} onStart={()=>setView("authChoice")}/>}
+      {view==="landing" && <LandingPage plans={PLANS} addons={ADDONS} selectedPlan={selectedPlan} setSelectedPlan={setSelectedPlan} addonsState={addons} setAddons={setAddons} totalPrice={totalPrice} onStart={()=>setView("authChoice")} onContactUs={()=>setView("contactUs")}/>}
+      {view==="contactUs" && <ContactUsView onBack={()=>setView("landing")}/>}
       {view==="authChoice" && <AuthChoiceView onGoogleSuccess={handleGoogleSuccess} onPhone={()=>setView("signup")} onBack={()=>setView("landing")}/>}
       {view==="signup" && <SignupView signup={signup} setSignup={setSignup} onNext={()=>{setOtp(Array(OTP_LENGTH).fill("")); setView("otp");}}/>}
       {view==="otp" && <OtpView otp={otp} handleOtp={handleOtp} otpRefs={otpRefs} phone={signup.phone} onNext={handleOtpVerified}/>}

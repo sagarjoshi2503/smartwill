@@ -5,6 +5,7 @@ from _app.core.middleware import add_cors
 from _app.features.admin_dashboard.router import router as admin_dashboard_router
 from _app.features.admin_signin.router import router as admin_signin_router
 from _app.features.admin_signup.router import router as admin_signup_router
+from _app.features.contact_us.router import router as contact_us_router
 from _app.features.create_will.router import router as create_will_router
 from _app.features.payments.router import router as payments_router
 from _app.features.user_signin_gmail.router import router as user_signin_gmail_router
@@ -27,6 +28,7 @@ app.include_router(user_signin_otp_router)
 app.include_router(admin_dashboard_router)
 app.include_router(create_will_router)
 app.include_router(payments_router)
+app.include_router(contact_us_router)
 
 
 @app.get("/healthz")

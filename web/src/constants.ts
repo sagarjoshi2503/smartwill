@@ -34,6 +34,8 @@ export const API_ADMIN_WILLS = "/api/will/admin-wills";
 export const API_MY_WILLS = "/api/will/my-wills";
 export const API_OTP_REQUEST = "/api/auth/otp/request";
 export const API_OTP_VERIFY = "/api/auth/otp/verify";
+export const API_CONTACT_INFO = "/api/contact-us/info";
+export const API_CONTACT_SEND = "/api/contact-us/send";
 export const apiPathWill = (willId: string): string => `/api/will/${willId}`;
 export const apiPathAdminWill = (willId: string): string => `/api/will/admin/${willId}`;
 export const apiPathSendBack = (willId: string): string => `/api/will/admin/${willId}/send-back`;
