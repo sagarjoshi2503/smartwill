@@ -1,17 +1,31 @@
 import { useEffect, useState } from "react";
 import { Users, Plus, Edit3, Trash2, Clock, CheckCircle2 } from "lucide-react";
 import { apiUrl } from "../../utils/apiBase";
+import { fmt } from "../../utils/format";
 import {
   API_ADMIN_WILLS, apiPathAdminWill, CONFIRM_DELETE_WILL,
   ERR_LOAD_WILL, ERR_DELETE_WILL, STATUS_DRAFT, STATUS_PENDING_REVIEW, STATUS_COMPLETED,
   STATUS_LBL,
 } from "../../constants";
+import { WILL_TYPE_LBL_SHORT } from "../../data/willTypes";
 import type { AdminClient, AdminProfile, WillState, WillType } from "../../types";
 
 const STATUS_STYLE: Record<AdminClient["status"], string> = {
   Draft: "bg-slate-100 text-slate-600 border-slate-200",
   PendingReview: "bg-[#d09d61]/10 text-[#b6844a] border-[#d09d61]/30",
   Completed: "bg-emerald-50 text-emerald-600 border-emerald-200",
+};
+
+const PAYMENT_STYLE: Record<AdminClient["paymentStatus"], string> = {
+  NotPaid: "bg-slate-100 text-slate-600 border-slate-200",
+  Paid: "bg-emerald-50 text-emerald-600 border-emerald-200",
+  Failed: "bg-red-50 text-red-500 border-red-200",
+};
+
+const PAYMENT_LBL: Record<AdminClient["paymentStatus"], string> = {
+  NotPaid: "Not Paid",
+  Paid: "Paid",
+  Failed: "Failed",
 };
 
 export default function AdminPortal({admin,onCreateWill,onReviewWill}:{
@@ -147,8 +161,8 @@ export default function AdminPortal({admin,onCreateWill,onReviewWill}:{
           {status==="ready" && filteredClients.length>0 && (
             <table className="w-full">
               <thead><tr className="border-b border-slate-800">
-                {["Client","Contact","Updated","Status","Action"].map(h=>(
-                  <th key={h} className="px-5 py-3 text-left text-[10px] font-bold text-slate-500 uppercase tracking-widest">{h}</th>
+                {["Client","Contact","Updated","Will Type","Status","Payment","Amount","Action"].map(h=>(
+                  <th key={h} className="px-5 py-3 text-left text-[10px] font-bold text-slate-500 uppercase tracking-widest whitespace-nowrap">{h}</th>
                 ))}
               </tr></thead>
               <tbody>
@@ -164,12 +178,18 @@ export default function AdminPortal({admin,onCreateWill,onReviewWill}:{
                     </td>
                     <td className="px-5 py-3.5 text-slate-500 text-sm">{c.contact}</td>
                     <td className="px-5 py-3.5 text-slate-500 text-xs">{c.updatedAt?new Date(c.updatedAt).toLocaleDateString():"—"}</td>
-                    <td className="px-5 py-3.5">
-                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${STATUS_STYLE[c.status]}`}>{STATUS_LBL[c.status]}</span>
+                    <td className="px-5 py-3.5 text-slate-500 text-xs whitespace-nowrap">{WILL_TYPE_LBL_SHORT[c.willType]}</td>
+                    <td className="px-5 py-3.5 whitespace-nowrap">
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border whitespace-nowrap ${STATUS_STYLE[c.status]}`}>{STATUS_LBL[c.status]}</span>
                     </td>
+                    <td className="px-5 py-3.5 whitespace-nowrap">
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border whitespace-nowrap ${PAYMENT_STYLE[c.paymentStatus]}`}>{PAYMENT_LBL[c.paymentStatus]}</span>
+                    </td>
+                    <td className="px-5 py-3.5 text-slate-500 text-sm whitespace-nowrap">{c.paymentAmount!=null?fmt(c.paymentAmount):"—"}</td>
                     <td className="px-5 py-3.5">
                       <div className="flex items-center gap-3">
-                        <button onClick={()=>handleReview(c.willId)} disabled={c.status===STATUS_DRAFT||reviewingId===c.willId}
+                        <button onClick={()=>handleReview(c.willId)}
+                          disabled={(c.status===STATUS_DRAFT&&c.createdBy!==c.contact)||reviewingId===c.willId}
                           className="flex items-center gap-1.5 text-[#d09d61] hover:text-[#b88442] text-xs font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                           <Edit3 size={11}/>{reviewingId===c.willId?"Opening…":"Review"}
                         </button>

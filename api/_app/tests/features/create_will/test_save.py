@@ -173,6 +173,28 @@ def test_save_preserves_will_type_when_omitted_on_update(client, fake_db):
     assert doc["willType"] == WillType.GOAN.value
 
 
+def test_save_sets_created_by_to_testator_email_on_creation(client, fake_db):
+    res = client.post(URL, json=VALID_PAYLOAD)
+    doc = fake_db["will"].find_one({"willId": res.json()["willId"]})
+    assert doc["createdBy"] == "jane@example.com"
+
+
+def test_save_ignores_client_supplied_created_by(client, fake_db):
+    res = client.post(URL, json={**VALID_PAYLOAD, "createdBy": "someone-else@example.com"})
+    doc = fake_db["will"].find_one({"willId": res.json()["willId"]})
+    assert doc["createdBy"] == "jane@example.com"
+
+
+def test_save_preserves_created_by_across_updates(client, fake_db):
+    first = client.post(URL, json={**VALID_PAYLOAD, "status": "Draft"})
+    will_id = first.json()["willId"]
+
+    client.post(URL, json={**VALID_PAYLOAD, "status": "Draft", "willId": will_id, "createdBy": "someone-else@example.com"})
+
+    doc = fake_db["will"].find_one({"willId": will_id})
+    assert doc["createdBy"] == "jane@example.com"
+
+
 def test_save_stores_pending_review_status(client, fake_db):
     res = client.post(URL, json={**VALID_PAYLOAD, "status": "PendingReview"})
     assert res.json()["status"] == "PendingReview"

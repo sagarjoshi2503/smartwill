@@ -29,6 +29,7 @@ interface WizardFormsProps {
   setWill: (fn: (p: WillState) => WillState) => void;
   willType: WillType;
   setWillType: (t: WillType) => void;
+  hideWillTypeStep?: boolean;
   addBene: () => void;
   removeBene: (id: number) => void;
   updateBene: (id: number, k: keyof Beneficiary, v: string) => void;
@@ -54,7 +55,7 @@ interface WizardFormsProps {
   paymentEnabled?: boolean;
 }
 
-export default function WizardForms({step,will,setWill,willType,setWillType,addBene,removeBene,updateBene,addAsset,removeAsset,updateAssetData,updateAssetAlloc,allocTotal,assetAdded,onNext,onPrev,onGenerate,willId,onSaved,adminReview,adminComplete,testatorEmailEditable,viewOnly,reviewerEmail,adminComments,willStatus,amount,paymentEnabled}: WizardFormsProps){
+export default function WizardForms({step,will,setWill,willType,setWillType,hideWillTypeStep,addBene,removeBene,updateBene,addAsset,removeAsset,updateAssetData,updateAssetAlloc,allocTotal,assetAdded,onNext,onPrev,onGenerate,willId,onSaved,adminReview,adminComplete,testatorEmailEditable,viewOnly,reviewerEmail,adminComments,willStatus,amount,paymentEnabled}: WizardFormsProps){
   const IC="w-full apv-input rounded-2xl px-3.5 py-2.5 text-slate-900 placeholder:text-slate-500 text-sm focus:outline-none transition";
   const LC="block apv-label mb-1";
   const set=(path: string, v: string | boolean)=>setWill(p=>{
@@ -206,7 +207,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,addB
   return(
     <div className="fade-in max-w-[560px] mx-auto">
       {/* ── STEP 1: WILL TYPE ────────────────────────────────── */}
-      {step===1&&!adminReview&&(
+      {step===1&&!hideWillTypeStep&&(
         <div className="space-y-4">
           <StepHeader icon={<FileText size={17}/>} title="Select Will Type" sub="Choose the format that applies to you"/>
           <div className="space-y-3">

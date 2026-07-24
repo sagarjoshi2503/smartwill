@@ -15,6 +15,7 @@ class ClientOut(BaseModel):
     updatedAt: str | None
     status: str
     willType: str
+    createdBy: str
     paymentStatus: PaymentStatus
     paymentAmount: int | None = None
 

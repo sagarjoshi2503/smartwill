@@ -156,7 +156,7 @@ def test_admin_save_creates_will_as_completed_directly(client, fake_db):
         "will": {"testator": {"fullName": "New Client"}},
         "testatorEmail": "client@example.com",
         "status": "Completed",
-        "reviewerEmail": "anup@prabhuverlekar.com",
+        "reviewerEmail": "admin@forwardlegacy.co.in",
     })
 
     assert res.status_code == 201
@@ -164,9 +164,41 @@ def test_admin_save_creates_will_as_completed_directly(client, fake_db):
     assert body["status"] == "Completed"
     doc = fake_db["will"].find_one({"willId": body["willId"]})
     assert doc["status"] == "Completed"
-    assert doc["reviewerEmail"] == "anup@prabhuverlekar.com"
+    assert doc["reviewerEmail"] == "admin@forwardlegacy.co.in"
     # Directly-completed admin saves never go through the review inbox.
     assert fake_db["adminwill"].find_one({"willId": body["willId"]}) is None
+
+
+def test_admin_save_sets_created_by_to_reviewer_email_on_creation(client, fake_db):
+    res = client.post(ADMIN_SAVE_URL, json={
+        "will": {"testator": {"fullName": "New Client"}},
+        "testatorEmail": "client@example.com",
+        "status": "Completed",
+        "reviewerEmail": "admin@forwardlegacy.co.in",
+    })
+    doc = fake_db["will"].find_one({"willId": res.json()["willId"]})
+    assert doc["createdBy"] == "admin@forwardlegacy.co.in"
+
+
+def test_admin_save_preserves_created_by_across_updates(client, fake_db):
+    first = client.post(ADMIN_SAVE_URL, json={
+        "will": {"testator": {"fullName": "New Client"}},
+        "testatorEmail": "client@example.com",
+        "status": "PendingReview",
+        "reviewerEmail": "admin@forwardlegacy.co.in",
+    })
+    will_id = first.json()["willId"]
+
+    client.post(ADMIN_SAVE_URL, json={
+        "will": {"testator": {"fullName": "New Client"}},
+        "testatorEmail": "client@example.com",
+        "status": "PendingReview",
+        "willId": will_id,
+        "reviewerEmail": "someone-else@example.com",
+    })
+
+    doc = fake_db["will"].find_one({"willId": will_id})
+    assert doc["createdBy"] == "admin@forwardlegacy.co.in"
 
 
 def test_admin_save_still_allows_pending_review_status(client):

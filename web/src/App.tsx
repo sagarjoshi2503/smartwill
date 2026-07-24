@@ -49,6 +49,11 @@ export default function SmartWill() {
   const [wizardStep, setWizardStep] = useState(1);
   const [will, setWill] = useState<WillState>(DEFAULT_WILL);
   const [willType, setWillType] = useState<WillType>("");
+  // Set once per wizard entry: true when opening an already-existing Will
+  // (View/Edit from My Wills, or Review from the admin dashboard) — the Will
+  // Type was already chosen when the Will was first created, so that step is
+  // skipped. False when starting a brand-new Will (testator or admin).
+  const [skipWillTypeStep, setSkipWillTypeStep] = useState(false);
   const [editingWillId, setEditingWillId] = useState<string | null>(null);
   const [adminReviewMode, setAdminReviewMode] = useState(false);
   const [adminReviewStatus, setAdminReviewStatus] = useState<string | null>(null);
@@ -134,6 +139,7 @@ export default function SmartWill() {
     setOtp(Array(OTP_LENGTH).fill(""));
     setWill(DEFAULT_WILL);
     setWillType("");
+    setSkipWillTypeStep(false);
     setEditingWillId(null);
     setWizardStep(1);
     setViewOnlyMode(false);
@@ -166,6 +172,7 @@ export default function SmartWill() {
   const handleCreateNewWill = () => {
     setWill({...DEFAULT_WILL, testator: {...DEFAULT_WILL.testator, fullName: signup.name, email: signup.email}});
     setWillType("");
+    setSkipWillTypeStep(false);
     setEditingWillId(null);
     setAdminReviewMode(false);
     setAdminReviewStatus(null);
@@ -180,6 +187,7 @@ export default function SmartWill() {
   const handleEditWill = (willId: string, fetchedWill: WillState, fetchedWillType: WillType, adminComments?: string) => {
     setWill(mergeWithDefaults(fetchedWill));
     setWillType(fetchedWillType);
+    setSkipWillTypeStep(true);
     setEditingWillId(willId);
     setAdminReviewMode(false);
     setAdminReviewStatus(null);
@@ -187,12 +195,13 @@ export default function SmartWill() {
     setTestatorEmailEditable(false);
     setViewOnlyMode(false);
     setActiveAdminComments(adminComments || "");
-    setWizardStep(1);
+    setWizardStep(2);
     setView("wizard");
   };
   const handleViewWill = (willId: string, fetchedWill: WillState, fetchedWillType: WillType) => {
     setWill(mergeWithDefaults(fetchedWill));
     setWillType(fetchedWillType);
+    setSkipWillTypeStep(true);
     setEditingWillId(willId);
     setAdminReviewMode(false);
     setAdminReviewStatus(null);
@@ -200,12 +209,13 @@ export default function SmartWill() {
     setTestatorEmailEditable(false);
     setViewOnlyMode(true);
     setActiveAdminComments("");
-    setWizardStep(1);
+    setWizardStep(2);
     setView("wizard");
   };
   const handleAdminCreateWill = () => {
     setWill({...DEFAULT_WILL, testator: {...DEFAULT_WILL.testator, fullName:"", email:""}});
     setWillType("");
+    setSkipWillTypeStep(false);
     setEditingWillId(null);
     setAdminReviewMode(false);
     setAdminReviewStatus(null);
@@ -219,6 +229,7 @@ export default function SmartWill() {
   const handleAdminReviewWill = (willId: string, fetchedWill: WillState, status: string, fetchedWillType: WillType) => {
     setWill(mergeWithDefaults(fetchedWill));
     setWillType(fetchedWillType);
+    setSkipWillTypeStep(true);
     setEditingWillId(willId);
     setAdminReviewMode(true);
     setAdminReviewStatus(status);
@@ -373,7 +384,7 @@ export default function SmartWill() {
               </div>
             </div>
             <div className="flex items-center gap-1">
-              {WIZARD_STEPS.filter(s=>!(adminReviewMode&&s.n===1)).map(s=>(
+              {WIZARD_STEPS.filter(s=>!(skipWillTypeStep&&s.n===1)).map(s=>(
                 <button key={s.n} onClick={()=>setWizardStep(s.n)}
                     className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-[10px] font-semibold transition-all ${wizardStep===s.n?"bg-[#d09d61] text-[#020617]":"border border-slate-200 text-slate-600 hover:bg-slate-100 hover:text-slate-900"}`}>
                   {wizardStep>s.n?<Check size={9}/>:<span>{s.n}</span>}
@@ -424,13 +435,13 @@ export default function SmartWill() {
             <div className="w-full lg:w-[50%] overflow-y-auto p-5 bg-slate-50">
               <WizardForms
                 step={wizardStep} will={will} setWill={setWill}
-                willType={willType} setWillType={setWillType}
+                willType={willType} setWillType={setWillType} hideWillTypeStep={skipWillTypeStep}
                 addBene={addBene} removeBene={removeBene} updateBene={updateBene}
                 addAsset={addAsset} removeAsset={removeAsset}
                 updateAssetData={updateAssetData} updateAssetAlloc={updateAssetAlloc}
                 allocTotal={allocTotal} assetAdded={assetAdded}
                 onNext={()=>setWizardStep(s=>Math.min(s+1,7))}
-                onPrev={()=>setWizardStep(s=>Math.max(s-1,adminReviewMode?2:1))}
+                onPrev={()=>setWizardStep(s=>Math.max(s-1,skipWillTypeStep?2:1))}
                 onGenerate={()=>setShowWillDoc(true)}
                 willId={editingWillId}
                 adminReview={adminReviewMode}

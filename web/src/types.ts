@@ -155,6 +155,9 @@ export interface AdminClient {
   updatedAt: string | null;
   status: "Draft" | "PendingReview" | "Completed";
   willType: WillType;
+  createdBy: string;
+  paymentStatus: "NotPaid" | "Paid" | "Failed";
+  paymentAmount: number | null;
 }
 
 export interface TestatorWill {

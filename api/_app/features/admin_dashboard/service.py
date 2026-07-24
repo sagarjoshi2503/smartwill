@@ -161,6 +161,7 @@ def list_admin_wills(db: Database) -> dict:
             FLD_UPDATED_AT: updated_at.isoformat() if updated_at else None,
             FLD_STATUS: w.get(FLD_STATUS) or STATUS_DRAFT,
             FLD_WILL_TYPE: w.get(FLD_WILL_TYPE) or "",
+            FLD_CREATED_BY: w.get(FLD_CREATED_BY) or "",
             FLD_PAYMENT_STATUS: w.get(FLD_PAYMENT_STATUS) or PaymentStatus.NOT_PAID.value,
             FLD_PAYMENT_AMOUNT: w.get(FLD_PAYMENT_AMOUNT),
         })
