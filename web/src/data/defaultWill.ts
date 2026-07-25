@@ -44,13 +44,13 @@ export const DEFAULT_WILL: WillState = {
   // Fixed asset line-items from the All India (Non-Goan) Will PDF template —
   // only used/shown when willType==="allindia".
   allIndiaAssets:{
-    houseFlat:[{description:"",beneficiary:""}],
-    landPlot:[{description:"",beneficiary:""}],
-    commercialProperty:[{description:"",beneficiary:""}],
-    vehicle:[{description:"",beneficiary:""}],
-    jewellery:[{description:"",beneficiary:""}],
-    socialMediaDigital:[{description:"",beneficiary:""}],
-    intellectualProperty:[{description:"",beneficiary:""}],
+    houseFlat:[{description:"",beneficiary:"",relation:"",idType:"Aadhaar Card",idNumber:""}],
+    landPlot:[{description:"",beneficiary:"",relation:"",idType:"Aadhaar Card",idNumber:""}],
+    commercialProperty:[{description:"",beneficiary:"",relation:"",idType:"Aadhaar Card",idNumber:""}],
+    vehicle:[{description:"",beneficiary:"",relation:"",idType:"Aadhaar Card",idNumber:""}],
+    jewellery:[{description:"",beneficiary:"",relation:"",idType:"Aadhaar Card",idNumber:""}],
+    socialMediaDigital:[{description:"",beneficiary:"",relation:"",idType:"Aadhaar Card",idNumber:""}],
+    intellectualProperty:[{description:"",beneficiary:"",relation:"",idType:"Aadhaar Card",idNumber:""}],
   },
   // Residuary beneficiaries for the All India Will format (relationship +
   // name + Aadhaar, more than one allowed) — only used when willType==="allindia".

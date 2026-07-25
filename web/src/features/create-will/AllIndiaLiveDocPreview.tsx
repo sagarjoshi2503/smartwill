@@ -21,7 +21,7 @@ export default function AllIndiaLiveDocPreview({will}:{
   const renderAssetList = (items: AllIndiaAssetItem[], label: string) => {
     const numbered = items.length>1;
     return items.map((item,i)=>(
-      <p key={i} className="mb-1">{numbered?`(${i+1}) `:""}{label}: <strong>{item.description||blank}</strong> Bequeathed to: <strong>{item.beneficiary||blank}</strong>.</p>
+      <p key={i} className="mb-1">{numbered?`(${i+1}) `:""}{label}: <strong>{item.description||blank}</strong> Bequeathed to: <strong>{item.beneficiary||blank}</strong> Relationship: <strong>{item.relation||blank}</strong>, bearing {item.idType||"Aadhaar Card"} Number: <strong>{item.idNumber||blank}</strong>.</p>
     ));
   };
 
@@ -84,10 +84,10 @@ export default function AllIndiaLiveDocPreview({will}:{
 
         <p className="font-bold mb-1">E. Digital & Miscellaneous Assets:</p>
         {allIndiaAssets.socialMediaDigital.map((item,i)=>(
-          <p key={i} className="mb-1">{i===0?"(1) ":""}Social Media / Digital: <strong>{item.description||blank}</strong> Bequeathed to: <strong>{item.beneficiary||blank}</strong>.</p>
+          <p key={i} className="mb-1">{i===0?"(1) ":""}Social Media / Digital: <strong>{item.description||blank}</strong> Bequeathed to: <strong>{item.beneficiary||blank}</strong> Relationship: <strong>{item.relation||blank}</strong>, bearing {item.idType||"Aadhaar Card"} Number: <strong>{item.idNumber||blank}</strong>.</p>
         ))}
         {allIndiaAssets.intellectualProperty.map((item,i)=>(
-          <p key={i} className="mb-3">{i===0?"(2) ":""}Intellectual Property: <strong>{item.description||blank}</strong> Bequeathed to: <strong>{item.beneficiary||blank}</strong>.</p>
+          <p key={i} className="mb-3">{i===0?"(2) ":""}Intellectual Property: <strong>{item.description||blank}</strong> Bequeathed to: <strong>{item.beneficiary||blank}</strong> Relationship: <strong>{item.relation||blank}</strong>, bearing {item.idType||"Aadhaar Card"} Number: <strong>{item.idNumber||blank}</strong>.</p>
         ))}
 
         <p className="text-justify mb-3">

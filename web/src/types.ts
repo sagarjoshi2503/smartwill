@@ -109,6 +109,9 @@ export type GlobalMode = "equal" | "percentage";
 export interface AllIndiaAssetItem {
   description: string;
   beneficiary: string;
+  relation: string;
+  idType: string;
+  idNumber: string;
 }
 
 // The seven fixed asset line-items from the All India (Non-Goan) Will PDF

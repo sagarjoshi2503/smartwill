@@ -8,7 +8,8 @@ from _app.core.exceptions import AppError
 from _app.features.create_will import repository
 from _app.shared import email
 from _app.shared.constants import (
-    FLD_AADHAAR_NUMBER, FLD_ADMIN_COMMENTS, FLD_CREATED_AT, FLD_CREATED_BY, FLD_EXECUTOR, FLD_FULL_NAME,
+    FLD_AADHAAR_NUMBER, FLD_ADMIN_COMMENTS, FLD_ALL_INDIA_ASSETS, FLD_ALL_INDIA_RESIDUE, FLD_CREATED_AT,
+    FLD_CREATED_BY, FLD_EXECUTOR, FLD_FULL_NAME,
     FLD_GUARDIAN, FLD_ID_NUMBER, FLD_JOINT_ID, FLD_PAN, FLD_PAYMENT_AMOUNT, FLD_PAYMENT_STATUS,
     FLD_RESIDUAL_ID, FLD_SPOUSE_AADHAAR_NUMBER, FLD_STATUS, FLD_SUB_ID, FLD_TESTATOR, FLD_TESTATOR_EMAIL,
     FLD_UPDATED_AT, FLD_WILL, FLD_WILL_ID, FLD_WILL_TYPE, FLD_WITNESSES, HTTP_BAD_REQUEST, HTTP_FORBIDDEN,
@@ -46,6 +47,18 @@ def _redact_id_numbers(will_data: dict) -> dict:
     if isinstance(redacted.get(FLD_WITNESSES), list):
         redacted[FLD_WITNESSES] = [
             {**w, FLD_AADHAAR_NUMBER: ""} if isinstance(w, dict) else w for w in redacted[FLD_WITNESSES]
+        ]
+    if isinstance(redacted.get(FLD_ALL_INDIA_ASSETS), dict):
+        redacted[FLD_ALL_INDIA_ASSETS] = {
+            category: (
+                [{**item, FLD_ID_NUMBER: ""} if isinstance(item, dict) else item for item in items]
+                if isinstance(items, list) else items
+            )
+            for category, items in redacted[FLD_ALL_INDIA_ASSETS].items()
+        }
+    if isinstance(redacted.get(FLD_ALL_INDIA_RESIDUE), list):
+        redacted[FLD_ALL_INDIA_RESIDUE] = [
+            {**e, FLD_AADHAAR_NUMBER: ""} if isinstance(e, dict) else e for e in redacted[FLD_ALL_INDIA_RESIDUE]
         ]
     return redacted
 

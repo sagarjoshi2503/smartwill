@@ -469,19 +469,30 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
           <StepHeader icon={<Briefcase size={17}/>} title="Asset Selection" sub="Sections B–E — Bequests as per the All India Will format"/>
           {(()=>{
             type AllIndiaKey = keyof WillState["allIndiaAssets"];
-            const addItem=(key: AllIndiaKey)=>setWill(p=>({...p, allIndiaAssets:{...p.allIndiaAssets, [key]:[...p.allIndiaAssets[key],{description:"",beneficiary:""}]}}));
+            const addItem=(key: AllIndiaKey)=>setWill(p=>({...p, allIndiaAssets:{...p.allIndiaAssets, [key]:[...p.allIndiaAssets[key],{description:"",beneficiary:"",relation:"",idType:"Aadhaar Card",idNumber:""}]}}));
             const removeItem=(key: AllIndiaKey, idx: number)=>setWill(p=>({...p, allIndiaAssets:{...p.allIndiaAssets, [key]:p.allIndiaAssets[key].filter((_,j)=>j!==idx)}}));
-            const setItem=(key: AllIndiaKey, idx: number, field: "description"|"beneficiary", value: string)=>
+            const setItem=(key: AllIndiaKey, idx: number, field: "description"|"beneficiary"|"relation"|"idType"|"idNumber", value: string)=>
               setWill(p=>({...p, allIndiaAssets:{...p.allIndiaAssets, [key]:p.allIndiaAssets[key].map((item,j)=>j===idx?{...item,[field]:value}:item)}}));
             const Category=({itemKey,label,placeholder}:{itemKey: AllIndiaKey; label: string; placeholder: string})=>(
               <div>
                 <p className="text-slate-900 text-sm font-semibold mb-2">{label}</p>
                 {will.allIndiaAssets[itemKey].map((item,idx)=>(
-                  <div key={idx} className="grid grid-cols-2 gap-2.5 mb-2.5">
-                    <input value={item.description} onChange={e=>setItem(itemKey,idx,"description",e.target.value)} className={IC} placeholder={placeholder}/>
-                    <div className="flex gap-2">
-                      <input value={item.beneficiary} onChange={e=>setItem(itemKey,idx,"beneficiary",e.target.value)} className={IC} placeholder="Bequeathed to"/>
-                      {will.allIndiaAssets[itemKey].length>1&&<button onClick={()=>removeItem(itemKey,idx)} className="text-red-400 hover:text-red-500 shrink-0"><Trash2 size={14}/></button>}
+                  <div key={idx} className="bg-slate-50 border border-slate-200 rounded-xl p-3 mb-2.5">
+                    <div className="grid grid-cols-2 gap-2.5 mb-2.5">
+                      <input value={item.description} onChange={e=>setItem(itemKey,idx,"description",e.target.value)} className={IC} placeholder={placeholder}/>
+                      <div className="flex gap-2">
+                        <input value={item.beneficiary} onChange={e=>setItem(itemKey,idx,"beneficiary",e.target.value)} className={IC} placeholder="Bequeathed to"/>
+                        {will.allIndiaAssets[itemKey].length>1&&<button onClick={()=>removeItem(itemKey,idx)} className="text-red-400 hover:text-red-500 shrink-0"><Trash2 size={14}/></button>}
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-3 gap-2.5">
+                      <div><label className={LC}>Relationship</label><input value={item.relation} onChange={e=>setItem(itemKey,idx,"relation",e.target.value)} className={IC} placeholder="Spouse / Son / Daughter / Other"/></div>
+                      <div><label className={LC}>{LBL_ID_TYPE}</label>
+                        <select value={item.idType} onChange={e=>setItem(itemKey,idx,"idType",e.target.value)} className={IC+" appearance-none"}>
+                          {ID_TYPES.map(t=><option key={t}>{t}</option>)}
+                        </select>
+                      </div>
+                      <div><label className={LC}>{LBL_ID_NUMBER}</label><input value={item.idNumber} onChange={e=>setItem(itemKey,idx,"idNumber",e.target.value)} className={IC} placeholder="ID number" title={TIP_NO_ID_SAVED}/></div>
                     </div>
                   </div>
                 ))}

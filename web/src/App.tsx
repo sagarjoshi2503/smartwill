@@ -21,6 +21,7 @@ import WillDocument from "./features/create-will/WillDocument";
 import AllIndiaWillDocument from "./features/create-will/AllIndiaWillDocument";
 import { allocTotal } from "./utils/allocation";
 import { apiUrl } from "./utils/apiBase";
+import { getMissingIdFields } from "./utils/willValidation";
 import {
   ADMIN_PATH, API_FLAGS, API_RAZORPAY_FLAG, API_WILL_SAVE, apiPathSendBack,
   OTP_LENGTH, STATUS_DRAFT, STATUS_PENDING_REVIEW, STATUS_COMPLETED,
@@ -66,6 +67,7 @@ export default function SmartWill() {
   const [viewOnlyMode, setViewOnlyMode] = useState(false);
   const [activeAdminComments, setActiveAdminComments] = useState("");
   const [showWillDoc, setShowWillDoc] = useState(false);
+  const [genWillErrors, setGenWillErrors] = useState<string[]>([]);
   const [adminProfile, setAdminProfile] = useState<AdminProfile | null>(null);
   const [draftStatus, setDraftStatus] = useState<"idle" | "saving" | "error" | "done">("idle");
   const [draftError, setDraftError] = useState("");
@@ -294,6 +296,20 @@ export default function SmartWill() {
   const assetAdded = (id: string) => will.assets.some(a=>a.typeId===id);
   const residualBene = will.beneficiaries.find(b=>String(b.id)===String(will.residualBeneId));
 
+  // Generate/preview the Will document — blocked until every in-use ID
+  // Number field (Aadhaar/PAN/Passport/Voter ID/Driving Licence, whichever
+  // type was selected) is filled in, since the printed document renders
+  // these blanks verbatim.
+  const handleGenerateWill = () => {
+    const missing = getMissingIdFields(will, willType);
+    if (missing.length > 0) {
+      setGenWillErrors(missing);
+      return;
+    }
+    setGenWillErrors([]);
+    setShowWillDoc(true);
+  };
+
   // Save as draft
   const handleSaveDraft = async () => {
     setDraftStatus("saving"); setDraftError("");
@@ -438,11 +454,20 @@ export default function SmartWill() {
                   )}
                 </div>
               )}
-              <button onClick={()=>setShowWillDoc(true)} className="flex items-center gap-1.5 text-xs text-[#d09d61] hover:text-[#b6844a] border border-[#d09d61]/30 hover:border-[#d09d61]/60 rounded-lg px-3 py-1.5 transition-all font-semibold">
+              <button onClick={handleGenerateWill} className="flex items-center gap-1.5 text-xs text-[#d09d61] hover:text-[#b6844a] border border-[#d09d61]/30 hover:border-[#d09d61]/60 rounded-lg px-3 py-1.5 transition-all font-semibold">
                 <Eye size={12}/>Generate Will
               </button>
             </div>
           </div>
+          {genWillErrors.length>0 && (
+            <div className="flex-none bg-red-50 border-b border-red-200 px-4 py-2.5 flex items-start gap-2.5">
+              <div className="text-red-700 text-xs flex-1">
+                <span className="font-semibold">Cannot generate the Will document — the following ID Numbers are missing:</span>
+                <span className="ml-1">{genWillErrors.join("; ")}.</span>
+              </div>
+              <button onClick={()=>setGenWillErrors([])} className="text-red-500 hover:text-red-700 text-xs font-semibold shrink-0">Dismiss</button>
+            </div>
+          )}
           {/* Split pane */}
           <div className="flex flex-1 overflow-hidden">
             <div className="w-full lg:w-[50%] overflow-y-auto p-5 bg-slate-50">
@@ -455,7 +480,7 @@ export default function SmartWill() {
                 allocTotal={allocTotal} assetAdded={assetAdded}
                 onNext={()=>setWizardStep(s=>Math.min(s+1,7))}
                 onPrev={()=>setWizardStep(s=>Math.max(s-1,skipWillTypeStep?2:1))}
-                onGenerate={()=>setShowWillDoc(true)}
+                onGenerate={handleGenerateWill}
                 willId={editingWillId}
                 adminReview={adminReviewMode}
                 adminComplete={adminCreateMode}

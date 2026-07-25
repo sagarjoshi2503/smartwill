@@ -58,6 +58,35 @@ def test_save_strips_id_numbers_before_persisting(client, fake_db):
     assert doc["will"]["witnesses"][0]["name"] == "Wit One"
 
 
+def test_save_strips_all_india_asset_and_residue_ids_before_persisting(client, fake_db):
+    payload = {
+        "will": {
+            "testator": {"fullName": "Jane Doe"},
+            "allIndiaAssets": {
+                "houseFlat": [{"description": "Flat 1", "beneficiary": "Bob", "relation": "Son", "idType": "PAN Card", "idNumber": "HHHHH8888H"}],
+                "vehicle": [],
+            },
+            "allIndiaResidue": [{"relation": "Brother", "name": "Sam", "aadhaarNumber": "555566667777"}],
+        },
+        "testatorEmail": "jane@example.com",
+    }
+
+    res = client.post(URL, json=payload)
+
+    assert res.status_code == 201
+    doc = fake_db["will"].find_one({"willId": res.json()["willId"]})
+    house = doc["will"]["allIndiaAssets"]["houseFlat"][0]
+    assert house["idNumber"] == ""
+    # Non-ID fields must survive redaction untouched.
+    assert house["description"] == "Flat 1"
+    assert house["beneficiary"] == "Bob"
+    assert house["relation"] == "Son"
+    assert house["idType"] == "PAN Card"
+    assert doc["will"]["allIndiaAssets"]["vehicle"] == []
+    assert doc["will"]["allIndiaResidue"][0]["aadhaarNumber"] == ""
+    assert doc["will"]["allIndiaResidue"][0]["name"] == "Sam"
+
+
 def test_save_generates_unique_will_ids_across_requests(client):
     res1 = client.post(URL, json=VALID_PAYLOAD)
     res2 = client.post(URL, json=VALID_PAYLOAD)
