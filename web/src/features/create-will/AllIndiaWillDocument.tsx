@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import type { MutableRefObject } from "react";
+import type { MutableRefObject, ReactNode } from "react";
 import { ChevronLeft, Scale, Printer, Download } from "lucide-react";
 import { numberToWords } from "../../utils/format";
 import type { AllIndiaAssetItem, Beneficiary, WillState } from "../../types";
@@ -41,19 +41,41 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,w
     ));
   };
 
+  // Each Will page is laid out as an explicit, fixed-height block (rather
+  // than left to the browser's automatic reflow) so page breaks fall in
+  // predictable places and this attestation line — required on every page —
+  // reliably lands as the last line of each one. (A `position:fixed` footer
+  // was tried first, but Firefox and some print/PDF pipelines don't repeat
+  // fixed-position elements across printed pages, so it isn't reliable.)
+  // The `pdf-page` height/flex rules only apply under @media print — on
+  // screen this still reads as one continuous scrollable document.
+  const Page = ({children,isLast}:{children: ReactNode; isLast?: boolean})=>(
+    <section className={`pdf-page${isLast?"":" pdf-page-break"}`}>
+      <div>{children}</div>
+      <p className="pdf-sig-line mb-0 mt-4">Testator's Signature: ___________________ Witness 1: _________ Witness 2: _________</p>
+    </section>
+  );
+
   return(
     <div className="min-h-screen bg-slate-800 print:bg-white">
       <style>{`
-        .print-sig-footer{display:none;}
+        @page { size: A4; margin: 15mm; }
         @media print {
           .no-print{display:none!important}
           body{margin:0;padding:0}
-          .will-print-page{box-shadow:none!important;margin:0!important;border-radius:0!important;max-width:100%!important;padding-bottom:2.2cm!important;}
-          .page-break{break-before:page}
-          .print-sig-footer{
-            display:block;position:fixed;bottom:0.6cm;left:0;right:0;
-            text-align:center;font-size:9.5pt;color:#555;
-          }
+          .will-print-page{box-shadow:none!important;margin:0!important;border-radius:0!important;max-width:100%!important;padding:0!important}
+          /* Leaves headroom below the 267mm printable area (297mm A4 minus
+             15mm top/bottom @page margins) — pinning content to exactly that
+             height left no margin for error, so the flex-pinned signature
+             line (laid out last, after all other content) rounded past the
+             physical page edge and got pushed onto the next page. */
+          .pdf-page{min-height:250mm;display:flex;flex-direction:column;justify-content:space-between}
+          .pdf-page-break{break-after:page}
+          /* Belt-and-braces: even if a page's own content still overflows,
+             never let the signature line get separated from what precedes
+             it — the pair moves to the next page together instead of the
+             line appearing alone. */
+          .pdf-sig-line{break-inside:avoid;break-before:avoid}
         }
         @import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;0,700;1,400&display=swap');
       `}</style>
@@ -79,98 +101,103 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,w
         <div className="will-print-page bg-white shadow-2xl rounded-lg max-w-[780px] w-full p-14 print:p-10"
           style={{fontFamily:"'EB Garamond','Times New Roman',Georgia,serif",fontSize:"14px",lineHeight:"1.85",color:"#1a1a1a"}}>
 
-          <h1 className="text-center text-2xl font-bold tracking-widest uppercase mb-6">WILL</h1>
+          <Page>
+            <h1 className="text-center text-2xl font-bold tracking-widest uppercase mb-6">WILL</h1>
 
-          <p className="text-justify mb-5">
-            I, <strong>{testator.fullName||blank}</strong>, having PAN <strong>{testator.pan||blank}</strong>, Aadhar no <strong>{testator.aadhaarNumber||blank}</strong> {testator.relation} of <strong>{testator.parentSpouseName||blank}</strong>, aged <strong>{testator.age||"___"}</strong>, {testator.maritalStatus}, resident of <strong>{testator.address||blank}</strong>
-            {testator.maritalStatus==="married"&&(
-              <>, I am married to <strong>{testator.spouseName||blank}</strong>, bearing Aadhar No. <strong>{testator.spouseAadhaarNumber||blank}</strong> and I have {sonNames.length===1?"one":sonNames.length||"___"} son, namely, <strong>{sonNames.join(", ")||blank}</strong> and {daughterNames.length===1?"one":daughterNames.length||"___"} daughter, namely, <strong>{daughterNames.join(", ")||blank}</strong>
-              </>
-            )}
-          </p>
+            <p className="text-justify mb-5">
+              I, <strong>{testator.fullName||blank}</strong>, having PAN <strong>{testator.pan||blank}</strong>, Aadhar no <strong>{testator.aadhaarNumber||blank}</strong> {testator.relation} of <strong>{testator.parentSpouseName||blank}</strong>, aged <strong>{testator.age||"___"}</strong>, {testator.maritalStatus}, resident of <strong>{testator.address||blank}</strong>
+              {testator.maritalStatus==="married"&&(
+                <>, I am married to <strong>{testator.spouseName||blank}</strong>, bearing Aadhar No. <strong>{testator.spouseAadhaarNumber||blank}</strong> and I have {sonNames.length===1?"one":sonNames.length||"___"} son, namely, <strong>{sonNames.join(", ")||blank}</strong> and {daughterNames.length===1?"one":daughterNames.length||"___"} daughter, namely, <strong>{daughterNames.join(", ")||blank}</strong>
+                </>
+              )}
+            </p>
 
-          <p className="text-justify mb-5">
-            And on <strong>{testator.signDay||"___"}</strong> day of <strong>{testator.signMonth||"_______"}</strong> of the year Two Thousand and <strong>{yearWords||"____"}</strong> and in the presence of two following witnesses:
-          </p>
+            <p className="text-justify mb-5">
+              And on <strong>{testator.signDay||"___"}</strong> day of <strong>{testator.signMonth||"_______"}</strong> of the year Two Thousand and <strong>{yearWords||"____"}</strong> and in the presence of two following witnesses:
+            </p>
 
-          <div className="mb-5 space-y-3">
-            {witnesses.map((w,i)=>(
-              <p key={i} className="text-justify">
-                {String.fromCharCode(97+i)}) <strong>{w.name||blank}</strong> {w.parentRelation} of <strong>{w.parentName||blank}</strong> aged <strong>{w.age||"___"}</strong>{i===1&&<>, {w.maritalStatus}</>}, resident of <strong>{w.address||blank}</strong> bearing Aadhaar Number <strong>{w.aadhaarNumber||blank}</strong>
-              </p>
-            ))}
-          </div>
-
-          <p className="text-justify mb-5">make my last and final WILL.</p>
-
-          <p className="text-justify mb-5">
-            I am making this last WILL and testament of mine voluntarily and without any compulsion or pressure from any source or person and in sound health and disposing state of mind. I have not been influenced, cajoled or coerced in any manner to write this WILL. I do hereby revoke all my wills, if any, previously made by me.
-          </p>
-
-          <p className="text-justify mb-5">
-            I own the following movable and immovable properties which are all self-acquired or built out of my own earning and income and have absolute power of disposal of the same.
-          </p>
-
-          <p className="text-justify mb-5">I bequeath my specific assets to the designated beneficiaries as outlined below:</p>
-
-          <p className="font-bold mb-1">A. Financial Assets:</p>
-          <p className="text-justify mb-5">
-            I bequeath all my financial assets including Bank Accounts, FDs, RDs, PPF, Life Insurance, Stocks, Mutual Funds, Crypto, Digital Wallets, NPS, Bonds, AIF, SIF, and PMS entirely to the nominees registered in those financial instruments.
-          </p>
-
-          <p className="font-bold mb-1">B. Immovable Property:</p>
-          {renderAssetList(allIndiaAssets.houseFlat,"House / Flat")}
-          {renderAssetList(allIndiaAssets.landPlot,"Land / Plot")}
-          <div className="mb-5">{renderAssetList(allIndiaAssets.commercialProperty,"Commercial Property")}</div>
-
-          <p className="font-bold mb-1 page-break">C. Motor Vehicles:</p>
-          <div className="mb-5">{renderAssetList(allIndiaAssets.vehicle,"Vehicle / Car")}</div>
-
-          <p className="font-bold mb-1">D. Personal & Valuables:</p>
-          <div className="mb-5">{renderAssetList(allIndiaAssets.jewellery,"Jewellery & Heirlooms")}</div>
-
-          <p className="font-bold mb-1">E. Digital & Miscellaneous Assets:</p>
-          {allIndiaAssets.socialMediaDigital.map((item,i)=>(
-            <p key={i} className="mb-1">{i===0?"(1) ":""}Social Media / Digital: <strong>{item.description||blank}</strong> Bequeathed to: <strong>{item.beneficiary||blank}</strong> Relationship: <strong>{item.relation||blank}</strong>, bearing {item.idType||"Aadhaar Card"} Number: <strong>{item.idNumber||blank}</strong>.</p>
-          ))}
-          {allIndiaAssets.intellectualProperty.map((item,i)=>(
-            <p key={i} className="mb-5">{i===0?"(2) ":""}Intellectual Property: <strong>{item.description||blank}</strong> Bequeathed to: <strong>{item.beneficiary||blank}</strong> Relationship: <strong>{item.relation||blank}</strong>, bearing {item.idType||"Aadhaar Card"} Number: <strong>{item.idNumber||blank}</strong>.</p>
-          ))}
-
-          <p className="text-justify mb-5">
-            I hereby declare, direct, and devise that all the Rest and Residue of my estate, including any property or assets, both movable and immovable, which I may acquire after the execution of this Will, or which has been inadvertently omitted from this document, shall be given entirely to {allIndiaResidue.length>1&&"the following, in equal shares: "}
-            {allIndiaResidue.map((entry,i)=>(
-              <span key={i}><strong>{entry.relation||blank}</strong> (Relationship), <strong>{entry.name||blank}</strong> bearing Aadhaar Card number: <strong>{entry.aadhaarNumber||blank}</strong>{i<allIndiaResidue.length-1?"; ":"."}</span>
-            ))}
-          </p>
-
-          <div className="mb-6">
-            <div className="inline-block min-w-[280px]">
-              <div className="border-b-2 border-slate-800 pt-10 mb-1"/>
-              <p className="text-xs text-slate-500">Signature of Testator/Testatrix</p>
+            <div className="mb-5 space-y-3">
+              {witnesses.map((w,i)=>(
+                <p key={i} className="text-justify">
+                  {String.fromCharCode(97+i)}) <strong>{w.name||blank}</strong> {w.parentRelation} of <strong>{w.parentName||blank}</strong> aged <strong>{w.age||"___"}</strong>{i===1&&<>, {w.maritalStatus}</>}, resident of <strong>{w.address||blank}</strong> bearing Aadhaar Number <strong>{w.aadhaarNumber||blank}</strong>
+                </p>
+              ))}
             </div>
-          </div>
 
-          <p className="text-justify mb-5">
-            I have fully understood the contents, significance and implications contained in this WILL which has been executed out of my free will, and choice. There has been no misrepresentation in regard to this WILL and no one has any right to object and/or to challenge this WILL as this is culmination of my discretion and best for me to safeguard my interest and interest of my family.
-          </p>
+            <p className="text-justify mb-5">make my last and final WILL.</p>
 
-          <p className="text-justify mb-8">
-            Testator/Testatrix understands and approves the contents of document before signing and was not forced to do so by any person.
-          </p>
+            <p className="text-justify mb-5">
+              I am making this last WILL and testament of mine voluntarily and without any compulsion or pressure from any source or person and in sound health and disposing state of mind. I have not been influenced, cajoled or coerced in any manner to write this WILL. I do hereby revoke all my wills, if any, previously made by me.
+            </p>
 
-          <div className="mb-2">
-            <div className="inline-block min-w-[280px]">
-              <div className="border-b-2 border-slate-800 pt-10 mb-1"/>
-              <p className="text-xs text-slate-500">Signature of Testator/Testatrix</p>
+            <p className="text-justify mb-5">
+              I own the following movable and immovable properties which are all self-acquired or built out of my own earning and income and have absolute power of disposal of the same.
+            </p>
+
+            <p className="text-justify mb-5">I bequeath my specific assets to the designated beneficiaries as outlined below:</p>
+
+            <p className="font-bold mb-1">A. Financial Assets:</p>
+            <p className="text-justify mb-5">
+              I bequeath all my financial assets including Bank Accounts, FDs, RDs, PPF, Life Insurance, Stocks, Mutual Funds, Crypto, Digital Wallets, NPS, Bonds, AIF, SIF, and PMS entirely to the nominees registered in those financial instruments.
+            </p>
+          </Page>
+
+          <Page>
+            <p className="font-bold mb-1">B. Immovable Property:</p>
+            {renderAssetList(allIndiaAssets.houseFlat,"House / Flat")}
+            {renderAssetList(allIndiaAssets.landPlot,"Land / Plot")}
+            <div className="mb-5">{renderAssetList(allIndiaAssets.commercialProperty,"Commercial Property")}</div>
+
+            <p className="font-bold mb-1">C. Motor Vehicles:</p>
+            <div className="mb-5">{renderAssetList(allIndiaAssets.vehicle,"Vehicle / Car")}</div>
+
+            <p className="font-bold mb-1">D. Personal &amp; Valuables:</p>
+            <div className="mb-5">{renderAssetList(allIndiaAssets.jewellery,"Jewellery & Heirlooms")}</div>
+
+            <p className="font-bold mb-1">E. Digital &amp; Miscellaneous Assets:</p>
+            {allIndiaAssets.socialMediaDigital.map((item,i)=>(
+              <p key={i} className="mb-1">{i===0?"(1) ":""}Social Media / Digital: <strong>{item.description||blank}</strong> Bequeathed to: <strong>{item.beneficiary||blank}</strong> Relationship: <strong>{item.relation||blank}</strong>, bearing {item.idType||"Aadhaar Card"} Number: <strong>{item.idNumber||blank}</strong>.</p>
+            ))}
+            {allIndiaAssets.intellectualProperty.map((item,i)=>(
+              <p key={i} className="mb-5">{i===0?"(2) ":""}Intellectual Property: <strong>{item.description||blank}</strong> Bequeathed to: <strong>{item.beneficiary||blank}</strong> Relationship: <strong>{item.relation||blank}</strong>, bearing {item.idType||"Aadhaar Card"} Number: <strong>{item.idNumber||blank}</strong>.</p>
+            ))}
+          </Page>
+
+          <Page>
+            <p className="text-justify mb-5">
+              I hereby declare, direct, and devise that all the Rest and Residue of my estate, including any property or assets, both movable and immovable, which I may acquire after the execution of this Will, or which has been inadvertently omitted from this document, shall be given entirely to {allIndiaResidue.length>1&&"the following, in equal shares: "}
+              {allIndiaResidue.map((entry,i)=>(
+                <span key={i}><strong>{entry.relation||blank}</strong> (Relationship), <strong>{entry.name||blank}</strong> bearing Aadhaar Card number: <strong>{entry.aadhaarNumber||blank}</strong>{i<allIndiaResidue.length-1?"; ":"."}</span>
+              ))}
+            </p>
+
+            <div className="mb-6">
+              <div className="inline-block min-w-[280px]">
+                <div className="border-b-2 border-slate-800 pt-10 mb-1"/>
+                <p className="text-xs text-slate-500">Signature of Testator/Testatrix</p>
+              </div>
             </div>
-          </div>
-          <p className="mb-1">Name of Testator/Testatrix: <strong>{testator.fullName||blank}</strong></p>
-          <p className="mb-1">Place: <strong>{testator.signPlace||blank}</strong></p>
-          <p className="mb-1">Date: <strong>{testator.signDay||"__"} {testator.signMonth} {testator.signYear}</strong></p>
 
-          {/* WITNESSES page */}
-          <div className="page-break mt-10">
+            <p className="text-justify mb-5">
+              I have fully understood the contents, significance and implications contained in this WILL which has been executed out of my free will, and choice. There has been no misrepresentation in regard to this WILL and no one has any right to object and/or to challenge this WILL as this is culmination of my discretion and best for me to safeguard my interest and interest of my family.
+            </p>
+
+            <p className="text-justify mb-8">
+              Testator/Testatrix understands and approves the contents of document before signing and was not forced to do so by any person.
+            </p>
+
+            <div className="mb-2">
+              <div className="inline-block min-w-[280px]">
+                <div className="border-b-2 border-slate-800 pt-10 mb-1"/>
+                <p className="text-xs text-slate-500">Signature of Testator/Testatrix</p>
+              </div>
+            </div>
+            <p className="mb-1">Name of Testator/Testatrix: <strong>{testator.fullName||blank}</strong></p>
+            <p className="mb-1">Place: <strong>{testator.signPlace||blank}</strong></p>
+            <p className="mb-1">Date: <strong>{testator.signDay||"__"} {testator.signMonth} {testator.signYear}</strong></p>
+          </Page>
+
+          <Page isLast>
             <h2 className="font-bold text-lg uppercase mb-8">Witnesses</h2>
             {witnesses.map((w,i)=>(
               <div key={i} className="mb-10">
@@ -180,9 +207,7 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,w
                 <p className="text-xs text-slate-500">Signature</p>
               </div>
             ))}
-          </div>
-
-          <div className="print-sig-footer">Testator's Signature: ___________________ Witness 1: _________ Witness 2: ________</div>
+          </Page>
         </div>
       </div>
     </div>

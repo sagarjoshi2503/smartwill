@@ -25,6 +25,10 @@ export default function AllIndiaLiveDocPreview({will}:{
     ));
   };
 
+  const SectionSignatureLine = () => (
+    <p className="mb-3">Testator's Signature: ___________________ Witness 1: _________ Witness 2: _________</p>
+  );
+
   return(
     <div className="w-full max-w-[520px] rounded-xl shadow-2xl overflow-hidden border border-amber-900/20">
       <div className="bg-slate-700 px-4 py-2 flex items-center gap-2">
@@ -70,6 +74,7 @@ export default function AllIndiaLiveDocPreview({will}:{
         <p className="text-justify mb-3">
           I bequeath all my financial assets including Bank Accounts, FDs, RDs, PPF, Life Insurance, Stocks, Mutual Funds, Crypto, Digital Wallets, NPS, Bonds, AIF, SIF, and PMS entirely to the nominees registered in those financial instruments.
         </p>
+        <SectionSignatureLine/>
 
         <p className="font-bold mb-1">B. Immovable Property:</p>
         {renderAssetList(allIndiaAssets.houseFlat,"House / Flat")}
@@ -89,6 +94,7 @@ export default function AllIndiaLiveDocPreview({will}:{
         {allIndiaAssets.intellectualProperty.map((item,i)=>(
           <p key={i} className="mb-3">{i===0?"(2) ":""}Intellectual Property: <strong>{item.description||blank}</strong> Bequeathed to: <strong>{item.beneficiary||blank}</strong> Relationship: <strong>{item.relation||blank}</strong>, bearing {item.idType||"Aadhaar Card"} Number: <strong>{item.idNumber||blank}</strong>.</p>
         ))}
+        <SectionSignatureLine/>
 
         <p className="text-justify mb-3">
           I hereby declare, direct, and devise that all the Rest and Residue of my estate, including any property or assets, both movable and immovable, which I may acquire after the execution of this Will, or which has been inadvertently omitted from this document, shall be given entirely to {allIndiaResidue.length>1&&"the following, in equal shares: "}
@@ -96,6 +102,7 @@ export default function AllIndiaLiveDocPreview({will}:{
             <span key={i}><strong>{entry.relation||blank}</strong> (Relationship), <strong>{entry.name||blank}</strong> bearing Aadhaar Card number: <strong>{entry.aadhaarNumber||blank}</strong>{i<allIndiaResidue.length-1?"; ":"."}</span>
           ))}
         </p>
+        <SectionSignatureLine/>
 
         <div className="mt-4 pt-3 border-t border-slate-400 text-center">
           <p className="text-[10px] text-slate-500">Signed at {testator.signPlace||"[Place]"} on the {testator.signDay||"__"}th day of {testator.signMonth}, {testator.signYear}</p>
