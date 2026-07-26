@@ -1,16 +1,16 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from _app.shared.constants import CORS_ALLOW_HEADERS, CORS_ALLOW_METHODS, CORS_ALLOW_ORIGINS
+from _app.core.config import get_settings
+from _app.shared.constants import CORS_ALLOW_HEADERS, CORS_ALLOW_METHODS
 
 
 def add_cors(app: FastAPI) -> None:
-    # The frontend can be served from a different origin than this API (e.g.
-    # GitHub Pages calling the Vercel-hosted backend). No cookies/session are
-    # used anywhere in this app, so a wildcard origin is safe.
+    # Only the React web app (dev + prod) is allowed to call this API.
+    settings = get_settings()
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=CORS_ALLOW_ORIGINS,
+        allow_origins=settings.cors_allow_origins,
         allow_methods=CORS_ALLOW_METHODS,
         allow_headers=CORS_ALLOW_HEADERS,
     )

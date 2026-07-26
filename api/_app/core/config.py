@@ -1,14 +1,28 @@
 from functools import lru_cache
+from typing import Annotated
 
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import BeforeValidator
+from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 
-from _app.shared.constants import DB_NAME, DEFAULT_ADMIN_EMAIL, TWILIO_FROM_NUMBER
+from _app.shared.constants import CORS_ALLOW_ORIGINS, DB_NAME, DEFAULT_ADMIN_EMAIL, TWILIO_FROM_NUMBER
+
+
+def _split_comma_separated(value: str | list[str]) -> list[str]:
+    if isinstance(value, str):
+        return [item.strip() for item in value.split(",") if item.strip()]
+    return value
 
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env.local", extra="ignore")
 
     mongodb_uri: str | None = None
+
+    # Origins allowed to call this API (see _app/core/middleware.py). Comma
+    # separated in the environment, e.g. "http://localhost:5174,https://www.forwardlegacy.co.in".
+    # Defaults to the dev + prod web app origins so production (Vercel)
+    # doesn't need to set this unless it changes.
+    cors_allow_origins: Annotated[list[str], NoDecode, BeforeValidator(_split_comma_separated)] = CORS_ALLOW_ORIGINS
 
     # Signs and verifies JWTs issued on admin/testator login (see
     # _app/core/jwt_auth.py). Must be a long random secret, set only in the

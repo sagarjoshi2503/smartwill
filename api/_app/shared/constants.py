@@ -41,7 +41,13 @@ ROLE_ADMIN = "admin"
 ROLE_TESTATOR = "testator"
 
 # --- CORS ---
-CORS_ALLOW_ORIGINS = ["*"]
+# Default origins allowed to call the API, used when CORS_ALLOW_ORIGINS is
+# unset in the environment (see _app/core/config.py).
+CORS_ALLOW_ORIGINS = [
+    "http://localhost:5174",
+    "https://www.forwardlegacy.co.in",
+    "https://www.dev.forwardlegacy.co.in",
+]
 CORS_ALLOW_METHODS = ["GET", "POST", "DELETE", "OPTIONS"]
 CORS_ALLOW_HEADERS = ["Content-Type", "Authorization"]
 
