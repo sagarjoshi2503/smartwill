@@ -23,6 +23,7 @@ import { allocTotal } from "./utils/allocation";
 import { authFetch } from "./utils/apiBase";
 import { clearAuthToken } from "./utils/auth";
 import { getMissingIdFields } from "./utils/willValidation";
+import { trackPageview } from "./utils/analytics";
 import {
   ADMIN_PATH, API_FLAGS, API_RAZORPAY_FLAG, API_WILL_SAVE, apiPathSendBack,
   OTP_LENGTH, STATUS_DRAFT, STATUS_PENDING_REVIEW, STATUS_COMPLETED,
@@ -90,6 +91,12 @@ export default function SmartWill() {
     const onAdminPath = window.location.pathname===ADMIN_PATH;
     if(isAdminView(view) && !onAdminPath) window.history.pushState({}, "", ADMIN_PATH);
     else if(!isAdminView(view) && onAdminPath) window.history.pushState({}, "", "/");
+  }, [view]);
+
+  // Send a virtual page view to GA on every in-app view change — this SPA
+  // has no router/URL-per-screen, so `view` is the closest thing to a route.
+  useEffect(() => {
+    trackPageview(`/${view}`, view);
   }, [view]);
 
   useEffect(() => {
