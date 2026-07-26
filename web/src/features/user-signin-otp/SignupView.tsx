@@ -17,8 +17,11 @@ export default function SignupView({signup,setSignup,onNext}:{
   const [error,setError]=useState("");
   const IC="w-full apv-input rounded-2xl pl-11 pr-4 py-3 text-slate-900 placeholder:text-slate-500 text-sm focus:outline-none transition";
 
+  const canSubmit = signup.name.trim().length>0 && signup.phone.replace(/\D/g,"").length>=10
+    && /\S+@\S+\.\S+/.test(signup.email) && signup.terms;
+
   const handleSendOtp = async () => {
-    if(!signup.terms||sending) return;
+    if(!canSubmit||sending) return;
     setSending(true); setError("");
     try {
       const res = await fetch(apiUrl(API_OTP_REQUEST), {
@@ -69,7 +72,7 @@ export default function SignupView({signup,setSignup,onNext}:{
             <span className="text-slate-600 text-sm">I agree to the <span className="text-[#d09d61]">Terms of Service</span> and <span className="text-[#d09d61]">Privacy Policy</span></span>
           </label>
           {error&&<p className="text-red-500 text-xs">{error}</p>}
-          <button onClick={handleSendOtp} disabled={!signup.terms||sending} className={`w-full py-3 rounded-full font-bold text-sm transition-all ${signup.terms&&!sending?"apv-btn":"bg-slate-200 text-slate-500 cursor-not-allowed"}`}>
+          <button onClick={handleSendOtp} disabled={!canSubmit||sending} className={`w-full py-3 rounded-full font-bold text-sm transition-all ${canSubmit&&!sending?"apv-btn":"bg-slate-200 text-slate-500 cursor-not-allowed"}`}>
             {sending?MSG_SENDING_OTP:<>Send OTP to {COUNTRY_CODE_PREFIX}{signup.phone.slice(0,PHONE_MASK_DIGITS)||"XXXXX"}XXXXX</>}
           </button>
         </div>
