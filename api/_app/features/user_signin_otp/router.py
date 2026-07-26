@@ -28,11 +28,11 @@ async def request_otp(request: Request, settings: Settings = Depends(get_setting
     "/verify", response_model=OtpVerifyResponse, responses=ERROR_RESPONSES,
     summary="Verify a previously requested OTP",
 )
-async def verify_otp(request: Request):
+async def verify_otp(request: Request, settings: Settings = Depends(get_settings)):
     try:
         body = await request.json()
     except Exception:
         body = {}
     if not isinstance(body, dict):
         body = {}
-    return service.verify_otp(body)
+    return service.verify_otp(body, settings)

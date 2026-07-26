@@ -10,6 +10,11 @@ class Settings(BaseSettings):
 
     mongodb_uri: str | None = None
 
+    # Signs and verifies JWTs issued on admin/testator login (see
+    # _app/core/jwt_auth.py). Must be a long random secret, set only in the
+    # server environment — never exposed to the frontend.
+    jwt_secret_key: str | None = None
+
     # Lets local dev point at a separate database (e.g. "smartwill-dev") while
     # Vercel keeps using the existing production db, without touching the
     # connection string itself.

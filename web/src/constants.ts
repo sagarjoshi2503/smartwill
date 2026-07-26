@@ -8,6 +8,12 @@ export const STATUS_DRAFT = "Draft" as const;
 export const STATUS_PENDING_REVIEW = "PendingReview" as const;
 export const STATUS_COMPLETED = "Completed" as const;
 
+// --- Auth roles (mirrors ROLE_ADMIN / ROLE_TESTATOR in the backend's
+// _app/shared/constants.py) — identifies which stored JWT authFetch() should
+// attach to a request. ---
+export const ROLE_ADMIN = "admin" as const;
+export const ROLE_TESTATOR = "testator" as const;
+
 // --- Routes ---
 export const ADMIN_PATH = "/admin";
 

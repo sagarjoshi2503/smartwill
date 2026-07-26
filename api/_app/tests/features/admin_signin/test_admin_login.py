@@ -25,7 +25,10 @@ def test_login_success_with_correct_credentials(client, fake_db):
     seed_admin(fake_db)
     res = client.post(URL, json={"email": "jane@lawfirm.com", "password": encode(PASSWORD)})
     assert res.status_code == 200
-    assert res.json() == {"name": "Jane Doe", "email": "jane@lawfirm.com"}
+    body = res.json()
+    assert body["name"] == "Jane Doe"
+    assert body["email"] == "jane@lawfirm.com"
+    assert body["token"]
 
 
 def test_login_is_case_insensitive_on_email(client, fake_db):

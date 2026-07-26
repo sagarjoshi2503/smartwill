@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { FileText, Plus, Edit3, Eye, Trash2, Clock } from "lucide-react";
-import { apiUrl } from "../../utils/apiBase";
+import { authFetch } from "../../utils/apiBase";
 import {
   API_MY_WILLS, apiPathWill, CONFIRM_DELETE_WILL, ERR_LOAD_WILL,
   ERR_DELETE_WILL, STATUS_DRAFT, STATUS_PENDING_REVIEW, STATUS_COMPLETED, STATUS_LBL, WILL_VISIBLE_DAYS,
+  ROLE_TESTATOR,
 } from "../../constants";
 import { WILL_TYPE_LBL_SHORT } from "../../data/willTypes";
 import type { TestatorWill, WillState, WillType } from "../../types";
@@ -33,7 +34,7 @@ export default function TestatorWillsView({email,onCreateNew,onEditWill,onViewWi
   const filteredWills = statusFilter==="All" ? wills : wills.filter(w=>w.status===statusFilter);
 
   const fetchWill = async (willId: string): Promise<{ will: WillState; willType: WillType; adminComments?: string }> => {
-    const res = await fetch(apiUrl(`${apiPathWill(willId)}?email=${encodeURIComponent(email)}`));
+    const res = await authFetch(ROLE_TESTATOR, apiPathWill(willId));
     const isJson = res.headers.get("content-type")?.includes("application/json");
     const data = isJson ? await res.json() : null;
     if(!res.ok) throw new Error(data?.error || `Could not load this Will (server returned ${res.status}).`);
@@ -68,7 +69,7 @@ export default function TestatorWillsView({email,onCreateNew,onEditWill,onViewWi
     if(!window.confirm(CONFIRM_DELETE_WILL)) return;
     setBusyId(willId); setActionError("");
     try {
-      const res = await fetch(apiUrl(`${apiPathWill(willId)}?email=${encodeURIComponent(email)}`), { method: "DELETE" });
+      const res = await authFetch(ROLE_TESTATOR, apiPathWill(willId), { method: "DELETE" });
       const isJson = res.headers.get("content-type")?.includes("application/json");
       const data = isJson ? await res.json() : null;
       if(!res.ok) throw new Error(data?.error || `Could not delete this Will (server returned ${res.status}).`);
@@ -85,7 +86,7 @@ export default function TestatorWillsView({email,onCreateNew,onEditWill,onViewWi
     (async()=>{
       setStatus("loading"); setError("");
       try {
-        const res = await fetch(apiUrl(`${API_MY_WILLS}?email=${encodeURIComponent(email)}`));
+        const res = await authFetch(ROLE_TESTATOR, API_MY_WILLS);
         const isJson = res.headers.get("content-type")?.includes("application/json");
         const data = isJson ? await res.json() : null;
         if(!res.ok) throw new Error(data?.error || `Could not load your Wills (server returned ${res.status}).`);

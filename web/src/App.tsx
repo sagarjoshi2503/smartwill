@@ -20,13 +20,14 @@ import AllIndiaLiveDocPreview from "./features/create-will/AllIndiaLiveDocPrevie
 import WillDocument from "./features/create-will/WillDocument";
 import AllIndiaWillDocument from "./features/create-will/AllIndiaWillDocument";
 import { allocTotal } from "./utils/allocation";
-import { apiUrl } from "./utils/apiBase";
+import { authFetch } from "./utils/apiBase";
+import { clearAuthToken } from "./utils/auth";
 import { getMissingIdFields } from "./utils/willValidation";
 import {
   ADMIN_PATH, API_FLAGS, API_RAZORPAY_FLAG, API_WILL_SAVE, apiPathSendBack,
   OTP_LENGTH, STATUS_DRAFT, STATUS_PENDING_REVIEW, STATUS_COMPLETED,
   SEND_BACK_REDIRECT_MS, DRAFT_RESET_MS, WIZARD_REDIRECT_MS,
-  MSG_VIEW_ONLY, MSG_SAVING, BTN_SAVE_AS_DRAFT,
+  MSG_VIEW_ONLY, MSG_SAVING, BTN_SAVE_AS_DRAFT, ROLE_ADMIN, ROLE_TESTATOR,
 } from "./constants";
 import type {
   AdminProfile, AssetCatalogItem, Beneficiary, DisclaimerChecks, GoogleProfile, Plan, SignupState, ViewName, WillState, WillType,
@@ -140,6 +141,7 @@ export default function SmartWill() {
   };
 
   const handleTestatorLogout = () => {
+    clearAuthToken(ROLE_TESTATOR);
     setTestatorAuthenticated(false);
     setSignup({ name:"", phone:"", email:"", state:"", terms:false });
     setOtp(Array(OTP_LENGTH).fill(""));
@@ -260,7 +262,7 @@ export default function SmartWill() {
     if(!editingWillId || !sendBackComments.trim()) return;
     setSendBackStatus("sending"); setSendBackError("");
     try {
-      const res = await fetch(apiUrl(apiPathSendBack(editingWillId)), {
+      const res = await authFetch(ROLE_ADMIN, apiPathSendBack(editingWillId), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ comments: sendBackComments }),
@@ -314,7 +316,7 @@ export default function SmartWill() {
   const handleSaveDraft = async () => {
     setDraftStatus("saving"); setDraftError("");
     try {
-      const res = await fetch(apiUrl(API_WILL_SAVE), {
+      const res = await authFetch(ROLE_TESTATOR, API_WILL_SAVE, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ will, testatorEmail: will.testator.email, status: STATUS_DRAFT, willId: editingWillId, willType }),
@@ -364,7 +366,7 @@ export default function SmartWill() {
                     </div>
                     <span className="text-[#d09d61] text-sm">{adminProfile.name}</span>
                   </div>
-                  <button onClick={()=>{setAdminProfile(null);setView("landing");}} className="flex items-center gap-1.5 text-slate-600 hover:text-slate-900 text-sm transition-colors"><LogOut size={13}/>Logout</button>
+                  <button onClick={()=>{clearAuthToken(ROLE_ADMIN);setAdminProfile(null);setView("landing");}} className="flex items-center gap-1.5 text-slate-600 hover:text-slate-900 text-sm transition-colors"><LogOut size={13}/>Logout</button>
                 </>
               ):testatorAuthenticated && !isAdminView(view) ? (
                 <>
@@ -393,7 +395,7 @@ export default function SmartWill() {
       {view==="contactUs" && <ContactUsView onBack={()=>setView("landing")}/>}
       {view==="authChoice" && <AuthChoiceView onGoogleSuccess={handleGoogleSuccess} onPhone={()=>setView("signup")} onBack={()=>setView("landing")}/>}
       {view==="signup" && <SignupView signup={signup} setSignup={setSignup} onNext={()=>{setOtp(Array(OTP_LENGTH).fill("")); setView("otp");}}/>}
-      {view==="otp" && <OtpView otp={otp} handleOtp={handleOtp} otpRefs={otpRefs} phone={signup.phone} onNext={handleOtpVerified}/>}
+      {view==="otp" && <OtpView otp={otp} handleOtp={handleOtp} otpRefs={otpRefs} phone={signup.phone} email={signup.email} onNext={handleOtpVerified}/>}
       {view==="disclaimer" && <DisclaimerView dchecks={dchecks} setDchecks={setDchecks} allChecked={allDchecked} onAgree={()=>setView("wizard")} onBack={()=>setView("myWills")}/>}
       {view==="myWills" && <TestatorWillsView email={signup.email} onCreateNew={handleCreateNewWill} onEditWill={handleEditWill} onViewWill={handleViewWill}/>}
       {view==="adminLogin" && <AdminLoginView onLogin={(admin)=>{setAdminProfile(admin);setView("admin");}} onBack={()=>setView("landing")} onSignup={()=>setView("adminSignup")}/>}
@@ -487,7 +489,6 @@ export default function SmartWill() {
                 testatorEmailEditable={testatorEmailEditable}
                 viewOnly={viewOnlyMode}
                 willStatus={adminReviewStatus}
-                reviewerEmail={adminProfile?.email}
                 adminComments={activeAdminComments}
                 amount={totalPrice}
                 paymentEnabled={razorpayEnabled}

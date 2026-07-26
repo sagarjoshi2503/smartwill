@@ -3,17 +3,22 @@ from pymongo.database import Database
 
 from _app.core.config import Settings, get_settings
 from _app.core.db import get_db
+from _app.core.jwt_auth import get_current_admin
 from _app.features.admin_dashboard import service
 from _app.features.admin_dashboard.schemas import (
     ClientsResponse, DeleteWillResponse, ErrorResponse, SaveWillResponse, WillDetailResponse,
 )
 from _app.shared.constants import (
-    FLD_COMMENTS, HTTP_BAD_REQUEST, HTTP_CREATED, HTTP_SERVER_ERROR, HTTP_NOT_FOUND,
+    FLD_COMMENTS, HTTP_BAD_REQUEST, HTTP_CREATED, HTTP_SERVER_ERROR, HTTP_NOT_FOUND, HTTP_UNAUTHORIZED,
 )
 
 router = APIRouter(prefix="/api/will", tags=["admin-dashboard"])
 
-ERROR_RESPONSES = {HTTP_BAD_REQUEST: {"model": ErrorResponse}, HTTP_SERVER_ERROR: {"model": ErrorResponse}}
+ERROR_RESPONSES = {
+    HTTP_BAD_REQUEST: {"model": ErrorResponse},
+    HTTP_UNAUTHORIZED: {"model": ErrorResponse},
+    HTTP_SERVER_ERROR: {"model": ErrorResponse},
+}
 
 
 @router.post(
@@ -21,40 +26,44 @@ ERROR_RESPONSES = {HTTP_BAD_REQUEST: {"model": ErrorResponse}, HTTP_SERVER_ERROR
     responses={**ERROR_RESPONSES, HTTP_NOT_FOUND: {"model": ErrorResponse}},
     summary="Admin creates or updates a Will directly (e.g. save-and-complete for a client)",
 )
-async def save_admin(request: Request, db: Database = Depends(get_db), settings: Settings = Depends(get_settings)):
+async def save_admin(
+    request: Request, db: Database = Depends(get_db), settings: Settings = Depends(get_settings),
+    admin_email: str = Depends(get_current_admin),
+):
     try:
         body = await request.json()
     except Exception:
         body = None
     if not isinstance(body, dict):
         body = None
-    return service.save_will_as_admin(db, body or {}, settings)
+    return service.save_will_as_admin(db, body or {}, settings, admin_email)
 
 
 @router.get(
-    "/admin-wills", response_model=ClientsResponse, responses={HTTP_SERVER_ERROR: {"model": ErrorResponse}},
+    "/admin-wills", response_model=ClientsResponse, responses=ERROR_RESPONSES,
     summary="List all Wills submitted for admin review",
 )
-async def admin_wills(db: Database = Depends(get_db)):
+async def admin_wills(db: Database = Depends(get_db), admin_email: str = Depends(get_current_admin)):
     return service.list_admin_wills(db)
 
 
 @router.get(
     "/admin/{will_id}", response_model=WillDetailResponse,
-    responses={HTTP_SERVER_ERROR: {"model": ErrorResponse}, HTTP_NOT_FOUND: {"model": ErrorResponse}},
+    responses={**ERROR_RESPONSES, HTTP_NOT_FOUND: {"model": ErrorResponse}},
     summary="Fetch any Will for admin review (no ownership check)",
 )
-async def get_will_admin(will_id: str, db: Database = Depends(get_db)):
+async def get_will_admin(will_id: str, db: Database = Depends(get_db), admin_email: str = Depends(get_current_admin)):
     return service.get_will_as_admin(db, will_id)
 
 
 @router.post(
     "/admin/{will_id}/complete", response_model=SaveWillResponse,
-    responses={HTTP_SERVER_ERROR: {"model": ErrorResponse}, HTTP_NOT_FOUND: {"model": ErrorResponse}},
+    responses={**ERROR_RESPONSES, HTTP_NOT_FOUND: {"model": ErrorResponse}},
     summary="Admin completes review of a Will",
 )
 async def complete_will_admin(
     will_id: str, request: Request, db: Database = Depends(get_db), settings: Settings = Depends(get_settings),
+    admin_email: str = Depends(get_current_admin),
 ):
     try:
         body = await request.json()
@@ -62,7 +71,7 @@ async def complete_will_admin(
         body = {}
     if not isinstance(body, dict):
         body = {}
-    return service.admin_complete_will(db, will_id, body, settings)
+    return service.admin_complete_will(db, will_id, body, settings, admin_email)
 
 
 @router.post(
@@ -72,6 +81,7 @@ async def complete_will_admin(
 )
 async def send_back_will_admin(
     will_id: str, request: Request, db: Database = Depends(get_db), settings: Settings = Depends(get_settings),
+    admin_email: str = Depends(get_current_admin),
 ):
     try:
         body = await request.json()
@@ -84,8 +94,8 @@ async def send_back_will_admin(
 
 @router.delete(
     "/admin/{will_id}", response_model=DeleteWillResponse,
-    responses={HTTP_SERVER_ERROR: {"model": ErrorResponse}, HTTP_NOT_FOUND: {"model": ErrorResponse}},
+    responses={**ERROR_RESPONSES, HTTP_NOT_FOUND: {"model": ErrorResponse}},
     summary="Delete any Will (admin reviewer action)",
 )
-async def delete_will_admin(will_id: str, db: Database = Depends(get_db)):
+async def delete_will_admin(will_id: str, db: Database = Depends(get_db), admin_email: str = Depends(get_current_admin)):
     return service.delete_will_as_admin(db, will_id)

@@ -34,10 +34,16 @@ OTP_TTL_SECONDS = 300
 OTP_PHONE_MIN = 10
 OTP_COUNTRY_CODE = "+91"
 
+# --- JWT auth ---
+JWT_ALGORITHM = "HS256"
+JWT_EXPIRE_MINUTES = 60 * 24
+ROLE_ADMIN = "admin"
+ROLE_TESTATOR = "testator"
+
 # --- CORS ---
 CORS_ALLOW_ORIGINS = ["*"]
 CORS_ALLOW_METHODS = ["GET", "POST", "DELETE", "OPTIONS"]
-CORS_ALLOW_HEADERS = ["Content-Type"]
+CORS_ALLOW_HEADERS = ["Content-Type", "Authorization"]
 
 # --- Email (Resend) ---
 RESEND_API_URL = "https://api.resend.com/emails"
@@ -81,6 +87,10 @@ OTP_MISSING = "Request an OTP before attempting to verify it."
 OTP_EXPIRED = "This OTP has expired. Please request a new one."
 INVALID_OTP = "The OTP you entered is incorrect."
 
+MISSING_AUTH_TOKEN = "Missing or invalid Authorization header."
+INVALID_AUTH_TOKEN = "Invalid or expired session. Please log in again."
+JWT_NOT_CONFIGURED = "Authentication is not configured on the server (missing JWT_SECRET_KEY)."
+
 WILL_REQUIRED = "Will data is required."
 BAD_WILL_STATUS = "Invalid will status."
 BAD_WILL_TYPE = "Invalid will type."
@@ -110,6 +120,7 @@ FLD_PWD_HASH = "passwordHash"
 FLD_FULL_NAME = "fullName"
 FLD_NAME = "name"
 FLD_ID_TOKEN = "idToken"
+FLD_TOKEN = "token"
 FLD_PHONE = "phone"
 FLD_CODE = "code"
 FLD_COMMENTS = "comments"

@@ -13,7 +13,10 @@ VALID_PAYLOAD = {"fullName": "Jane Doe", "email": "jane@lawfirm.com", "password"
 def test_signup_success_stores_hashed_password(client, fake_db):
     res = client.post(URL, json=VALID_PAYLOAD)
     assert res.status_code == 201
-    assert res.json() == {"name": "Jane Doe", "email": "jane@lawfirm.com"}
+    body = res.json()
+    assert body["name"] == "Jane Doe"
+    assert body["email"] == "jane@lawfirm.com"
+    assert body["token"]
 
     doc = fake_db["login"].find_one({"email": "jane@lawfirm.com"})
     assert doc["fullName"] == "Jane Doe"
@@ -25,7 +28,9 @@ def test_signup_success_stores_hashed_password(client, fake_db):
 def test_signup_lowercases_and_trims_input(client, fake_db):
     res = client.post(URL, json={"fullName": "  Jane Doe  ", "email": "  Jane@LawFirm.com  ", "password": "password123"})
     assert res.status_code == 201
-    assert res.json() == {"name": "Jane Doe", "email": "jane@lawfirm.com"}
+    body = res.json()
+    assert body["name"] == "Jane Doe"
+    assert body["email"] == "jane@lawfirm.com"
     assert fake_db["login"].find_one({"email": "jane@lawfirm.com"}) is not None
 
 

@@ -2,7 +2,8 @@ import { useState } from "react";
 import { Scale, Phone, ArrowRight } from "lucide-react";
 import GoogleSignInButton from "../features/user-signin-gmail/GoogleSignInButton";
 import { apiUrl } from "../utils/apiBase";
-import { API_GOOGLE } from "../constants";
+import { setAuthToken } from "../utils/auth";
+import { API_GOOGLE, ROLE_TESTATOR } from "../constants";
 import type { GoogleProfile } from "../types";
 
 export default function AuthChoiceView({onGoogleSuccess,onPhone,onBack}:{
@@ -31,6 +32,7 @@ export default function AuthChoiceView({onGoogleSuccess,onPhone,onBack}:{
       }
       const data = await res.json();
       if(!res.ok) throw new Error(data?.error || "Google sign-in failed.");
+      setAuthToken(ROLE_TESTATOR, data.token);
       setStatus("idle");
       onGoogleSuccess({ name: data.name, email: data.email });
     } catch (err) {

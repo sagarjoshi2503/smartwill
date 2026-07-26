@@ -51,7 +51,7 @@ def _redact_id_numbers(will_data: dict) -> dict:
     return redacted
 
 
-def save_will_as_admin(db: Database, body: dict, settings: Settings) -> dict:
+def save_will_as_admin(db: Database, body: dict, settings: Settings, admin_email: str) -> dict:
     # Admin-driven saves (e.g. save-and-complete for a client) bypass the
     # ownership/lock checks that apply to testator-driven saves — an admin
     # can create or update any Will regardless of who submitted it.
@@ -85,11 +85,10 @@ def save_will_as_admin(db: Database, body: dict, settings: Settings) -> dict:
     else:
         will_id = str(uuid.uuid4())
         created_at = now
-        # This endpoint is only reachable by an admin (e.g. creating a Will
-        # on a client's behalf), so the admin's own email — sent as
-        # reviewerEmail, the field that already carries the acting admin's
-        # identity elsewhere in this module — is the creator here.
-        created_by = normalize_email(body.get(FLD_REVIEWER_EMAIL)) if body.get(FLD_REVIEWER_EMAIL) else testator_email
+        # This endpoint is only reachable by an authenticated admin (e.g.
+        # creating a Will on a client's behalf) — the admin's own email, taken
+        # from their JWT rather than any client-supplied field, is the creator.
+        created_by = admin_email
         payment_status = PaymentStatus.NOT_PAID.value
         payment_amount = None
 
@@ -113,9 +112,7 @@ def save_will_as_admin(db: Database, body: dict, settings: Settings) -> dict:
         FLD_PAYMENT_AMOUNT: payment_amount,
     }
     if status == STATUS_COMPLETED:
-        reviewer_email = normalize_email(body.get(FLD_REVIEWER_EMAIL)) if body.get(FLD_REVIEWER_EMAIL) else None
-        if reviewer_email:
-            document[FLD_REVIEWER_EMAIL] = reviewer_email
+        document[FLD_REVIEWER_EMAIL] = admin_email
     repository.upsert_will(db, will_id, document)
 
     if status == STATUS_PENDING_REVIEW:
@@ -188,21 +185,18 @@ def get_will_as_admin(db: Database, will_id: str) -> dict:
     }
 
 
-def admin_complete_will(db: Database, will_id: str, body: dict, settings: Settings) -> dict:
+def admin_complete_will(db: Database, will_id: str, body: dict, settings: Settings, admin_email: str) -> dict:
     document = repository.find_will_by_id(db, will_id)
     if not document:
         raise AppError(HTTP_NOT_FOUND, WILL_NOT_FOUND)
 
     updated_will = body.get(FLD_WILL) if isinstance(body, dict) else None
-    reviewer_email = None
-    if isinstance(body, dict) and body.get(FLD_REVIEWER_EMAIL):
-        reviewer_email = normalize_email(body.get(FLD_REVIEWER_EMAIL))
     document = {
         **document,
         **({FLD_WILL: _redact_id_numbers(updated_will)} if updated_will is not None else {}),
         FLD_STATUS: STATUS_COMPLETED,
         FLD_UPDATED_AT: datetime.now(timezone.utc),
-        **({FLD_REVIEWER_EMAIL: reviewer_email} if reviewer_email else {}),
+        FLD_REVIEWER_EMAIL: admin_email,
     }
     repository.upsert_will(db, will_id, document)
 

@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, Request
 from pymongo.database import Database
 
+from _app.core.config import Settings, get_settings
 from _app.core.db import get_db
 from _app.features.admin_signup import service
 from _app.features.admin_signup.schemas import AuthResponse, ErrorResponse
@@ -19,11 +20,11 @@ ERROR_RESPONSES = {
     responses={**ERROR_RESPONSES, HTTP_CONFLICT: {"model": ErrorResponse}},
     summary="Create an Admin Portal account",
 )
-async def admin_signup(request: Request, db: Database = Depends(get_db)):
+async def admin_signup(request: Request, db: Database = Depends(get_db), settings: Settings = Depends(get_settings)):
     try:
         body = await request.json()
     except Exception:
         body = {}
     if not isinstance(body, dict):
         body = {}
-    return service.signup_admin(db, body)
+    return service.signup_admin(db, body, settings)

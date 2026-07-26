@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { Users, Plus, Edit3, Trash2, Clock, CheckCircle2 } from "lucide-react";
-import { apiUrl } from "../../utils/apiBase";
+import { authFetch } from "../../utils/apiBase";
 import { fmt } from "../../utils/format";
 import {
   API_ADMIN_WILLS, apiPathAdminWill, CONFIRM_DELETE_WILL,
   ERR_LOAD_WILL, ERR_DELETE_WILL, STATUS_DRAFT, STATUS_PENDING_REVIEW, STATUS_COMPLETED,
-  STATUS_LBL,
+  STATUS_LBL, ROLE_ADMIN,
 } from "../../constants";
 import { WILL_TYPE_LBL_SHORT } from "../../data/willTypes";
 import type { AdminClient, AdminProfile, WillState, WillType } from "../../types";
@@ -52,7 +52,7 @@ export default function AdminPortal({admin,onCreateWill,onReviewWill}:{
     (async()=>{
       setStatus("loading"); setError("");
       try {
-        const res = await fetch(apiUrl(API_ADMIN_WILLS));
+        const res = await authFetch(ROLE_ADMIN, API_ADMIN_WILLS);
         const isJson = res.headers.get("content-type")?.includes("application/json");
         const data = isJson ? await res.json() : null;
         if(!res.ok) throw new Error(data?.error || `Could not load clients (server returned ${res.status}).`);
@@ -71,7 +71,7 @@ export default function AdminPortal({admin,onCreateWill,onReviewWill}:{
   const handleReview = async (willId: string) => {
     setReviewingId(willId); setReviewError("");
     try {
-      const res = await fetch(apiUrl(apiPathAdminWill(willId)));
+      const res = await authFetch(ROLE_ADMIN, apiPathAdminWill(willId));
       const isJson = res.headers.get("content-type")?.includes("application/json");
       const data = isJson ? await res.json() : null;
       if(!res.ok) throw new Error(data?.error || `Could not load this Will (server returned ${res.status}).`);
@@ -87,7 +87,7 @@ export default function AdminPortal({admin,onCreateWill,onReviewWill}:{
     if(!window.confirm(CONFIRM_DELETE_WILL)) return;
     setDeletingId(willId); setDeleteError("");
     try {
-      const res = await fetch(apiUrl(apiPathAdminWill(willId)), { method: "DELETE" });
+      const res = await authFetch(ROLE_ADMIN, apiPathAdminWill(willId), { method: "DELETE" });
       const isJson = res.headers.get("content-type")?.includes("application/json");
       const data = isJson ? await res.json() : null;
       if(!res.ok) throw new Error(data?.error || `Could not delete this Will (server returned ${res.status}).`);

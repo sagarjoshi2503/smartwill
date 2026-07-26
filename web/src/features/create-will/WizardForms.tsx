@@ -10,7 +10,7 @@ import StepHeader from "../../components/shared/StepHeader";
 import FormBlock from "../../components/shared/FormBlock";
 import Toggle from "../../components/shared/Toggle";
 import Nav from "../../components/shared/Nav";
-import { apiUrl } from "../../utils/apiBase";
+import { authFetch } from "../../utils/apiBase";
 import {
   API_WILL_SAVE, API_ADMIN_SAVE, API_PAYMENTS_CREATE_ORDER, API_PAYMENTS_VERIFY, API_PAYMENTS_MARK_FAILED,
   apiPathComplete,
@@ -18,7 +18,7 @@ import {
   TIP_NO_ID_SAVED, MSG_VIEW_ONLY, MSG_SAVING,
   BTN_COMPLETE_REVIEW, BTN_SUBMIT_REVIEW,
   STATUS_COMPLETED, STATUS_DRAFT, STATUS_PENDING_REVIEW,
-  RAZORPAY_KEY_ID,
+  RAZORPAY_KEY_ID, ROLE_ADMIN, ROLE_TESTATOR,
 } from "../../constants";
 import type { AssetCatalogItem, AssetInstance, Beneficiary, WillState, WillType } from "../../types";
 import type { RazorpaySuccessResponse } from "../../types/razorpay";
@@ -48,14 +48,13 @@ interface WizardFormsProps {
   adminComplete?: boolean;
   testatorEmailEditable?: boolean;
   viewOnly?: boolean;
-  reviewerEmail?: string;
   adminComments?: string;
   willStatus?: string | null;
   amount?: number;
   paymentEnabled?: boolean;
 }
 
-export default function WizardForms({step,will,setWill,willType,setWillType,hideWillTypeStep,addBene,removeBene,updateBene,addAsset,removeAsset,updateAssetData,updateAssetAlloc,allocTotal,assetAdded,onNext,onPrev,onGenerate,willId,onSaved,adminReview,adminComplete,testatorEmailEditable,viewOnly,reviewerEmail,adminComments,willStatus,amount,paymentEnabled}: WizardFormsProps){
+export default function WizardForms({step,will,setWill,willType,setWillType,hideWillTypeStep,addBene,removeBene,updateBene,addAsset,removeAsset,updateAssetData,updateAssetAlloc,allocTotal,assetAdded,onNext,onPrev,onGenerate,willId,onSaved,adminReview,adminComplete,testatorEmailEditable,viewOnly,adminComments,willStatus,amount,paymentEnabled}: WizardFormsProps){
   const IC="w-full apv-input rounded-2xl px-3.5 py-2.5 text-slate-900 placeholder:text-slate-500 text-sm focus:outline-none transition";
   const LC="block apv-label mb-1";
   const set=(path: string, v: string | boolean)=>setWill(p=>{
@@ -83,7 +82,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
   const gateBehindPayment = isPlainTestatorSubmit && !!RAZORPAY_KEY_ID && !!paymentEnabled;
 
   const submitForReview = async (savedWillId: string) => {
-    const res = await fetch(apiUrl(API_WILL_SAVE), {
+    const res = await authFetch(ROLE_TESTATOR, API_WILL_SAVE, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ will, testatorEmail: will.testator.email, status: STATUS_PENDING_REVIEW, willId: savedWillId, willType }),
@@ -99,7 +98,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
     // Fire-and-forget: the testator's Draft stays editable either way, this
     // is just so the will document doesn't sit at NotPaid forever after a
     // genuine (failed/cancelled) attempt.
-    fetch(apiUrl(API_PAYMENTS_MARK_FAILED), {
+    authFetch(ROLE_TESTATOR, API_PAYMENTS_MARK_FAILED, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ willId: savedWillId }),
@@ -108,7 +107,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
 
   const handlePaymentSuccess = async (savedWillId: string, orderAmount: number, response: RazorpaySuccessResponse) => {
     try {
-      const res = await fetch(apiUrl(API_PAYMENTS_VERIFY), {
+      const res = await authFetch(ROLE_TESTATOR, API_PAYMENTS_VERIFY, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...response, willId: savedWillId, amount: orderAmount }),
@@ -159,18 +158,18 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
     setSubmitStatus("saving"); setSubmitError("");
     try {
       const res = adminReview && willId
-        ? await fetch(apiUrl(apiPathComplete(willId)), {
+        ? await authFetch(ROLE_ADMIN, apiPathComplete(willId), {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ will, reviewerEmail, willType }),
+            body: JSON.stringify({ will, willType }),
           })
         : adminComplete
-        ? await fetch(apiUrl(API_ADMIN_SAVE), {
+        ? await authFetch(ROLE_ADMIN, API_ADMIN_SAVE, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ will, testatorEmail: will.testator.email, status: STATUS_COMPLETED, willId, reviewerEmail, willType }),
+            body: JSON.stringify({ will, testatorEmail: will.testator.email, status: STATUS_COMPLETED, willId, willType }),
           })
-        : await fetch(apiUrl(API_WILL_SAVE), {
+        : await authFetch(ROLE_TESTATOR, API_WILL_SAVE, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -184,7 +183,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
       if(!res.ok) throw new Error(data?.error || `Could not save the Will (server returned ${res.status}).`);
 
       if(gateBehindPayment) {
-        const orderRes = await fetch(apiUrl(API_PAYMENTS_CREATE_ORDER), {
+        const orderRes = await authFetch(ROLE_TESTATOR, API_PAYMENTS_CREATE_ORDER, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ amount: Math.round((amount||0)*100), receipt: data.willId }),

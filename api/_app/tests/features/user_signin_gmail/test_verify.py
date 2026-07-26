@@ -25,14 +25,19 @@ def test_verify_success(client, monkeypatch):
     monkeypatch.setattr(service, "verify_google_id_token", fake_verify({"email": "user@example.com", "name": "Some User"}))
     res = client.post(URL, json={"idToken": "good-token"})
     assert res.status_code == 200
-    assert res.json() == {"name": "Some User", "email": "user@example.com"}
+    body = res.json()
+    assert body["name"] == "Some User"
+    assert body["email"] == "user@example.com"
+    assert body["token"]
 
 
 def test_verify_falls_back_to_email_when_name_missing(client, monkeypatch):
     monkeypatch.setattr(service, "verify_google_id_token", fake_verify({"email": "user@example.com"}))
     res = client.post(URL, json={"idToken": "good-token"})
     assert res.status_code == 200
-    assert res.json() == {"name": "user@example.com", "email": "user@example.com"}
+    body = res.json()
+    assert body["name"] == "user@example.com"
+    assert body["email"] == "user@example.com"
 
 
 # --- negative scenarios ---

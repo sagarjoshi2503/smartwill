@@ -63,7 +63,7 @@ def _redact_id_numbers(will_data: dict) -> dict:
     return redacted
 
 
-def save_will(db: Database, body: dict, settings: Settings) -> dict:
+def save_will(db: Database, body: dict, settings: Settings, testator_email: str) -> dict:
     if not isinstance(body, dict) or not body:
         raise AppError(HTTP_BAD_REQUEST, WILL_REQUIRED)
 
@@ -75,7 +75,10 @@ def save_will(db: Database, body: dict, settings: Settings) -> dict:
     if will_type and will_type not in ALLOWED_WILL_TYPES:
         raise AppError(HTTP_BAD_REQUEST, BAD_WILL_TYPE)
 
-    testator_email = normalize_email(body.get(FLD_TESTATOR_EMAIL))
+    # The owning testator is always the authenticated identity from the JWT —
+    # never the client-supplied testatorEmail field — so a testator can never
+    # save/attach a Will under someone else's email.
+    testator_email = normalize_email(testator_email)
     if not is_valid_email(testator_email):
         raise AppError(HTTP_BAD_REQUEST, BAD_TESTATOR_EMAIL)
 

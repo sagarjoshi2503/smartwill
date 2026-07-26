@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { Scale, Mail, Lock, LogIn } from "lucide-react";
 import { apiUrl } from "../../utils/apiBase";
+import { setAuthToken } from "../../utils/auth";
 import { encodePassword } from "../../utils/encode";
-import { API_ADMIN_LOGIN, LBL_EMAIL_ADDR, LBL_PASSWORD, PH_LAWFIRM_EMAIL } from "../../constants";
+import { API_ADMIN_LOGIN, LBL_EMAIL_ADDR, LBL_PASSWORD, PH_LAWFIRM_EMAIL, ROLE_ADMIN } from "../../constants";
 import type { AdminProfile } from "../../types";
 
 export default function AdminLoginView({onLogin,onBack,onSignup}:{
@@ -32,6 +33,7 @@ export default function AdminLoginView({onLogin,onBack,onSignup}:{
       const isJson = res.headers.get("content-type")?.includes("application/json");
       const data = isJson ? await res.json() : null;
       if(!res.ok) throw new Error(data?.error || `Login failed (server returned ${res.status}).`);
+      setAuthToken(ROLE_ADMIN, data.token);
       onLogin({ name: data.name, email: data.email });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed.");

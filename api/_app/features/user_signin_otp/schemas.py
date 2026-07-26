@@ -8,7 +8,9 @@ class OtpRequestResponse(BaseModel):
 
 class OtpVerifyResponse(BaseModel):
     phone: str
+    email: str
     verified: bool
+    token: str
 
 
 class ErrorResponse(BaseModel):

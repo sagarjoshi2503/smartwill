@@ -1,9 +1,10 @@
 from _app.core.config import Settings
 from _app.core.exceptions import AppError
+from _app.core.jwt_auth import create_access_token
 from _app.core.security import verify_google_id_token
 from _app.shared.constants import (
-    FLD_EMAIL, FLD_ID_TOKEN, FLD_NAME, GOOGLE_NOT_CONFIGURED, GOOGLE_NO_EMAIL,
-    HTTP_BAD_REQUEST, HTTP_SERVER_ERROR, HTTP_UNAUTHORIZED, MISSING_ID_TOKEN,
+    FLD_EMAIL, FLD_ID_TOKEN, FLD_NAME, FLD_TOKEN, GOOGLE_NOT_CONFIGURED, GOOGLE_NO_EMAIL,
+    HTTP_BAD_REQUEST, HTTP_SERVER_ERROR, HTTP_UNAUTHORIZED, MISSING_ID_TOKEN, ROLE_TESTATOR,
 )
 
 
@@ -22,4 +23,5 @@ def verify_google_signin(body: dict, settings: Settings) -> dict:
     if not email:
         raise AppError(HTTP_UNAUTHORIZED, GOOGLE_NO_EMAIL)
 
-    return {FLD_NAME: payload.get(FLD_NAME) or email, FLD_EMAIL: email}
+    token = create_access_token(email, ROLE_TESTATOR, settings)
+    return {FLD_NAME: payload.get(FLD_NAME) or email, FLD_EMAIL: email, FLD_TOKEN: token}

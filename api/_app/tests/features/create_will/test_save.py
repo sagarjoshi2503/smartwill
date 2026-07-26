@@ -1,17 +1,29 @@
+import jwt
+
 from _app.core.config import Settings, get_settings
 from _app.features.create_will import service as will_service
 from _app.main import app
 from _app.shared import constants
+from _app.shared.constants import JWT_ALGORITHM, ROLE_TESTATOR
 from _app.shared.enums import PaymentStatus, WillType
 
 URL = "/api/will/save"
 VALID_PAYLOAD = {"will": {"testator": {"fullName": "Jane Doe"}}, "testatorEmail": "jane@example.com"}
 
 
+def auth_headers(email="jane@example.com"):
+    token = jwt.encode({"sub": email, "role": ROLE_TESTATOR}, "test-secret-key", algorithm=JWT_ALGORITHM)
+    return {"Authorization": f"Bearer {token}"}
+
+
+AUTH = auth_headers()
+OTHER_AUTH = auth_headers("someone-else@example.com")
+
+
 # --- positive scenarios ---
 
 def test_save_success_returns_generated_will_id(client, fake_db):
-    res = client.post(URL, json=VALID_PAYLOAD)
+    res = client.post(URL, headers=AUTH, json=VALID_PAYLOAD)
     assert res.status_code == 201
     will_id = res.json()["willId"]
     assert will_id
@@ -37,7 +49,7 @@ def test_save_strips_id_numbers_before_persisting(client, fake_db):
         "testatorEmail": "jane@example.com",
     }
 
-    res = client.post(URL, json=payload)
+    res = client.post(URL, headers=AUTH, json=payload)
 
     assert res.status_code == 201
     doc = fake_db["will"].find_one({"willId": res.json()["willId"]})
@@ -71,7 +83,7 @@ def test_save_strips_all_india_asset_and_residue_ids_before_persisting(client, f
         "testatorEmail": "jane@example.com",
     }
 
-    res = client.post(URL, json=payload)
+    res = client.post(URL, headers=AUTH, json=payload)
 
     assert res.status_code == 201
     doc = fake_db["will"].find_one({"willId": res.json()["willId"]})
@@ -88,13 +100,13 @@ def test_save_strips_all_india_asset_and_residue_ids_before_persisting(client, f
 
 
 def test_save_generates_unique_will_ids_across_requests(client):
-    res1 = client.post(URL, json=VALID_PAYLOAD)
-    res2 = client.post(URL, json=VALID_PAYLOAD)
+    res1 = client.post(URL, headers=AUTH, json=VALID_PAYLOAD)
+    res2 = client.post(URL, headers=AUTH, json=VALID_PAYLOAD)
     assert res1.json()["willId"] != res2.json()["willId"]
 
 
 def test_save_updates_existing_draft_when_will_id_provided(client, fake_db):
-    first = client.post(URL, json={**VALID_PAYLOAD, "status": "Draft"})
+    first = client.post(URL, headers=AUTH, json={**VALID_PAYLOAD, "status": "Draft"})
     will_id = first.json()["willId"]
 
     updated_payload = {
@@ -103,7 +115,7 @@ def test_save_updates_existing_draft_when_will_id_provided(client, fake_db):
         "status": "Draft",
         "willId": will_id,
     }
-    second = client.post(URL, json=updated_payload)
+    second = client.post(URL, headers=AUTH, json=updated_payload)
 
     assert second.status_code == 201
     assert second.json()["willId"] == will_id
@@ -113,20 +125,20 @@ def test_save_updates_existing_draft_when_will_id_provided(client, fake_db):
 
 
 def test_save_preserves_created_at_across_updates(client, fake_db):
-    first = client.post(URL, json={**VALID_PAYLOAD, "status": "Draft"})
+    first = client.post(URL, headers=AUTH, json={**VALID_PAYLOAD, "status": "Draft"})
     will_id = first.json()["willId"]
     created_at = fake_db["will"].find_one({"willId": will_id})["createdAt"]
 
-    client.post(URL, json={**VALID_PAYLOAD, "status": "Draft", "willId": will_id})
+    client.post(URL, headers=AUTH, json={**VALID_PAYLOAD, "status": "Draft", "willId": will_id})
 
     assert fake_db["will"].find_one({"willId": will_id})["createdAt"] == created_at
 
 
 def test_save_can_transition_an_existing_draft_to_pending_review(client, fake_db):
-    first = client.post(URL, json={**VALID_PAYLOAD, "status": "Draft"})
+    first = client.post(URL, headers=AUTH, json={**VALID_PAYLOAD, "status": "Draft"})
     will_id = first.json()["willId"]
 
-    second = client.post(URL, json={**VALID_PAYLOAD, "status": "PendingReview", "willId": will_id})
+    second = client.post(URL, headers=AUTH, json={**VALID_PAYLOAD, "status": "PendingReview", "willId": will_id})
 
     assert second.status_code == 201
     assert second.json()["status"] == "PendingReview"
@@ -134,14 +146,14 @@ def test_save_can_transition_an_existing_draft_to_pending_review(client, fake_db
 
 
 def test_save_defaults_to_pending_review_status_when_omitted(client, fake_db):
-    res = client.post(URL, json=VALID_PAYLOAD)
+    res = client.post(URL, headers=AUTH, json=VALID_PAYLOAD)
     assert res.json()["status"] == "PendingReview"
     doc = fake_db["will"].find_one({"willId": res.json()["willId"]})
     assert doc["status"] == "PendingReview"
 
 
 def test_save_stores_draft_status(client, fake_db):
-    res = client.post(URL, json={**VALID_PAYLOAD, "status": "Draft"})
+    res = client.post(URL, headers=AUTH, json={**VALID_PAYLOAD, "status": "Draft"})
     assert res.status_code == 201
     assert res.json()["status"] == "Draft"
     doc = fake_db["will"].find_one({"willId": res.json()["willId"]})
@@ -149,25 +161,25 @@ def test_save_stores_draft_status(client, fake_db):
 
 
 def test_save_defaults_payment_status_to_not_paid_on_creation(client, fake_db):
-    res = client.post(URL, json=VALID_PAYLOAD)
+    res = client.post(URL, headers=AUTH, json=VALID_PAYLOAD)
     doc = fake_db["will"].find_one({"willId": res.json()["willId"]})
     assert doc["paymentStatus"] == PaymentStatus.NOT_PAID.value
     assert doc["paymentAmount"] is None
 
 
 def test_save_ignores_client_supplied_payment_status(client, fake_db):
-    res = client.post(URL, json={**VALID_PAYLOAD, "paymentStatus": "Paid", "paymentAmount": 99999})
+    res = client.post(URL, headers=AUTH, json={**VALID_PAYLOAD, "paymentStatus": "Paid", "paymentAmount": 99999})
     doc = fake_db["will"].find_one({"willId": res.json()["willId"]})
     assert doc["paymentStatus"] == PaymentStatus.NOT_PAID.value
     assert doc["paymentAmount"] is None
 
 
 def test_save_preserves_payment_status_across_updates(client, fake_db):
-    first = client.post(URL, json={**VALID_PAYLOAD, "status": "Draft"})
+    first = client.post(URL, headers=AUTH, json={**VALID_PAYLOAD, "status": "Draft"})
     will_id = first.json()["willId"]
     fake_db["will"].update_one({"willId": will_id}, {"$set": {"paymentStatus": "Paid", "paymentAmount": 50000}})
 
-    client.post(URL, json={**VALID_PAYLOAD, "status": "Draft", "willId": will_id, "paymentStatus": "Failed"})
+    client.post(URL, headers=AUTH, json={**VALID_PAYLOAD, "status": "Draft", "willId": will_id, "paymentStatus": "Failed"})
 
     doc = fake_db["will"].find_one({"willId": will_id})
     assert doc["paymentStatus"] == "Paid"
@@ -175,57 +187,57 @@ def test_save_preserves_payment_status_across_updates(client, fake_db):
 
 
 def test_save_defaults_will_type_to_empty_on_creation(client, fake_db):
-    res = client.post(URL, json=VALID_PAYLOAD)
+    res = client.post(URL, headers=AUTH, json=VALID_PAYLOAD)
     doc = fake_db["will"].find_one({"willId": res.json()["willId"]})
     assert doc["willType"] == ""
 
 
 def test_save_stores_selected_will_type(client, fake_db):
-    res = client.post(URL, json={**VALID_PAYLOAD, "willType": WillType.ALL_INDIA.value})
+    res = client.post(URL, headers=AUTH, json={**VALID_PAYLOAD, "willType": WillType.ALL_INDIA.value})
     doc = fake_db["will"].find_one({"willId": res.json()["willId"]})
     assert doc["willType"] == WillType.ALL_INDIA.value
 
 
 def test_save_rejects_invalid_will_type(client, fake_db):
-    res = client.post(URL, json={**VALID_PAYLOAD, "willType": "bogus"})
+    res = client.post(URL, headers=AUTH, json={**VALID_PAYLOAD, "willType": "bogus"})
     assert res.status_code == 400
     assert res.json() == {"error": constants.BAD_WILL_TYPE}
 
 
 def test_save_preserves_will_type_when_omitted_on_update(client, fake_db):
-    first = client.post(URL, json={**VALID_PAYLOAD, "status": "Draft", "willType": WillType.GOAN.value})
+    first = client.post(URL, headers=AUTH, json={**VALID_PAYLOAD, "status": "Draft", "willType": WillType.GOAN.value})
     will_id = first.json()["willId"]
 
-    client.post(URL, json={**VALID_PAYLOAD, "status": "Draft", "willId": will_id})
+    client.post(URL, headers=AUTH, json={**VALID_PAYLOAD, "status": "Draft", "willId": will_id})
 
     doc = fake_db["will"].find_one({"willId": will_id})
     assert doc["willType"] == WillType.GOAN.value
 
 
 def test_save_sets_created_by_to_testator_email_on_creation(client, fake_db):
-    res = client.post(URL, json=VALID_PAYLOAD)
+    res = client.post(URL, headers=AUTH, json=VALID_PAYLOAD)
     doc = fake_db["will"].find_one({"willId": res.json()["willId"]})
     assert doc["createdBy"] == "jane@example.com"
 
 
 def test_save_ignores_client_supplied_created_by(client, fake_db):
-    res = client.post(URL, json={**VALID_PAYLOAD, "createdBy": "someone-else@example.com"})
+    res = client.post(URL, headers=AUTH, json={**VALID_PAYLOAD, "createdBy": "someone-else@example.com"})
     doc = fake_db["will"].find_one({"willId": res.json()["willId"]})
     assert doc["createdBy"] == "jane@example.com"
 
 
 def test_save_preserves_created_by_across_updates(client, fake_db):
-    first = client.post(URL, json={**VALID_PAYLOAD, "status": "Draft"})
+    first = client.post(URL, headers=AUTH, json={**VALID_PAYLOAD, "status": "Draft"})
     will_id = first.json()["willId"]
 
-    client.post(URL, json={**VALID_PAYLOAD, "status": "Draft", "willId": will_id, "createdBy": "someone-else@example.com"})
+    client.post(URL, headers=AUTH, json={**VALID_PAYLOAD, "status": "Draft", "willId": will_id, "createdBy": "someone-else@example.com"})
 
     doc = fake_db["will"].find_one({"willId": will_id})
     assert doc["createdBy"] == "jane@example.com"
 
 
 def test_save_stores_pending_review_status(client, fake_db):
-    res = client.post(URL, json={**VALID_PAYLOAD, "status": "PendingReview"})
+    res = client.post(URL, headers=AUTH, json={**VALID_PAYLOAD, "status": "PendingReview"})
     assert res.json()["status"] == "PendingReview"
 
 
@@ -233,7 +245,7 @@ def test_save_notifies_admin_email_when_submitted_for_review(client, monkeypatch
     calls = []
     monkeypatch.setattr(will_service.email, "send_email", lambda settings, to, subject, html: calls.append((to, subject, html)))
 
-    res = client.post(URL, json={**VALID_PAYLOAD, "status": "PendingReview"})
+    res = client.post(URL, headers=AUTH, json={**VALID_PAYLOAD, "status": "PendingReview"})
 
     assert res.status_code == 201
     assert len(calls) == 1
@@ -249,14 +261,14 @@ def test_save_does_not_notify_admin_email_for_draft(client, monkeypatch):
     calls = []
     monkeypatch.setattr(will_service.email, "send_email", lambda *a, **k: calls.append(1))
 
-    res = client.post(URL, json={**VALID_PAYLOAD, "status": "Draft"})
+    res = client.post(URL, headers=AUTH, json={**VALID_PAYLOAD, "status": "Draft"})
 
     assert res.status_code == 201
     assert calls == []
 
 
 def test_save_creates_adminwill_entry_when_submitted_for_review(client, fake_db):
-    res = client.post(URL, json={**VALID_PAYLOAD, "status": "PendingReview"})
+    res = client.post(URL, headers=AUTH, json={**VALID_PAYLOAD, "status": "PendingReview"})
 
     assert res.status_code == 201
     entry = fake_db["adminwill"].find_one({"willId": res.json()["willId"]})
@@ -266,7 +278,7 @@ def test_save_creates_adminwill_entry_when_submitted_for_review(client, fake_db)
 
 
 def test_save_does_not_create_adminwill_entry_for_draft(client, fake_db):
-    res = client.post(URL, json={**VALID_PAYLOAD, "status": "Draft"})
+    res = client.post(URL, headers=AUTH, json={**VALID_PAYLOAD, "status": "Draft"})
 
     assert res.status_code == 201
     assert fake_db["adminwill"].count_documents({}) == 0
@@ -275,46 +287,49 @@ def test_save_does_not_create_adminwill_entry_for_draft(client, fake_db):
 # --- negative scenarios ---
 
 def test_save_rejects_empty_body(client):
-    res = client.post(URL, json={})
+    res = client.post(URL, headers=AUTH, json={})
     assert res.status_code == 400
     assert res.json() == {"error": constants.WILL_REQUIRED}
 
 
 def test_save_rejects_malformed_json_body(client):
-    res = client.post(URL, content=b"not json", headers={"Content-Type": "application/json"})
+    res = client.post(URL, content=b"not json", headers={**AUTH, "Content-Type": "application/json"})
     assert res.status_code == 400
     assert res.json() == {"error": constants.WILL_REQUIRED}
 
 
 def test_save_rejects_invalid_status(client):
-    res = client.post(URL, json={**VALID_PAYLOAD, "status": "Bogus"})
+    res = client.post(URL, headers=AUTH, json={**VALID_PAYLOAD, "status": "Bogus"})
     assert res.status_code == 400
     assert res.json() == {"error": constants.BAD_WILL_STATUS}
 
 
-def test_save_rejects_missing_testator_email(client):
+def test_save_rejects_missing_auth_token(client):
     res = client.post(URL, json={"will": {"testator": {"fullName": "Jane Doe"}}})
-    assert res.status_code == 400
-    assert res.json() == {"error": constants.BAD_TESTATOR_EMAIL}
+    assert res.status_code == 401
 
 
-def test_save_rejects_invalid_testator_email(client):
-    res = client.post(URL, json={**VALID_PAYLOAD, "testatorEmail": "not-an-email"})
-    assert res.status_code == 400
-    assert res.json() == {"error": constants.BAD_TESTATOR_EMAIL}
+def test_save_ignores_client_supplied_testator_email_and_uses_authenticated_identity(client, fake_db):
+    # The owning testator is always the authenticated JWT identity — a
+    # client-supplied testatorEmail field can no longer be used to save a
+    # Will under a different (unauthenticated) identity.
+    res = client.post(URL, headers=AUTH, json={**VALID_PAYLOAD, "testatorEmail": "not-an-email"})
+    assert res.status_code == 201
+    doc = fake_db["will"].find_one({"willId": res.json()["willId"]})
+    assert doc["testatorEmail"] == "jane@example.com"
 
 
 def test_save_rejects_unknown_will_id(client):
-    res = client.post(URL, json={**VALID_PAYLOAD, "willId": "does-not-exist"})
+    res = client.post(URL, headers=AUTH, json={**VALID_PAYLOAD, "willId": "does-not-exist"})
     assert res.status_code == 404
     assert res.json() == {"error": constants.WILL_NOT_FOUND}
 
 
 def test_save_rejects_updating_will_owned_by_a_different_testator(client, fake_db):
-    first = client.post(URL, json={**VALID_PAYLOAD, "status": "Draft"})
+    first = client.post(URL, headers=AUTH, json={**VALID_PAYLOAD, "status": "Draft"})
     will_id = first.json()["willId"]
 
-    res = client.post(URL, json={
+    res = client.post(URL, headers=OTHER_AUTH, json={
         "will": {"testator": {"fullName": "Someone Else"}},
         "testatorEmail": "someone-else@example.com",
         "status": "Draft",
@@ -326,10 +341,10 @@ def test_save_rejects_updating_will_owned_by_a_different_testator(client, fake_d
 
 
 def test_save_rejects_editing_a_will_pending_review(client, fake_db):
-    first = client.post(URL, json={**VALID_PAYLOAD, "status": "PendingReview"})
+    first = client.post(URL, headers=AUTH, json={**VALID_PAYLOAD, "status": "PendingReview"})
     will_id = first.json()["willId"]
 
-    res = client.post(URL, json={**VALID_PAYLOAD, "status": "Draft", "willId": will_id})
+    res = client.post(URL, headers=AUTH, json={**VALID_PAYLOAD, "status": "Draft", "willId": will_id})
 
     assert res.status_code == 403
     assert res.json() == {"error": constants.WILL_LOCKED}
@@ -339,7 +354,7 @@ def test_save_returns_500_when_mongodb_uri_missing():
     app.dependency_overrides[get_settings] = lambda: Settings(mongodb_uri=None)
     try:
         from fastapi.testclient import TestClient
-        res = TestClient(app).post(URL, json=VALID_PAYLOAD)
+        res = TestClient(app).post(URL, headers=AUTH, json=VALID_PAYLOAD)
         assert res.status_code == 500
         assert res.json() == {"error": constants.MONGODB_NOT_CONFIGURED}
     finally:

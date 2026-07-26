@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { Scale, User, Mail, Lock, UserPlus } from "lucide-react";
 import { apiUrl } from "../../utils/apiBase";
+import { setAuthToken } from "../../utils/auth";
 import {
   API_ADMIN_SIGNUP, LBL_EMAIL_ADDR, LBL_FULL_NAME, LBL_PASSWORD,
-  MIN_PASSWORD_LENGTH, PH_LAWFIRM_EMAIL, BTN_CREATE_ACCOUNT,
+  MIN_PASSWORD_LENGTH, PH_LAWFIRM_EMAIL, BTN_CREATE_ACCOUNT, ROLE_ADMIN,
 } from "../../constants";
 import type { AdminProfile } from "../../types";
 
@@ -43,6 +44,7 @@ export default function AdminSignupView({onSignup,onBack,onGoToLogin}:{
         if(res.status===409) setAlreadySignedUp(true);
         throw new Error(data?.error || `Signup failed (server returned ${res.status}).`);
       }
+      setAuthToken(ROLE_ADMIN, data.token);
       onSignup({ name: data.name, email: data.email });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Signup failed.");

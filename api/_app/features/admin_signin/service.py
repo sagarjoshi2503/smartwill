@@ -1,16 +1,18 @@
 from pymongo.database import Database
 
+from _app.core.config import Settings
 from _app.core.exceptions import AppError
+from _app.core.jwt_auth import create_access_token
 from _app.core.security import decode_transport_password, verify_password
 from _app.features.admin_signin import repository
 from _app.shared.constants import (
-    FLD_EMAIL, FLD_FULL_NAME, FLD_NAME, FLD_PASSWORD, FLD_PWD_HASH, HTTP_BAD_REQUEST,
-    HTTP_UNAUTHORIZED, INVALID_EMAIL, BAD_LOGIN_CREDS, PASSWORD_REQUIRED,
+    FLD_EMAIL, FLD_FULL_NAME, FLD_NAME, FLD_PASSWORD, FLD_PWD_HASH, FLD_TOKEN, HTTP_BAD_REQUEST,
+    HTTP_UNAUTHORIZED, INVALID_EMAIL, BAD_LOGIN_CREDS, PASSWORD_REQUIRED, ROLE_ADMIN,
 )
 from _app.shared.validators import is_valid_email, normalize_email
 
 
-def login_admin(db: Database, body: dict) -> dict:
+def login_admin(db: Database, body: dict, settings: Settings) -> dict:
     email = normalize_email(body.get(FLD_EMAIL))
     encoded_password = body.get(FLD_PASSWORD)
 
@@ -25,4 +27,5 @@ def login_admin(db: Database, body: dict) -> dict:
     if not user or not verify_password(password, user[FLD_PWD_HASH]):
         raise AppError(HTTP_UNAUTHORIZED, BAD_LOGIN_CREDS)
 
-    return {FLD_NAME: user[FLD_FULL_NAME], FLD_EMAIL: user[FLD_EMAIL]}
+    token = create_access_token(user[FLD_EMAIL], ROLE_ADMIN, settings)
+    return {FLD_NAME: user[FLD_FULL_NAME], FLD_EMAIL: user[FLD_EMAIL], FLD_TOKEN: token}

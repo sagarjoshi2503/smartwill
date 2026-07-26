@@ -2,13 +2,17 @@ import { useState } from "react";
 import { Phone } from "lucide-react";
 import type { MutableRefObject } from "react";
 import { apiUrl } from "../../utils/apiBase";
-import { API_OTP_VERIFY, COUNTRY_CODE_PREFIX, ERR_VERIFY_OTP, MSG_VERIFYING_OTP, PHONE_MASK_DIGITS } from "../../constants";
+import { setAuthToken } from "../../utils/auth";
+import {
+  API_OTP_VERIFY, COUNTRY_CODE_PREFIX, ERR_VERIFY_OTP, MSG_VERIFYING_OTP, PHONE_MASK_DIGITS, ROLE_TESTATOR,
+} from "../../constants";
 
-export default function OtpView({otp,handleOtp,otpRefs,phone,onNext}:{
+export default function OtpView({otp,handleOtp,otpRefs,phone,email,onNext}:{
   otp: string[];
   handleOtp: (i: number, v: string) => void;
   otpRefs: MutableRefObject<(HTMLInputElement | null)[]>;
   phone: string;
+  email: string;
   onNext: () => void;
 }){
   const [verifying,setVerifying]=useState(false);
@@ -21,11 +25,12 @@ export default function OtpView({otp,handleOtp,otpRefs,phone,onNext}:{
       const res = await fetch(apiUrl(API_OTP_VERIFY), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone, code: otp.join("") }),
+        body: JSON.stringify({ phone, code: otp.join(""), email }),
       });
       const isJson = res.headers.get("content-type")?.includes("application/json");
       const data = isJson ? await res.json() : null;
       if(!res.ok) throw new Error(data?.error || `Could not verify OTP (server returned ${res.status}).`);
+      setAuthToken(ROLE_TESTATOR, data.token);
       onNext();
     } catch (err) {
       setError(err instanceof Error ? err.message : ERR_VERIFY_OTP);
