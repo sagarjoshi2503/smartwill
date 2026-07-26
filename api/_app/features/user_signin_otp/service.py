@@ -15,8 +15,8 @@ from _app.features.user_signin_otp import repository
 from _app.shared import sms
 from _app.shared.constants import (
     BAD_TESTATOR_EMAIL, FLD_CODE, FLD_EMAIL, FLD_PHONE, FLD_TOKEN, HTTP_BAD_REQUEST, INVALID_OTP, BAD_PHONE,
-    OTP_COUNTRY_CODE, OTP_EXPIRED, OTP_LENGTH, OTP_MISSING, OTP_PHONE_MIN, OTP_SMS_TMPL, OTP_TTL_SECONDS,
-    ROLE_TESTATOR,
+    OTP_COUNTRY_CODE, OTP_EXPIRED, OTP_LENGTH, OTP_MAX_ATTEMPTS, OTP_MISSING, OTP_PHONE_MIN, OTP_SMS_TMPL,
+    OTP_TOO_MANY_ATTEMPTS, OTP_TTL_SECONDS, ROLE_TESTATOR,
 )
 from _app.shared.validators import is_valid_email, normalize_email
 
@@ -53,12 +53,20 @@ def verify_otp(body: dict, settings: Settings) -> dict:
     if not entry:
         raise AppError(HTTP_BAD_REQUEST, OTP_MISSING)
 
-    saved_code, expires_at = entry
+    saved_code, expires_at, attempts = entry
     if datetime.now(timezone.utc) > expires_at:
         repository.clear_otp(phone)
         raise AppError(HTTP_BAD_REQUEST, OTP_EXPIRED)
 
+    if attempts >= OTP_MAX_ATTEMPTS:
+        repository.clear_otp(phone)
+        raise AppError(HTTP_BAD_REQUEST, OTP_TOO_MANY_ATTEMPTS)
+
     if code != saved_code:
+        attempts = repository.record_failed_attempt(phone)
+        if attempts >= OTP_MAX_ATTEMPTS:
+            repository.clear_otp(phone)
+            raise AppError(HTTP_BAD_REQUEST, OTP_TOO_MANY_ATTEMPTS)
         raise AppError(HTTP_BAD_REQUEST, INVALID_OTP)
 
     repository.clear_otp(phone)

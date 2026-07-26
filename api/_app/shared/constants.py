@@ -33,6 +33,9 @@ OTP_LENGTH = 6
 OTP_TTL_SECONDS = 300
 OTP_PHONE_MIN = 10
 OTP_COUNTRY_CODE = "+91"
+# Max wrong-code guesses allowed against a single requested OTP before it's
+# invalidated and a fresh one must be requested (mitigates brute force).
+OTP_MAX_ATTEMPTS = 5
 
 # --- JWT auth ---
 JWT_ALGORITHM = "HS256"
@@ -92,6 +95,7 @@ BAD_PHONE = "Enter a valid mobile number."
 OTP_MISSING = "Request an OTP before attempting to verify it."
 OTP_EXPIRED = "This OTP has expired. Please request a new one."
 INVALID_OTP = "The OTP you entered is incorrect."
+OTP_TOO_MANY_ATTEMPTS = "Too many incorrect attempts. Please request a new OTP."
 
 MISSING_AUTH_TOKEN = "Missing or invalid Authorization header."
 INVALID_AUTH_TOKEN = "Invalid or expired session. Please log in again."
