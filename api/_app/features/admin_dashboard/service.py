@@ -18,7 +18,7 @@ from _app.shared.constants import (
     SENT_BACK_SUBJECT, SUBMIT_SUBJECT_TMPL,
 )
 from _app.shared.enums import PaymentStatus, WillType
-from _app.shared.validators import is_valid_email, normalize_email
+from _app.shared.validators import escape_html, is_valid_email, normalize_email
 
 ALLOWED_STATUSES = {STATUS_DRAFT, STATUS_PENDING_REVIEW, STATUS_COMPLETED}
 ALLOWED_WILL_TYPES = {t.value for t in WillType}
@@ -138,9 +138,9 @@ def _submit_for_admin_review(db: Database, settings: Settings, document: dict) -
         html=(
             f"<p>A new Will has been submitted for review.</p>"
             f"<ul>"
-            f"<li><strong>Testator:</strong> {testator_name}</li>"
-            f"<li><strong>Testator email:</strong> {testator_email}</li>"
-            f"<li><strong>Will ID:</strong> {document[FLD_WILL_ID]}</li>"
+            f"<li><strong>Testator:</strong> {escape_html(testator_name)}</li>"
+            f"<li><strong>Testator email:</strong> {escape_html(testator_email)}</li>"
+            f"<li><strong>Will ID:</strong> {escape_html(document[FLD_WILL_ID])}</li>"
             f"</ul>"
         ),
     )
@@ -210,7 +210,7 @@ def admin_complete_will(db: Database, will_id: str, body: dict, settings: Settin
             to=testator_email,
             subject=REVIEW_COMPLETED_SUBJECT,
             html=(
-                f"<p>Hi {testator_name},</p>"
+                f"<p>Hi {escape_html(testator_name)},</p>"
                 f"<p>Your Will has been reviewed and is now complete.</p>"
             ),
         )
@@ -250,9 +250,9 @@ def admin_send_back_will(db: Database, will_id: str, comments: str, settings: Se
             to=testator_email,
             subject=SENT_BACK_SUBJECT,
             html=(
-                f"<p>Hi {testator_name},</p>"
+                f"<p>Hi {escape_html(testator_name)},</p>"
                 f"<p>Your Will submission has been reviewed and needs some changes before it can be completed:</p>"
-                f"<p>{comments}</p>"
+                f"<p>{escape_html(comments)}</p>"
                 f"<p>Please log back in to update and resubmit your Will.</p>"
             ),
         )

@@ -5,7 +5,7 @@ from _app.shared.constants import (
     CONTACT_EMAIL_INVALID, CONTACT_MESSAGE_REQUIRED, CONTACT_NAME_REQUIRED, CONTACT_SUBJECT_REQUIRED,
     CONTACT_SUBJECT_TMPL, FLD_EMAIL, FLD_MESSAGE, FLD_NAME, FLD_SUBJECT, HTTP_BAD_REQUEST,
 )
-from _app.shared.validators import is_valid_email, normalize_email
+from _app.shared.validators import escape_html, is_valid_email, normalize_email
 
 
 def get_contact_info(settings: Settings) -> dict:
@@ -37,11 +37,11 @@ def send_contact_message(body: dict, settings: Settings) -> dict:
         html=(
             f"<p>New message from the Contact Us page.</p>"
             f"<ul>"
-            f"<li><strong>Name:</strong> {name}</li>"
-            f"<li><strong>Email:</strong> {sender_email}</li>"
-            f"<li><strong>Subject:</strong> {subject}</li>"
+            f"<li><strong>Name:</strong> {escape_html(name)}</li>"
+            f"<li><strong>Email:</strong> {escape_html(sender_email)}</li>"
+            f"<li><strong>Subject:</strong> {escape_html(subject)}</li>"
             f"</ul>"
-            f"<p>{message}</p>"
+            f"<p>{escape_html(message)}</p>"
         ),
     )
     return {"sent": True}

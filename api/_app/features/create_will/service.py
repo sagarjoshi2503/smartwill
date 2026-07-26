@@ -18,7 +18,7 @@ from _app.shared.constants import (
     SUBMIT_SUBJECT_TMPL,
 )
 from _app.shared.enums import PaymentStatus, WillType
-from _app.shared.validators import is_valid_email, normalize_email
+from _app.shared.validators import escape_html, is_valid_email, normalize_email
 
 ALLOWED_STATUSES = {STATUS_DRAFT, STATUS_PENDING_REVIEW}
 ALLOWED_WILL_TYPES = {t.value for t in WillType}
@@ -159,9 +159,9 @@ def _submit_for_admin_review(db: Database, settings: Settings, document: dict) -
         html=(
             f"<p>A new Will has been submitted for review.</p>"
             f"<ul>"
-            f"<li><strong>Testator:</strong> {testator_name}</li>"
-            f"<li><strong>Testator email:</strong> {testator_email}</li>"
-            f"<li><strong>Will ID:</strong> {document[FLD_WILL_ID]}</li>"
+            f"<li><strong>Testator:</strong> {escape_html(testator_name)}</li>"
+            f"<li><strong>Testator email:</strong> {escape_html(testator_email)}</li>"
+            f"<li><strong>Will ID:</strong> {escape_html(document[FLD_WILL_ID])}</li>"
             f"</ul>"
         ),
     )
