@@ -3,7 +3,7 @@ import { Scale, Mail, Lock, LogIn } from "lucide-react";
 import { apiUrl } from "../../utils/apiBase";
 import { setAuthToken } from "../../utils/auth";
 import { encodePassword } from "../../utils/encode";
-import { API_ADMIN_LOGIN, LBL_EMAIL_ADDR, LBL_PASSWORD, PH_LAWFIRM_EMAIL, ROLE_ADMIN } from "../../constants";
+import { API_ADMIN_LOGIN, EMAIL_REGEX, LBL_EMAIL_ADDR, LBL_PASSWORD, PH_LAWFIRM_EMAIL, ROLE_ADMIN } from "../../constants";
 import type { AdminProfile } from "../../types";
 
 export default function AdminLoginView({onLogin,onBack,onSignup}:{
@@ -17,7 +17,7 @@ export default function AdminLoginView({onLogin,onBack,onSignup}:{
   const [submitting,setSubmitting]=useState(false);
   const IC="w-full apv-input rounded-2xl pl-11 pr-4 py-3 text-slate-900 placeholder:text-slate-500 text-sm focus:outline-none transition";
 
-  const canSubmit = /\S+@\S+\.\S+/.test(email) && password.length>0;
+  const canSubmit = EMAIL_REGEX.test(email) && password.length>0;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

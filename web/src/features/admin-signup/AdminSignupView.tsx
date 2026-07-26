@@ -3,7 +3,7 @@ import { Scale, User, Mail, Lock, UserPlus } from "lucide-react";
 import { apiUrl } from "../../utils/apiBase";
 import { setAuthToken } from "../../utils/auth";
 import {
-  API_ADMIN_SIGNUP, LBL_EMAIL_ADDR, LBL_FULL_NAME, LBL_PASSWORD,
+  API_ADMIN_SIGNUP, EMAIL_REGEX, LBL_EMAIL_ADDR, LBL_FULL_NAME, LBL_PASSWORD,
   MIN_PASSWORD_LENGTH, PH_LAWFIRM_EMAIL, BTN_CREATE_ACCOUNT, ROLE_ADMIN,
 } from "../../constants";
 import type { AdminProfile } from "../../types";
@@ -22,12 +22,12 @@ export default function AdminSignupView({onSignup,onBack,onGoToLogin}:{
   const [submitting,setSubmitting]=useState(false);
   const IC="w-full apv-input rounded-2xl pl-11 pr-4 py-3 text-slate-900 placeholder:text-slate-500 text-sm focus:outline-none transition";
 
-  const canSubmit = fullName.trim().length>0 && /\S+@\S+\.\S+/.test(email) && password.length>=MIN_PASSWORD_LENGTH && confirmPassword.length>0;
+  const canSubmit = fullName.trim().length>0 && EMAIL_REGEX.test(email) && password.length>=MIN_PASSWORD_LENGTH && confirmPassword.length>0;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if(!fullName.trim()){ setError("Enter your full name."); return; }
-    if(!/\S+@\S+\.\S+/.test(email)){ setError("Enter a valid email address."); return; }
+    if(!EMAIL_REGEX.test(email)){ setError("Enter a valid email address."); return; }
     if(password.length<MIN_PASSWORD_LENGTH){ setError(`Password must be at least ${MIN_PASSWORD_LENGTH} characters.`); return; }
     if(password!==confirmPassword){ setError("Passwords do not match."); return; }
     setError(""); setAlreadySignedUp(false);

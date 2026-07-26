@@ -52,7 +52,12 @@ export const MIN_PASSWORD_LENGTH = 8;
 export const WILL_VISIBLE_DAYS = 30;
 export const OTP_LENGTH = 6;
 export const PHONE_MASK_DIGITS = 5;
+export const PHONE_MIN_DIGITS = 10;
 export const COUNTRY_CODE_PREFIX = "+91 ";
+
+// --- Validation (mirrors EMAIL_REGEX_PATTERN in the backend's
+// _app/shared/constants.py) ---
+export const EMAIL_REGEX = /\S+@\S+\.\S+/;
 
 // --- UI timing (milliseconds) ---
 export const SEND_BACK_REDIRECT_MS = 300;
@@ -78,6 +83,18 @@ export const LBL_ADDRESS = "Address";
 export const LBL_EMAIL_ADDR = "Email Address";
 export const LBL_PASSWORD = "Password";
 export const PH_LAWFIRM_EMAIL = "you@lawfirm.com";
+export const PH_FULL_NAME = "As per Aadhaar / PAN";
+export const PH_MOBILE = "10-digit number";
+export const PH_EMAIL_DELIVERY = "For Will delivery";
+
+// --- Signup screen copy ---
+export const HEADING_SIGNUP = "Create Account";
+export const SUB_SIGNUP = "Start your Will in under 2 minutes";
+export const TERMS_AGREE_PREFIX = "I agree to the ";
+export const LBL_TERMS_OF_SERVICE = "Terms of Service";
+export const TERMS_AGREE_JOINER = " and ";
+export const LBL_PRIVACY_POLICY = "Privacy Policy";
+export const PHONE_MASK = "XXXXX";
 
 // --- Tooltip / help text ---
 export const TIP_NO_ID_SAVED = "No ID Number will be saved in database";
