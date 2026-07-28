@@ -8,7 +8,13 @@
       "Bash(\"/c/Gitlab/smartwill/smartwill/api/.venv-api/Scripts/python.exe\" -m pip list)",
       "Bash(./.venv-mcp/Scripts/python.exe -m pip install -r requirements-dev.txt -q)",
       "Bash(./.venv-mcp/Scripts/python.exe -m pytest -v)",
-      "Bash(./.venv-mcp/Scripts/python.exe -m pytest -q)"
+      "Bash(./.venv-mcp/Scripts/python.exe -m pytest -q)",
+      "Bash(gh auth *)",
+      "Bash(MSYS_NO_PATHCONV=1 az role assignment create --assignee-object-id adcf5c5f-daf9-4ccc-9bf8-183004ac65eb --assignee-principal-type ServicePrincipal --role AcrPush --scope /subscriptions/13328e70-227c-4589-9c01-5a33a3cbe4ae/resourceGroups/rg-test-deletelater/providers/Microsoft.ContainerRegistry/registries/smartwillacr --output table)",
+      "Bash(MSYS_NO_PATHCONV=1 az role assignment create --assignee-object-id adcf5c5f-daf9-4ccc-9bf8-183004ac65eb --assignee-principal-type ServicePrincipal --role 'Azure Kubernetes Service Cluster Admin Role' --scope /subscriptions/13328e70-227c-4589-9c01-5a33a3cbe4ae/resourceGroups/rg-test-deletelater/providers/Microsoft.ContainerService/managedClusters/smartwillcluster --output table)",
+      "Bash(/c/Gitlab/smartwill/smartwill/api/.venv-api/Scripts/python.exe -c ' *)",
+      "Bash(\"/c/Gitlab/smartwill/smartwill/mcp/.venv-mcp/Scripts/python.exe\" -m pip install pyyaml -q)",
+      "Bash(/c/Gitlab/smartwill/smartwill/mcp/.venv-mcp/Scripts/python.exe -c ' *)"
     ]
   }
 }

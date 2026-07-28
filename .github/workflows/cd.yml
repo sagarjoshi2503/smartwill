@@ -1,0 +1,63 @@
+name: CD
+
+# Deploys the images CI just pushed to smartwillcluster (AKS), automatically
+# once CI succeeds on main. Only smartwill-api and smartwill-web have
+# Kubernetes manifests today (infra/k8s/{api,web}/) — smartwill-mcp is built
+# and pushed by CI but has no Deployment/Service yet, so it's not rolled out
+# here. See cicd/README.md.
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch: {}
+
+permissions:
+  id-token: write # required for OIDC federated login to Azure
+  contents: read
+
+jobs:
+  deploy:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      # For workflow_run, checkout defaults to the branch tip rather than the
+      # exact commit CI built — pin explicitly so a push landing between CI
+      # and CD can't cause a mismatch.
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && github.ref || github.event.workflow_run.head_sha }}
+
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      # `admin: true` fetches the cluster's local-admin kubeconfig rather than
+      # requiring Azure AD-backed Kubernetes RBAC bindings — simpler to wire
+      # up for a small dev cluster; the CI identity's "Azure Kubernetes
+      # Service Cluster Admin Role" (Azure RBAC, granted out-of-band) is what
+      # authorizes fetching it.
+      - uses: azure/aks-set-context@v4
+        with:
+          resource-group: rg-test-deletelater
+          cluster-name: smartwillcluster
+          admin: true
+
+      # Re-applying the manifests is a no-op when nothing changed; the
+      # rollout restart is what actually forces a re-pull of the `:latest`
+      # tag CI just pushed (images are always tagged :latest, so a plain
+      # re-apply wouldn't trigger a new pull on its own).
+      - name: Deploy smartwill-api
+        run: |
+          kubectl apply -f infra/k8s/api/
+          kubectl rollout restart deployment/smartwill-api -n smartwill-api
+          kubectl rollout status deployment/smartwill-api -n smartwill-api --timeout=120s
+
+      - name: Deploy smartwill-web
+        run: |
+          kubectl apply -f infra/k8s/web/
+          kubectl rollout restart deployment/smartwill-web -n smartwill-web
+          kubectl rollout status deployment/smartwill-web -n smartwill-web --timeout=120s

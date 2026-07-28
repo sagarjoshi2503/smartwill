@@ -1,0 +1,102 @@
+name: CI
+
+# Builds and pushes smartwill-api / smartwill-web / smartwill-mcp images to
+# Azure Container Registry whenever their respective folder changes on main.
+# See cicd/README.md for the full explanation of this setup (why these files
+# live under .github/workflows/ instead of cicd/, the Azure identity used,
+# and the required repository variables).
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "api/**"
+      - "web/**"
+      - "mcp/**"
+  workflow_dispatch: {}
+
+permissions:
+  id-token: write # required for OIDC federated login to Azure
+  contents: read
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      api: ${{ steps.filter.outputs.api }}
+      web: ${{ steps.filter.outputs.web }}
+      mcp: ${{ steps.filter.outputs.mcp }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            api:
+              - 'api/**'
+            web:
+              - 'web/**'
+            mcp:
+              - 'mcp/**'
+
+  build-api:
+    needs: changes
+    if: needs.changes.outputs.api == 'true' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+      # az acr build runs the build inside ACR itself (Azure Container
+      # Registry Tasks) — no local Docker daemon/login step needed on the
+      # runner, and it authenticates via the azure/login session above.
+      - name: Build and push smartwill-api
+        run: |
+          az acr build --registry smartwillacr \
+            --image smartwill-api:${{ github.sha }} --image smartwill-api:latest \
+            ./api
+
+  build-web:
+    needs: changes
+    if: needs.changes.outputs.web == 'true' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+      # Vite inlines these at build time, so they're passed as build-args —
+      # same values used for the manual builds documented in web/.env.example.
+      # VITE_API_BASE_URL points at the smartwill-api LoadBalancer's IP
+      # (see infra/k8s/api/service.yaml's current EXTERNAL-IP).
+      - name: Build and push smartwill-web
+        run: |
+          az acr build --registry smartwillacr \
+            --image smartwill-web:${{ github.sha }} --image smartwill-web:latest \
+            --build-arg VITE_GOOGLE_CLIENT_ID="${{ vars.VITE_GOOGLE_CLIENT_ID }}" \
+            --build-arg VITE_API_BASE_URL="${{ vars.VITE_API_BASE_URL }}" \
+            --build-arg VITE_RAZORPAY_KEY_ID="${{ vars.VITE_RAZORPAY_KEY_ID }}" \
+            --build-arg VITE_GA_MEASUREMENT_ID="${{ vars.VITE_GA_MEASUREMENT_ID }}" \
+            ./web
+
+  build-mcp:
+    needs: changes
+    if: needs.changes.outputs.mcp == 'true' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+      - name: Build and push smartwill-mcp
+        run: |
+          az acr build --registry smartwillacr \
+            --image smartwill-mcp:${{ github.sha }} --image smartwill-mcp:latest \
+            ./mcp
