@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(docker rm *)",
+      "Bash(docker run *)",
+      "Bash(\"/c/Gitlab/smartwill/smartwill/mcp/.venv-mcp/Scripts/python.exe\" \"C:\\\\Users\\\\ADMIN\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Gitlab-smartwill-smartwill-api\\\\fc79d66c-ea75-4345-bd02-a8ecc9a4fad5\\\\scratchpad\\\\verify_mcp_container.py\")",
+      "Bash(docker tag *)",
+      "Bash(\"/c/Gitlab/smartwill/smartwill/api/.venv-api/Scripts/python.exe\" -m pip list)",
+      "Bash(./.venv-mcp/Scripts/python.exe -m pip install -r requirements-dev.txt -q)",
+      "Bash(./.venv-mcp/Scripts/python.exe -m pytest -v)",
+      "Bash(./.venv-mcp/Scripts/python.exe -m pytest -q)"
+    ]
+  }
+}
