@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: smartwill-api-config
+  namespace: smartwill-api
+# Reserved for non-secret config that shouldn't live in Key Vault. Currently
+# empty — CORS_ALLOW_ORIGINS moved to Key Vault (see secret-provider-class.yaml)
+# as the single source of truth alongside the rest of the app's config/secrets.
+data: {}

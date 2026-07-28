@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: smartwill-web
+  namespace: smartwill-web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: smartwill-web
+  template:
+    metadata:
+      labels:
+        app: smartwill-web
+    spec:
+      containers:
+        - name: smartwill-web
+          image: smartwillacr.azurecr.io/smartwill-web:latest
+          ports:
+            - containerPort: 5174
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 150Mi
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 5174
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 5174
+            initialDelaySeconds: 5
+            periodSeconds: 10

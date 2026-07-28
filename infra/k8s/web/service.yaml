@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: smartwill-web
+  namespace: smartwill-web
+spec:
+  type: LoadBalancer
+  selector:
+    app: smartwill-web
+  ports:
+    - port: 80
+      targetPort: 5174
