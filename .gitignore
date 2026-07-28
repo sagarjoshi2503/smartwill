@@ -34,3 +34,11 @@ __pycache__/
 # Coverage reports
 htmlcov/
 coverage/
+
+# Terraform
+**/.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+crash.log
+crash.*.log
