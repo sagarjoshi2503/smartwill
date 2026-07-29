@@ -14,6 +14,10 @@
       "root": "api/",
       "entrypoint": "index:app"
     },
+    "flags": {
+      "root": "flags/",
+      "entrypoint": "flags.ts"
+    },
     "mcp": {
       "root": "mcp/",
       "entrypoint": "server:app",
@@ -30,7 +34,7 @@
     }
   },
   "rewrites": [
-    { "source": "/api/flags", "destination": { "service": "api" } },
+    { "source": "/api/flags", "destination": { "service": "flags" } },
     { "source": "/api/(.*)", "destination": { "service": "api" } },
     { "source": "/docs", "destination": { "service": "api" } },
     { "source": "/openapi.json", "destination": { "service": "api" } },

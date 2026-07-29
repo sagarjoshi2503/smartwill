@@ -1,8 +1,9 @@
 """Server-side evaluation of Vercel Flags (https://vercel.com/docs/flags).
 
 The Flags SDK (`@flags-sdk/vercel`) is JS/TS-only — there's no Python client
-— so this delegates to the sibling `api/flags.ts` Node function, which is
-part of the same Vercel deployment and already knows how to talk to it.
+— so this delegates to the `flags/flags.ts` Node function (a separate Vercel
+service, routed at /api/flags — see vercel.json), which already knows how
+to talk to it.
 
 Only reachable on Vercel, where `VERCEL_URL` is set automatically. In local
 dev there's no Node server running alongside uvicorn, so evaluation is
