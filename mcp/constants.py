@@ -8,6 +8,10 @@ DEFAULT_MCP_PORT = "8000"
 DEFAULT_API_BASE_URL = "http://127.0.0.1:8051"
 CALL_TIMEOUT_SECONDS = 30.0
 
+# --- Streamable-HTTP mount path (used both for the standalone/AKS run() and
+# the Vercel ASGI app export) ---
+STREAMABLE_HTTP_PATH = "/mcp"
+
 # --- HTTP methods ---
 METHOD_GET = "GET"
 METHOD_POST = "POST"

@@ -3,7 +3,12 @@ web/, and mcp/ — no cross-service imports, even where a value happens to
 match one defined elsewhere (e.g. tool/role names also present in mcp/)."""
 
 # --- Env var defaults ---
-DEFAULT_MCP_SERVER_URL = "http://127.0.0.1:8000/mcp"
+# Base URL only (no path) — mcp_client.py appends MCP_STREAMABLE_HTTP_PATH.
+# Kept as a base so the same code path works whether MCP_SERVER_URL comes
+# from a plain env var (local/AKS) or a Vercel service binding (which only
+# ever injects a bare base URL).
+DEFAULT_MCP_SERVER_URL = "http://127.0.0.1:8000"
+MCP_STREAMABLE_HTTP_PATH = "/mcp"
 DEFAULT_HOST = "0.0.0.0"
 DEFAULT_PORT = "8010"
 

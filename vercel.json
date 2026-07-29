@@ -1,12 +1,40 @@
 {
-  "installCommand": "cd web && npm install",
-  "buildCommand": "cd web && npm run build",
-  "outputDirectory": "web/dist",
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "services": {
+    "web": {
+      "root": "web/",
+      "installCommand": "npm install",
+      "buildCommand": "npm run build",
+      "outputDirectory": "dist",
+      "rewrites": [
+        { "source": "/admin", "destination": "/index.html" }
+      ]
+    },
+    "api": {
+      "root": "api/",
+      "entrypoint": "index:app"
+    },
+    "mcp": {
+      "root": "mcp/",
+      "entrypoint": "server:app",
+      "bindings": [
+        { "type": "service", "service": "api", "format": "url", "env": "API_BASE_URL" }
+      ]
+    },
+    "chatbot": {
+      "root": "chatbot/",
+      "entrypoint": "main:app",
+      "bindings": [
+        { "type": "service", "service": "mcp", "format": "url", "env": "MCP_SERVER_URL" }
+      ]
+    }
+  },
   "rewrites": [
-    { "source": "/api/flags", "destination": "/api/flags" },
-    { "source": "/api/(.*)", "destination": "/api/index" },
-    { "source": "/docs", "destination": "/api/index" },
-    { "source": "/openapi.json", "destination": "/api/index" },
-    { "source": "/admin", "destination": "/index.html" }
+    { "source": "/api/flags", "destination": { "service": "api" } },
+    { "source": "/api/(.*)", "destination": { "service": "api" } },
+    { "source": "/docs", "destination": { "service": "api" } },
+    { "source": "/openapi.json", "destination": { "service": "api" } },
+    { "source": "/chat", "destination": { "service": "chatbot" } },
+    { "source": "/(.*)", "destination": { "service": "web" } }
   ]
 }

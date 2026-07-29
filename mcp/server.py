@@ -10,6 +10,8 @@ import os
 
 from mcp.server import MCPServer
 
+from mcp.server.transport_security import TransportSecuritySettings
+
 from client import call, encode_password
 from constants import (
     DEFAULT_MCP_HOST, DEFAULT_MCP_PORT, FLD_AMOUNT, FLD_CODE, FLD_COMMENTS, FLD_CURRENCY, FLD_EMAIL,
@@ -18,8 +20,8 @@ from constants import (
     FLD_WILL, FLD_WILL_ID, FLD_WILL_TYPE, METHOD_DELETE, METHOD_GET, METHOD_POST, PATH_ADMIN_LOGIN,
     PATH_ADMIN_SAVE_WILL, PATH_ADMIN_SIGNUP, PATH_ADMIN_WILLS, PATH_CONTACT_INFO, PATH_CONTACT_SEND,
     PATH_CREATE_PAYMENT_ORDER, PATH_GOOGLE_SIGN_IN, PATH_HEALTHZ, PATH_MARK_PAYMENT_FAILED, PATH_MY_WILLS,
-    PATH_OTP_REQUEST, PATH_OTP_VERIFY, PATH_VERIFY_PAYMENT, PATH_WILL_SAVE, path_admin_will,
-    path_admin_will_complete, path_admin_will_send_back, path_will,
+    PATH_OTP_REQUEST, PATH_OTP_VERIFY, PATH_VERIFY_PAYMENT, PATH_WILL_SAVE, STREAMABLE_HTTP_PATH,
+    path_admin_will, path_admin_will_complete, path_admin_will_send_back, path_will,
 )
 
 MCP_HOST = os.environ.get("MCP_HOST", DEFAULT_MCP_HOST)
@@ -219,6 +221,22 @@ async def admin_send_back_will(token: str, will_id: str, comments: str) -> dict:
 async def admin_delete_will(token: str, will_id: str) -> dict:
     """Delete any Will (admin reviewer action)."""
     return await call(METHOD_DELETE, path_admin_will(will_id), token=token)
+
+
+# ASGI app for platforms that run this as a plain HTTP service instead of via
+# mcp.run() below (e.g. Vercel's Python runtime, entrypoint "server:app" in
+# vercel.json's "mcp" service). DNS-rebinding Host-header protection is
+# disabled explicitly: it exists to stop a malicious webpage from tricking a
+# victim's browser into reaching a localhost-bound service, but this app is
+# never reachable from a browser at all — no public route on Vercel, and
+# ClusterIP-only (ie. cluster-internal-only) on AKS — so there's no such
+# webpage-to-localhost path to protect against, and the default protection
+# would otherwise reject the (legitimate, non-loopback) Host header that
+# Vercel's internal service-to-service proxy sends.
+app = mcp.streamable_http_app(
+    streamable_http_path=STREAMABLE_HTTP_PATH,
+    transport_security=TransportSecuritySettings(enable_dns_rebinding_protection=False),
+)
 
 
 if __name__ == "__main__":

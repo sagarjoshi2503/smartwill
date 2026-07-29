@@ -6,4 +6,5 @@ metadata:
 data:
   # In-cluster DNS to smartwill-mcp's ClusterIP Service (see
   # infra/k8s/mcp/service.yaml) — that Service has no public IP by design.
-  MCP_SERVER_URL: "http://smartwill-mcp.smartwill-mcp.svc.cluster.local:8000/mcp"
+  # Base URL only — chatbot/mcp_client.py appends the /mcp path itself.
+  MCP_SERVER_URL: "http://smartwill-mcp.smartwill-mcp.svc.cluster.local:8000"
