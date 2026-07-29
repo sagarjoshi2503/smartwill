@@ -28,6 +28,8 @@ export const API_FLAGS = "/api/flags?key=enable-admin-button";
 // Vercel Flag gating whether Razorpay Checkout is offered at all when
 // submitting a Will for review — see App.tsx and WizardForms.tsx.
 export const API_RAZORPAY_FLAG = "/api/flags?key=use-razorpay";
+// Vercel Flag gating whether the SmartWill Assistant chat widget is shown at all — see App.tsx.
+export const API_CHATBOT_FLAG = "/api/flags?key=enable-chat-bot";
 export const API_PAYMENTS_CREATE_ORDER = "/api/payments/create-order";
 export const API_PAYMENTS_VERIFY = "/api/payments/verify";
 export const API_PAYMENTS_MARK_FAILED = "/api/payments/mark-failed";
@@ -43,6 +45,9 @@ export const API_OTP_VERIFY = "/api/auth/otp/verify";
 export const API_CONTACT_INFO = "/api/contact-us/info";
 export const API_CONTACT_SEND = "/api/contact-us/send";
 export const apiPathWill = (willId: string): string => `/api/will/${willId}`;
+
+// --- Chatbot (pass to utils/chatbotBase's chatbotUrl(), a separate service — see chatbot/.env.example) ---
+export const CHATBOT_CHAT = "/chat";
 export const apiPathAdminWill = (willId: string): string => `/api/will/admin/${willId}`;
 export const apiPathSendBack = (willId: string): string => `/api/will/admin/${willId}/send-back`;
 export const apiPathComplete = (willId: string): string => `/api/will/admin/${willId}/complete`;

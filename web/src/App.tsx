@@ -19,13 +19,14 @@ import LiveDocPreview from "./features/create-will/LiveDocPreview";
 import AllIndiaLiveDocPreview from "./features/create-will/AllIndiaLiveDocPreview";
 import WillDocument from "./features/create-will/WillDocument";
 import AllIndiaWillDocument from "./features/create-will/AllIndiaWillDocument";
+import ChatWidget from "./features/chatbot/ChatWidget";
 import { allocTotal } from "./utils/allocation";
 import { authFetch } from "./utils/apiBase";
 import { clearAuthToken } from "./utils/auth";
 import { getMissingIdFields } from "./utils/willValidation";
 import { trackPageview } from "./utils/analytics";
 import {
-  ADMIN_PATH, API_FLAGS, API_RAZORPAY_FLAG, API_WILL_SAVE, apiPathSendBack,
+  ADMIN_PATH, API_FLAGS, API_RAZORPAY_FLAG, API_CHATBOT_FLAG, API_WILL_SAVE, apiPathSendBack,
   OTP_LENGTH, STATUS_DRAFT, STATUS_PENDING_REVIEW, STATUS_COMPLETED,
   SEND_BACK_REDIRECT_MS, DRAFT_RESET_MS, WIZARD_REDIRECT_MS,
   MSG_VIEW_ONLY, MSG_SAVING, BTN_SAVE_AS_DRAFT, ROLE_ADMIN, ROLE_TESTATOR,
@@ -79,6 +80,7 @@ export default function SmartWill() {
   const [sendBackError, setSendBackError] = useState("");
   const [showAdminButton, setShowAdminButton] = useState(false);
   const [razorpayEnabled, setRazorpayEnabled] = useState(false);
+  const [chatbotEnabled, setChatbotEnabled] = useState(false);
   const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
   const willDocRef = useRef<HTMLDivElement | null>(null);
 
@@ -132,6 +134,17 @@ export default function SmartWill() {
     fetch(API_RAZORPAY_FLAG)
       .then(res => res.ok ? res.json() : { enabled: false })
       .then(data => { if(!cancelled) setRazorpayEnabled(!!data?.enabled); })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, []);
+
+  // SmartWill Assistant chat widget is gated behind the "enable-chat-bot"
+  // Vercel Flag, same fail-closed pattern as the flags above.
+  useEffect(() => {
+    let cancelled = false;
+    fetch(API_CHATBOT_FLAG)
+      .then(res => res.ok ? res.json() : { enabled: false })
+      .then(data => { if(!cancelled) setChatbotEnabled(!!data?.enabled); })
       .catch(() => {});
     return () => { cancelled = true; };
   }, []);
@@ -512,6 +525,7 @@ export default function SmartWill() {
           </div>
         </div>
       )}
+      {chatbotEnabled && <ChatWidget />}
     </div>
   );
 }

@@ -1,0 +1,12 @@
+FROM python:3.12-slim
+
+WORKDIR /app
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY mcp_client.py tools.py main.py ./
+
+EXPOSE 8010
+
+CMD ["python", "main.py"]

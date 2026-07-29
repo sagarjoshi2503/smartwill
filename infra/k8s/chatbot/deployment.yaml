@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: smartwill-chatbot
+  namespace: smartwill-chatbot
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: smartwill-chatbot
+  template:
+    metadata:
+      labels:
+        app: smartwill-chatbot
+    spec:
+      containers:
+        - name: smartwill-chatbot
+          image: smartwillacr.azurecr.io/smartwill-chatbot:latest
+          ports:
+            - containerPort: 8010
+          envFrom:
+            - secretRef:
+                name: smartwill-chatbot-secrets
+            - configMapRef:
+                name: smartwill-chatbot-config
+          volumeMounts:
+            # Triggers the SecretProviderClass's secretObjects sync into the
+            # smartwill-chatbot-secrets k8s Secret above — same pattern as
+            # infra/k8s/api/deployment.yaml.
+            - name: secrets-store
+              mountPath: /mnt/secrets-store
+              readOnly: true
+          resources:
+            requests:
+              cpu: 100m
+              memory: 150Mi
+            limits:
+              cpu: 400m
+              memory: 300Mi
+          # No liveness/readiness probe on a specific path — /chat is
+          # POST-only and there's no dedicated /healthz on this service.
+          # FastAPI's OpenAPI docs page at / responds to a plain GET.
+          livenessProbe:
+            httpGet:
+              path: /docs
+              port: 8010
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /docs
+              port: 8010
+            initialDelaySeconds: 5
+            periodSeconds: 10
+      volumes:
+        - name: secrets-store
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: smartwill-kv-secrets
