@@ -69,7 +69,7 @@ def test_verify_rejects_payload_without_email(client, monkeypatch):
 
 
 def test_verify_returns_500_when_client_id_missing(fake_db):
-    app.dependency_overrides[get_settings] = lambda: Settings(mongodb_uri="mongodb://fake", vite_google_client_id=None, google_client_id=None)
+    app.dependency_overrides[get_settings] = lambda: Settings(mongodb_uri="mongodb://fake", google_client_id=None)
     try:
         from fastapi.testclient import TestClient
         res = TestClient(app).post(URL, json={"idToken": "token"})

@@ -10,4 +10,4 @@ os.environ.setdefault("ANTHROPIC_API_KEY", "test-key")
 # never make a real network call (open_session/CORSMiddleware aren't
 # exercised against a real MCP server or real browser origins).
 os.environ.setdefault("MCP_SERVER_URL", "http://test-mcp.invalid")
-os.environ.setdefault("CORS_ALLOW_ORIGINS", "http://localhost:5174")
+os.environ.setdefault("CHATBOT_CORS_ALLOW_ORIGINS", "http://localhost:5174")

@@ -7,10 +7,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 from constants import (
-    CORS_ALLOW_HEADERS, CORS_ALLOW_METHODS, DEFAULT_HOST, DEFAULT_PORT, ERR_CORS_ALLOW_ORIGINS_REQUIRED, FLD_TOKEN,
-    INCOMPLETE_REPLY, MAX_TOKENS, MAX_TOOL_ITERATIONS, MODEL, MSG_ROLE_ASSISTANT, MSG_ROLE_USER, REFUSAL_REPLY,
-    STOP_REASON_REFUSAL, STOP_REASON_TOOL_USE, SYSTEM_PROMPT, UNAVAILABLE_REPLY, err_tool_not_available,
-    err_tool_result,
+    CORS_ALLOW_HEADERS, CORS_ALLOW_METHODS, DEFAULT_HOST, DEFAULT_PORT, ENV_CORS_ALLOW_ORIGINS,
+    ERR_CORS_ALLOW_ORIGINS_REQUIRED, FLD_TOKEN, INCOMPLETE_REPLY, MAX_TOKENS, MAX_TOOL_ITERATIONS, MODEL,
+    MSG_ROLE_ASSISTANT, MSG_ROLE_USER, REFUSAL_REPLY, STOP_REASON_REFUSAL, STOP_REASON_TOOL_USE, SYSTEM_PROMPT,
+    UNAVAILABLE_REPLY, err_tool_not_available, err_tool_result,
 )
 from mcp_client import open_session
 from tools import TOOLS_REQUIRING_TOKEN, allowed_tool_names, claude_tools_for_role
@@ -21,10 +21,13 @@ logger = logging.getLogger("smartwill-chatbot")
 # declares its own allowed origins explicitly (comma-separated) rather than
 # silently inheriting a baked-in list. Same shape as api/_app/core/config.py's
 # cors_allow_origins, simplified here (plain env var, no pydantic-settings)
-# since this service doesn't need the API's full config surface.
-if not os.environ.get("CORS_ALLOW_ORIGINS"):
+# since this service doesn't need the API's full config surface. Uses its own
+# env var name (CHATBOT_CORS_ALLOW_ORIGINS, not CORS_ALLOW_ORIGINS) since
+# api/, mcp/, and chatbot/ are separate Vercel services sharing one flat
+# project-level env var pool.
+if not os.environ.get(ENV_CORS_ALLOW_ORIGINS):
     raise RuntimeError(ERR_CORS_ALLOW_ORIGINS_REQUIRED)
-CORS_ALLOW_ORIGINS = [o.strip() for o in os.environ["CORS_ALLOW_ORIGINS"].split(",") if o.strip()]
+CORS_ALLOW_ORIGINS = [o.strip() for o in os.environ[ENV_CORS_ALLOW_ORIGINS].split(",") if o.strip()]
 
 app = FastAPI(title="smartwill-chatbot")
 app.add_middleware(

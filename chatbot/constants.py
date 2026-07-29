@@ -5,15 +5,20 @@ match one defined elsewhere (e.g. tool/role names also present in mcp/)."""
 # --- Env var defaults ---
 # Only the server's own listen address gets a default — it's not an
 # environment-specific base URL, just where this process binds locally.
-# MCP_SERVER_URL and CORS_ALLOW_ORIGINS (below) are required, declared
-# per-environment (Vercel service binding / env var, AKS ConfigMap, or
-# .env.local for local dev) — see mcp_client.py and main.py.
+# MCP_SERVER_URL and CHATBOT_CORS_ALLOW_ORIGINS (below) are required,
+# declared per-environment (Vercel service binding / env var, AKS ConfigMap,
+# or .env.local for local dev) — see mcp_client.py and main.py.
 MCP_STREAMABLE_HTTP_PATH = "/mcp"
 DEFAULT_HOST = "0.0.0.0"
 DEFAULT_PORT = "8010"
 
+# CHATBOT_CORS_ALLOW_ORIGINS (not the bare CORS_ALLOW_ORIGINS api/ uses) is a
+# deliberately distinct key: this project deploys api/, mcp/, and chatbot/ as
+# separate Vercel services sharing one flat project-level env var pool, so a
+# same-named key can't hold a different value per service.
+ENV_CORS_ALLOW_ORIGINS = "CHATBOT_CORS_ALLOW_ORIGINS"
 ERR_MCP_SERVER_URL_REQUIRED = "MCP_SERVER_URL environment variable is required (base URL of smartwill-mcp)"
-ERR_CORS_ALLOW_ORIGINS_REQUIRED = "CORS_ALLOW_ORIGINS environment variable is required (comma-separated origins)"
+ERR_CORS_ALLOW_ORIGINS_REQUIRED = f"{ENV_CORS_ALLOW_ORIGINS} environment variable is required (comma-separated origins)"
 
 # --- Claude model / request shape ---
 MODEL = "claude-opus-5"

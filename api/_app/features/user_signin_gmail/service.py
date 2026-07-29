@@ -9,7 +9,7 @@ from _app.shared.constants import (
 
 
 def verify_google_signin(body: dict, settings: Settings) -> dict:
-    client_id = settings.google_id
+    client_id = settings.google_client_id
     if not client_id:
         raise AppError(HTTP_SERVER_ERROR, GOOGLE_NOT_CONFIGURED)
 

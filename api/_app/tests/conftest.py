@@ -19,7 +19,7 @@ def configured_settings():
     return Settings(
         mongodb_uri="mongodb://fake",
         db_name="smartwill-dev",
-        vite_google_client_id="fake-client-id.apps.googleusercontent.com",
+        google_client_id="fake-client-id.apps.googleusercontent.com",
         jwt_secret_key="test-secret-key",
     )
 

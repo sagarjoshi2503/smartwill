@@ -34,10 +34,9 @@ class Settings(BaseSettings):
     # connection string itself.
     db_name: str = DB_NAME
 
-    # Client IDs are not secret, so reusing the same VITE_-prefixed var the
-    # frontend uses is fine — it just also needs to be set (without the Vite
-    # prefix requirement) in this app's own environment.
-    vite_google_client_id: str | None = None
+    # Same Google OAuth Client ID as web/.env.example's VITE_GOOGLE_CLIENT_ID
+    # (not secret — both need the same value), but under its own distinct key
+    # so this service's config doesn't overlap with web/'s.
     google_client_id: str | None = None
 
     # Recipient notified whenever a testator submits their Will for review.
@@ -70,10 +69,6 @@ class Settings(BaseSettings):
     # signatures server-side only — it must never reach the frontend.
     razorpay_key_id: str | None = None
     razorpay_key_secret: str | None = None
-
-    @property
-    def google_id(self) -> str | None:
-        return self.vite_google_client_id or self.google_client_id
 
 
 @lru_cache
