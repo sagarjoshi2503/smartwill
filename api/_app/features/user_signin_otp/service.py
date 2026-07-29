@@ -14,9 +14,9 @@ from _app.core.jwt_auth import create_access_token
 from _app.features.user_signin_otp import repository
 from _app.shared import sms
 from _app.shared.constants import (
-    BAD_TESTATOR_EMAIL, FLD_CODE, FLD_EMAIL, FLD_PHONE, FLD_TOKEN, HTTP_BAD_REQUEST, INVALID_OTP, BAD_PHONE,
-    OTP_COUNTRY_CODE, OTP_EXPIRED, OTP_LENGTH, OTP_MAX_ATTEMPTS, OTP_MISSING, OTP_PHONE_MIN, OTP_SMS_TMPL,
-    OTP_TOO_MANY_ATTEMPTS, OTP_TTL_SECONDS, ROLE_TESTATOR,
+    BAD_TESTATOR_EMAIL, FLD_CODE, FLD_EMAIL, FLD_EXPIRES_IN_SECONDS, FLD_PHONE, FLD_TOKEN, FLD_VERIFIED,
+    HTTP_BAD_REQUEST, INVALID_OTP, BAD_PHONE, OTP_COUNTRY_CODE, OTP_EXPIRED, OTP_LENGTH, OTP_MAX_ATTEMPTS,
+    OTP_MISSING, OTP_PHONE_MIN, OTP_SMS_TMPL, OTP_TOO_MANY_ATTEMPTS, OTP_TTL_SECONDS, ROLE_TESTATOR,
 )
 from _app.shared.validators import is_valid_email, normalize_email
 
@@ -36,7 +36,7 @@ def request_otp(body: dict, settings: Settings) -> dict:
 
     sms.send_sms(settings, to=f"{OTP_COUNTRY_CODE}{phone}", body=OTP_SMS_TMPL.format(code=code))
 
-    return {"phone": phone, "expiresInSeconds": OTP_TTL_SECONDS}
+    return {FLD_PHONE: phone, FLD_EXPIRES_IN_SECONDS: OTP_TTL_SECONDS}
 
 
 def verify_otp(body: dict, settings: Settings) -> dict:
@@ -71,4 +71,4 @@ def verify_otp(body: dict, settings: Settings) -> dict:
 
     repository.clear_otp(phone)
     token = create_access_token(email, ROLE_TESTATOR, settings)
-    return {"phone": phone, "email": email, "verified": True, FLD_TOKEN: token}
+    return {FLD_PHONE: phone, FLD_EMAIL: email, FLD_VERIFIED: True, FLD_TOKEN: token}

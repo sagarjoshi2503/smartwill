@@ -12,12 +12,12 @@ from _app.core.logging import get_logger
 from _app.features.create_will.repository import find_will_by_id
 from _app.features.payments import repository
 from _app.shared.constants import (
-    FLD_AMOUNT, FLD_CURRENCY, FLD_RAZORPAY_ORDER_ID, FLD_RAZORPAY_PAYMENT_ID, FLD_RAZORPAY_SIGNATURE,
-    FLD_RECEIPT, FLD_TESTATOR_EMAIL, FLD_WILL_ID, HTTP_BAD_REQUEST, HTTP_FORBIDDEN, HTTP_NOT_FOUND,
-    HTTP_SERVER_ERROR, HTTP_UNAUTHORIZED, RAZORPAY_AUTH_FAILED, RAZORPAY_DEFAULT_CURRENCY, RAZORPAY_INVALID_AMOUNT,
-    RAZORPAY_MIN_AMOUNT_PAISE, RAZORPAY_MISSING_FIELDS, RAZORPAY_NOT_CONFIGURED, RAZORPAY_ORDER_FAILED,
-    RAZORPAY_ORDERS_URL, RAZORPAY_SIGNATURE_INVALID, RAZORPAY_TIMEOUT_SEC, RAZORPAY_WILL_ID_REQUIRED,
-    WILL_ACCESS_DENIED, WILL_NOT_FOUND,
+    FLD_AMOUNT, FLD_CURRENCY, FLD_ORDER_ID, FLD_PAYMENT_STATUS, FLD_RAZORPAY_ORDER_ID, FLD_RAZORPAY_PAYMENT_ID,
+    FLD_RAZORPAY_SIGNATURE, FLD_RECEIPT, FLD_TESTATOR_EMAIL, FLD_VERIFIED, FLD_WILL_ID, HTTP_BAD_REQUEST,
+    HTTP_FORBIDDEN, HTTP_NOT_FOUND, HTTP_SERVER_ERROR, HTTP_UNAUTHORIZED, RAZORPAY_AUTH_FAILED,
+    RAZORPAY_DEFAULT_CURRENCY, RAZORPAY_INVALID_AMOUNT, RAZORPAY_MIN_AMOUNT_PAISE, RAZORPAY_MISSING_FIELDS,
+    RAZORPAY_NOT_CONFIGURED, RAZORPAY_ORDER_FAILED, RAZORPAY_ORDERS_URL, RAZORPAY_SIGNATURE_INVALID,
+    RAZORPAY_TIMEOUT_SEC, RAZORPAY_WILL_ID_REQUIRED, WILL_ACCESS_DENIED, WILL_NOT_FOUND,
 )
 from _app.shared.enums import PaymentStatus
 from _app.shared.validators import normalize_email
@@ -40,21 +40,21 @@ def create_order(body: dict, settings: Settings) -> dict:
         response = requests.post(
             RAZORPAY_ORDERS_URL,
             auth=HTTPBasicAuth(settings.razorpay_key_id, settings.razorpay_key_secret),
-            json={"amount": int(amount), "currency": currency, "receipt": receipt},
+            json={FLD_AMOUNT: int(amount), FLD_CURRENCY: currency, FLD_RECEIPT: receipt},
             timeout=RAZORPAY_TIMEOUT_SEC,
         )
     except requests.RequestException:
         logger.warning("Could not reach Razorpay to create an order", exc_info=True)
         raise AppError(HTTP_SERVER_ERROR, RAZORPAY_ORDER_FAILED)
 
-    if response.status_code == 401:
+    if response.status_code == HTTP_UNAUTHORIZED:
         raise AppError(HTTP_UNAUTHORIZED, RAZORPAY_AUTH_FAILED)
     if not response.ok:
         logger.warning("Razorpay order creation failed: %s %s", response.status_code, response.text)
         raise AppError(HTTP_SERVER_ERROR, RAZORPAY_ORDER_FAILED)
 
     order = response.json()
-    return {"orderId": order["id"], "amount": order["amount"], "currency": order["currency"]}
+    return {FLD_ORDER_ID: order["id"], FLD_AMOUNT: order[FLD_AMOUNT], FLD_CURRENCY: order[FLD_CURRENCY]}
 
 
 def _assert_owns_will(db: Database, will_id: str, testator_email: str) -> None:
@@ -91,7 +91,7 @@ def verify_payment(db: Database, body: dict, settings: Settings, testator_email:
         _assert_owns_will(db, will_id, testator_email)
         repository.set_payment_status(db, will_id, PaymentStatus.PAID.value, body.get(FLD_AMOUNT))
 
-    return {"verified": True}
+    return {FLD_VERIFIED: True}
 
 
 def mark_payment_failed(db: Database, body: dict, testator_email: str) -> dict:
@@ -105,4 +105,4 @@ def mark_payment_failed(db: Database, body: dict, testator_email: str) -> dict:
 
     _assert_owns_will(db, will_id, testator_email)
     repository.set_payment_status(db, will_id, PaymentStatus.FAILED.value)
-    return {FLD_WILL_ID: will_id, "paymentStatus": PaymentStatus.FAILED.value}
+    return {FLD_WILL_ID: will_id, FLD_PAYMENT_STATUS: PaymentStatus.FAILED.value}

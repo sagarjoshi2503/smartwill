@@ -8,8 +8,8 @@ from _app.core.exceptions import AppError
 from _app.features.create_will import repository
 from _app.shared import email
 from _app.shared.constants import (
-    FLD_AADHAAR_NUMBER, FLD_ADMIN_COMMENTS, FLD_ALL_INDIA_ASSETS, FLD_ALL_INDIA_RESIDUE, FLD_CREATED_AT,
-    FLD_CREATED_BY, FLD_EXECUTOR, FLD_FULL_NAME,
+    FLD_AADHAAR_NUMBER, FLD_ADMIN_COMMENTS, FLD_ADMIN_EMAIL, FLD_ALL_INDIA_ASSETS, FLD_ALL_INDIA_RESIDUE,
+    FLD_ASSIGNED_AT, FLD_CREATED_AT, FLD_CREATED_BY, FLD_EXECUTOR, FLD_FULL_LEGAL_NAME, FLD_FULL_NAME,
     FLD_GUARDIAN, FLD_ID_NUMBER, FLD_JOINT_ID, FLD_PAN, FLD_PAYMENT_AMOUNT, FLD_PAYMENT_STATUS,
     FLD_RESIDUAL_ID, FLD_SPOUSE_AADHAAR_NUMBER, FLD_STATUS, FLD_SUB_ID, FLD_TESTATOR, FLD_TESTATOR_EMAIL,
     FLD_UPDATED_AT, FLD_WILL, FLD_WILL_ID, FLD_WILL_TYPE, FLD_WITNESSES, HTTP_BAD_REQUEST, HTTP_FORBIDDEN,
@@ -145,8 +145,8 @@ def _submit_for_admin_review(db: Database, settings: Settings, document: dict) -
     # reviewer — there's no admin-selection step anymore.
     repository.insert_admin_will(db, {
         FLD_WILL_ID: document[FLD_WILL_ID],
-        "adminEmail": settings.admin_review_email,
-        "assignedAt": datetime.now(timezone.utc),
+        FLD_ADMIN_EMAIL: settings.admin_review_email,
+        FLD_ASSIGNED_AT: datetime.now(timezone.utc),
     })
 
     testator = (document.get(FLD_WILL) or {}).get(FLD_TESTATOR) or {}
@@ -180,7 +180,7 @@ def list_testator_wills(db: Database, email: str) -> dict:
         wills.append({
             FLD_WILL_ID: w.get(FLD_WILL_ID),
             FLD_TESTATOR_EMAIL: w.get(FLD_TESTATOR_EMAIL) or "",
-            "fullLegalName": testator.get(FLD_FULL_NAME) or "",
+            FLD_FULL_LEGAL_NAME: testator.get(FLD_FULL_NAME) or "",
             FLD_UPDATED_AT: updated_at.isoformat() if updated_at else None,
             FLD_STATUS: w.get(FLD_STATUS) or STATUS_DRAFT,
             FLD_WILL_TYPE: w.get(FLD_WILL_TYPE) or "",
@@ -188,7 +188,7 @@ def list_testator_wills(db: Database, email: str) -> dict:
             FLD_PAYMENT_AMOUNT: w.get(FLD_PAYMENT_AMOUNT),
         })
 
-    wills.sort(key=lambda w: w["updatedAt"] or "", reverse=True)
+    wills.sort(key=lambda w: w[FLD_UPDATED_AT] or "", reverse=True)
     return {"wills": wills}
 
 

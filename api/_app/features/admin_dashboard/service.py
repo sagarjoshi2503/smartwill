@@ -8,13 +8,13 @@ from _app.core.exceptions import AppError
 from _app.features.admin_dashboard import repository
 from _app.shared import email
 from _app.shared.constants import (
-    COMMENTS_REQUIRED, DEFAULT_GREETING, FLD_AADHAAR_NUMBER, FLD_ADMIN_COMMENTS, FLD_COMMENTS,
-    FLD_CREATED_AT, FLD_CREATED_BY, FLD_EXECUTOR, FLD_FULL_NAME, FLD_GUARDIAN, FLD_ID_NUMBER, FLD_JOINT_ID,
-    FLD_PAN, FLD_PAYMENT_AMOUNT, FLD_PAYMENT_STATUS, FLD_RESIDUAL_ID, FLD_REVIEWER_EMAIL,
-    FLD_SPOUSE_AADHAAR_NUMBER, FLD_STATUS, FLD_SUB_ID, FLD_TESTATOR, FLD_TESTATOR_EMAIL, FLD_UPDATED_AT,
-    FLD_WILL, FLD_WILL_ID, FLD_WILL_TYPE, FLD_WITNESSES, HTTP_BAD_REQUEST, HTTP_NOT_FOUND,
-    BAD_TESTATOR_EMAIL, BAD_WILL_STATUS, BAD_WILL_TYPE, STATUS_COMPLETED, STATUS_DRAFT,
-    STATUS_PENDING_REVIEW, UNKNOWN_NAME, WILL_REQUIRED, WILL_NOT_FOUND, REVIEW_COMPLETED_SUBJECT,
+    COMMENTS_REQUIRED, DEFAULT_GREETING, FLD_AADHAAR_NUMBER, FLD_ADMIN_COMMENTS, FLD_ADMIN_EMAIL,
+    FLD_ASSIGNED_AT, FLD_COMMENTS, FLD_CONTACT, FLD_CREATED_AT, FLD_CREATED_BY, FLD_EXECUTOR, FLD_FULL_NAME,
+    FLD_GUARDIAN, FLD_ID_NUMBER, FLD_JOINT_ID, FLD_NAME, FLD_PAN, FLD_PAYMENT_AMOUNT, FLD_PAYMENT_STATUS,
+    FLD_RESIDUAL_ID, FLD_REVIEWER_EMAIL, FLD_SENT_BACK_AT, FLD_SPOUSE_AADHAAR_NUMBER, FLD_STATUS, FLD_SUB_ID,
+    FLD_TESTATOR, FLD_TESTATOR_EMAIL, FLD_UPDATED_AT, FLD_WILL, FLD_WILL_ID, FLD_WILL_TYPE, FLD_WITNESSES,
+    HTTP_BAD_REQUEST, HTTP_NOT_FOUND, BAD_TESTATOR_EMAIL, BAD_WILL_STATUS, BAD_WILL_TYPE, STATUS_COMPLETED,
+    STATUS_DRAFT, STATUS_PENDING_REVIEW, UNKNOWN_NAME, WILL_REQUIRED, WILL_NOT_FOUND, REVIEW_COMPLETED_SUBJECT,
     SENT_BACK_SUBJECT, SUBMIT_SUBJECT_TMPL,
 )
 from _app.shared.enums import PaymentStatus, WillType
@@ -124,8 +124,8 @@ def save_will_as_admin(db: Database, body: dict, settings: Settings, admin_email
 def _submit_for_admin_review(db: Database, settings: Settings, document: dict) -> None:
     repository.insert_admin_will(db, {
         FLD_WILL_ID: document[FLD_WILL_ID],
-        "adminEmail": settings.admin_review_email,
-        "assignedAt": datetime.now(timezone.utc),
+        FLD_ADMIN_EMAIL: settings.admin_review_email,
+        FLD_ASSIGNED_AT: datetime.now(timezone.utc),
     })
 
     testator = (document.get(FLD_WILL) or {}).get(FLD_TESTATOR) or {}
@@ -153,8 +153,8 @@ def list_admin_wills(db: Database) -> dict:
         updated_at = w.get(FLD_UPDATED_AT)
         clients.append({
             FLD_WILL_ID: w.get(FLD_WILL_ID),
-            "name": testator.get(FLD_FULL_NAME) or "",
-            "contact": w.get(FLD_TESTATOR_EMAIL) or "",
+            FLD_NAME: testator.get(FLD_FULL_NAME) or "",
+            FLD_CONTACT: w.get(FLD_TESTATOR_EMAIL) or "",
             FLD_UPDATED_AT: updated_at.isoformat() if updated_at else None,
             FLD_STATUS: w.get(FLD_STATUS) or STATUS_DRAFT,
             FLD_WILL_TYPE: w.get(FLD_WILL_TYPE) or "",
@@ -163,7 +163,7 @@ def list_admin_wills(db: Database) -> dict:
             FLD_PAYMENT_AMOUNT: w.get(FLD_PAYMENT_AMOUNT),
         })
 
-    clients.sort(key=lambda c: c["updatedAt"] or "", reverse=True)
+    clients.sort(key=lambda c: c[FLD_UPDATED_AT] or "", reverse=True)
     return {"clients": clients}
 
 
@@ -237,7 +237,7 @@ def admin_send_back_will(db: Database, will_id: str, comments: str, settings: Se
     repository.insert_admin_will(db, {
         FLD_WILL_ID: will_id,
         FLD_COMMENTS: comments,
-        "sentBackAt": datetime.now(timezone.utc),
+        FLD_SENT_BACK_AT: datetime.now(timezone.utc),
     })
 
     testator_email = document.get(FLD_TESTATOR_EMAIL)

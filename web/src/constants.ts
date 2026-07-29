@@ -120,3 +120,34 @@ export const ERR_SEND_OTP = "Could not send OTP.";
 export const ERR_VERIFY_OTP = "Could not verify OTP.";
 export const MSG_SENDING_OTP = "Sending OTP…";
 export const MSG_VERIFYING_OTP = "Verifying…";
+
+// --- App shell / header / wizard bar copy ---
+export const errSendBackTmpl = (status: number): string => `Could not send this Will back (server returned ${status}).`;
+export const ERR_SEND_BACK = "Could not send this Will back.";
+export const errSaveDraftTmpl = (status: number): string => `Could not save the draft (server returned ${status}).`;
+export const ERR_SAVE_DRAFT = "Could not save the draft.";
+export const LBL_INDIA_BADGE = "INDIA";
+export const BTN_LOGOUT = "Logout";
+export const BTN_ADMIN_PORTAL = "Admin Portal";
+export const BTN_CREATE_YOUR_WILL = "Create Your Will";
+export const LBL_WILL_DRAFTING = "Will Drafting";
+export const MSG_DRAFT_SAVED = "Saved";
+export const MSG_DRAFT_FAILED = "Failed";
+export const BTN_SEND_BACK_TO_TESTATOR = "Send Back to Testator";
+export const LBL_SEND_BACK_FOR_CHANGES = "Send back for changes";
+export const PH_SEND_BACK_COMMENTS = "Explain what needs to change…";
+export const MSG_SENDING = "Sending…";
+export const BTN_SEND_BACK = "Send Back";
+export const BTN_CANCEL = "Cancel";
+export const BTN_GENERATE_WILL = "Generate Will";
+export const ERR_GENERATE_WILL_MISSING_IDS = "Cannot generate the Will document — the following ID Numbers are missing:";
+export const BTN_DISMISS = "Dismiss";
+
+// --- Chat assistant widget ---
+export const LBL_CHAT_ASSISTANT_TITLE = "SmartWill Assistant";
+export const MSG_CHAT_EMPTY_STATE = "Ask me a question about SmartWill, or about your own Wills if you're signed in.";
+export const MSG_CHAT_THINKING = "Thinking…";
+export const MSG_CHAT_UNAVAILABLE = "SmartWill Assistant isn't available right now.";
+export const BTN_CONTACT_SUPPORT = "Contact Support";
+export const PH_CHAT_QUESTION = "Ask a question…";
+export const ARIA_OPEN_CHAT = "Open chat assistant";

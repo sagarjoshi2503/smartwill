@@ -170,6 +170,23 @@ FLD_PAYMENT_AMOUNT = "paymentAmount"
 FLD_RAZORPAY_ORDER_ID = "razorpay_order_id"
 FLD_RAZORPAY_PAYMENT_ID = "razorpay_payment_id"
 FLD_RAZORPAY_SIGNATURE = "razorpay_signature"
+FLD_ORDER_ID = "orderId"
+FLD_CONTACT = "contact"
+FLD_FULL_LEGAL_NAME = "fullLegalName"
+FLD_ADMIN_EMAIL = "adminEmail"
+FLD_ASSIGNED_AT = "assignedAt"
+FLD_SENT_BACK_AT = "sentBackAt"
+FLD_VERIFIED = "verified"
+FLD_EXPIRES_IN_SECONDS = "expiresInSeconds"
+FLD_SENT = "sent"
+
+# --- HTTP headers ---
+HEADER_AUTHORIZATION = "Authorization"
+BEARER_PREFIX = "Bearer "
+
+# --- JWT claim names ---
+JWT_CLAIM_SUB = "sub"
+JWT_CLAIM_ROLE = "role"
 
 # --- Fallback values ---
 UNKNOWN_NAME = "Unknown"

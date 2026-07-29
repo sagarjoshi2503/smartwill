@@ -1,3 +1,4 @@
+import logging
 import os
 
 import anthropic
@@ -5,45 +6,33 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
+from constants import (
+    CORS_ALLOW_HEADERS, CORS_ALLOW_METHODS, DEFAULT_CORS_ALLOW_ORIGINS, DEFAULT_HOST, DEFAULT_PORT, FLD_TOKEN,
+    INCOMPLETE_REPLY, MAX_TOKENS, MAX_TOOL_ITERATIONS, MODEL, MSG_ROLE_ASSISTANT, MSG_ROLE_USER, REFUSAL_REPLY,
+    STOP_REASON_REFUSAL, STOP_REASON_TOOL_USE, SYSTEM_PROMPT, UNAVAILABLE_REPLY, err_tool_not_available,
+    err_tool_result,
+)
 from mcp_client import open_session
 from tools import TOOLS_REQUIRING_TOKEN, allowed_tool_names, claude_tools_for_role
 
-MODEL = "claude-opus-5"
-MAX_TOKENS = 4096
-MAX_TOOL_ITERATIONS = 10
+logger = logging.getLogger("smartwill-chatbot")
 
 # Same default allowed origins as api/_app/shared/constants.py's
 # CORS_ALLOW_ORIGINS, overridable the same way (comma-separated env var) —
 # simplified here (plain constant, no pydantic-settings) since this service
 # doesn't need the API's full config surface.
-DEFAULT_CORS_ALLOW_ORIGINS = [
-    "http://localhost:5174",
-    "https://www.forwardlegacy.co.in",
-    "https://www.dev.forwardlegacy.co.in",
-]
 CORS_ALLOW_ORIGINS = (
     [o.strip() for o in os.environ["CORS_ALLOW_ORIGINS"].split(",") if o.strip()]
     if os.environ.get("CORS_ALLOW_ORIGINS")
     else DEFAULT_CORS_ALLOW_ORIGINS
 )
 
-SYSTEM_PROMPT = (
-    "You are the SmartWill assistant, embedded in the SmartWill web app. "
-    "Answer questions about SmartWill (an India-focused Will-drafting service) and, "
-    "when a tool is available, look up the signed-in user's own Wills to answer "
-    "questions about their status. You can only ever look things up — you have no "
-    "way to create, edit, delete, or pay for a Will, and no way to sign anyone up "
-    "or log anyone in. If asked to do any of those, explain that this assistant "
-    "can only answer questions and that the action has to be done in the app "
-    "itself. Keep answers concise."
-)
-
 app = FastAPI(title="smartwill-chatbot")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=CORS_ALLOW_ORIGINS,
-    allow_methods=["POST"],
-    allow_headers=["Content-Type", "Authorization"],
+    allow_methods=CORS_ALLOW_METHODS,
+    allow_headers=CORS_ALLOW_HEADERS,
 )
 
 client = anthropic.Anthropic()
@@ -62,6 +51,11 @@ class ChatRequest(BaseModel):
 
 class ChatResponse(BaseModel):
     reply: str
+    # Set when the assistant couldn't complete the request because a
+    # downstream service (smartwill-mcp, or the Claude API itself) failed —
+    # the frontend renders a distinct "not available" state with a Contact
+    # Support option instead of treating this like a normal reply.
+    unavailable: bool = False
 
 
 async def _execute_tool(session, name: str, arguments: dict, role: str | None, token: str | None) -> str:
@@ -69,59 +63,68 @@ async def _execute_tool(session, name: str, arguments: dict, role: str | None, t
     # outside the ones offered for this role (defense in depth; the tools
     # list already excludes it, but this is what actually stops the call).
     if name not in allowed_tool_names(role):
-        return f"Error: tool '{name}' is not available."
+        return err_tool_not_available(name)
 
     call_args = dict(arguments)
     if name in TOOLS_REQUIRING_TOKEN:
         # The token is never taken from the model's input — injected here
         # from the original HTTP request, regardless of what (if anything)
         # Claude supplied, since `token` was stripped from the schema.
-        call_args["token"] = token
+        call_args[FLD_TOKEN] = token
 
     result = await session.call_tool(name, call_args)
     text = "\n".join(block.text for block in result.content if block.type == "text")
-    return f"Error: {text}" if result.is_error else text
+    return err_tool_result(text) if result.is_error else text
 
 
 @app.post("/chat", response_model=ChatResponse)
 async def chat(body: ChatRequest) -> ChatResponse:
     messages: list[dict] = [{"role": m.role, "content": m.content} for m in body.messages]
 
-    async with open_session() as session:
-        mcp_tools = (await session.list_tools()).tools
-        claude_tools = claude_tools_for_role(mcp_tools, body.role)
+    try:
+        async with open_session() as session:
+            mcp_tools = (await session.list_tools()).tools
+            claude_tools = claude_tools_for_role(mcp_tools, body.role)
 
-        for _ in range(MAX_TOOL_ITERATIONS):
-            response = client.messages.create(
-                model=MODEL,
-                max_tokens=MAX_TOKENS,
-                system=SYSTEM_PROMPT,
-                tools=claude_tools,
-                messages=messages,
-            )
+            for _ in range(MAX_TOOL_ITERATIONS):
+                response = client.messages.create(
+                    model=MODEL,
+                    max_tokens=MAX_TOKENS,
+                    system=SYSTEM_PROMPT,
+                    tools=claude_tools,
+                    messages=messages,
+                )
 
-            if response.stop_reason == "refusal":
-                return ChatResponse(reply="I'm not able to help with that.")
+                if response.stop_reason == STOP_REASON_REFUSAL:
+                    return ChatResponse(reply=REFUSAL_REPLY)
 
-            if response.stop_reason != "tool_use":
-                text = "".join(b.text for b in response.content if b.type == "text")
-                return ChatResponse(reply=text)
+                if response.stop_reason != STOP_REASON_TOOL_USE:
+                    text = "".join(b.text for b in response.content if b.type == "text")
+                    return ChatResponse(reply=text)
 
-            messages.append({"role": "assistant", "content": response.content})
+                messages.append({"role": MSG_ROLE_ASSISTANT, "content": response.content})
 
-            tool_results = []
-            for block in response.content:
-                if block.type != "tool_use":
-                    continue
-                result_text = await _execute_tool(session, block.name, block.input, body.role, body.token)
-                tool_results.append({"type": "tool_result", "tool_use_id": block.id, "content": result_text})
+                tool_results = []
+                for block in response.content:
+                    if block.type != "tool_use":
+                        continue
+                    result_text = await _execute_tool(session, block.name, block.input, body.role, body.token)
+                    tool_results.append({"type": "tool_result", "tool_use_id": block.id, "content": result_text})
 
-            messages.append({"role": "user", "content": tool_results})
+                messages.append({"role": MSG_ROLE_USER, "content": tool_results})
+    except Exception:
+        # Covers smartwill-mcp being unreachable or returning a 4xx/5xx (the
+        # streamable-HTTP client raises on a bad connection/handshake, not a
+        # clean is_error tool result — that case is already handled inside
+        # _execute_tool without raising) as well as any Claude API failure.
+        # Either way, the assistant can't do anything useful right now.
+        logger.warning("Chat request failed", exc_info=True)
+        return ChatResponse(reply=UNAVAILABLE_REPLY, unavailable=True)
 
-    return ChatResponse(reply="I wasn't able to finish answering that — please try rephrasing.")
+    return ChatResponse(reply=INCOMPLETE_REPLY)
 
 
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run(app, host=os.environ.get("HOST", "0.0.0.0"), port=int(os.environ.get("PORT", "8010")))
+    uvicorn.run(app, host=os.environ.get("HOST", DEFAULT_HOST), port=int(os.environ.get("PORT", DEFAULT_PORT)))

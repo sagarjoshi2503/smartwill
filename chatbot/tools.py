@@ -8,15 +8,20 @@ injected server-side when a tool is actually called, so the model can never
 see, choose, or hallucinate a token.
 """
 
+from constants import (
+    FLD_TOKEN, ROLE_ADMIN, ROLE_TESTATOR, TOOL_ADMIN_GET_WILL, TOOL_GET_CONTACT_INFO, TOOL_GET_WILL,
+    TOOL_HEALTH_CHECK, TOOL_LIST_ADMIN_WILLS, TOOL_LIST_MY_WILLS,
+)
+
 ROLE_TOOL_WHITELIST: dict[str | None, set[str]] = {
-    None: {"health_check", "get_contact_info"},
-    "testator": {"health_check", "get_contact_info", "list_my_wills", "get_will"},
-    "admin": {"health_check", "get_contact_info", "list_admin_wills", "admin_get_will"},
+    None: {TOOL_HEALTH_CHECK, TOOL_GET_CONTACT_INFO},
+    ROLE_TESTATOR: {TOOL_HEALTH_CHECK, TOOL_GET_CONTACT_INFO, TOOL_LIST_MY_WILLS, TOOL_GET_WILL},
+    ROLE_ADMIN: {TOOL_HEALTH_CHECK, TOOL_GET_CONTACT_INFO, TOOL_LIST_ADMIN_WILLS, TOOL_ADMIN_GET_WILL},
 }
 
 # MCP tools whose call signature includes a `token` parameter that must be
 # injected server-side rather than ever shown to (or settable by) Claude.
-TOOLS_REQUIRING_TOKEN = {"list_my_wills", "get_will", "list_admin_wills", "admin_get_will"}
+TOOLS_REQUIRING_TOKEN = {TOOL_LIST_MY_WILLS, TOOL_GET_WILL, TOOL_LIST_ADMIN_WILLS, TOOL_ADMIN_GET_WILL}
 
 
 def allowed_tool_names(role: str | None) -> set[str]:
@@ -35,10 +40,10 @@ def claude_tools_for_role(mcp_tools: list, role: str | None) -> list[dict]:
 
         schema = dict(tool.input_schema)
         properties = dict(schema.get("properties") or {})
-        properties.pop("token", None)
+        properties.pop(FLD_TOKEN, None)
         schema["properties"] = properties
         if "required" in schema:
-            schema["required"] = [r for r in schema["required"] if r != "token"]
+            schema["required"] = [r for r in schema["required"] if r != FLD_TOKEN]
 
         claude_tools.append({
             "name": tool.name,

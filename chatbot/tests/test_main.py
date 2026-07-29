@@ -107,7 +107,7 @@ def test_chat_anonymous_returns_text_reply_without_calling_a_tool(monkeypatch, c
     res = client.post("/chat", json={"messages": [{"role": "user", "content": "What is SmartWill?"}]})
 
     assert res.status_code == 200
-    assert res.json() == {"reply": "SmartWill helps you draft a Will."}
+    assert res.json() == {"reply": "SmartWill helps you draft a Will.", "unavailable": False}
     assert session.call_tool_calls == []
 
 
@@ -140,7 +140,7 @@ def test_chat_injects_real_token_into_whitelisted_tool_call(monkeypatch, client)
     )
 
     assert res.status_code == 200
-    assert res.json() == {"reply": "You have no Wills yet."}
+    assert res.json() == {"reply": "You have no Wills yet.", "unavailable": False}
     assert session.call_tool_calls == [{"name": "list_my_wills", "args": {"token": "real-jwt"}}]
 
 
@@ -188,6 +188,39 @@ def test_chat_refuses_tool_outside_whitelist_even_if_requested(monkeypatch, clie
     assert "not available" in tool_result["content"]
 
 
+# --- downstream failures (MCP server unreachable/4xx/5xx, or Claude API
+# failure) surface as a friendly "unavailable" response, not a 500 ---
+
+def test_chat_returns_unavailable_when_mcp_session_fails_to_open(monkeypatch, client):
+    @asynccontextmanager
+    async def failing_open_session():
+        raise ConnectionError("smartwill-mcp: connection refused")
+        yield  # pragma: no cover - unreachable, satisfies generator syntax
+
+    monkeypatch.setattr(main, "open_session", failing_open_session)
+
+    res = client.post("/chat", json={"messages": [{"role": "user", "content": "hi"}]})
+
+    assert res.status_code == 200
+    assert res.json() == {"reply": main.UNAVAILABLE_REPLY, "unavailable": True}
+
+
+def test_chat_returns_unavailable_when_claude_call_raises(monkeypatch, client):
+    session = FakeSession()
+    patch_session(monkeypatch, session)
+
+    class FailingMessagesApi:
+        def create(self, **kwargs):
+            raise RuntimeError("upstream Claude API failure")
+
+    monkeypatch.setattr(main.client, "messages", FailingMessagesApi())
+
+    res = client.post("/chat", json={"messages": [{"role": "user", "content": "hi"}]})
+
+    assert res.status_code == 200
+    assert res.json()["unavailable"] is True
+
+
 # --- refusal stop_reason ---
 
 def test_chat_handles_refusal_stop_reason(monkeypatch, client):
@@ -199,7 +232,7 @@ def test_chat_handles_refusal_stop_reason(monkeypatch, client):
     res = client.post("/chat", json={"messages": [{"role": "user", "content": "x"}]})
 
     assert res.status_code == 200
-    assert res.json() == {"reply": "I'm not able to help with that."}
+    assert res.json() == {"reply": "I'm not able to help with that.", "unavailable": False}
 
 
 # --- runaway tool-use loop is bounded ---

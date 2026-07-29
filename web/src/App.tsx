@@ -30,6 +30,10 @@ import {
   OTP_LENGTH, STATUS_DRAFT, STATUS_PENDING_REVIEW, STATUS_COMPLETED,
   SEND_BACK_REDIRECT_MS, DRAFT_RESET_MS, WIZARD_REDIRECT_MS,
   MSG_VIEW_ONLY, MSG_SAVING, BTN_SAVE_AS_DRAFT, ROLE_ADMIN, ROLE_TESTATOR,
+  errSendBackTmpl, ERR_SEND_BACK, errSaveDraftTmpl, ERR_SAVE_DRAFT, LBL_INDIA_BADGE, BTN_LOGOUT,
+  BTN_ADMIN_PORTAL, BTN_CREATE_YOUR_WILL, LBL_WILL_DRAFTING, MSG_DRAFT_SAVED, MSG_DRAFT_FAILED,
+  BTN_SEND_BACK_TO_TESTATOR, LBL_SEND_BACK_FOR_CHANGES, PH_SEND_BACK_COMMENTS, MSG_SENDING,
+  BTN_SEND_BACK, BTN_CANCEL, BTN_GENERATE_WILL, ERR_GENERATE_WILL_MISSING_IDS, BTN_DISMISS,
 } from "./constants";
 import type {
   AdminProfile, AssetCatalogItem, Beneficiary, DisclaimerChecks, GoogleProfile, Plan, SignupState, ViewName, WillState, WillType,
@@ -289,14 +293,14 @@ export default function SmartWill() {
       });
       const isJson = res.headers.get("content-type")?.includes("application/json");
       const data = isJson ? await res.json() : null;
-      if(!res.ok) throw new Error(data?.error || `Could not send this Will back (server returned ${res.status}).`);
+      if(!res.ok) throw new Error(data?.error || errSendBackTmpl(res.status));
       setSendBackOpen(false);
       setSendBackComments("");
       setSendBackStatus("idle");
       setTimeout(()=>setView("admin"), SEND_BACK_REDIRECT_MS);
     } catch (err) {
       setSendBackStatus("error");
-      setSendBackError(err instanceof Error ? err.message : "Could not send this Will back.");
+      setSendBackError(err instanceof Error ? err.message : ERR_SEND_BACK);
     }
   };
 
@@ -343,13 +347,13 @@ export default function SmartWill() {
       });
       const isJson = res.headers.get("content-type")?.includes("application/json");
       const data = isJson ? await res.json() : null;
-      if(!res.ok) throw new Error(data?.error || `Could not save the draft (server returned ${res.status}).`);
+      if(!res.ok) throw new Error(data?.error || errSaveDraftTmpl(res.status));
       setEditingWillId(data.willId);
       setDraftStatus("done");
       setTimeout(()=>setDraftStatus("idle"), DRAFT_RESET_MS);
     } catch (err) {
       setDraftStatus("error");
-      setDraftError(err instanceof Error ? err.message : "Could not save the draft.");
+      setDraftError(err instanceof Error ? err.message : ERR_SAVE_DRAFT);
       setTimeout(()=>setDraftStatus("idle"), DRAFT_RESET_MS);
     }
   };
@@ -375,7 +379,7 @@ export default function SmartWill() {
             <div className="flex items-center gap-2 cursor-pointer" onClick={()=>setView("landing")}>
               <div className="w-8 h-8 bg-[#d09d61] rounded-lg flex items-center justify-center shadow-lg shadow-[#d09d61]/15"><Scale size={15} className="text-white"/></div>
               <span className="text-slate-900 font-bold text-lg serif">SmartWill</span>
-              <span className="text-[9px] font-bold tracking-[0.35em] text-[#924d06] bg-[#f8edd1] border border-[#d09d61] px-1.5 py-0.5 rounded">INDIA</span>
+              <span className="text-[9px] font-bold tracking-[0.35em] text-[#924d06] bg-[#f8edd1] border border-[#d09d61] px-1.5 py-0.5 rounded">{LBL_INDIA_BADGE}</span>
             </div>
             <div className="flex items-center gap-3">
               {view==="admin" && adminProfile ? (
@@ -386,7 +390,7 @@ export default function SmartWill() {
                     </div>
                     <span className="text-[#d09d61] text-sm">{adminProfile.name}</span>
                   </div>
-                  <button onClick={()=>{clearAuthToken(ROLE_ADMIN);setAdminProfile(null);setView("landing");}} className="flex items-center gap-1.5 text-slate-600 hover:text-slate-900 text-sm transition-colors"><LogOut size={13}/>Logout</button>
+                  <button onClick={()=>{clearAuthToken(ROLE_ADMIN);setAdminProfile(null);setView("landing");}} className="flex items-center gap-1.5 text-slate-600 hover:text-slate-900 text-sm transition-colors"><LogOut size={13}/>{BTN_LOGOUT}</button>
                 </>
               ):testatorAuthenticated && !isAdminView(view) ? (
                 <>
@@ -396,14 +400,14 @@ export default function SmartWill() {
                     </div>
                     <span className="text-[#d09d61] text-sm">{signup.name||signup.email}</span>
                   </div>
-                  <button onClick={handleTestatorLogout} className="flex items-center gap-1.5 text-slate-600 hover:text-slate-900 text-sm transition-colors"><LogOut size={13}/>Logout</button>
+                  <button onClick={handleTestatorLogout} className="flex items-center gap-1.5 text-slate-600 hover:text-slate-900 text-sm transition-colors"><LogOut size={13}/>{BTN_LOGOUT}</button>
                 </>
               ):(
                 <>
                   {showAdminButton && (
-                    <button onClick={()=>setView("adminLogin")} className="flex items-center gap-1.5 text-slate-600 hover:text-slate-900 border border-slate-200 hover:border-slate-300 rounded-lg px-3 py-1.5 text-sm transition-all"><LogIn size={13}/>Admin Portal</button>
+                    <button onClick={()=>setView("adminLogin")} className="flex items-center gap-1.5 text-slate-600 hover:text-slate-900 border border-slate-200 hover:border-slate-300 rounded-lg px-3 py-1.5 text-sm transition-all"><LogIn size={13}/>{BTN_ADMIN_PORTAL}</button>
                   )}
-                  <button onClick={()=>setView("authChoice")} className="flex items-center gap-1.5 bg-[#d09d61] hover:bg-[#d7a46a] text-[#020617] rounded-lg px-4 py-2 text-sm font-semibold transition-colors shadow-lg shadow-[#d09d61]/20">Create Your Will <ArrowRight size={13}/></button>
+                  <button onClick={()=>setView("authChoice")} className="flex items-center gap-1.5 bg-[#d09d61] hover:bg-[#d7a46a] text-[#020617] rounded-lg px-4 py-2 text-sm font-semibold transition-colors shadow-lg shadow-[#d09d61]/20">{BTN_CREATE_YOUR_WILL} <ArrowRight size={13}/></button>
                 </>
               )}
             </div>
@@ -431,7 +435,7 @@ export default function SmartWill() {
               <div className="w-8 h-8 bg-[#d09d61] rounded-2xl flex items-center justify-center shadow-lg shadow-[#d09d61]/15"><Scale size={12} className="text-[#020617]"/></div>
               <div>
                 <div className="text-slate-900 font-semibold serif text-sm">SmartWill</div>
-                <div className="text-slate-500 text-[10px]">Will Drafting{willType&&` - ${WILL_TYPE_LBL_SHORT[willType]}`}</div>
+                <div className="text-slate-500 text-[10px]">{LBL_WILL_DRAFTING}{willType&&` - ${WILL_TYPE_LBL_SHORT[willType]}`}</div>
               </div>
             </div>
             <div className="flex items-center gap-1">
@@ -448,46 +452,46 @@ export default function SmartWill() {
                 <button onClick={handleSaveDraft} disabled={draftStatus==="saving"||viewOnlyMode}
                   title={viewOnlyMode?MSG_VIEW_ONLY:draftStatus==="error"?draftError:undefined}
                   className={`flex items-center gap-1.5 text-xs rounded-lg px-3 py-1.5 transition-all font-semibold border ${draftStatus==="error"?"text-red-500 border-red-300":draftStatus==="done"?"text-emerald-600 border-emerald-300":"text-slate-600 hover:text-slate-900 border-slate-200 hover:border-slate-300"} ${draftStatus==="saving"||viewOnlyMode?"opacity-60 cursor-not-allowed":""}`}>
-                  <Save size={12}/>{draftStatus==="saving"?MSG_SAVING:draftStatus==="done"?"Saved":draftStatus==="error"?"Failed":BTN_SAVE_AS_DRAFT}
+                  <Save size={12}/>{draftStatus==="saving"?MSG_SAVING:draftStatus==="done"?MSG_DRAFT_SAVED:draftStatus==="error"?MSG_DRAFT_FAILED:BTN_SAVE_AS_DRAFT}
                 </button>
               )}
               {adminReviewMode && adminReviewStatus===STATUS_PENDING_REVIEW && (
                 <div className="relative">
                   <button onClick={()=>setSendBackOpen(o=>!o)}
                     className="flex items-center gap-1.5 text-xs text-red-500 hover:text-red-600 border border-red-200 hover:border-red-300 rounded-lg px-3 py-1.5 transition-all font-semibold">
-                    <RotateCcw size={12}/>Send Back to Testator
+                    <RotateCcw size={12}/>{BTN_SEND_BACK_TO_TESTATOR}
                   </button>
                   {sendBackOpen && (
                     <div className="absolute left-0 top-full mt-2 w-72 bg-white border border-slate-200 rounded-xl shadow-xl p-3.5 z-50">
-                      <p className="text-slate-900 text-xs font-semibold mb-2">Send back for changes</p>
+                      <p className="text-slate-900 text-xs font-semibold mb-2">{LBL_SEND_BACK_FOR_CHANGES}</p>
                       <textarea value={sendBackComments} onChange={e=>setSendBackComments(e.target.value)} rows={3}
-                        placeholder="Explain what needs to change…"
+                        placeholder={PH_SEND_BACK_COMMENTS}
                         className="w-full apv-input rounded-xl px-3 py-2 text-slate-900 placeholder:text-slate-500 text-xs focus:outline-none transition resize-none"/>
                       {sendBackStatus==="error" && <p className="text-red-500 text-[10px] mt-1">{sendBackError}</p>}
                       <div className="flex items-center gap-2 mt-2.5">
                         <button onClick={handleSendBack} disabled={sendBackStatus==="sending"||!sendBackComments.trim()}
                           className="flex-1 bg-red-500 hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-semibold rounded-lg py-1.5 transition-colors">
-                          {sendBackStatus==="sending"?"Sending…":"Send Back"}
+                          {sendBackStatus==="sending"?MSG_SENDING:BTN_SEND_BACK}
                         </button>
                         <button onClick={()=>{setSendBackOpen(false);setSendBackComments("");setSendBackStatus("idle");}}
-                          className="text-slate-500 hover:text-slate-900 text-xs px-2">Cancel</button>
+                          className="text-slate-500 hover:text-slate-900 text-xs px-2">{BTN_CANCEL}</button>
                       </div>
                     </div>
                   )}
                 </div>
               )}
               <button onClick={handleGenerateWill} className="flex items-center gap-1.5 text-xs text-[#d09d61] hover:text-[#b6844a] border border-[#d09d61]/30 hover:border-[#d09d61]/60 rounded-lg px-3 py-1.5 transition-all font-semibold">
-                <Eye size={12}/>Generate Will
+                <Eye size={12}/>{BTN_GENERATE_WILL}
               </button>
             </div>
           </div>
           {genWillErrors.length>0 && (
             <div className="flex-none bg-red-50 border-b border-red-200 px-4 py-2.5 flex items-start gap-2.5">
               <div className="text-red-700 text-xs flex-1">
-                <span className="font-semibold">Cannot generate the Will document — the following ID Numbers are missing:</span>
+                <span className="font-semibold">{ERR_GENERATE_WILL_MISSING_IDS}</span>
                 <span className="ml-1">{genWillErrors.join("; ")}.</span>
               </div>
-              <button onClick={()=>setGenWillErrors([])} className="text-red-500 hover:text-red-700 text-xs font-semibold shrink-0">Dismiss</button>
+              <button onClick={()=>setGenWillErrors([])} className="text-red-500 hover:text-red-700 text-xs font-semibold shrink-0">{BTN_DISMISS}</button>
             </div>
           )}
           {/* Split pane */}
@@ -525,7 +529,16 @@ export default function SmartWill() {
           </div>
         </div>
       )}
-      {chatbotEnabled && <ChatWidget />}
+      {chatbotEnabled && (
+        <ChatWidget
+          // Remounts (wiping all chat state) whenever who's signed in
+          // changes — login, logout, or switching between admin/testator —
+          // so no Will data from a previous session's answers can linger
+          // in the transcript after that identity is no longer present.
+          key={adminProfile ? `admin:${adminProfile.email}` : testatorAuthenticated ? `testator:${signup.email}` : "anon"}
+          onContactSupport={() => setView("contactUs")}
+        />
+      )}
     </div>
   );
 }

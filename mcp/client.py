@@ -6,7 +6,9 @@ import os
 
 import httpx
 
-API_BASE_URL = os.environ.get("API_BASE_URL", "http://127.0.0.1:8051").rstrip("/")
+from constants import BEARER_PREFIX, CALL_TIMEOUT_SECONDS, DEFAULT_API_BASE_URL, HEADER_AUTHORIZATION
+
+API_BASE_URL = os.environ.get("API_BASE_URL", DEFAULT_API_BASE_URL).rstrip("/")
 
 
 class ApiError(Exception):
@@ -25,8 +27,8 @@ def encode_password(password: str) -> str:
 
 
 async def call(method: str, path: str, *, token: str | None = None, json_body: dict | None = None) -> dict:
-    headers = {"Authorization": f"Bearer {token}"} if token else {}
-    async with httpx.AsyncClient(base_url=API_BASE_URL, timeout=30.0) as client:
+    headers = {HEADER_AUTHORIZATION: f"{BEARER_PREFIX}{token}"} if token else {}
+    async with httpx.AsyncClient(base_url=API_BASE_URL, timeout=CALL_TIMEOUT_SECONDS) as client:
         response = await client.request(method, path, headers=headers, json=json_body)
 
     if response.status_code >= 400:
