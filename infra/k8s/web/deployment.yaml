@@ -5,6 +5,10 @@ metadata:
   namespace: smartwill-web
 spec:
   replicas: 1
+  # Recreate: the single small cluster node doesn't have spare CPU to run
+  # an old+new pod simultaneously during a rollout once 4 services share it.
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app: smartwill-web

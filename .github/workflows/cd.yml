@@ -1,10 +1,10 @@
 name: CD
 
 # Deploys the images CI just pushed to smartwillcluster (AKS), automatically
-# once CI succeeds on main. Only smartwill-api and smartwill-web have
-# Kubernetes manifests today (infra/k8s/{api,web}/) — smartwill-mcp is built
-# and pushed by CI but has no Deployment/Service yet, so it's not rolled out
-# here. See cicd/README.md.
+# once CI succeeds on main. All four services (api, web, mcp, chatbot) have
+# Kubernetes manifests under infra/k8s/. smartwill-mcp has no public IP by
+# design (ClusterIP — see infra/k8s/mcp/service.yaml); it's only reachable
+# from smartwill-chatbot inside the cluster. See cicd/README.md.
 
 on:
   workflow_run:
@@ -55,6 +55,18 @@ jobs:
           kubectl apply -f infra/k8s/api/
           kubectl rollout restart deployment/smartwill-api -n smartwill-api
           kubectl rollout status deployment/smartwill-api -n smartwill-api --timeout=120s
+
+      - name: Deploy smartwill-mcp
+        run: |
+          kubectl apply -f infra/k8s/mcp/
+          kubectl rollout restart deployment/smartwill-mcp -n smartwill-mcp
+          kubectl rollout status deployment/smartwill-mcp -n smartwill-mcp --timeout=120s
+
+      - name: Deploy smartwill-chatbot
+        run: |
+          kubectl apply -f infra/k8s/chatbot/
+          kubectl rollout restart deployment/smartwill-chatbot -n smartwill-chatbot
+          kubectl rollout status deployment/smartwill-chatbot -n smartwill-chatbot --timeout=120s
 
       - name: Deploy smartwill-web
         run: |

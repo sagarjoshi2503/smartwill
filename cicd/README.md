@@ -5,16 +5,17 @@ and [`.github/workflows/cd.yml`](../.github/workflows/cd.yml), not in this
 folder — GitHub Actions only executes workflow files under
 `.github/workflows/`, so that's where they have to be for anything to
 actually run. This folder exists to keep pipeline documentation in one place
-alongside `api/`, `web/`, `mcp/`, and `infra/`.
+alongside `api/`, `web/`, `mcp/`, `chatbot/`, and `infra/`.
 
 ## CI (`ci.yml`)
 
 Trigger: push to `main` (path-filtered per app) or manual dispatch.
 
-For each of `api/`, `web/`, and `mcp/` that changed, builds and pushes that
-app's Docker image to `smartwillacr.azurecr.io` via `az acr build` (builds
-inside ACR itself — no local Docker daemon or separate registry login needed
-on the runner), tagged both `:latest` and `:<commit-sha>`.
+For each of `api/`, `web/`, `mcp/`, and `chatbot/` that changed, builds and
+pushes that app's Docker image to `smartwillacr.azurecr.io` via `az acr
+build` (builds inside ACR itself — no local Docker daemon or separate
+registry login needed on the runner), tagged both `:latest` and
+`:<commit-sha>`.
 
 ## CD (`cd.yml`)
 
@@ -22,10 +23,25 @@ Trigger: automatically after `ci.yml` completes successfully on `main`, or
 manual dispatch.
 
 Fetches AKS admin credentials for `smartwillcluster` and re-applies +
-rollout-restarts the `smartwill-api` and `smartwill-web` Deployments (see
-[`infra/k8s/`](../infra/k8s/)), so they pick up the `:latest` image CI just
-pushed. **`smartwill-mcp` is built by CI but not deployed by CD** — there's
-no `infra/k8s/mcp/` yet.
+rollout-restarts all four Deployments (see [`infra/k8s/`](../infra/k8s/)) in
+dependency order — `smartwill-api`, then `smartwill-mcp` (depends on api),
+then `smartwill-chatbot` (depends on mcp), then `smartwill-web` — so each
+picks up the `:latest` image CI just pushed.
+
+`smartwill-mcp` has **no public IP** — its Service is `ClusterIP`, reachable
+only from `smartwill-chatbot` inside the cluster (see
+[`infra/k8s/mcp/service.yaml`](../infra/k8s/mcp/service.yaml)). It exposes
+all 21 MCP tools with no auth of its own beyond whatever token a caller
+supplies; only `smartwill-chatbot`'s read-only tool whitelist should ever be
+able to reach it — a public IP would let anyone bypass that whitelist
+entirely (delete a Will, mark a payment, sign up an admin, etc.).
+
+All four Deployments use `strategy: type: Recreate` instead of the
+`RollingUpdate` default — the cluster's single small node (`Standard_D2s_v6`)
+doesn't have spare CPU to run an old and new pod of the same service at once
+once four services share it, so a rolling update would leave the new pod
+stuck `Pending` forever. `Recreate` accepts brief downtime per deploy, which
+is fine for this dev cluster.
 
 ## Azure identity
 
@@ -55,3 +71,25 @@ these are sensitive under the OIDC trust model above):
 | `VITE_API_BASE_URL` | `smartwill-api`'s LoadBalancer external IP, e.g. `http://52.140.85.135` (see `infra/k8s/api/service.yaml`'s current `EXTERNAL-IP`) |
 | `VITE_RAZORPAY_KEY_ID` | see `web/.env.local` |
 | `VITE_GA_MEASUREMENT_ID` | see `web/.env.local` |
+| `VITE_CHATBOT_BASE_URL` | `smartwill-chatbot`'s LoadBalancer external IP, e.g. `http://4.224.64.236` (see `infra/k8s/chatbot/service.yaml`'s current `EXTERNAL-IP`) |
+
+`ANTHROPIC_API_KEY` and `CORS_ALLOW_ORIGINS` for `smartwill-chatbot`, and
+`API_BASE_URL` for `smartwill-mcp`, are **not** GitHub variables — they're
+pulled at runtime from Azure Key Vault (`anthropic-api-key`,
+`cors-allow-origins`) or an in-cluster ConfigMap (`API_BASE_URL` points at
+`smartwill-api`'s in-cluster DNS name), same pattern as `smartwill-api`'s own
+secrets. See `infra/k8s/{mcp,chatbot}/secret-provider-class.yaml` and
+`configmap.yaml`.
+
+### A note on the two LoadBalancer IPs that changed today
+
+Whenever `smartwill-api` or `smartwill-chatbot`'s Service is deleted and
+recreated (not just a rollout restart — an actual delete), Azure assigns a
+**new** LoadBalancer IP. If that happens, update:
+
+1. This table's `VITE_API_BASE_URL` / `VITE_CHATBOT_BASE_URL` GitHub variables
+2. The corresponding Key Vault secrets (`vite-api-base-url`,
+   `vite-chatbot-base-url`, `cors-allow-origins`) so future manual rebuilds
+   stay correct too
+3. `smartwill-chatbot`'s `cors-allow-origins` Key Vault secret, if it was
+   `smartwill-web`'s IP that changed

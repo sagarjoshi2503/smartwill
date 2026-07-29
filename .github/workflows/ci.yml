@@ -1,10 +1,11 @@
 name: CI
 
-# Builds and pushes smartwill-api / smartwill-web / smartwill-mcp images to
-# Azure Container Registry whenever their respective folder changes on main.
-# See cicd/README.md for the full explanation of this setup (why these files
-# live under .github/workflows/ instead of cicd/, the Azure identity used,
-# and the required repository variables).
+# Builds and pushes smartwill-api / smartwill-web / smartwill-mcp /
+# smartwill-chatbot images to Azure Container Registry whenever their
+# respective folder changes on main. See cicd/README.md for the full
+# explanation of this setup (why these files live under .github/workflows/
+# instead of cicd/, the Azure identity used, and the required repository
+# variables).
 
 on:
   push:
@@ -13,6 +14,7 @@ on:
       - "api/**"
       - "web/**"
       - "mcp/**"
+      - "chatbot/**"
   workflow_dispatch: {}
 
 permissions:
@@ -26,6 +28,7 @@ jobs:
       api: ${{ steps.filter.outputs.api }}
       web: ${{ steps.filter.outputs.web }}
       mcp: ${{ steps.filter.outputs.mcp }}
+      chatbot: ${{ steps.filter.outputs.chatbot }}
     steps:
       - uses: actions/checkout@v4
       - uses: dorny/paths-filter@v3
@@ -38,6 +41,8 @@ jobs:
               - 'web/**'
             mcp:
               - 'mcp/**'
+            chatbot:
+              - 'chatbot/**'
 
   build-api:
     needs: changes
@@ -72,8 +77,9 @@ jobs:
           subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
       # Vite inlines these at build time, so they're passed as build-args —
       # same values used for the manual builds documented in web/.env.example.
-      # VITE_API_BASE_URL points at the smartwill-api LoadBalancer's IP
-      # (see infra/k8s/api/service.yaml's current EXTERNAL-IP).
+      # VITE_API_BASE_URL / VITE_CHATBOT_BASE_URL point at smartwill-api's
+      # and smartwill-chatbot's LoadBalancer IPs (see infra/k8s/{api,chatbot}/
+      # service.yaml's current EXTERNAL-IP).
       - name: Build and push smartwill-web
         run: |
           az acr build --registry smartwillacr \
@@ -82,6 +88,7 @@ jobs:
             --build-arg VITE_API_BASE_URL="${{ vars.VITE_API_BASE_URL }}" \
             --build-arg VITE_RAZORPAY_KEY_ID="${{ vars.VITE_RAZORPAY_KEY_ID }}" \
             --build-arg VITE_GA_MEASUREMENT_ID="${{ vars.VITE_GA_MEASUREMENT_ID }}" \
+            --build-arg VITE_CHATBOT_BASE_URL="${{ vars.VITE_CHATBOT_BASE_URL }}" \
             ./web
 
   build-mcp:
@@ -100,3 +107,20 @@ jobs:
           az acr build --registry smartwillacr \
             --image smartwill-mcp:${{ github.sha }} --image smartwill-mcp:latest \
             ./mcp
+
+  build-chatbot:
+    needs: changes
+    if: needs.changes.outputs.chatbot == 'true' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+      - name: Build and push smartwill-chatbot
+        run: |
+          az acr build --registry smartwillacr \
+            --image smartwill-chatbot:${{ github.sha }} --image smartwill-chatbot:latest \
+            ./chatbot

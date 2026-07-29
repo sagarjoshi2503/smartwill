@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: smartwill-mcp
+  namespace: smartwill-mcp
+spec:
+  replicas: 1
+  # Recreate: the single small cluster node doesn't have spare CPU to run
+  # an old+new pod simultaneously during a rollout once 4 services share it.
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: smartwill-mcp
+  template:
+    metadata:
+      labels:
+        app: smartwill-mcp
+    spec:
+      containers:
+        - name: smartwill-mcp
+          image: smartwillacr.azurecr.io/smartwill-mcp:latest
+          ports:
+            - containerPort: 8000
+          envFrom:
+            - configMapRef:
+                name: smartwill-mcp-config
+          resources:
+            requests:
+              cpu: 100m
+              memory: 150Mi
+            limits:
+              cpu: 400m
+              memory: 300Mi
+          # No dedicated /healthz, and the streamable-HTTP /mcp endpoint
+          # returns 400 on a bare GET (no session) — an httpGet probe would
+          # treat that as failing and kill the pod in a loop. A TCP check
+          # just confirms uvicorn is accepting connections on the port.
+          livenessProbe:
+            tcpSocket:
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe:
+            tcpSocket:
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 10
