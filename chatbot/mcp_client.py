@@ -7,9 +7,11 @@ from contextlib import asynccontextmanager
 from mcp import ClientSession
 from mcp.client.streamable_http import streamable_http_client
 
-from constants import DEFAULT_MCP_SERVER_URL, MCP_STREAMABLE_HTTP_PATH
+from constants import ERR_MCP_SERVER_URL_REQUIRED, MCP_STREAMABLE_HTTP_PATH
 
-MCP_SERVER_BASE_URL = os.environ.get("MCP_SERVER_URL", DEFAULT_MCP_SERVER_URL).rstrip("/")
+if not os.environ.get("MCP_SERVER_URL"):
+    raise RuntimeError(ERR_MCP_SERVER_URL_REQUIRED)
+MCP_SERVER_BASE_URL = os.environ["MCP_SERVER_URL"].rstrip("/")
 MCP_SERVER_URL = f"{MCP_SERVER_BASE_URL}{MCP_STREAMABLE_HTTP_PATH}"
 
 

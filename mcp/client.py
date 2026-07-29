@@ -6,9 +6,11 @@ import os
 
 import httpx
 
-from constants import BEARER_PREFIX, CALL_TIMEOUT_SECONDS, DEFAULT_API_BASE_URL, HEADER_AUTHORIZATION
+from constants import BEARER_PREFIX, CALL_TIMEOUT_SECONDS, ERR_API_BASE_URL_REQUIRED, HEADER_AUTHORIZATION
 
-API_BASE_URL = os.environ.get("API_BASE_URL", DEFAULT_API_BASE_URL).rstrip("/")
+if not os.environ.get("API_BASE_URL"):
+    raise RuntimeError(ERR_API_BASE_URL_REQUIRED)
+API_BASE_URL = os.environ["API_BASE_URL"].rstrip("/")
 
 
 class ApiError(Exception):
