@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Will Generator — Non-Goan Will</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1c2431;
+    --ink-soft:#3d4759;
+    --paper:#faf9f6;
+    --paper-line:#e4e0d6;
+    --panel:#ffffff;
+    --seal:#7a2e2e;
+    --seal-dark:#5e2323;
+    --brass:#9c7f3f;
+    --ok:#3c6e47;
+    --err:#a3312a;
+    --border:#d9d4c6;
+    --radius:3px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--ink);
+    background-image:
+      radial-gradient(1200px 600px at 10% -10%, #2a3245 0%, transparent 60%),
+      radial-gradient(1000px 500px at 110% 10%, #232a3a 0%, transparent 55%);
+    font-family:'Inter',sans-serif;
+    color:var(--ink);
+    min-height:100vh;
+  }
+  #app{max-width:900px;margin:0 auto;padding:28px 20px 80px;}
+
+  .brandbar{display:flex;align-items:center;gap:14px;margin-bottom:22px;color:#f2efe7;}
+  .seal-mark{
+    width:40px;height:40px;border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, #9a3f3f, var(--seal-dark));
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Source Serif 4',serif;font-weight:700;color:#f2e6c9;font-size:15px;
+    box-shadow:0 0 0 3px rgba(242,239,231,0.08), inset 0 0 6px rgba(0,0,0,0.4);
+    flex-shrink:0;
+  }
+  .brandbar h1{font-family:'Source Serif 4',serif;font-weight:700;font-size:22px;margin:0;letter-spacing:0.3px;}
+  .brandbar p{margin:2px 0 0;font-size:12.5px;color:#b7bcc9;}
+
+  .stepper{
+    display:flex;flex-wrap:wrap;gap:0;background:#f2efe6;border:1px solid var(--paper-line);
+    border-radius:var(--radius);overflow:hidden;margin-bottom:22px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.25);
+  }
+  .step-tab{
+    flex:1 1 auto;min-width:96px;text-align:center;padding:10px 6px;font-size:11px;font-weight:600;
+    color:#8b8571;border-right:1px solid var(--paper-line);cursor:default;position:relative;
+    letter-spacing:0.2px;
+  }
+  .step-tab:last-child{border-right:none;}
+  .step-tab .n{display:block;font-family:'Source Serif 4',serif;font-size:13px;margin-bottom:2px;}
+  .step-tab.done{color:var(--seal-dark);cursor:pointer;background:#ece5d3;}
+  .step-tab.active{color:#fff;background:var(--ink);}
+  .step-tab.active .n{color:#e7c98f;}
+
+  .card{
+    background:var(--panel);border:1px solid var(--paper-line);border-radius:var(--radius);
+    padding:28px 30px;box-shadow:0 20px 45px rgba(0,0,0,0.28);
+  }
+  .card h2{font-family:'Source Serif 4',serif;font-size:21px;margin:0 0 4px;color:var(--ink);}
+  .card .sub{font-size:13px;color:#6b6f7d;margin:0 0 22px;line-height:1.5;}
+
+  .row{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:16px;}
+  .field{flex:1 1 220px;display:flex;flex-direction:column;gap:6px;}
+  .field.full{flex-basis:100%;}
+  label{font-size:12.5px;font-weight:600;color:var(--ink-soft);display:flex;align-items:center;gap:5px;}
+  label .req{color:var(--seal);}
+  input[type=text],input[type=number],select,textarea{
+    font-family:'Inter',sans-serif;font-size:14px;padding:9px 11px;border:1px solid var(--border);
+    border-radius:var(--radius);background:#fff;color:var(--ink);outline:none;
+  }
+  input:focus,select:focus,textarea:focus{border-color:var(--brass);box-shadow:0 0 0 3px rgba(156,127,63,0.15);}
+  input.err,select.err{border-color:var(--err);background:#fdf3f2;}
+  .errmsg{font-size:11.5px;color:var(--err);margin-top:1px;}
+  .hint{font-size:11.5px;color:#8a8d97;margin-top:1px;}
+
+  .radiogroup{display:flex;gap:10px;flex-wrap:wrap;}
+  .pillbtn{
+    padding:8px 16px;border:1px solid var(--border);border-radius:20px;background:#fff;
+    font-size:13px;cursor:pointer;font-weight:500;color:var(--ink-soft);
+  }
+  .pillbtn.on{background:var(--ink);color:#fff;border-color:var(--ink);}
+
+  .info-btn{
+    display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--seal-dark);
+    background:#f7ece9;border:1px solid #ecd6d1;padding:5px 11px;border-radius:20px;cursor:pointer;
+    font-weight:600;
+  }
+  .info-btn:hover{background:#f2ddd6;}
+
+  .clause-block{
+    background:#f7f5ef;border:1px solid var(--paper-line);border-left:4px solid var(--seal);
+    padding:18px 20px;border-radius:var(--radius);margin:14px 0 18px;
+  }
+  .clause-block .tag{font-size:10.5px;font-weight:700;letter-spacing:1px;color:var(--seal-dark);text-transform:uppercase;}
+  .clause-block .clause-text{font-family:'Source Serif 4',serif;font-size:15px;line-height:1.6;margin:8px 0;color:var(--ink);}
+  .clause-block .why{font-size:12.5px;color:#5c6070;line-height:1.6;margin-top:10px;padding-top:10px;border-top:1px dashed #d7d2c2;}
+
+  .item-card{
+    border:1px solid var(--paper-line);border-radius:var(--radius);padding:16px 18px 6px;margin-bottom:14px;
+    background:#fcfbf9;position:relative;
+  }
+  .item-card .item-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+  .item-card .item-title{font-size:12.5px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:0.4px;}
+  .removebtn{background:none;border:none;color:#a3312a;font-size:12px;cursor:pointer;font-weight:600;padding:2px 6px;}
+  .removebtn:hover{text-decoration:underline;}
+
+  .addbtn{
+    display:inline-flex;align-items:center;gap:6px;background:#fff;border:1.5px dashed var(--border);
+    color:var(--ink-soft);font-size:13px;font-weight:600;padding:9px 16px;border-radius:var(--radius);
+    cursor:pointer;width:100%;justify-content:center;margin-top:2px;
+  }
+  .addbtn:hover{border-color:var(--brass);color:var(--brass);}
+
+  .category-title{
+    font-family:'Source Serif 4',serif;font-size:16px;font-weight:600;margin:26px 0 4px;color:var(--ink);
+    display:flex;align-items:baseline;gap:8px;
+  }
+  .category-title .letter{color:var(--seal);font-size:14px;}
+  .category-sub{font-size:12px;color:#7b7f8c;margin:0 0 12px;}
+
+  .nav-row{display:flex;justify-content:space-between;align-items:center;margin-top:26px;padding-top:20px;border-top:1px solid var(--paper-line);}
+  .btn{
+    font-family:'Inter',sans-serif;font-size:14px;font-weight:600;padding:11px 24px;border-radius:var(--radius);
+    border:none;cursor:pointer;
+  }
+  .btn-primary{background:var(--ink);color:#fff;}
+  .btn-primary:hover{background:#2b3549;}
+  .btn-ghost{background:none;color:var(--ink-soft);border:1px solid var(--border);}
+  .btn-ghost:hover{background:#f2efe6;}
+  .btn:disabled{opacity:0.4;cursor:not-allowed;}
+
+  .step-error-banner{
+    background:#fdf3f2;border:1px solid #ecc8c3;color:var(--err);font-size:12.5px;
+    padding:10px 14px;border-radius:var(--radius);margin-bottom:16px;font-weight:600;
+  }
+
+  /* Modal */
+  .modal-overlay{
+    position:fixed;inset:0;background:rgba(15,18,26,0.6);display:flex;align-items:center;justify-content:center;
+    z-index:200;padding:20px;
+  }
+  .modal-box{
+    background:#fff;border-radius:var(--radius);max-width:560px;width:100%;padding:26px 28px;
+    max-height:80vh;overflow-y:auto;box-shadow:0 30px 60px rgba(0,0,0,0.4);
+  }
+  .modal-box h3{font-family:'Source Serif 4',serif;font-size:19px;margin:0 0 12px;color:var(--ink);}
+  .modal-box p, .modal-box li{font-size:13.5px;line-height:1.65;color:var(--ink-soft);}
+  .modal-box ul{padding-left:18px;margin:10px 0;}
+  .modal-close{margin-top:14px;}
+
+  /* Review / instructions */
+  .instructions{
+    background:#f2efe6;border:1px solid var(--paper-line);border-radius:var(--radius);
+    padding:20px 22px;margin-bottom:20px;
+  }
+  .instructions h3{font-family:'Source Serif 4',serif;font-size:15px;margin:0 0 10px;color:var(--ink);}
+  .spec-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 20px;}
+  .spec-grid .k{font-size:12px;color:#7b7f8c;text-transform:uppercase;letter-spacing:0.3px;}
+  .spec-grid .v{font-size:13.5px;font-weight:600;color:var(--ink);margin-bottom:8px;}
+  .review-summary{font-size:13px;color:var(--ink-soft);line-height:1.7;margin-bottom:6px;}
+  .review-section-title{font-weight:700;color:var(--ink);margin-top:14px;}
+
+  .download-row{display:flex;gap:12px;flex-wrap:wrap;margin-top:18px;}
+
+  @media (max-width:640px){
+    .card{padding:20px 16px;}
+    .spec-grid{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+/* ===================== STATE ===================== */
+const RELATIONSHIP_OPTIONS = ["Spouse","Son","Daughter","Father","Mother","Brother","Sister","Grandson","Granddaughter","Nephew","Niece","Friend","Other"];
+const ID_TYPES = ["Aadhaar Card","PAN Card","Passport","Voter ID","Driving License"];
+const WITNESS_RELATIONS = ["Not a relative","Friend","Neighbour","Colleague","Family member","Executor of the Will","Other"];
+const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+const NUM_WORDS = ["zero","one","two","three","four","five","six","seven","eight","nine","ten"];
+const OCCUPATIONS = ["Retired","In Service","Business","Profession","Homemaker","Other"];
+const WITNESS_DESCRIPTORS = ["Son of","Daughter of","Wife of"];
+
+function newAssetItem(){ return { description:"", beneficiaryName:"", relationship:"", relationshipOther:"", idType:"", idNumber:"" }; }
+function newResiduaryItem(){ return { name:"", relationship:"", relationshipOther:"", nationality:"", occupation:"", occupationOther:"", idType:"", idNumber:"" }; }
+function newWitness(){ return { name:"", descriptor:"Son of", parentOrSpouseName:"", age:"", maritalStatus:"unmarried", nationality:"", occupation:"", occupationOther:"", residentOf:"", aadhar:"", relation:"", relationOther:"" }; }
+function newChild(){ return { name:"" }; }
+
+let state = {
+  step: 0,
+  showErrors: {},
+  modal: null,
+  testator: {
+    name:"", childOf:"son", parentName:"", pan:"", aadhar:"", age:"",
+    maritalStatus:"unmarried", nationality:"", occupation:"", occupationOther:"", residentOf:"",
+    spouseName:"", spouseAadhar:"", sons:[], daughters:[],
+    day:"", month:"", year:"", place:""
+  },
+  immovable: { house: [], land: [], commercial: [] },
+  vehicles: [],
+  personal: [],
+  digital: [],
+  ip: [],
+  residuary: [ newResiduaryItem() ],
+  witnesses: [ newWitness(), newWitness() ]
+};
+
+const STEPS = [
+  {key:"testator", label:"Testator Details"},
+  {key:"financial", label:"Financial Assets"},
+  {key:"immovable", label:"Immovable Property"},
+  {key:"vehicles", label:"Motor Vehicles"},
+  {key:"personal", label:"Personal & Valuables"},
+  {key:"digitalip", label:"Digital & IP"},
+  {key:"residuary", label:"Residuary Clause"},
+  {key:"witnesses", label:"Witnesses"},
+  {key:"review", label:"Review & Generate"}
+];
+
+/* ===================== PATH HELPERS ===================== */
+function pathParts(path){ return path.replace(/\[(\d+)\]/g,'.$1').split('.').filter(Boolean); }
+function getPath(obj, path){ return pathParts(path).reduce((o,k)=> (o==null? undefined : o[k]), obj); }
+function setPath(obj, path, value){
+  const parts = pathParts(path);
+  let o = obj;
+  for(let i=0;i<parts.length-1;i++){ o = o[parts[i]]; }
+  o[parts[parts.length-1]] = value;
+}
+function esc(s){
+  return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+
+/* ===================== VALIDATION ===================== */
+function validateAssetItem(item){
+  const missing=[];
+  if(!item.description.trim()) missing.push("description");
+  if(!item.beneficiaryName.trim()) missing.push("beneficiaryName");
+  if(!item.relationship) missing.push("relationship");
+  if(item.relationship==="Other" && !item.relationshipOther.trim()) missing.push("relationshipOther");
+  if(!item.idType) missing.push("idType");
+  if(!item.idNumber.trim()) missing.push("idNumber");
+  return missing;
+}
+function validateResiduaryItem(item){
+  const missing=[];
+  if(!item.name.trim()) missing.push("name");
+  if(!item.relationship) missing.push("relationship");
+  if(item.relationship==="Other" && !item.relationshipOther.trim()) missing.push("relationshipOther");
+  if(!item.nationality.trim()) missing.push("nationality");
+  if(!item.occupation) missing.push("occupation");
+  if(item.occupation==="Other" && !item.occupationOther.trim()) missing.push("occupationOther");
+  if(!item.idType) missing.push("idType");
+  if(!item.idNumber.trim()) missing.push("idNumber");
+  return missing;
+}
+function validateWitness(w){
+  const missing=[];
+  if(!w.name.trim()) missing.push("name");
+  if(!w.parentOrSpouseName.trim()) missing.push("parentOrSpouseName");
+  if(!w.age.trim()) missing.push("age");
+  if(!w.nationality.trim()) missing.push("nationality");
+  if(!w.occupation) missing.push("occupation");
+  if(w.occupation==="Other" && !w.occupationOther.trim()) missing.push("occupationOther");
+  if(!w.residentOf.trim()) missing.push("residentOf");
+  if(!w.aadhar.trim()) missing.push("aadhar");
+  if(!w.relation) missing.push("relation");
+  if(w.relation==="Other" && !w.relationOther.trim()) missing.push("relationOther");
+  return missing;
+}
+
+function validateStep(idx){
+  const key = STEPS[idx].key;
+  let paths = [];
+  if(key==="testator"){
+    const t = state.testator;
+    ["name","parentName","pan","aadhar","age","nationality","residentOf","day","month","year","place"].forEach(f=>{
+      if(!String(t[f]).trim()) paths.push("testator."+f);
+    });
+    if(!t.occupation) paths.push("testator.occupation");
+    if(t.occupation==="Other" && !t.occupationOther.trim()) paths.push("testator.occupationOther");
+    if(t.maritalStatus==="married"){
+      if(!t.spouseName.trim()) paths.push("testator.spouseName");
+      if(!t.spouseAadhar.trim()) paths.push("testator.spouseAadhar");
+    }
+    t.sons.forEach((c,i)=>{ if(!c.name.trim()) paths.push("testator.sons["+i+"].name"); });
+    t.daughters.forEach((c,i)=>{ if(!c.name.trim()) paths.push("testator.daughters["+i+"].name"); });
+  } else if(key==="financial"){
+    // informational only, always valid
+  } else if(key==="immovable"){
+    ["house","land","commercial"].forEach(cat=>{
+      state.immovable[cat].forEach((it,i)=>{
+        validateAssetItem(it).forEach(f=> paths.push("immovable."+cat+"["+i+"]."+f));
+      });
+    });
+  } else if(key==="vehicles"){
+    state.vehicles.forEach((it,i)=> validateAssetItem(it).forEach(f=> paths.push("vehicles["+i+"]."+f)));
+  } else if(key==="personal"){
+    state.personal.forEach((it,i)=> validateAssetItem(it).forEach(f=> paths.push("personal["+i+"]."+f)));
+  } else if(key==="digitalip"){
+    state.digital.forEach((it,i)=> validateAssetItem(it).forEach(f=> paths.push("digital["+i+"]."+f)));
+    state.ip.forEach((it,i)=> validateAssetItem(it).forEach(f=> paths.push("ip["+i+"]."+f)));
+  } else if(key==="residuary"){
+    if(state.residuary.length===0) paths.push("residuary.__empty");
+    state.residuary.forEach((it,i)=> validateResiduaryItem(it).forEach(f=> paths.push("residuary["+i+"]."+f)));
+  } else if(key==="witnesses"){
+    if(state.witnesses.length<2) paths.push("witnesses.__min");
+    state.witnesses.forEach((w,i)=> validateWitness(w).forEach(f=> paths.push("witnesses["+i+"]."+f)));
+  } else if(key==="review"){
+    // recheck everything
+  }
+  return paths;
+}
+function stepIsValid(idx){ return validateStep(idx).length===0; }
+function furthestAllowed(){
+  for(let i=0;i<STEPS.length;i++){ if(!stepIsValid(i)) return i; }
+  return STEPS.length-1;
+}
+
+/* ===================== ACTIONS ===================== */
+function goNext(){
+  const missing = validateStep(state.step);
+  if(missing.length>0){ state.showErrors[state.step]=true; render(); scrollToFirstError(); return; }
+  state.showErrors[state.step]=false;
+  if(state.step < STEPS.length-1){ state.step++; window.scrollTo({top:0,behavior:"smooth"}); }
+  render();
+}
+function goPrev(){ if(state.step>0){ state.step--; window.scrollTo({top:0,behavior:"smooth"}); } render(); }
+function goToStep(i){
+  if(i<=state.step || i<=furthestAllowed()){ state.step=i; window.scrollTo({top:0,behavior:"smooth"}); render(); }
+}
+function scrollToFirstError(){
+  setTimeout(()=>{ const el=document.querySelector(".err"); if(el) el.scrollIntoView({behavior:"smooth",block:"center"}); },30);
+}
+
+function handleClick(e){
+  const t = e.target.closest("[data-action]");
+  if(!t) return;
+  const action = t.getAttribute("data-action");
+  const cat = t.getAttribute("data-cat");
+  const idx = t.getAttribute("data-idx");
+  if(action==="next") goNext();
+  else if(action==="prev") goPrev();
+  else if(action==="goto") goToStep(parseInt(t.getAttribute("data-step"),10));
+  else if(action==="addAsset"){ getPath(state,cat).push(newAssetItem()); render(); }
+  else if(action==="removeAsset"){ getPath(state,cat).splice(parseInt(idx,10),1); render(); }
+  else if(action==="addResiduary"){ state.residuary.push(newResiduaryItem()); render(); }
+  else if(action==="removeResiduary"){ if(state.residuary.length>1){ state.residuary.splice(parseInt(idx,10),1); render(); } }
+  else if(action==="addWitness"){ state.witnesses.push(newWitness()); render(); }
+  else if(action==="removeWitness"){ if(state.witnesses.length>2){ state.witnesses.splice(parseInt(idx,10),1); render(); } }
+  else if(action==="addSon"){ state.testator.sons.push(newChild()); render(); }
+  else if(action==="removeSon"){ state.testator.sons.splice(parseInt(idx,10),1); render(); }
+  else if(action==="addDaughter"){ state.testator.daughters.push(newChild()); render(); }
+  else if(action==="removeDaughter"){ state.testator.daughters.splice(parseInt(idx,10),1); render(); }
+  else if(action==="openModal"){ state.modal = t.getAttribute("data-modal"); render(); }
+  else if(action==="closeModal"){ state.modal = null; render(); }
+  else if(action==="setMarital"){ state.testator.maritalStatus = t.getAttribute("data-val"); render(); }
+  else if(action==="setWitnessMarital"){ state.witnesses[parseInt(idx,10)].maritalStatus = t.getAttribute("data-val"); render(); }
+  else if(action==="setChildOf"){ state.testator.childOf = t.getAttribute("data-val"); render(); }
+  else if(action==="generate"){ generateDocument(); }
+  else if(action==="downloadHtml"){ downloadHtmlCopy(); }
+}
+function handleInput(e){
+  const el = e.target;
+  const bind = el.getAttribute("data-bind");
+  if(!bind) return;
+  setPath(state, bind, el.value);
+}
+function handleChange(e){
+  const el = e.target;
+  const bind = el.getAttribute("data-bind");
+  if(!bind) return;
+  setPath(state, bind, el.value);
+  render();
+}
+
+/* ===================== RENDER HELPERS ===================== */
+function fieldError(path){
+  if(!state.showErrors[state.step]) return false;
+  return validateStep(state.step).includes(path);
+}
+function inputHtml(opts){
+  const {bind,label,placeholder,required,type,full,hint}=opts;
+  const val = getPath(state,bind) ?? "";
+  const errored = fieldError(bind);
+  return `<div class="field ${full?'full':''}">
+    <label>${label} ${required?'<span class="req">*</span>':''}</label>
+    <input type="${type||'text'}" data-bind="${bind}" value="${esc(val)}" placeholder="${esc(placeholder||'')}" class="${errored?'err':''}">
+    ${errored?'<div class="errmsg">This field is required</div>':(hint?`<div class="hint">${hint}</div>`:'')}
+  </div>`;
+}
+function selectHtml(opts){
+  const {bind,label,options,required,placeholder,full}=opts;
+  const val = getPath(state,bind) ?? "";
+  const errored = fieldError(bind);
+  return `<div class="field ${full?'full':''}">
+    <label>${label} ${required?'<span class="req">*</span>':''}</label>
+    <select data-bind="${bind}" class="${errored?'err':''}">
+      <option value="">${esc(placeholder||'Select...')}</option>
+      ${options.map(o=>`<option value="${esc(o)}" ${val===o?'selected':''}>${esc(o)}</option>`).join('')}
+    </select>
+    ${errored?'<div class="errmsg">This field is required</div>':''}
+  </div>`;
+}
+
+function assetItemHtml(catPath, idx, item, label, canRemove){
+  const base = catPath+"["+idx+"]";
+  return `<div class="item-card">
+    <div class="item-head">
+      <span class="item-title">${label} ${idx+1}</span>
+      ${canRemove?`<button class="removebtn" data-action="removeAsset" data-cat="${catPath}" data-idx="${idx}">Remove</button>`:''}
+    </div>
+    <div class="row">
+      ${inputHtml({bind:base+".description",label:"Description of asset",required:true,full:true,placeholder:"e.g. 3BHK flat at ..., Survey no. ..., Registration no. ..."})}
+    </div>
+    <div class="row">
+      ${inputHtml({bind:base+".beneficiaryName",label:"Bequeathed to (full name)",required:true})}
+      ${selectHtml({bind:base+".relationship",label:"Relationship to testator",required:true,options:RELATIONSHIP_OPTIONS})}
+    </div>
+    ${item.relationship==="Other"?`<div class="row">${inputHtml({bind:base+".relationshipOther",label:"Please specify relationship",required:true})}</div>`:''}
+    <div class="row">
+      ${selectHtml({bind:base+".idType",label:"Beneficiary's ID proof type",required:true,options:ID_TYPES,placeholder:"Choose ID type"})}
+      ${inputHtml({bind:base+".idNumber",label:"ID number",required:true})}
+    </div>
+  </div>`;
+}
+
+function assetCategoryHtml(catPath, items, singularLabel, categoryTitle, letter, hint){
+  return `
+  <div class="category-title"><span class="letter">${letter}.</span> ${categoryTitle}</div>
+  ${hint?`<p class="category-sub">${hint}</p>`:''}
+  ${items.map((it,i)=>assetItemHtml(catPath,i,it,singularLabel,true)).join('')}
+  <button class="addbtn" data-action="addAsset" data-cat="${catPath}">+ Add another ${singularLabel.toLowerCase()}</button>
+  `;
+}
+
+/* ===================== STEP RENDERERS ===================== */
+function renderTestatorStep(){
+  const t = state.testator;
+  return `
+  <h2>Testator Details</h2>
+  <p class="sub">The testator is the person making this Will — you. This section identifies you and, if applicable, your immediate family.</p>
+  <button class="info-btn" data-action="openModal" data-modal="testator" style="margin-bottom:20px;">Who is the Testator? &nbsp;ⓘ</button>
+
+  <div class="row">
+    ${inputHtml({bind:"testator.name",label:"Full name",required:true})}
+    ${inputHtml({bind:"testator.age",label:"Age",required:true,type:"number"})}
+  </div>
+  <div class="row">
+    <div class="field">
+      <label>You are the <span class="req">*</span></label>
+      <div class="radiogroup">
+        <div class="pillbtn ${t.childOf==='son'?'on':''}" data-action="setChildOf" data-val="son">Son of</div>
+        <div class="pillbtn ${t.childOf==='daughter'?'on':''}" data-action="setChildOf" data-val="daughter">Daughter of</div>
+      </div>
+    </div>
+    ${inputHtml({bind:"testator.parentName",label:"Parent's name",required:true})}
+  </div>
+  <div class="row">
+    ${inputHtml({bind:"testator.pan",label:"PAN number",required:true,hint:"10-character Permanent Account Number"})}
+    ${inputHtml({bind:"testator.aadhar",label:"Aadhaar number",required:true})}
+  </div>
+  <div class="row">
+    <div class="field">
+      <label>Marital status <span class="req">*</span></label>
+      <div class="radiogroup">
+        <div class="pillbtn ${t.maritalStatus==='unmarried'?'on':''}" data-action="setMarital" data-val="unmarried">Unmarried</div>
+        <div class="pillbtn ${t.maritalStatus==='married'?'on':''}" data-action="setMarital" data-val="married">Married</div>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    ${inputHtml({bind:"testator.nationality",label:"Nationality",required:true,placeholder:"e.g. Indian"})}
+    ${selectHtml({bind:"testator.occupation",label:"Occupation",required:true,options:OCCUPATIONS,placeholder:"Select..."})}
+  </div>
+  ${t.occupation==="Other"?`<div class="row">${inputHtml({bind:"testator.occupationOther",label:"Please specify occupation",required:true})}</div>`:''}
+  <div class="row">
+    ${inputHtml({bind:"testator.residentOf",label:"Resident of (full address)",required:true,full:true,placeholder:"House no., street, city, state, PIN"})}
+  </div>
+
+  ${t.maritalStatus==='married' ? `
+  <div class="clause-block" style="border-left-color:var(--brass);">
+    <div class="tag">Spouse &amp; Children</div>
+    <div class="row" style="margin-top:12px;">
+      ${inputHtml({bind:"testator.spouseName",label:"Spouse's full name",required:true})}
+      ${inputHtml({bind:"testator.spouseAadhar",label:"Spouse's Aadhaar number",required:true})}
+    </div>
+    <div class="field full" style="margin-bottom:10px;">
+      <label>Sons (optional — add each by name)</label>
+    </div>
+    ${t.sons.map((c,i)=>`<div class="item-card" style="padding:10px 14px;">
+        <div class="row" style="margin-bottom:0;align-items:center;">
+          ${inputHtml({bind:"testator.sons["+i+"].name",label:"Son "+(i+1)+"'s name",required:true})}
+          <button class="removebtn" data-action="removeSon" data-idx="${i}" style="align-self:center;">Remove</button>
+        </div>
+      </div>`).join('')}
+    <button class="addbtn" data-action="addSon">+ Add a son</button>
+    <div class="field full" style="margin:16px 0 10px;">
+      <label>Daughters (optional — add each by name)</label>
+    </div>
+    ${t.daughters.map((c,i)=>`<div class="item-card" style="padding:10px 14px;">
+        <div class="row" style="margin-bottom:0;align-items:center;">
+          ${inputHtml({bind:"testator.daughters["+i+"].name",label:"Daughter "+(i+1)+"'s name",required:true})}
+          <button class="removebtn" data-action="removeDaughter" data-idx="${i}" style="align-self:center;">Remove</button>
+        </div>
+      </div>`).join('')}
+    <button class="addbtn" data-action="addDaughter">+ Add a daughter</button>
+  </div>
+  ` : ''}
+
+  <div class="category-title" style="margin-top:30px;">Date &amp; Place of Execution</div>
+  <div class="row">
+    ${inputHtml({bind:"testator.day",label:"Day",required:true,type:"number",placeholder:"e.g. 27"})}
+    ${selectHtml({bind:"testator.month",label:"Month",required:true,options:MONTHS})}
+    ${inputHtml({bind:"testator.year",label:"Year",required:true,type:"number",placeholder:"e.g. 2026"})}
+  </div>
+  <div class="row">
+    ${inputHtml({bind:"testator.place",label:"Place of signing",required:true,placeholder:"City, State"})}
+  </div>
+  `;
+}
+
+function renderFinancialStep(){
+  return `
+  <h2>Financial Assets</h2>
+  <p class="sub">This clause is applied automatically to your Will. It covers all your financial holdings in one place.</p>
+  <div class="clause-block">
+    <div class="tag">Clause to be included</div>
+    <p class="clause-text">"I bequeath all my financial assets including Bank Accounts, Fixed Deposits (FDs), Recurring Deposits (RDs), Public Provident Fund (PPF), Life Insurance, Stocks, Mutual Funds, Cryptocurrency (Crypto), Digital Wallets, National Pension System (NPS), Bonds, Alternative Investment Fund (AIF), Specialized Investment Fund (SIF), and Portfolio Management Services (PMS) entirely to the nominees registered in those financial instruments."</p>
+    <div class="why">
+      <strong>Why we recommend this:</strong> it is highly advisable to distribute your financial assets through nomination. This clause ensures all financial assets go to whoever is currently registered as your nominee on each account — because account numbers, folio numbers, and balances change frequently, it's better to rely on your nominations rather than listing specific account details in the Will. This also means you won't need to alter your Will every time a financial detail changes. We recommend simply keeping your nominations updated on each account.
+    </div>
+  </div>
+  <p class="hint">No further details are needed for this section — click Next to continue to your immovable property.</p>
+  `;
+}
+
+function renderImmovableStep(){
+  const im = state.immovable;
+  return `
+  <h2>Immovable Property</h2>
+  <p class="sub">List any houses, flats, land, plots, or commercial property you wish to bequeath. If you own none in a category, simply leave it empty and move on.</p>
+  ${assetCategoryHtml("immovable.house", im.house, "House / Flat", "House / Flat", "B")}
+  ${assetCategoryHtml("immovable.land", im.land, "Land / Plot", "Land / Plot", "B")}
+  ${assetCategoryHtml("immovable.commercial", im.commercial, "Commercial property", "Commercial Property", "B")}
+  `;
+}
+function renderVehiclesStep(){
+  return `
+  <h2>Motor Vehicles</h2>
+  <p class="sub">List any vehicles you wish to bequeath. Leave empty if not applicable.</p>
+  ${assetCategoryHtml("vehicles", state.vehicles, "Vehicle", "Motor Vehicles", "C")}
+  `;
+}
+function renderPersonalStep(){
+  return `
+  <h2>Personal &amp; Valuables</h2>
+  <p class="sub">Jewellery, heirlooms, and other personal valuables.</p>
+  ${assetCategoryHtml("personal", state.personal, "Item", "Jewellery & Heirlooms", "D")}
+  `;
+}
+function renderDigitalIpStep(){
+  return `
+  <h2>Digital &amp; Intellectual Property</h2>
+  <p class="sub">Social media / digital assets and any intellectual property (copyrights, patents, trademarks, royalties).</p>
+  ${assetCategoryHtml("digital", state.digital, "Digital asset", "Digital & Miscellaneous Assets", "E")}
+  ${assetCategoryHtml("ip", state.ip, "IP asset", "Intellectual Property", "F")}
+  `;
+}
+
+function renderResiduaryStep(){
+  return `
+  <h2>Residuary Clause</h2>
+  <p class="sub">Every Will should include a residuary clause.</p>
+  <div class="clause-block">
+    <div class="tag">What is a residuary clause?</div>
+    <p class="clause-text" style="font-size:13.5px;font-family:'Inter',sans-serif;">
+      A residuary clause covers anything left over: any asset you own that isn't specifically listed elsewhere in this Will — including property you acquire after signing it, or something you simply forgot to mention. Rather than leaving that property undecided, this clause states clearly who should receive it.
+    </p>
+  </div>
+  <p class="category-sub">If there is any asset where you've missed mentioning it in the Will, it should go to the following:</p>
+  ${state.residuary.map((it,i)=>{
+    const base="residuary["+i+"]";
+    return `<div class="item-card">
+      <div class="item-head">
+        <span class="item-title">Residuary Beneficiary ${i+1}</span>
+        ${state.residuary.length>1?`<button class="removebtn" data-action="removeResiduary" data-idx="${i}">Remove</button>`:''}
+      </div>
+      <div class="row">
+        ${inputHtml({bind:base+".name",label:"Full name",required:true})}
+        ${selectHtml({bind:base+".relationship",label:"Relationship to testator",required:true,options:RELATIONSHIP_OPTIONS})}
+      </div>
+      ${it.relationship==="Other"?`<div class="row">${inputHtml({bind:base+".relationshipOther",label:"Please specify relationship",required:true})}</div>`:''}
+      <div class="row">
+        ${inputHtml({bind:base+".nationality",label:"Nationality",required:true,placeholder:"e.g. Indian"})}
+        ${selectHtml({bind:base+".occupation",label:"Occupation",required:true,options:OCCUPATIONS,placeholder:"Select..."})}
+      </div>
+      ${it.occupation==="Other"?`<div class="row">${inputHtml({bind:base+".occupationOther",label:"Please specify occupation",required:true})}</div>`:''}
+      <div class="row">
+        ${selectHtml({bind:base+".idType",label:"Beneficiary's ID proof type",required:true,options:ID_TYPES,placeholder:"Choose ID type"})}
+        ${inputHtml({bind:base+".idNumber",label:"ID number",required:true})}
+      </div>
+    </div>`;
+  }).join('')}
+  <button class="addbtn" data-action="addResiduary">+ Add another residuary beneficiary</button>
+  `;
+}
+
+function renderWitnessesStep(){
+  return `
+  <h2>Witnesses</h2>
+  <p class="sub">A Will requires at least two witnesses. A witness does not need to be related to you.</p>
+  <button class="info-btn" data-action="openModal" data-modal="witness" style="margin-bottom:20px;">Who can be a Witness? &nbsp;ⓘ</button>
+  ${state.witnesses.map((w,i)=>{
+    const base="witnesses["+i+"]";
+    return `<div class="item-card">
+      <div class="item-head">
+        <span class="item-title">Witness ${i+1}</span>
+        ${state.witnesses.length>2?`<button class="removebtn" data-action="removeWitness" data-idx="${i}">Remove</button>`:''}
+      </div>
+      <div class="row">
+        ${inputHtml({bind:base+".name",label:"Full name",required:true})}
+        ${inputHtml({bind:base+".age",label:"Age",required:true,type:"number"})}
+      </div>
+      <div class="row">
+        ${selectHtml({bind:base+".descriptor",label:"Identify as",required:true,options:WITNESS_DESCRIPTORS})}
+        ${inputHtml({bind:base+".parentOrSpouseName",label:"Name of that parent / spouse",required:true})}
+      </div>
+      <div class="row">
+        <div class="field">
+          <label>Marital status <span class="req">*</span></label>
+          <div class="radiogroup">
+            <div class="pillbtn ${w.maritalStatus==='unmarried'?'on':''}" data-action="setWitnessMarital" data-idx="${i}" data-val="unmarried">Unmarried</div>
+            <div class="pillbtn ${w.maritalStatus==='married'?'on':''}" data-action="setWitnessMarital" data-idx="${i}" data-val="married">Married</div>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        ${inputHtml({bind:base+".nationality",label:"Nationality",required:true,placeholder:"e.g. Indian"})}
+        ${selectHtml({bind:base+".occupation",label:"Occupation",required:true,options:OCCUPATIONS,placeholder:"Select..."})}
+      </div>
+      ${w.occupation==="Other"?`<div class="row">${inputHtml({bind:base+".occupationOther",label:"Please specify occupation",required:true})}</div>`:''}
+      <div class="row">
+        ${inputHtml({bind:base+".residentOf",label:"Resident of (address)",required:true,full:true})}
+      </div>
+      <div class="row">
+        ${inputHtml({bind:base+".aadhar",label:"Aadhaar number",required:true})}
+        ${selectHtml({bind:base+".relation",label:"Relation to testator",required:true,options:WITNESS_RELATIONS,placeholder:"Select..."})}
+      </div>
+      ${w.relation==="Other"?`<div class="row">${inputHtml({bind:base+".relationOther",label:"Please specify relation",required:true})}</div>`:''}
+    </div>`;
+  }).join('')}
+  <button class="addbtn" data-action="addWitness">+ Add another witness</button>
+  `;
+}
+
+function reviewLine(label, value){
+  return `<div class="review-summary"><strong>${esc(label)}:</strong> ${esc(value)||'—'}</div>`;
+}
+function relLabel(it){ return it.relationship==="Other" ? it.relationshipOther : it.relationship; }
+
+function renderReviewStep(){
+  const t = state.testator;
+  const totalAssets = state.immovable.house.length+state.immovable.land.length+state.immovable.commercial.length+state.vehicles.length+state.personal.length+state.digital.length+state.ip.length;
+  return `
+  <h2>Review &amp; Generate</h2>
+  <p class="sub">Check your details below, review the required output format, then generate your Will.</p>
+
+  <div class="review-section-title">Testator</div>
+  ${reviewLine("Name", t.name)}
+  ${reviewLine("Marital status", t.maritalStatus)}
+  ${reviewLine("Resident of", t.residentOf)}
+  <div class="review-section-title">Assets listed</div>
+  ${reviewLine("Total specific bequests", totalAssets+" item(s), plus the standard financial assets clause")}
+  <div class="review-section-title">Residuary beneficiaries</div>
+  ${reviewLine("Count", state.residuary.length)}
+  <div class="review-section-title">Witnesses</div>
+  ${reviewLine("Count", state.witnesses.length)}
+
+  <div class="instructions" style="margin-top:24px;">
+    <h3>Required output format for this document</h3>
+    <div class="spec-grid">
+      <div><div class="k">Paper size</div><div class="v">A4</div></div>
+      <div><div class="k">Font</div><div class="v">Times New Roman</div></div>
+      <div><div class="k">Font size</div><div class="v">12 pt</div></div>
+      <div><div class="k">Line spacing</div><div class="v">1.15</div></div>
+      <div><div class="k">Print setting</div><div class="v">Single-sided only (one side of paper)</div></div>
+    </div>
+    <p style="font-size:12.5px;color:#6b6f7d;margin-top:10px;margin-bottom:0;">
+      When the print dialog opens, set the destination to <strong>Save as PDF</strong> and make sure two-sided / duplex printing is switched off, so every page prints on one side only.
+    </p>
+  </div>
+
+  <div class="download-row">
+    <button class="btn btn-primary" data-action="generate">Generate &amp; Print / Save as PDF</button>
+    <button class="btn btn-ghost" data-action="downloadHtml">Download document copy (.html)</button>
+  </div>
+  <p class="hint" style="margin-top:10px;">The document copy opens in any browser and can be printed later with the same formatting.</p>
+  `;
+}
+
+/* ===================== MODALS ===================== */
+function renderModal(){
+  if(!state.modal) return "";
+  if(state.modal==="testator"){
+    return `<div class="modal-overlay">
+      <div class="modal-box">
+        <h3>Who is the Testator?</h3>
+        <p>The testator (or testatrix, if female) is simply the person making the Will — the owner of the assets being bequeathed. To make a valid Will in India, the testator must:</p>
+        <ul>
+          <li>Be a major — 18 years of age or older</li>
+          <li>Be of sound mind and understand what they are signing</li>
+          <li>Sign the Will voluntarily, free from pressure or influence</li>
+          <li>Have the legal right to dispose of the property being bequeathed</li>
+        </ul>
+        <p>You, as the testator, may leave your self-acquired property to whomever you choose.</p>
+        <button class="btn btn-primary modal-close" data-action="closeModal">Got it</button>
+      </div>
+    </div>`;
+  }
+  if(state.modal==="witness"){
+    return `<div class="modal-overlay">
+      <div class="modal-box">
+        <h3>Who can be a Witness?</h3>
+        <p>Under the Indian Succession Act, 1925, any person of sound mind who is a major (18 or older) and capable of signing their own name can act as a witness. At least two witnesses are required, and neither needs to know what the Will actually says.</p>
+        <ul>
+          <li><strong>Signing:</strong> each witness must see the testator sign the Will, or be told directly by the testator that the signature is theirs. Both witnesses then sign the Will in the testator's presence.</li>
+          <li><strong>Not a beneficiary:</strong> it's best to avoid choosing someone who is also inheriting under the Will, or their spouse — for some communities, being a witness can void that person's own inheritance.</li>
+          <li><strong>An executor can witness:</strong> the person you've asked to manage your estate is allowed to also act as a witness.</li>
+          <li><strong>Family members can witness</strong>, but an independent, impartial person is generally the safer choice to avoid any future dispute.</li>
+        </ul>
+        <p>In short: a witness simply needs to be an adult of sound mind, willing to watch you sign and sign the document themselves — they don't need to be related to you at all.</p>
+        <button class="btn btn-primary modal-close" data-action="closeModal">Got it</button>
+      </div>
+    </div>`;
+  }
+  return "";
+}
+
+/* ===================== MAIN RENDER ===================== */
+function render(){
+  const app = document.getElementById("app");
+  const idx = state.step;
+  const missing = validateStep(idx);
+  const showBanner = state.showErrors[idx] && missing.length>0;
+
+  const stepRenderers = [renderTestatorStep, renderFinancialStep, renderImmovableStep, renderVehiclesStep, renderPersonalStep, renderDigitalIpStep, renderResiduaryStep, renderWitnessesStep, renderReviewStep];
+
+  const stepperHtml = STEPS.map((s,i)=>{
+    let cls = "step-tab";
+    if(i===idx) cls+=" active"; else if(i<idx || stepIsValid(i)) cls+=" done";
+    return `<div class="${cls}" data-action="goto" data-step="${i}"><span class="n">${i+1}</span>${s.label}</div>`;
+  }).join('');
+
+  app.innerHTML = `
+    <div class="brandbar">
+      <div class="seal-mark">W</div>
+      <div>
+        <h1>Will Drafting Assistant</h1>
+        <p>Non-Goan Will · India</p>
+      </div>
+    </div>
+    <div class="stepper">${stepperHtml}</div>
+    <div class="card">
+      ${showBanner?'<div class="step-error-banner">Please complete the highlighted required fields before continuing.</div>':''}
+      ${stepRenderers[idx]()}
+      <div class="nav-row">
+        <button class="btn btn-ghost" data-action="prev" ${idx===0?'disabled':''}>Back</button>
+        ${idx<STEPS.length-1?'<button class="btn btn-primary" data-action="next">Next</button>':''}
+      </div>
+    </div>
+    ${renderModal()}
+  `;
+}
+
+/* ===================== DOCUMENT GENERATION ===================== */
+function ordinal(n){
+  n = parseInt(n,10);
+  const s=["th","st","nd","rd"], v=n%100;
+  return n+(s[(v-20)%10]||s[v]||s[0]);
+}
+function numWord(n){ return NUM_WORDS[n] || String(n); }
+function relOf(it){ return it.relationship==="Other" ? it.relationshipOther : it.relationship; }
+function witRel(w){ return w.relation==="Other" ? w.relationOther : w.relation; }
+
+function assetParagraph(label, it){
+  return `<p>${esc(label)}: <u>${esc(it.description)}</u><br>
+  Bequeathed to: <u>${esc(it.beneficiaryName)}</u>, Relationship: <u>${esc(relOf(it))}</u>, bearing
+  ${esc(it.idType)} Number: <u>${esc(it.idNumber)}</u>.</p>`;
+}
+function signatureLine(){
+  return `<p class="sigline">Testator's Signature: __________________ &nbsp;&nbsp; Witness 1: __________________ &nbsp;&nbsp; Witness 2: __________________</p>`;
+}
+
+function occupationOf(obj){ return obj.occupation==="Other" ? obj.occupationOther : obj.occupation; }
+
+function buildWillBody(){
+  const t = state.testator;
+  const dateStr = (t.day && t.month && t.year) ? `${ordinal(t.day)} day of ${t.month}, ${t.year}` : "____________________";
+  const marriedBlock = t.maritalStatus==="married" ? `I am married to <u>${esc(t.spouseName)}</u>, bearing Aadhaar No. <u>${esc(t.spouseAadhar)}</u>` +
+    (t.sons.length ? ` and I have ${numWord(t.sons.length)} son${t.sons.length>1?'s':''}, namely, <u>${t.sons.map(s=>esc(s.name)).join(', ')}</u>` : '') +
+    (t.daughters.length ? ` and ${numWord(t.daughters.length)} daughter${t.daughters.length>1?'s':''}, namely, <u>${t.daughters.map(d=>esc(d.name)).join(', ')}</u>` : '') + `. ` : '';
+
+  let letterCode = 65; // 'A'
+  const sections = [];
+
+  // Financial (always A)
+  sections.push({
+    letter: String.fromCharCode(letterCode++),
+    title: "Financial Assets",
+    body: `<p>I bequeath all my financial assets including Bank Accounts, Fixed Deposits (FDs), Recurring Deposits (RDs), Public Provident Fund (PPF), Life Insurance, Stocks, Mutual Funds, Cryptocurrency (Crypto), Digital Wallets, National Pension System (NPS), Bonds, Alternative Investment Fund (AIF), Specialized Investment Fund (SIF), and Portfolio Management Services (PMS) entirely to the nominees registered in those financial instruments.</p>`,
+    signAfter: true
+  });
+
+  const immov = [...state.immovable.house.map(it=>({...it,_label:"House / Flat"})),
+                 ...state.immovable.land.map(it=>({...it,_label:"Land / Plot"})),
+                 ...state.immovable.commercial.map(it=>({...it,_label:"Commercial Property"}))];
+  if(immov.length){
+    sections.push({letter:String.fromCharCode(letterCode++), title:"Immovable Property", body: immov.map(it=>assetParagraph(it._label,it)).join(''), signAfter:false});
+  }
+  if(state.vehicles.length){
+    sections.push({letter:String.fromCharCode(letterCode++), title:"Motor Vehicles", body: state.vehicles.map(it=>assetParagraph("Vehicle / Car",it)).join(''), signAfter:false});
+  }
+  if(state.personal.length){
+    sections.push({letter:String.fromCharCode(letterCode++), title:"Personal & Valuables", body: state.personal.map(it=>assetParagraph("Jewellery & Heirlooms",it)).join(''), signAfter:true});
+  }
+  const digitalMisc = [...state.digital.map(it=>({...it,_label:"Social Media / Digital"})), ...state.ip.map(it=>({...it,_label:"Intellectual Property"}))];
+  if(digitalMisc.length){
+    sections.push({letter:String.fromCharCode(letterCode++), title:"Digital & Miscellaneous Assets", body: digitalMisc.map(it=>assetParagraph(it._label,it)).join(''), signAfter:true});
+  }
+
+  const sectionsHtml = sections.map(s=>`
+    <p class="sectitle">${s.letter}. ${esc(s.title)}:</p>
+    ${s.body}
+    ${s.signAfter ? signatureLine() : ''}
+  `).join('');
+
+  const residuaryHtml = state.residuary.map((r,i)=>{
+    return `${esc(relOf(r))}, <u>${esc(r.name)}</u>, nationality <u>${esc(r.nationality)}</u>, occupation <u>${esc(occupationOf(r))}</u>, bearing ${esc(r.idType)} Number: <u>${esc(r.idNumber)}</u>`;
+  }).join('; and to ');
+
+  const witnessesHtml = state.witnesses.map((w,i)=>`
+    <p>${i+1}) Name: <u>${esc(w.name)}</u>, ${esc(w.descriptor)} <u>${esc(w.parentOrSpouseName)}</u>, Age: <u>${esc(w.age)}</u>,
+    ${esc(w.maritalStatus)}, Nationality: <u>${esc(w.nationality)}</u>, Occupation: <u>${esc(occupationOf(w))}</u>,
+    Resident of: <u>${esc(w.residentOf)}</u>, bearing Aadhaar Number: <u>${esc(w.aadhar)}</u>, Relation to testator: <u>${esc(witRel(w))}</u><br>
+    Signature: __________________________</p>
+  `).join('');
+
+  return `
+  <p class="willtitle">WILL</p>
+
+  <p>I, <u>${esc(t.name)}</u>, having PAN <u>${esc(t.pan)}</u>, Aadhaar No. <u>${esc(t.aadhar)}</u>,
+  ${t.childOf==='son'?'son':'daughter'} of <u>${esc(t.parentName)}</u>, aged <u>${esc(t.age)}</u>,
+  ${esc(t.maritalStatus)}, nationality <u>${esc(t.nationality)}</u>, occupation <u>${esc(occupationOf(t))}</u>,
+  resident of <u>${esc(t.residentOf)}</u>, ${marriedBlock}
+  And on this ${dateStr}, and in the presence of two witnesses whose details appear at the end of this document, make my last and final WILL.</p>
+
+  <p>I am making this last WILL and testament of mine voluntarily and without any compulsion or pressure from any source or person, and in sound health and disposing state of mind. I have not been influenced, cajoled, or coerced in any manner to write this WILL. I do hereby revoke all my previous wills, if any, previously made by me.</p>
+
+  <p>I own the following movable and immovable properties, which are all self-acquired or built out of my own earnings and income, and I have absolute power of disposal of the same.</p>
+
+  <p>I bequeath my specific assets to the designated beneficiaries as outlined below:</p>
+
+  ${sectionsHtml}
+
+  <p>I hereby declare, direct, and devise that all the Rest and Residue of my estate, including any property or assets, both movable and immovable, which I may acquire after the execution of this Will, or which has been inadvertently omitted from this document, shall be given entirely to ${residuaryHtml}.</p>
+
+  <p style="margin-top:26px;">Signature of Testator/Testatrix: __________________________</p>
+
+  <p>I have fully understood the contents, significance, and implications contained in this WILL, which has been executed out of my free will and choice. There has been no misrepresentation with regard to this WILL, and no one has any right to object to or challenge this WILL, as this is the culmination of my discretion and is best for me to safeguard my interest and the interest of my family.</p>
+
+  <p>Testator/Testatrix understands and approves the contents of this document before signing, and was not forced to do so by any person.</p>
+
+  <p>Signature of Testator/Testatrix: __________________________</p>
+  <p>Name of Testator/Testatrix: ${esc(t.name)}</p>
+  <p>Place: ${esc(t.place)}</p>
+  <p>Date: ${dateStr}</p>
+
+  <p class="sectitle" style="margin-top:24px;">WITNESSES</p>
+  ${witnessesHtml}
+  `;
+}
+
+function fullDocumentHtml(){
+  const body = buildWillBody();
+  return `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Will</title>
+  <style>
+    @page{ size:A4; margin:25mm 20mm; }
+    body{ font-family:'Times New Roman', Times, serif; font-size:12pt; line-height:1.15; color:#000; margin:0; padding:0; }
+    .willtitle{ text-align:center; font-size:14pt; font-weight:bold; margin-bottom:20pt; }
+    .sectitle{ font-weight:bold; margin-top:14pt; margin-bottom:4pt; }
+    p{ margin:0 0 10pt 0; text-align:justify; }
+    u{ text-decoration:underline; }
+    .sigline{ margin:14pt 0; }
+  </style></head>
+  <body>${body}</body></html>`;
+}
+
+function generateDocument(){
+  const html = fullDocumentHtml();
+  let iframe = document.getElementById("printFrame");
+  if(!iframe){
+    iframe = document.createElement("iframe");
+    iframe.id = "printFrame";
+    iframe.style.position = "fixed";
+    iframe.style.right = "0";
+    iframe.style.bottom = "0";
+    iframe.style.width = "0";
+    iframe.style.height = "0";
+    iframe.style.border = "0";
+    document.body.appendChild(iframe);
+  }
+  const doc = iframe.contentWindow.document;
+  doc.open(); doc.write(html); doc.close();
+  setTimeout(()=>{
+    iframe.contentWindow.focus();
+    iframe.contentWindow.print();
+  }, 350);
+}
+function downloadHtmlCopy(){
+  const html = fullDocumentHtml();
+  const blob = new Blob([html], {type:"text/html"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "Will_" + (state.testator.name.trim().replace(/\s+/g,'_') || "Document") + ".html";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+/* ===================== INIT ===================== */
+document.getElementById("app").addEventListener("click", handleClick);
+document.getElementById("app").addEventListener("input", handleInput);
+document.getElementById("app").addEventListener("change", handleChange);
+render();
+</script>
+</body>
+</html>

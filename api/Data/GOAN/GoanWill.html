@@ -1,0 +1,1436 @@
+Content is user-generated and unverified.
+
+
+1
+Learn how to customize
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ForwardLegacy — Will & Deed of Consent Builder</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Inter:wght@400;500;600;700&family=Noto+Serif:wght@400;600&display=swap');
+
+  :root{
+    --navy-trust:#1B498A;
+    --navy-deep:#133667;
+    --blue-cta:#007BFF;
+    --sky:#EAF2FB;
+    --border:#E2E8F0;
+    --muted:#718096;
+    --ink:#1A202C;
+    --gold:#C08A3E;
+    --white:#ffffff;
+    --danger:#B3261E;
+    --ok:#1B7F4C;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:'Inter',system-ui,sans-serif;
+    background:var(--sky);
+    color:var(--ink);
+    line-height:1.5;
+  }
+
+  /* ===== Top brand bar ===== */
+  .topbar{
+    background:var(--navy-trust);
+    color:#fff;
+    padding:22px 32px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    box-shadow:0 2px 10px rgba(19,54,103,.25);
+  }
+  .brand{
+    display:flex;
+    align-items:center;
+    gap:12px;
+  }
+  .crest{
+    width:34px;height:34px;border-radius:50%;
+    background:linear-gradient(135deg,var(--gold),#e0b96b);
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Fraunces',serif;font-weight:600;color:var(--navy-deep);
+    font-size:16px;
+  }
+  .brand h1{
+    font-family:'Fraunces',serif;
+    font-size:20px;
+    font-weight:600;
+    margin:0;
+    letter-spacing:.2px;
+  }
+  .brand .tag{
+    font-size:11.5px;
+    color:#cfe0f7;
+    margin-top:1px;
+    text-transform:uppercase;
+    letter-spacing:1.2px;
+  }
+  .progress-pill{
+    font-size:12.5px;
+    background:rgba(255,255,255,.12);
+    border:1px solid rgba(255,255,255,.25);
+    padding:6px 14px;
+    border-radius:999px;
+  }
+
+  /* ===== Layout ===== */
+  .wrap{
+    max-width:880px;
+    margin:0 auto;
+    padding:36px 20px 120px;
+  }
+  .intro-card{
+    background:#fff;
+    border:1px solid var(--border);
+    border-left:4px solid var(--gold);
+    border-radius:10px;
+    padding:20px 24px;
+    margin-bottom:30px;
+    font-size:14.5px;
+    color:var(--ink);
+  }
+  .intro-card b{color:var(--navy-deep);}
+
+  section.step{
+    background:#fff;
+    border:1px solid var(--border);
+    border-radius:14px;
+    margin-bottom:24px;
+    overflow:hidden;
+  }
+  .step-head{
+    background:var(--navy-deep);
+    color:#fff;
+    padding:16px 24px;
+    display:flex;
+    align-items:center;
+    gap:12px;
+  }
+  .step-num{
+    width:28px;height:28px;border-radius:50%;
+    background:var(--gold);
+    color:var(--navy-deep);
+    font-weight:700;font-size:13px;
+    display:flex;align-items:center;justify-content:center;
+    flex-shrink:0;
+  }
+  .step-head h2{
+    font-family:'Fraunces',serif;
+    font-size:17px;
+    font-weight:600;
+    margin:0;
+    flex:1;
+  }
+  .step-body{padding:22px 24px 26px;}
+  .step-sub{
+    font-size:13px;
+    color:var(--muted);
+    margin:-4px 0 18px;
+  }
+
+  .field-row{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:16px;
+    margin-bottom:16px;
+  }
+  .field-row.single{grid-template-columns:1fr;}
+  .field-row.three{grid-template-columns:1fr 1fr 1fr;}
+  @media(max-width:640px){
+    .field-row,.field-row.three{grid-template-columns:1fr;}
+  }
+  .field{display:flex;flex-direction:column;gap:6px;}
+  .field label{
+    font-size:12.5px;
+    font-weight:600;
+    color:var(--navy-deep);
+    display:flex;align-items:center;gap:6px;
+  }
+  .req{color:var(--danger);font-weight:700;}
+  .field input[type=text],
+  .field input[type=number],
+  .field select,
+  .field textarea{
+    border:1.5px solid var(--border);
+    border-radius:8px;
+    padding:10px 12px;
+    font-size:14px;
+    font-family:inherit;
+    color:var(--ink);
+    background:#fff;
+    outline:none;
+    transition:border-color .15s;
+  }
+  .field input:focus,.field select:focus,.field textarea:focus{
+    border-color:var(--blue-cta);
+  }
+  .field .hint{font-size:11.5px;color:var(--muted);}
+  .field .warn{font-size:11.5px;color:var(--gold);font-weight:600;}
+
+  .info-btn{
+    width:16px;height:16px;border-radius:50%;
+    background:var(--blue-cta);color:#fff;
+    font-size:11px;font-weight:700;
+    display:inline-flex;align-items:center;justify-content:center;
+    cursor:pointer;border:none;flex-shrink:0;
+  }
+  .popover{
+    display:none;
+    position:relative;
+  }
+  .popover-box{
+    display:none;
+    background:var(--navy-deep);
+    color:#fff;
+    font-size:12.5px;
+    font-weight:400;
+    line-height:1.55;
+    padding:14px 16px;
+    border-radius:10px;
+    margin-top:8px;
+    max-width:560px;
+  }
+  .popover-box.show{display:block;}
+  .popover-box ul{margin:8px 0 0;padding-left:18px;}
+  .popover-box li{margin-bottom:6px;}
+
+  /* toggle chip groups */
+  .chip-group{display:flex;flex-wrap:wrap;gap:8px;}
+  .chip{
+    border:1.5px solid var(--border);
+    background:#fff;
+    padding:8px 14px;
+    border-radius:999px;
+    font-size:13px;
+    cursor:pointer;
+    color:var(--ink);
+    user-select:none;
+    transition:.15s;
+  }
+  .chip.active{
+    background:var(--blue-cta);
+    border-color:var(--blue-cta);
+    color:#fff;
+    font-weight:600;
+  }
+
+  .conditional{
+    border-top:1px dashed var(--border);
+    margin-top:18px;
+    padding-top:18px;
+    display:none;
+  }
+  .conditional.show{display:block;}
+  .conditional-title{
+    font-family:'Fraunces',serif;
+    font-size:15px;
+    color:var(--navy-deep);
+    font-weight:600;
+    margin-bottom:14px;
+  }
+
+  /* prominent financial clause card */
+  .prominent-card{
+    background:linear-gradient(135deg,var(--sky),#fff);
+    border:1.5px solid var(--navy-trust);
+    border-radius:12px;
+    padding:20px 22px;
+    margin-bottom:26px;
+    position:relative;
+  }
+  .prominent-badge{
+    position:absolute;top:-11px;left:20px;
+    background:var(--gold);
+    color:var(--navy-deep);
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:.5px;
+    text-transform:uppercase;
+    padding:4px 12px;
+    border-radius:999px;
+  }
+  .prominent-card h3{
+    font-family:'Fraunces',serif;
+    color:var(--navy-deep);
+    margin:6px 0 8px;
+    font-size:16px;
+  }
+  .prominent-card p{font-size:13.5px;margin:0 0 6px;color:var(--ink);}
+  .prominent-card .why{
+    font-size:12.5px;color:var(--muted);
+    background:#fff;border:1px solid var(--border);
+    border-radius:8px;padding:10px 12px;margin-top:10px;
+  }
+
+  /* asset category */
+  .asset-cat{
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:16px 18px;
+    margin-bottom:16px;
+  }
+  .asset-cat > h4{
+    font-family:'Fraunces',serif;
+    color:var(--navy-deep);
+    font-size:15px;
+    margin:0 0 4px;
+  }
+  .asset-cat > .sub-hint{font-size:12px;color:var(--muted);margin-bottom:12px;}
+  .asset-entry{
+    background:var(--sky);
+    border:1px solid var(--border);
+    border-radius:8px;
+    padding:14px 16px;
+    margin-bottom:12px;
+    position:relative;
+  }
+  .entry-remove{
+    position:absolute;top:10px;right:10px;
+    background:none;border:none;color:var(--danger);
+    font-size:12px;font-weight:600;cursor:pointer;
+  }
+  .add-btn{
+    background:#fff;
+    border:1.5px dashed var(--blue-cta);
+    color:var(--blue-cta);
+    font-weight:600;
+    font-size:13px;
+    padding:8px 16px;
+    border-radius:8px;
+    cursor:pointer;
+    margin-top:4px;
+  }
+  .add-btn:hover{background:var(--sky);}
+
+  .note-box{
+    background:var(--sky);
+    border:1px solid var(--border);
+    border-radius:8px;
+    padding:12px 14px;
+    font-size:12.5px;
+    color:var(--muted);
+    margin-bottom:16px;
+  }
+  .lock-note{
+    background:#fff;
+    border:1px dashed var(--muted);
+    border-radius:8px;
+    padding:12px 14px;
+    font-size:12.5px;
+    color:var(--muted);
+    margin-top:8px;
+  }
+
+  .married-flag{
+    background:var(--navy-trust);
+    color:#fff;
+    font-size:12px;
+    font-weight:600;
+    padding:10px 14px;
+    border-radius:8px;
+    margin-bottom:16px;
+    display:none;
+  }
+  .married-flag.show{display:block;}
+
+  /* footer action bar */
+  .action-bar{
+    position:sticky;
+    bottom:0;
+    background:#fff;
+    border-top:1px solid var(--border);
+    box-shadow:0 -6px 18px rgba(19,54,103,.08);
+    padding:14px 24px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    flex-wrap:wrap;
+    z-index:50;
+  }
+  .validation-msg{font-size:13px;color:var(--danger);font-weight:600;}
+  .validation-msg.ok{color:var(--ok);}
+  .btn{
+    border:none;
+    border-radius:9px;
+    padding:12px 20px;
+    font-size:14px;
+    font-weight:600;
+    cursor:pointer;
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+  }
+  .btn-primary{background:var(--blue-cta);color:#fff;}
+  .btn-primary:hover{background:#0069d9;}
+  .btn-secondary{background:var(--sky);color:var(--navy-deep);border:1.5px solid var(--navy-trust);}
+  .btn-secondary:hover{background:#dcebfa;}
+  .btn-gold{background:var(--gold);color:var(--navy-deep);}
+  .btn-row{display:flex;gap:10px;flex-wrap:wrap;}
+
+  .download-section{
+    display:none;
+    background:#fff;
+    border:1.5px solid var(--ok);
+    border-radius:12px;
+    padding:22px 24px;
+    margin-top:10px;
+  }
+  .download-section.show{display:block;}
+  .download-section h3{font-family:'Fraunces',serif;color:var(--navy-deep);margin-top:0;}
+  .doc-list{display:flex;flex-direction:column;gap:10px;margin-top:14px;}
+  .doc-item{
+    display:flex;align-items:center;justify-content:space-between;
+    background:var(--sky);border:1px solid var(--border);
+    border-radius:8px;padding:12px 16px;
+  }
+  .doc-item span{font-size:13.5px;font-weight:600;color:var(--navy-deep);}
+
+  /* ================= PRINT DOCUMENTS (hidden on screen) ================= */
+  .print-doc{display:none;}
+  .doc-page{
+    font-family:'Noto Serif','Times New Roman',serif;
+    font-size:12.5pt;
+    line-height:2;
+    color:#000;
+    text-align:justify;
+  }
+  .doc-title{
+    text-align:center;
+    text-decoration:underline;
+    font-weight:700;
+    font-size:14pt;
+    margin-bottom:22px;
+    letter-spacing:1px;
+  }
+  .doc-page p{margin:0 0 14px;}
+  .doc-page .section-label{text-decoration:underline;font-weight:700;}
+  .doc-page .blank{border-bottom:1px solid #000;padding:0 2px;}
+  .doc-page ol{padding-left:22px;margin:0 0 14px;}
+  .doc-page li{margin-bottom:10px;}
+  .sig-block{margin-top:34px;}
+  .sig-line{margin-bottom:26px;}
+
+  @media print{
+    body *{visibility:hidden;}
+    .print-doc.active, .print-doc.active *{visibility:visible;}
+    .print-doc.active{
+      display:block;
+      position:absolute;top:0;left:0;width:100%;
+    }
+    @page{
+      size:A4;
+      margin:3cm 1cm 3cm 5cm; /* top right bottom left */
+    }
+  }
+
+  @media(max-width:640px){
+    .topbar{padding:16px 18px;}
+    .step-body{padding:18px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">
+    <div class="crest">FL</div>
+    <div>
+      <h1>ForwardLegacy</h1>
+      <div class="tag">Will &amp; Deed of Consent Builder</div>
+    </div>
+  </div>
+  <div class="progress-pill" id="fieldsCounter">Compulsory fields remaining: —</div>
+</div>
+
+<div class="wrap">
+
+  <div class="intro-card">
+    Fill in the details below in one sitting. Fields marked <span class="req">*</span> are compulsory —
+    you won't be able to generate your documents until these are complete. Everything you type stays in
+    this browser tab only; nothing is uploaded anywhere. At the end you can download a print-ready
+    PDF of your Will (formatted to A4, with the correct margins and line spacing) and, where applicable,
+    the accompanying Deed of Consent — and email a copy to your lawyer for final review before signing.
+  </div>
+
+  <!-- STEP 1: TESTATOR -->
+  <section class="step">
+    <div class="step-head">
+      <div class="step-num">1</div>
+      <h2>Your Details (the "Testator")</h2>
+      <button type="button" class="info-btn" onclick="togglePop('pop-testator')">i</button>
+    </div>
+    <div class="step-body">
+      <div class="popover-box" id="pop-testator">
+        <b>Who is the Testator?</b> The Testator is simply <b>you</b> — the person making this Will and
+        deciding how your property should be distributed. Every "I" in the document refers to you.
+      </div>
+      <p class="step-sub">Enter your name and details exactly as they appear on your PAN / Aadhaar card, to avoid discrepancies later.</p>
+
+      <div class="field-row three">
+        <div class="field">
+          <label>Full Name <span class="req">*</span></label>
+          <input type="text" id="t_name" placeholder="As per PAN / Aadhaar">
+        </div>
+        <div class="field">
+          <label>Gender <span class="req">*</span></label>
+          <select id="t_gender">
+            <option value="">Select</option>
+            <option value="M">Male (Testator)</option>
+            <option value="F">Female (Testatrix)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Age <span class="req">*</span></label>
+          <input type="number" id="t_age" min="18" max="120">
+        </div>
+      </div>
+
+      <div class="field-row three">
+        <div class="field">
+          <label>Relation <span class="req">*</span></label>
+          <select id="t_parentRelation">
+            <option value="son of">Son of</option>
+            <option value="daughter of">Daughter of</option>
+            <option value="wife of">Wife of</option>
+            <option value="husband of">Husband of</option>
+          </select>
+        </div>
+        <div class="field" style="grid-column:span 2;">
+          <label>Name of that person <span class="req">*</span></label>
+          <input type="text" id="t_parentName" placeholder="e.g. father's / husband's name">
+        </div>
+      </div>
+
+      <div class="field-row three">
+        <div class="field">
+          <label>Marital Status <span class="req">*</span></label>
+          <select id="t_marital" onchange="onMaritalChange()">
+            <option value="">Select</option>
+            <option value="married">Married</option>
+            <option value="unmarried">Unmarried</option>
+            <option value="widowed">Widowed</option>
+            <option value="divorced">Divorced</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Occupation <span class="req">*</span></label>
+          <select id="t_occupation">
+            <option value="">Select</option>
+            <option value="retired">Retired</option>
+            <option value="in service">In Service</option>
+            <option value="business">Business</option>
+            <option value="profession">Profession</option>
+            <option value="homemaker">Homemaker</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Nationality <span class="req">*</span></label>
+          <input type="text" id="t_nationality" value="Indian">
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label>PAN Card No. <span class="req">*</span></label>
+          <input type="text" id="t_pan" placeholder="ABCDE1234F" style="text-transform:uppercase;">
+        </div>
+        <div class="field">
+          <label>Aadhaar Card No. <span class="req">*</span></label>
+          <input type="text" id="t_aadhaar" placeholder="12 digit number">
+        </div>
+      </div>
+
+      <div class="field-row single">
+        <div class="field">
+          <label>Residential Address <span class="req">*</span></label>
+          <textarea id="t_address" rows="2" placeholder="Full address" oninput="checkGoa('t_address','t_addr_warn')"></textarea>
+          <span class="warn" id="t_addr_warn" style="display:none;">This Will is drafted under the Goa Succession framework — double-check your address is your Goa address, matching your ID documents.</span>
+        </div>
+      </div>
+
+      <div id="marriedFlagT" class="married-flag">
+        Because you selected "Married", we'll also collect your spouse's details below — their own Will
+        is generated at the same time, along with a Deed of Consent that you'll both need to sign.
+      </div>
+    </div>
+  </section>
+
+  <!-- STEP 2: SPOUSE (conditional) -->
+  <section class="step" id="spouseStep" style="display:none;">
+    <div class="step-head">
+      <div class="step-num">2</div>
+      <h2>Spouse's Details</h2>
+    </div>
+    <div class="step-body">
+      <p class="step-sub">Since jointly-held Goa property needs mutual consent, your spouse's Will and a shared Deed of Consent are prepared together with yours.</p>
+
+      <div class="field-row three">
+        <div class="field">
+          <label>Full Name <span class="req">*</span></label>
+          <input type="text" id="s_name" placeholder="As per PAN / Aadhaar">
+        </div>
+        <div class="field">
+          <label>Gender <span class="req">*</span></label>
+          <select id="s_gender">
+            <option value="">Select</option>
+            <option value="M">Male (Testator)</option>
+            <option value="F">Female (Testatrix)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Age <span class="req">*</span></label>
+          <input type="number" id="s_age" min="18" max="120">
+        </div>
+      </div>
+
+      <div class="field-row three">
+        <div class="field">
+          <label>Relation <span class="req">*</span></label>
+          <select id="s_parentRelation">
+            <option value="son of">Son of</option>
+            <option value="daughter of">Daughter of</option>
+            <option value="wife of">Wife of</option>
+            <option value="husband of">Husband of</option>
+          </select>
+        </div>
+        <div class="field" style="grid-column:span 2;">
+          <label>Name of that person <span class="req">*</span></label>
+          <input type="text" id="s_parentName">
+        </div>
+      </div>
+
+      <div class="field-row three">
+        <div class="field">
+          <label>Marital Status <span class="req">*</span></label>
+          <input type="text" value="Married" disabled style="background:#f5f7fa;">
+        </div>
+        <div class="field">
+          <label>Occupation <span class="req">*</span></label>
+          <select id="s_occupation">
+            <option value="">Select</option>
+            <option value="retired">Retired</option>
+            <option value="in service">In Service</option>
+            <option value="business">Business</option>
+            <option value="profession">Profession</option>
+            <option value="homemaker">Homemaker</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Nationality <span class="req">*</span></label>
+          <input type="text" id="s_nationality" value="Indian">
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label>PAN Card No. <span class="req">*</span></label>
+          <input type="text" id="s_pan" placeholder="ABCDE1234F">
+        </div>
+        <div class="field">
+          <label>Aadhaar Card No. <span class="req">*</span></label>
+          <input type="text" id="s_aadhaar" placeholder="12 digit number">
+        </div>
+      </div>
+
+      <div class="field-row single">
+        <div class="field">
+          <label>Residential Address <span class="req">*</span></label>
+          <textarea id="s_address" rows="2" oninput="checkGoa('s_address','s_addr_warn')"></textarea>
+          <span class="warn" id="s_addr_warn" style="display:none;">Double-check this matches your spouse's Goa address on file.</span>
+        </div>
+      </div>
+      <div class="field-row single">
+        <div class="field">
+          <label><input type="checkbox" id="sameAddress" onchange="copyAddress()"> Same address as testator</label>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STEP 3: CHILDREN (conditional, optional) -->
+  <section class="step" id="childrenStep" style="display:none;">
+    <div class="step-head">
+      <div class="step-num">3</div>
+      <h2>Children <span style="font-weight:400;font-size:12.5px;opacity:.85;">(optional)</span></h2>
+    </div>
+    <div class="step-body">
+      <p class="step-sub">Optional — add your children's names so you can quickly select them as beneficiaries further down. You are not required to leave anything to them here.</p>
+      <div id="childrenList"></div>
+      <button type="button" class="add-btn" onclick="addChild()">+ Add a child</button>
+    </div>
+  </section>
+
+  <!-- STEP 4: ASSETS -->
+  <section class="step">
+    <div class="step-head">
+      <div class="step-num">4</div>
+      <h2>Your Assets &amp; Who Should Receive Them</h2>
+    </div>
+    <div class="step-body">
+      <p class="step-sub">Only categories you fill in will appear on your Will. Leave a category empty to skip it entirely.</p>
+
+      <div class="prominent-card">
+        <span class="prominent-badge">Included automatically</span>
+        <h3>A. Financial Assets</h3>
+        <p>All your Bank Accounts, Fixed Deposits, Recurring Deposits, PPF, Life Insurance, Stocks, Mutual
+        Funds, Crypto, Digital Wallets, NPS, Bonds, AIF, SIF and PMS are bequeathed entirely to the
+        <b>nominees already registered</b> on those instruments.</p>
+        <div class="why">
+          <b>Why we do it this way:</b> we strongly recommend keeping the nomination on each financial
+          account up to date, rather than listing specific account numbers or balances here. Those details
+          change frequently — nominations don't need your Will to be rewritten every time they do.
+        </div>
+      </div>
+
+      <!-- Immovable property -->
+      <div class="asset-cat">
+        <h4>B. Immovable Property</h4>
+        <div class="sub-hint">Houses / flats, land or plots, and commercial property.</div>
+
+        <div style="margin-bottom:18px;">
+          <b style="font-size:13px;color:var(--navy-deep);">House / Flat</b>
+          <div id="houseList"></div>
+          <button type="button" class="add-btn" onclick="addAssetRow('houseList','house','House / Flat description')">+ Add a house / flat</button>
+        </div>
+        <div style="margin-bottom:18px;">
+          <b style="font-size:13px;color:var(--navy-deep);">Land / Plot</b>
+          <div id="landList"></div>
+          <button type="button" class="add-btn" onclick="addAssetRow('landList','land','Land / Plot description')">+ Add land / plot</button>
+        </div>
+        <div>
+          <b style="font-size:13px;color:var(--navy-deep);">Commercial Property</b>
+          <div id="commercialList"></div>
+          <button type="button" class="add-btn" onclick="addAssetRow('commercialList','commercial','Commercial property description')">+ Add commercial property</button>
+        </div>
+      </div>
+
+      <!-- Motor vehicles -->
+      <div class="asset-cat">
+        <h4>C. Motor Vehicles</h4>
+        <div id="vehicleList"></div>
+        <button type="button" class="add-btn" onclick="addAssetRow('vehicleList','vehicle','Vehicle / Car description (make, model, reg. no.)')">+ Add a vehicle</button>
+      </div>
+
+      <!-- Personal & valuables -->
+      <div class="asset-cat">
+        <h4>D. Personal &amp; Valuables</h4>
+        <div id="jewelleryList"></div>
+        <button type="button" class="add-btn" onclick="addAssetRow('jewelleryList','jewellery','Jewellery / heirloom description')">+ Add jewellery / heirloom</button>
+      </div>
+
+      <!-- Digital & misc -->
+      <div class="asset-cat">
+        <h4>E. Digital &amp; Miscellaneous Assets</h4>
+        <div style="margin-bottom:18px;">
+          <b style="font-size:13px;color:var(--navy-deep);">Social Media / Digital Assets</b>
+          <div id="socialList"></div>
+          <button type="button" class="add-btn" onclick="addAssetRow('socialList','social','Social media / digital asset description')">+ Add a digital asset</button>
+        </div>
+        <div>
+          <b style="font-size:13px;color:var(--navy-deep);">Intellectual Property</b>
+          <div id="ipList"></div>
+          <button type="button" class="add-btn" onclick="addAssetRow('ipList','ip','Intellectual property description')">+ Add intellectual property</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STEP 5: RESIDUARY CLAUSE -->
+  <section class="step">
+    <div class="step-head">
+      <div class="step-num">5</div>
+      <h2>Residuary Clause</h2>
+    </div>
+    <div class="step-body">
+      <div class="note-box">
+        <b>What is a residuary clause?</b> It's the clause that catches everything else — any asset you
+        acquire after signing this Will, or anything you've simply forgotten to mention above. Rather than
+        leaving that property undecided, name who should receive it here. This is compulsory.
+      </div>
+      <div id="residuaryList"></div>
+      <button type="button" class="add-btn" onclick="addResiduaryRow()">+ Add a residuary beneficiary</button>
+    </div>
+  </section>
+
+  <!-- STEP 6: WITNESSES -->
+  <section class="step">
+    <div class="step-head">
+      <div class="step-num">6</div>
+      <h2>Witnesses</h2>
+      <button type="button" class="info-btn" onclick="togglePop('pop-witness')">i</button>
+    </div>
+    <div class="step-body">
+      <div class="popover-box" id="pop-witness">
+        <b>Who can be a witness?</b> Under the Indian Succession Act, 1925, a witness must simply be an
+        adult (18 or older), of sound mind, and able to sign their own name.
+        <ul>
+          <li>You need at least <b>two</b> witnesses. They don't need to know what the Will says — only that
+          you signed it in front of them.</li>
+          <li>It's best to avoid a witness who is also a beneficiary of this Will, or that beneficiary's spouse.</li>
+          <li>A witness <b>does not need to be related to you</b> — independent, impartial people are actually
+          better practice, even though family members are technically allowed.</li>
+        </ul>
+      </div>
+      <p class="step-sub">At least two witnesses are compulsory. Add more if you'd like.</p>
+      <div id="witnessList"></div>
+      <button type="button" class="add-btn" onclick="addWitnessRow()">+ Add a witness</button>
+    </div>
+  </section>
+
+  <!-- STEP 7: CONSENT DEED (conditional) -->
+  <section class="step" id="consentStep" style="display:none;">
+    <div class="step-head">
+      <div class="step-num">7</div>
+      <h2>Deed of Consent</h2>
+    </div>
+    <div class="step-body">
+      <div class="note-box">
+        <b>What is a Deed of Consent?</b> Because you and your spouse jointly hold property in Goa, Goan
+        succession law requires you to formally authorise each other to each bequeath your share by way of
+        two separate Wills — executed the same day. That mutual authorisation is recorded in this one shared
+        Deed of Consent, signed by both of you together.
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label>Your Alias / Also known as <span style="font-weight:400;color:var(--muted);">(optional)</span></label>
+          <input type="text" id="t_alias">
+        </div>
+        <div class="field">
+          <label>Spouse's Alias / Also known as <span style="font-weight:400;color:var(--muted);">(optional)</span></label>
+          <input type="text" id="s_alias">
+        </div>
+      </div>
+
+      <div class="field-row single">
+        <div class="field">
+          <label><input type="checkbox" id="sameWitnessDeed" checked onchange="toggleDeedWitnesses()"> Use the same two witnesses as the Will for this Deed too</label>
+          <span class="hint">Perfectly fine for the witnesses to be identical in both documents.</span>
+        </div>
+      </div>
+
+      <div id="deedWitnessBlock" style="display:none;">
+        <div id="deedWitnessList"></div>
+        <button type="button" class="add-btn" onclick="addDeedWitnessRow()">+ Add a witness for the Deed</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- FINAL: NOTARY NOTE -->
+  <section class="step">
+    <div class="step-head">
+      <div class="step-num">8</div>
+      <h2>Notary &amp; Execution</h2>
+    </div>
+    <div class="step-body">
+      <div class="lock-note">
+        The date, hour, Judicial Division, Notary's name and office, and the notarial stamp value are
+        intentionally left blank on your generated documents. These are completed by the Notary / Sub-Registrar
+        at the time of execution — after your lawyer has reviewed everything below. Do not fill these in yourself.
+      </div>
+    </div>
+  </section>
+
+  <!-- ACTION BAR -->
+  <div class="action-bar">
+    <div class="validation-msg" id="validationMsg">Complete the compulsory fields above to continue.</div>
+    <div class="btn-row">
+      <button type="button" class="btn btn-secondary" onclick="emailLawyer()">✉ Send summary to lawyer</button>
+      <button type="button" class="btn btn-primary" onclick="tryGenerate()">Generate my documents</button>
+    </div>
+  </div>
+
+  <div class="download-section" id="downloadSection">
+    <h3>Your documents are ready</h3>
+    <p style="font-size:13.5px;color:var(--muted);">Each button opens your browser's print dialog with the
+    document formatted to A4, correct margins and double line spacing — choose <b>Save as PDF</b> as the
+    destination. Print single-sided.</p>
+    <div class="doc-list" id="docList"></div>
+  </div>
+
+</div>
+
+<!-- ================= PRINT TEMPLATES ================= -->
+<div class="print-doc" id="printWillT">
+  <div class="doc-page" id="willBodyT"></div>
+</div>
+<div class="print-doc" id="printWillS">
+  <div class="doc-page" id="willBodyS"></div>
+</div>
+<div class="print-doc" id="printDeed">
+  <div class="doc-page" id="deedBody"></div>
+</div>
+
+<script>
+/* ============================= HELPERS ============================= */
+function togglePop(id){
+  document.getElementById(id).classList.toggle('show');
+}
+function checkGoa(fieldId,warnId){
+  const v=document.getElementById(fieldId).value.toLowerCase();
+  document.getElementById(warnId).style.display = (v && !v.includes('goa')) ? 'inline' : 'none';
+}
+function copyAddress(){
+  if(document.getElementById('sameAddress').checked){
+    document.getElementById('s_address').value = document.getElementById('t_address').value;
+  }
+}
+function esc(s){
+  if(!s) return '';
+  const d=document.createElement('div');d.innerText=s;return d.innerHTML;
+}
+function blank(len){ return '<span class="blank">'+'&nbsp;'.repeat(len||18)+'</span>'; }
+function fieldOrBlank(v,len){ return v ? esc(v) : blank(len); }
+
+/* ============================= MARITAL / CHILDREN TOGGLE ============================= */
+function onMaritalChange(){
+  const status = document.getElementById('t_marital').value;
+  const spouseStep = document.getElementById('spouseStep');
+  const childrenStep = document.getElementById('childrenStep');
+  const consentStep = document.getElementById('consentStep');
+  const flagT = document.getElementById('marriedFlagT');
+
+  const isMarried = status==='married';
+  const showChildren = ['married','widowed','divorced'].includes(status);
+
+  spouseStep.style.display = isMarried ? 'block' : 'none';
+  consentStep.style.display = isMarried ? 'block' : 'none';
+  flagT.classList.toggle('show', isMarried);
+  childrenStep.style.display = showChildren ? 'block' : 'none';
+
+  if(!isMarried){
+    // clear spouse required-ness visually not necessary; validation handles it
+  }
+  updateCounter();
+}
+
+/* ============================= CHILDREN REPEATER ============================= */
+let childIdx=0;
+function addChild(){
+  childIdx++;
+  const id='child_'+childIdx;
+  const div=document.createElement('div');
+  div.className='asset-entry';
+  div.id=id;
+  div.innerHTML=`
+    <button type="button" class="entry-remove" onclick="removeEntry('${id}')">Remove ✕</button>
+    <div class="field-row">
+      <div class="field"><label>Child's Name</label><input type="text" class="c_name"></div>
+      <div class="field"><label>Relationship</label>
+        <select class="c_rel">
+          <option value="Son">Son</option>
+          <option value="Daughter">Daughter</option>
+        </select>
+      </div>
+    </div>`;
+  document.getElementById('childrenList').appendChild(div);
+}
+function removeEntry(id){
+  const el=document.getElementById(id);
+  if(el) el.remove();
+  updateCounter();
+}
+
+/* ============================= ASSET REPEATER ============================= */
+let assetIdx=0;
+const RELATIONSHIP_OPTIONS = ['Spouse','Son','Daughter','Other'];
+const ID_TYPES = ['Aadhaar Card','PAN Card','Passport','Voter ID','Driving License'];
+
+function relSelectHTML(cls){
+  let opts = RELATIONSHIP_OPTIONS.map(r=>`<option value="${r}">${r}</option>`).join('');
+  return `<select class="${cls}" onchange="toggleOther(this)">${opts}</select>`;
+}
+function idTypeSelectHTML(cls){
+  let opts = ID_TYPES.map(r=>`<option value="${r}">${r}</option>`).join('');
+  return `<select class="${cls}">${opts}</select>`;
+}
+function toggleOther(sel){
+  const wrap = sel.closest('.asset-entry');
+  const other = wrap.querySelector('.rel-other');
+  if(other) other.style.display = sel.value==='Other' ? 'flex' : 'none';
+}
+
+function addAssetRow(containerId, catKey, descLabel){
+  assetIdx++;
+  const id='asset_'+assetIdx;
+  const div=document.createElement('div');
+  div.className='asset-entry';
+  div.id=id;
+  div.dataset.cat=catKey;
+  div.innerHTML=`
+    <button type="button" class="entry-remove" onclick="removeEntry('${id}')">Remove ✕</button>
+    <div class="field-row single">
+      <div class="field"><label>${descLabel}</label><input type="text" class="a_desc"></div>
+    </div>
+    <div class="field-row three">
+      <div class="field"><label>Bequeathed to (Beneficiary Name)</label><input type="text" class="a_ben"></div>
+      <div class="field"><label>Relationship</label>${relSelectHTML('a_rel')}</div>
+      <div class="field rel-other" style="display:none;"><label>Specify relationship</label><input type="text" class="a_rel_other"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>ID Type</label>${idTypeSelectHTML('a_idtype')}</div>
+      <div class="field"><label>ID Number</label><input type="text" class="a_idnum"></div>
+    </div>`;
+  document.getElementById(containerId).appendChild(div);
+}
+
+/* ============================= RESIDUARY REPEATER ============================= */
+let resIdx=0;
+function addResiduaryRow(){
+  resIdx++;
+  const id='res_'+resIdx;
+  const div=document.createElement('div');
+  div.className='asset-entry';
+  div.id=id;
+  div.innerHTML=`
+    <button type="button" class="entry-remove" onclick="removeEntry('${id}')">Remove ✕</button>
+    <div class="field-row three">
+      <div class="field"><label>Beneficiary Name <span class="req">*</span></label><input type="text" class="r_ben"></div>
+      <div class="field"><label>Relationship <span class="req">*</span></label>${relSelectHTML('r_rel')}</div>
+      <div class="field rel-other" style="display:none;"><label>Specify relationship</label><input type="text" class="r_rel_other"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>ID Type <span class="req">*</span></label>${idTypeSelectHTML('r_idtype')}</div>
+      <div class="field"><label>ID Number <span class="req">*</span></label><input type="text" class="r_idnum"></div>
+    </div>`;
+  document.getElementById('residuaryList').appendChild(div);
+  updateCounter();
+}
+
+/* ============================= WITNESS REPEATER ============================= */
+let witIdx=0;
+function witnessFieldsHTML(prefix){
+  return `
+    <div class="field-row three">
+      <div class="field"><label>Full Name <span class="req">*</span></label><input type="text" class="${prefix}_name"></div>
+      <div class="field"><label>Relation <span class="req">*</span></label>
+        <select class="${prefix}_prel">
+          <option value="s/o.">Son of</option>
+          <option value="d/o.">Daughter of</option>
+          <option value="w/o.">Wife of</option>
+        </select>
+      </div>
+      <div class="field"><label>Name of that person <span class="req">*</span></label><input type="text" class="${prefix}_pname"></div>
+    </div>
+    <div class="field-row three">
+      <div class="field"><label>Age <span class="req">*</span></label><input type="number" class="${prefix}_age"></div>
+      <div class="field"><label>Marital Status <span class="req">*</span></label>
+        <select class="${prefix}_marital">
+          <option value="Married">Married</option>
+          <option value="Unmarried">Unmarried</option>
+          <option value="Widowed">Widowed</option>
+          <option value="Divorced">Divorced</option>
+        </select>
+      </div>
+      <div class="field"><label>Occupation <span class="req">*</span></label>
+        <select class="${prefix}_occ">
+          <option value="Service">Service</option>
+          <option value="Business">Business</option>
+          <option value="Professional">Professional</option>
+          <option value="Retired">Retired</option>
+          <option value="Homemaker">Homemaker</option>
+        </select>
+      </div>
+    </div>
+    <div class="field-row single">
+      <div class="field"><label>Residential Address <span class="req">*</span></label><textarea rows="2" class="${prefix}_addr"></textarea></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>PAN Card No. <span class="req">*</span></label><input type="text" class="${prefix}_pan"></div>
+      <div class="field"><label>Aadhaar Card No. <span class="req">*</span></label><input type="text" class="${prefix}_aadhaar"></div>
+    </div>`;
+}
+function addWitnessRow(){
+  witIdx++;
+  const id='wit_'+witIdx;
+  const div=document.createElement('div');
+  div.className='asset-entry';
+  div.id=id;
+  div.innerHTML=`<button type="button" class="entry-remove" onclick="removeEntry('${id}')">Remove ✕</button>`+witnessFieldsHTML('w');
+  document.getElementById('witnessList').appendChild(div);
+  updateCounter();
+}
+
+let deedWitIdx=0;
+function addDeedWitnessRow(){
+  deedWitIdx++;
+  const id='dwit_'+deedWitIdx;
+  const div=document.createElement('div');
+  div.className='asset-entry';
+  div.id=id;
+  div.innerHTML=`<button type="button" class="entry-remove" onclick="removeEntry('${id}')">Remove ✕</button>`+witnessFieldsHTML('dw');
+  document.getElementById('deedWitnessList').appendChild(div);
+  updateCounter();
+}
+function toggleDeedWitnesses(){
+  const same=document.getElementById('sameWitnessDeed').checked;
+  document.getElementById('deedWitnessBlock').style.display = same ? 'none' : 'block';
+  updateCounter();
+}
+
+/* seed initial rows */
+addResiduaryRow();
+addWitnessRow();
+addWitnessRow();
+
+/* ============================= VALIDATION ============================= */
+function val(id){ const el=document.getElementById(id); return el?el.value.trim():''; }
+
+function collectAssetRows(cat){
+  return Array.from(document.querySelectorAll(`.asset-entry[data-cat="${cat}"]`)).map(row=>{
+    const desc=row.querySelector('.a_desc').value.trim();
+    const ben=row.querySelector('.a_ben').value.trim();
+    const rel=row.querySelector('.a_rel').value;
+    const relOther=row.querySelector('.a_rel_other').value.trim();
+    const idtype=row.querySelector('.a_idtype').value;
+    const idnum=row.querySelector('.a_idnum').value.trim();
+    return {desc,ben,rel:rel==='Other'?(relOther||'Other'):rel,idtype,idnum, filled: !!(desc||ben||idnum)};
+  }).filter(r=>r.filled);
+}
+function collectResiduary(){
+  return Array.from(document.querySelectorAll('#residuaryList .asset-entry')).map(row=>{
+    const ben=row.querySelector('.r_ben').value.trim();
+    const rel=row.querySelector('.r_rel').value;
+    const relOther=row.querySelector('.r_rel_other').value.trim();
+    const idtype=row.querySelector('.r_idtype').value;
+    const idnum=row.querySelector('.r_idnum').value.trim();
+    return {ben,rel:rel==='Other'?(relOther||'Other'):rel,idtype,idnum};
+  });
+}
+function collectWitnesses(containerId,prefix){
+  return Array.from(document.querySelectorAll('#'+containerId+' .asset-entry')).map(row=>{
+    const g=cls=>row.querySelector('.'+prefix+'_'+cls).value.trim();
+    return {
+      name:g('name'), prel:row.querySelector('.'+prefix+'_prel').value, pname:g('pname'),
+      age:g('age'), marital:row.querySelector('.'+prefix+'_marital').value,
+      occ:row.querySelector('.'+prefix+'_occ').value, addr:g('addr'),
+      pan:g('pan'), aadhaar:g('aadhaar')
+    };
+  });
+}
+function collectChildren(){
+  return Array.from(document.querySelectorAll('#childrenList .asset-entry')).map(row=>{
+    return {name:row.querySelector('.c_name').value.trim(), rel:row.querySelector('.c_rel').value};
+  }).filter(c=>c.name);
+}
+
+function validateAll(){
+  const missing=[];
+  const isMarried = val('t_marital')==='married';
+
+  const reqCore=['t_name','t_gender','t_age','t_parentName','t_marital','t_occupation','t_nationality','t_pan','t_aadhaar','t_address'];
+  reqCore.forEach(id=>{ if(!val(id)) missing.push('Your details'); });
+
+  if(isMarried){
+    const reqS=['s_name','s_gender','s_age','s_parentName','s_occupation','s_nationality','s_pan','s_aadhaar','s_address'];
+    reqS.forEach(id=>{ if(!val(id)) missing.push("Spouse's details"); });
+  }
+
+  const residuary = collectResiduary();
+  if(residuary.length===0 || residuary.some(r=>!r.ben||!r.idnum)) missing.push('Residuary clause (at least one complete beneficiary)');
+
+  const witnesses = collectWitnesses('witnessList','w');
+  if(witnesses.length<2) missing.push('At least two witnesses');
+  witnesses.forEach(w=>{ if(!w.name||!w.pname||!w.age||!w.addr||!w.pan||!w.aadhaar) missing.push('Complete all witness fields'); });
+
+  if(isMarried && !document.getElementById('sameWitnessDeed').checked){
+    const dw = collectWitnesses('deedWitnessList','dw');
+    if(dw.length<2) missing.push('At least two witnesses for the Deed of Consent');
+    dw.forEach(w=>{ if(!w.name||!w.pname||!w.age||!w.addr||!w.pan||!w.aadhaar) missing.push('Complete all Deed witness fields'); });
+  }
+
+  return [...new Set(missing)];
+}
+function updateCounter(){
+  const missing=validateAll();
+  document.getElementById('fieldsCounter').textContent = missing.length ? ('Sections incomplete: '+missing.length) : 'All compulsory fields complete ✓';
+}
+document.addEventListener('input',updateCounter);
+document.addEventListener('change',updateCounter);
+updateCounter();
+
+/* ============================= TEXT BUILD HELPERS ============================= */
+function pronoun(gender,type){
+  // type: subj (he/she), obj (him/her), poss (his/her), title (Testator/Testatrix)
+  const male = gender==='M';
+  if(type==='subj') return male?'he':'she';
+  if(type==='obj') return male?'him':'her';
+  if(type==='poss') return male?'his':'her';
+  if(type==='title') return male?'Testator':'Testatrix';
+  if(type==='mr') return male?'Mr.':'Mrs.';
+  return '';
+}
+const NUM_WORDS={2:'two',3:'three',4:'four',5:'five',6:'six'};
+
+function witnessClauseHTML(w){
+  return `${fieldOrBlank(w.name,20)}, ${w.prel} ${fieldOrBlank(w.pname,20)}, aged about ${fieldOrBlank(w.age,3)} years, `+
+  `${fieldOrBlank(w.marital,10)}, ${fieldOrBlank(w.occ,10)}, Indian National, resident of ${fieldOrBlank(w.addr,30)}, `+
+  `having PAN Card No. ${fieldOrBlank(w.pan,12)} and Aadhaar Card No. ${fieldOrBlank(w.aadhaar,14)}.`;
+}
+
+function assetLineHTML(entry, label){
+  if(!entry.filled) return '';
+  return `<p>${label}: ${fieldOrBlank(entry.desc,30)}<br>`+
+    `Bequeathed to: ${fieldOrBlank(entry.ben,20)}. Relationship: ${fieldOrBlank(entry.rel,10)}, bearing `+
+    `${fieldOrBlank(entry.idtype,14)} Number: ${fieldOrBlank(entry.idnum,16)}.</p>`;
+}
+
+/* ============================= BUILD WILL ============================= */
+function buildWillHTML(person, spouse, isMarried){
+  const g=(id)=>document.getElementById(id).value.trim();
+  const title = pronoun(person.gender,'title');
+  const subj = pronoun(person.gender,'subj');
+  const poss = pronoun(person.gender,'poss');
+
+  const witnesses = collectWitnesses('witnessList','w');
+  const witnessCountWord = NUM_WORDS[witnesses.length] || witnesses.length;
+
+  // asset categories
+  const houses = collectAssetRows('house');
+  const lands = collectAssetRows('land');
+  const commercial = collectAssetRows('commercial');
+  const vehicles = collectAssetRows('vehicle');
+  const jewellery = collectAssetRows('jewellery');
+  const socials = collectAssetRows('social');
+  const ips = collectAssetRows('ip');
+  const residuary = collectResiduary();
+
+  let html = '';
+  html += `<div class="doc-title">${isMarried ? (pronoun(person.gender,'title')==='Testator'?"HUSBAND'S ":"WIFE'S ") : ''}OPEN WILL</div>`;
+
+  html += `<p>On this ${blank(6)} day of ${blank(10)} of the year Two Thousand and ${blank(6)} at ${blank(6)} hours, `+
+  `in this Judicial Division of ${blank(14)} and in the Office of the Special Notary Public, situated at ${blank(30)}, `+
+  `before me, ${blank(20)}, Civil Registrar-Cum-Sub Registrar and Special Notary Ex-Officio, in the said Division and `+
+  `before the ${witnessCountWord} suitable witnesses below mentioned and signed at the end, known to the party, was present `+
+  `${fieldOrBlank(person.name,20)} ${person.parentRelation} ${fieldOrBlank(person.parentName,20)}, aged about ${fieldOrBlank(person.age,3)} years, `+
+  `${fieldOrBlank(person.marital,10)} (marital status), ${fieldOrBlank(person.occupation,10)} (occupation), `+
+  `${fieldOrBlank(person.nationality,10)} (nationality), holder of PAN Card bearing No. ${fieldOrBlank(person.pan,12)} and Aadhaar Card `+
+  `bearing No. ${fieldOrBlank(person.aadhaar,14)}, resident of ${fieldOrBlank(person.address,30)} (address), hereinafter referred to as the `+
+  `"${title.toUpperCase()}", whose identity was verified by the guarantee of the said witnesses who are known to the party. `+
+  `And I and each of the said witnesses found ${pronoun(person.gender,'obj')} in a sound disposing state of mind and free from any `+
+  `coercion or undue influence for which fact I do hereby vouch. And before the said witnesses, the '${title.toUpperCase()}' makes this `+
+  `present will and declares ${poss} last wishes as follows:</p>`;
+
+  html += `<p>I am making this last WILL and testament of mine voluntarily and without any compulsion or pressure from any source or `+
+  `person and in sound health and disposing state of mind. I have not been influenced, cajoled or coerced in any manner to write this `+
+  `WILL. I do hereby revoke all my wills, if any, previously made by me.</p>`;
+
+  html += `<p>I own the following movable and immovable properties which are all self-acquired or built out of my own earning and `+
+  `income and have absolute power of disposal of the same.</p>`;
+
+  html += `<p>I bequeath my specific assets to the designated beneficiaries as outlined below:</p>`;
+
+  html += `<p class="section-label">A. Financial Assets:</p>`;
+  html += `<p>I bequeath all my financial assets including Bank Accounts, Fixed Deposits (FDs), Recurring Deposits (RDs), Public `+
+  `Provident Fund (PPF), Life Insurance, Stocks, Mutual Funds, Cryptocurrency (Crypto), Digital Wallets, National Pension System (NPS), `+
+  `Bonds, Alternative Investment Fund (AIF), Specialized Investment Fund (SIF), and Portfolio Management Services (PMS) entirely to the `+
+  `nominees registered in those financial instruments.</p>`;
+
+  if(houses.length||lands.length||commercial.length){
+    html += `<p class="section-label">B. Immovable Property:</p>`;
+    houses.forEach(h=>html+=assetLineHTML(h,'House / Flat'));
+    lands.forEach(l=>html+=assetLineHTML(l,'Land / Plot'));
+    commercial.forEach(c=>html+=assetLineHTML(c,'Commercial Property'));
+  }
+  if(vehicles.length){
+    html += `<p class="section-label">C. Motor Vehicles:</p>`;
+    vehicles.forEach(v=>html+=assetLineHTML(v,'Vehicle / Car'));
+  }
+  if(jewellery.length){
+    html += `<p class="section-label">D. Personal &amp; Valuables:</p>`;
+    jewellery.forEach(j=>html+=assetLineHTML(j,'Jewellery &amp; Heirlooms'));
+  }
+  if(socials.length||ips.length){
+    html += `<p class="section-label">E. Digital &amp; Miscellaneous Assets:</p>`;
+    socials.forEach(s=>html+=assetLineHTML(s,'(1) Social Media / Digital'));
+    ips.forEach(i=>html+=assetLineHTML(i,'(2) Intellectual Property'));
+  }
+
+  // Residuary
+  let resText = residuary.map(r=>`${fieldOrBlank(r.ben,20)}, Relationship: ${fieldOrBlank(r.rel,10)}, bearing ${fieldOrBlank(r.idtype,14)} Number: ${fieldOrBlank(r.idnum,16)}`).join('; and ');
+  html += `<p>I hereby declare, direct, and devise that all the Rest and Residue of my estate, including any property or assets, `+
+  `both movable and immovable, which I may acquire after the execution of this Will, or which has been inadvertently omitted from `+
+  `this document, shall be given entirely to ${resText}.</p>`;
+
+  html += `<p>The ${title.toUpperCase()} further stated that by this present Will, ${subj}, the ${title.toUpperCase()} revokes all the `+
+  `Wills made by ${pronoun(person.gender,'obj')} earlier and further declares that this is ${poss} last and final Will. The ${title.toUpperCase()} `+
+  `is well conversant with English and has read the contents of this Will thoroughly.</p>`;
+
+  html += `<p>That ${subj} stated and ended ${poss} last Will for which fact I do hereby vouch. I drew uninterruptedly this Will `+
+  `which the said ${title.toUpperCase()} and witnesses namely</p>`;
+
+  html += '<ol>';
+  witnesses.forEach(w=>{ html += `<li>${witnessClauseHTML(w)}</li>`; });
+  html += '</ol>';
+
+  html += `<p>This Will was read out loudly by me, the Notary Ex-Officio. I declare that all legal formalities were complied with `+
+  `within a continuous process. It will bear a notarial stamp of ${blank(10)}.</p>`;
+
+  html += `<p>${title}/${title==='Testator'?'Testatrix':'Testator'} understands and approves the contents of document before signing `+
+  `and was not forced to do so by any person.</p>`;
+
+  html += `<div class="sig-block">`;
+  html += `<p class="sig-line">Signature of ${title}: ${blank(24)}</p>`;
+  html += `<p class="sig-line">Name of ${title}: ${esc(person.name)}</p>`;
+  html += `<p class="sig-line">Place: ${blank(20)}</p>`;
+  html += `<p class="sig-line">Date: ${blank(20)}</p>`;
+  html += `<p class="section-label">WITNESSES</p>`;
+  witnesses.forEach((w,i)=>{
+    html += `<p class="sig-line">${i+1}) Name: ${esc(w.name)}<br>Signature: ${blank(20)}</p>`;
+  });
+  html += `</div>`;
+
+  return html;
+}
+
+/* ============================= BUILD DEED OF CONSENT ============================= */
+function buildDeedHTML(){
+  const t={
+    name:val('t_name'), gender:val('t_gender'), alias:val('t_alias'), parentRelation:val('t_parentRelation'),
+    parentName:val('t_parentName'), age:val('t_age'), marital:val('t_marital'), occupation:val('t_occupation'),
+    pan:val('t_pan'), aadhaar:val('t_aadhaar'), address:val('t_address')
+  };
+  const s={
+    name:val('s_name'), gender:val('s_gender'), alias:val('s_alias'), parentRelation:val('s_parentRelation'),
+    parentName:val('s_parentName'), age:val('s_age'), occupation:val('s_occupation'),
+    pan:val('s_pan'), aadhaar:val('s_aadhaar'), address:val('s_address')
+  };
+  const sameWit = document.getElementById('sameWitnessDeed').checked;
+  const deedWitnesses = sameWit ? collectWitnesses('witnessList','w').slice(0,2) : collectWitnesses('deedWitnessList','dw');
+
+  const tRelWord = pronoun(t.gender,'poss') + ' ' + (t.gender==='M' ? 'wife' : 'husband');
+
+  let html='';
+  html += `<div class="doc-title">DEED OF CONSENT</div>`;
+
+  html += `<p>On this ${blank(8)} day of ${blank(10)}, of the year ${blank(10)}, in this Judicial Division of ${blank(14)}, `+
+  `City of ${blank(14)} and in the Office of the Notarial Public, situated at ${blank(20)}, before me, Mrs./Mr. ${blank(20)}, `+
+  `Civil Registrar-Cum-Sub Registrar and Notary Ex-Officio, in the said Judicial Division and before the two suitable witnesses `+
+  `below mentioned and signed at the end were present as parties MR./MRS. ${fieldOrBlank(t.name,20)}`+
+  `${t.alias ? ' alias '+esc(t.alias) : ''}, ${t.parentRelation==='wife of'||t.parentRelation==='husband of'?'Son/Daughter of':'Son/Daughter of'} `+
+  `${fieldOrBlank(t.parentName,20)}, ${fieldOrBlank(t.age,3)} years of age, ${fieldOrBlank(t.marital,10)} (marital status), `+
+  `${fieldOrBlank(t.occupation,10)} (occupation), Indian National, having Pan Card No. ${fieldOrBlank(t.pan,12)} and having Aadhaar `+
+  `Card No. ${fieldOrBlank(t.aadhaar,14)}, and resident of ${fieldOrBlank(t.address,30)}, and ${tRelWord}; `+
+  `MR./MRS. ${fieldOrBlank(s.name,20)}${s.alias ? ' alias '+esc(s.alias) : ''}, Son/Daughter/Wife/Husband of ${fieldOrBlank(s.parentName,20)}, `+
+  `${fieldOrBlank(s.age,3)} years of age, Married (marital status), ${fieldOrBlank(s.occupation,10)} (occupation), Indian National, `+
+  `having Pan Card No. ${fieldOrBlank(s.pan,12)} and having Aadhaar Card No. ${fieldOrBlank(s.aadhaar,14)}, and resident of `+
+  `${fieldOrBlank(s.address,30)}, whose identity for this act was verified by the guarantee of the said witnesses found them in a `+
+  `sound disposing state of mind and free from coercion or undue influence for which act I do hereby vouch and before the said `+
+  `witnesses, they stated as follows: That they are husband and wife, and have acquired jointly immovable and movable properties `+
+  `in Goa. That they wish to bequeath their moveable and immovable properties in Goa as per their wish. And for the said purpose `+
+  `and since the assets are joint, the parties need a mutual consent or acquiescence. That the parties by this Deed do hereby `+
+  `authorized each other as per Section 219 of sub-section of (d) of the Goa Succession Special Notaries and Inventory Proceeding `+
+  `Act, 2012, to make the above bequest by way of two different wills to be executed today as per each one's wish. Thus, they `+
+  `stated and granted in the presence of the witnesses, who are:</p>`;
+
+  html += '<p>';
+  deedWitnesses.forEach((w,i)=>{
+    html += `(${i===0?'ONE':'TWO'}) MR./MRS. ${fieldOrBlank(w.name,20)}, ${w.prel} ${fieldOrBlank(w.pname,20)}, ${fieldOrBlank(w.age,3)} years of age, `+
+    `${fieldOrBlank(w.marital,10)} (marital status), ${fieldOrBlank(w.occ,10)} (occupation), Indian National (nationality), resident of `+
+    `${fieldOrBlank(w.addr,25)}, having PAN Card No. ${fieldOrBlank(w.pan,12)} and Aadhaar Card No. ${fieldOrBlank(w.aadhaar,14)};<br>`;
+  });
+  html += `</p>`;
+
+  html += `<p>who are going to sign with the parties and with me, the said Special Notary, in whose presence this deed of consent `+
+  `was read out in a loud voice in the simultaneous presence of all concerned, that is the said parties and the witnesses, and is `+
+  `being signed by the concerned parties on being found accordingly. I drew uninterruptedly this Deed, and I, the said Special `+
+  `Notary, declare that all the legal formalities were complied with within a continuous process.</p>`;
+
+  html += `<p>This deed bears Notarial Stamp of Rupees ${blank(10)} only.</p>`;
+
+  html += `<div class="sig-block">`;
+  html += `<p class="sig-line">Testator / Party 1 (Signature): ${blank(20)}</p>`;
+  html += `<p class="sig-line">Name: ${esc(t.name)}</p>`;
+  html += `<p class="sig-line">Testatrix / Party No. 2 (Signature): ${blank(20)}</p>`;
+  html += `<p class="sig-line">Name: ${esc(s.name)}</p>`;
+  deedWitnesses.forEach((w,i)=>{
+    html += `<p class="sig-line">Witness No. ${i+1} (Signature): ${blank(20)}</p>`;
+    html += `<p class="sig-line">Name: ${esc(w.name)}</p>`;
+  });
+  html += `</div>`;
+
+  return html;
+}
+
+/* ============================= GENERATE ============================= */
+function tryGenerate(){
+  const missing = validateAll();
+  const msgEl = document.getElementById('validationMsg');
+  if(missing.length){
+    msgEl.textContent = 'Please complete: ' + missing.join(' · ');
+    msgEl.classList.remove('ok');
+    msgEl.scrollIntoView({behavior:'smooth',block:'center'});
+    return;
+  }
+  msgEl.textContent = 'All set — your documents are ready below.';
+  msgEl.classList.add('ok');
+
+  const isMarried = val('t_marital')==='married';
+
+  const t = {
+    name:val('t_name'), gender:val('t_gender'), age:val('t_age'),
+    parentRelation:val('t_parentRelation'), parentName:val('t_parentName'),
+    marital:document.getElementById('t_marital').selectedOptions[0].textContent,
+    occupation:document.getElementById('t_occupation').selectedOptions[0]?.textContent||'',
+    nationality:val('t_nationality'), pan:val('t_pan'), aadhaar:val('t_aadhaar'), address:val('t_address')
+  };
+
+  document.getElementById('willBodyT').innerHTML = buildWillHTML(t, null, isMarried);
+
+  const docList = document.getElementById('docList');
+  docList.innerHTML='';
+  addDocButton(docList, isMarried ? `${t.name || 'Your'}'s Will` : 'Your Will', 'printWillT');
+
+  if(isMarried){
+    const s = {
+      name:val('s_name'), gender:val('s_gender'), age:val('s_age'),
+      parentRelation:val('s_parentRelation'), parentName:val('s_parentName'),
+      marital:'Married',
+      occupation:document.getElementById('s_occupation').selectedOptions[0]?.textContent||'',
+      nationality:val('s_nationality'), pan:val('s_pan'), aadhaar:val('s_aadhaar'), address:val('s_address')
+    };
+    document.getElementById('willBodyS').innerHTML = buildWillHTML(s, null, isMarried);
+    addDocButton(docList, `${s.name || "Spouse"}'s Will`, 'printWillS');
+
+    document.getElementById('deedBody').innerHTML = buildDeedHTML();
+    addDocButton(docList, 'Deed of Consent (both parties)', 'printDeed');
+  }
+
+  document.getElementById('downloadSection').classList.add('show');
+  document.getElementById('downloadSection').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function addDocButton(container,label,printId){
+  const row=document.createElement('div');
+  row.className='doc-item';
+  row.innerHTML = `<span>${label}</span><button type="button" class="btn btn-gold" onclick="printDoc('${printId}')">Download PDF</button>`;
+  container.appendChild(row);
+}
+
+function printDoc(id){
+  document.querySelectorAll('.print-doc').forEach(d=>d.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.title = id.replace('print','') + '_ForwardLegacy';
+  setTimeout(()=>{ window.print(); }, 80);
+}
+
+/* ============================= EMAIL LAWYER ============================= */
+function emailLawyer(){
+  const name = val('t_name') || '[Your name]';
+  const isMarried = val('t_marital')==='married';
+  const subject = encodeURIComponent(`Will for Review - ${name}`);
+  let body = `Hi,\n\nPlease find attached my draft Will${isMarried?', my spouse\'s draft Will, and our Deed of Consent':''} generated via ForwardLegacy for your review before execution.\n\n`;
+  body += `Testator: ${name}\n`;
+  if(isMarried) body += `Spouse: ${val('s_name')||'[Spouse name]'}\n`;
+  body += `\nPlease attach the downloaded PDF(s) to this email before sending.\n\nThank you.`;
+  window.location.href = `mailto:?subject=${subject}&body=${encodeURIComponent(body)}`;
+}
+</script>
+</body>
+</html>
