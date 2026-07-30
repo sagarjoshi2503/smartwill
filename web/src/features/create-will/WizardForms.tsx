@@ -1,9 +1,12 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import {
   User, UserCheck, Baby, Users, Briefcase, BookOpen, Lock, Info, Plus, Trash2,
   Check, AlertTriangle, CheckCircle, FileText, Send,
 } from "lucide-react";
-import { ID_TYPES, RELATIONS, MONTHS, OCCUPATIONS, ALLINDIA_RELATIONSHIP_OPTIONS } from "../../data/options";
+import {
+  ID_TYPES, RELATIONS, MONTHS, OCCUPATIONS, ALLINDIA_RELATIONSHIP_OPTIONS,
+  GOAN_MARITAL_STATUSES, GOAN_WITNESS_OCCUPATIONS,
+} from "../../data/options";
 import { ASSET_CATALOGUE, COLOR } from "../../data/assetCatalogue";
 import { WILL_TYPE_OPTIONS } from "../../data/willTypes";
 import StepHeader from "../../components/shared/StepHeader";
@@ -228,8 +231,8 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
         </div>
       )}
 
-      {/* ── STEP 2: TESTATOR ─────────────────────────────────── */}
-      {step===2&&(
+      {/* ── STEP 2: TESTATOR (non-Goan) ──────────────────────── */}
+      {step===2&&willType!=="goan"&&(
         <div className="space-y-4">
           <StepHeader icon={<User size={17}/>} title="Testator Details" sub="Section I — Your identity & declaration of fitness"/>
           {adminComments&&(
@@ -344,6 +347,101 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
           <Nav onNext={onNext}/>
         </div>
       )}
+
+      {/* ── STEP 2: TESTATOR (Goan — Open Will format) ───────── */}
+      {step===2&&willType==="goan"&&(()=>{
+        const t=will.goanTestator, s=will.goanSpouse;
+        const isMarried=t.maritalStatus==="married";
+        const goaHint=(addr: string)=>addr.trim()&&!addr.toLowerCase().includes("goa");
+        const personFields=(person: typeof t, path: "goanTestator"|"goanSpouse", lockMarital?: boolean)=>(
+          <>
+            <div className="grid grid-cols-3 gap-3">
+              <div className="col-span-1"><label className={LC}>Full Name</label><input value={person.name} onChange={e=>set(path+".name",e.target.value)} className={IC} placeholder="As per PAN / Aadhaar"/></div>
+              <div><label className={LC}>Gender</label>
+                <select value={person.gender} onChange={e=>set(path+".gender",e.target.value)} className={IC+" appearance-none"}>
+                  <option value="">Select</option>
+                  <option value="M">Male (Testator)</option>
+                  <option value="F">Female (Testatrix)</option>
+                </select>
+              </div>
+              <div><label className={LC}>Age</label><input type="number" value={person.age} onChange={e=>set(path+".age",e.target.value)} className={IC}/></div>
+            </div>
+            <div className="grid grid-cols-3 gap-3">
+              <div><label className={LC}>Relation</label>
+                <select value={person.parentRelation} onChange={e=>set(path+".parentRelation",e.target.value)} className={IC+" appearance-none"}>
+                  <option value="son of">Son of</option><option value="daughter of">Daughter of</option>
+                  <option value="wife of">Wife of</option><option value="husband of">Husband of</option>
+                </select>
+              </div>
+              <div className="col-span-2"><label className={LC}>Name of that person</label><input value={person.parentName} onChange={e=>set(path+".parentName",e.target.value)} className={IC}/></div>
+            </div>
+            <div className="grid grid-cols-3 gap-3">
+              <div><label className={LC}>Marital Status</label>
+                {lockMarital?(
+                  <input value="Married" disabled className={IC+" cursor-not-allowed text-slate-500"}/>
+                ):(
+                  <select value={person.maritalStatus} onChange={e=>set(path+".maritalStatus",e.target.value)} className={IC+" appearance-none"}>
+                    <option value="">Select</option>
+                    {GOAN_MARITAL_STATUSES.map(m=><option key={m} value={m}>{m[0].toUpperCase()+m.slice(1)}</option>)}
+                  </select>
+                )}
+              </div>
+              <div><label className={LC}>Occupation</label>
+                <select value={person.occupation} onChange={e=>set(path+".occupation",e.target.value)} className={IC+" appearance-none"}>
+                  <option value="">Select</option>
+                  {OCCUPATIONS.map(o=><option key={o}>{o}</option>)}
+                </select>
+              </div>
+              <div><label className={LC}>Nationality</label><input value={person.nationality} onChange={e=>set(path+".nationality",e.target.value)} className={IC}/></div>
+            </div>
+            {person.occupation==="Other"&&(
+              <div><label className={LC}>Please specify occupation</label><input value={person.occupationOther} onChange={e=>set(path+".occupationOther",e.target.value)} className={IC}/></div>
+            )}
+            <div className="grid grid-cols-2 gap-3">
+              <div><label className={LC}>PAN Card No.</label><input value={person.pan} onChange={e=>set(path+".pan",e.target.value)} className={IC} placeholder="ABCDE1234F" title={TIP_NO_ID_SAVED}/></div>
+              <div><label className={LC}>Aadhaar Card No.</label><input value={person.aadhaarNumber} onChange={e=>set(path+".aadhaarNumber",e.target.value)} className={IC} title={TIP_NO_ID_SAVED}/></div>
+            </div>
+            <div><label className={LC}>Residential Address</label>
+              <textarea value={person.address} onChange={e=>set(path+".address",e.target.value)} rows={2} className={IC+" resize-none"}/>
+              {goaHint(person.address)&&<p className="text-[#b88d48] text-[11px] mt-1">This Will is drafted under the Goa Succession framework — double-check this is a Goa address, matching your ID documents.</p>}
+            </div>
+          </>
+        );
+        return(
+          <div className="space-y-4">
+            <StepHeader icon={<User size={17}/>} title="Testator Details (Goan Will)" sub="Notarial Open Will format — your identity, and your spouse's if married"/>
+            {adminComments&&(
+              <div className="bg-amber-50 border border-amber-200 rounded-xl p-3.5 text-xs text-amber-700 flex items-start gap-2">
+                <AlertTriangle size={13} className="mt-0.5 shrink-0"/>
+                <div><span className="font-semibold">Reviewer comments:</span> {adminComments}</div>
+              </div>
+            )}
+            <div className="bg-slate-100 border border-slate-200 rounded-xl p-3.5 text-xs text-slate-600 flex items-start gap-2"><Info size={13} className="mt-0.5 shrink-0"/>You declare that you are of sound mind and executing this Will voluntarily, free from coercion or undue influence.</div>
+            <div>
+              <label className={LC}>Testator Email Address {!testatorEmailEditable&&<span className="text-red-400 normal-case text-[9px]">(Locked)</span>}</label>
+              <div className="relative">
+                {!testatorEmailEditable&&<Lock size={11} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-600"/>}
+                <input type="email" value={will.testator.email} onChange={e=>set("testator.email",e.target.value)} disabled={!testatorEmailEditable}
+                  className={IC+(!testatorEmailEditable?" pr-8 cursor-not-allowed text-slate-500":"")} placeholder="you@example.com"/>
+              </div>
+            </div>
+            <FormBlock title="Your Details">
+              {personFields(t,"goanTestator")}
+            </FormBlock>
+            {isMarried&&(
+              <>
+                <div className="bg-[#1B498A] text-white text-xs font-semibold rounded-xl p-3.5">
+                  Because you selected "Married", we'll also collect your spouse's details below — their own Will is generated at the same time, along with a Deed of Consent that you'll both need to sign.
+                </div>
+                <FormBlock title="Spouse's Details">
+                  {personFields(s,"goanSpouse",true)}
+                </FormBlock>
+              </>
+            )}
+            <Nav onNext={onNext}/>
+          </div>
+        );
+      })()}
 
       {/* ── STEP 3: EXECUTOR ─────────────────────────────────── */}
       {step===3&&(
@@ -549,7 +647,85 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
         </div>
       )}
 
-      {step===6&&willType!=="allindia"&&(
+      {step===6&&willType==="goan"&&(
+        <div className="space-y-5">
+          <StepHeader icon={<Briefcase size={17}/>} title="Asset Selection" sub="Sections B–E — Bequests as per the Goan Will format"/>
+          {(()=>{
+            type GoanKey = keyof WillState["goanAssets"];
+            const addItem=(key: GoanKey)=>setWill(p=>({...p, goanAssets:{...p.goanAssets, [key]:[...p.goanAssets[key],{description:"",beneficiary:"",relation:"",relationOther:"",idType:"Aadhaar Card",idNumber:""}]}}));
+            const removeItem=(key: GoanKey, idx: number)=>setWill(p=>({...p, goanAssets:{...p.goanAssets, [key]:p.goanAssets[key].filter((_,j)=>j!==idx)}}));
+            const setItem=(key: GoanKey, idx: number, field: "description"|"beneficiary"|"relation"|"relationOther"|"idType"|"idNumber", value: string)=>
+              setWill(p=>({...p, goanAssets:{...p.goanAssets, [key]:p.goanAssets[key].map((item,j)=>j===idx?{...item,[field]:value}:item)}}));
+            const category=(itemKey: GoanKey, label: string, placeholder: string)=>(
+              <div>
+                <p className="text-slate-900 text-sm font-semibold mb-2">{label}</p>
+                {will.goanAssets[itemKey].map((item,idx)=>(
+                  <div key={idx} className="bg-slate-50 border border-slate-200 rounded-xl p-3 mb-2.5">
+                    <div className="grid grid-cols-2 gap-2.5 mb-2.5">
+                      <input value={item.description} onChange={e=>setItem(itemKey,idx,"description",e.target.value)} className={IC} placeholder={placeholder}/>
+                      <div className="flex gap-2">
+                        <input value={item.beneficiary} onChange={e=>setItem(itemKey,idx,"beneficiary",e.target.value)} className={IC} placeholder="Bequeathed to"/>
+                        {will.goanAssets[itemKey].length>1&&<button onClick={()=>removeItem(itemKey,idx)} className="text-red-400 hover:text-red-500 shrink-0"><Trash2 size={14}/></button>}
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-3 gap-2.5">
+                      <div><label className={LC}>Relationship</label>
+                        <select value={item.relation} onChange={e=>setItem(itemKey,idx,"relation",e.target.value)} className={IC+" appearance-none"}>
+                          <option value="">Select...</option>
+                          {ALLINDIA_RELATIONSHIP_OPTIONS.map(r=><option key={r}>{r}</option>)}
+                        </select>
+                      </div>
+                      <div><label className={LC}>{LBL_ID_TYPE}</label>
+                        <select value={item.idType} onChange={e=>setItem(itemKey,idx,"idType",e.target.value)} className={IC+" appearance-none"}>
+                          {ID_TYPES.map(t=><option key={t}>{t}</option>)}
+                        </select>
+                      </div>
+                      <div><label className={LC}>{LBL_ID_NUMBER}</label><input value={item.idNumber} onChange={e=>setItem(itemKey,idx,"idNumber",e.target.value)} className={IC} placeholder="ID number" title={TIP_NO_ID_SAVED}/></div>
+                    </div>
+                    {item.relation==="Other"&&(
+                      <div className="mt-2.5"><label className={LC}>Please specify relationship</label>
+                        <input value={item.relationOther} onChange={e=>setItem(itemKey,idx,"relationOther",e.target.value)} className={IC}/></div>
+                    )}
+                  </div>
+                ))}
+                <button onClick={()=>addItem(itemKey)} className="text-xs text-[#d09d61] hover:text-[#b6844a] font-semibold flex items-center gap-1"><Plus size={12}/>Add another {label}</button>
+              </div>
+            );
+            return(
+              <>
+                <div className="bg-[#d09d61]/8 border border-[#d09d61]/25 rounded-xl p-4">
+                  <span className="inline-block bg-[#d09d61] text-[#020617] text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full mb-2">Included Automatically</span>
+                  <p className="text-slate-900 text-sm font-semibold mb-1">A. Financial Assets</p>
+                  <p className="text-slate-600 text-xs leading-relaxed">I bequeath all my financial assets — including Bank Accounts, FDs, RDs, PPF, Life Insurance, Stocks, Mutual Funds, Crypto, Digital Wallets, NPS, Bonds, AIF, SIF, and PMS — entirely to the nominees registered in those financial instruments.</p>
+                  <p className="text-[#8a6d3b] text-xs leading-relaxed mt-2.5 pt-2.5 border-t border-dashed border-[#d09d61]/30"><strong>Why we recommend this:</strong> it's advisable to pass on financial assets by nomination rather than by listing individual accounts — nominations stay current automatically as balances and accounts change, so you don't need to update this Will every time. Just keep your nominations up to date.</p>
+                </div>
+                <FormBlock title="B. Immovable Property">
+                  <div className="space-y-4">
+                    {category("houseFlat","House / Flat","Address / description")}
+                    {category("landPlot","Land / Plot","Address / description")}
+                    {category("commercialProperty","Commercial Property","Address / description")}
+                  </div>
+                </FormBlock>
+                <FormBlock title="C. Motor Vehicles">
+                  {category("vehicle","Vehicle / Car","Make, model, registration no.")}
+                </FormBlock>
+                <FormBlock title="D. Personal & Valuables">
+                  {category("jewellery","Jewellery & Heirlooms","Description")}
+                </FormBlock>
+                <FormBlock title="E. Digital & Miscellaneous Assets">
+                  <div className="space-y-4">
+                    {category("socialMediaDigital","Social Media / Digital","Accounts, digital assets")}
+                    {category("intellectualProperty","Intellectual Property","Patents, copyrights, etc.")}
+                  </div>
+                </FormBlock>
+              </>
+            );
+          })()}
+          <Nav onNext={onNext} onPrev={onPrev}/>
+        </div>
+      )}
+
+      {step===6&&willType!=="allindia"&&willType!=="goan"&&(
         <div className="space-y-5">
           <StepHeader icon={<Briefcase size={17}/>} title="Asset Selection" sub="Section IV — Click assets to add them to your Will"/>
           {/* Distribution Mode */}
@@ -770,6 +946,47 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
               <button onClick={()=>setWill(p=>({...p, allIndiaResidue:[...p.allIndiaResidue,{relation:"",relationOther:"",name:"",nationality:"",occupation:"",occupationOther:"",idType:"Aadhaar Card",idNumber:""}]}))}
                 className="text-xs text-[#d09d61] hover:text-[#b6844a] font-semibold flex items-center gap-1"><Plus size={12}/>Add another beneficiary</button>
             </FormBlock>
+          ):willType==="goan"?(
+            <FormBlock title="Residuary Clause">
+              <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 text-xs text-slate-600 mb-3 leading-relaxed">
+                <strong className="text-slate-900">What is a residuary clause?</strong> It's the clause that catches everything else — any asset you acquire after signing this Will, or anything you've simply forgotten to mention above. Rather than leaving that property undecided, name who should receive it here. This is compulsory.
+              </div>
+              {will.goanResidue.map((entry,idx)=>{
+                const setEntry=(field: "relation"|"relationOther"|"name"|"idType"|"idNumber", value: string)=>
+                  setWill(p=>({...p, goanResidue:p.goanResidue.map((e,j)=>j===idx?{...e,[field]:value}:e)}));
+                return(
+                  <div key={idx} className="bg-slate-50 border border-slate-200 rounded-xl p-3 mb-2.5">
+                    <div className="flex justify-between items-center mb-2.5">
+                      <span className="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Residuary Beneficiary {idx+1}</span>
+                      {will.goanResidue.length>1&&<button onClick={()=>setWill(p=>({...p, goanResidue:p.goanResidue.filter((_,j)=>j!==idx)}))} className="text-red-400 hover:text-red-500 shrink-0"><Trash2 size={14}/></button>}
+                    </div>
+                    <div className="grid grid-cols-2 gap-2.5 mb-2.5">
+                      <div><label className={LC}>Full Name</label><input value={entry.name} onChange={e=>setEntry("name",e.target.value)} className={IC}/></div>
+                      <div><label className={LC}>Relationship</label>
+                        <select value={entry.relation} onChange={e=>setEntry("relation",e.target.value)} className={IC+" appearance-none"}>
+                          <option value="">Select...</option>
+                          {ALLINDIA_RELATIONSHIP_OPTIONS.map(r=><option key={r}>{r}</option>)}
+                        </select>
+                      </div>
+                    </div>
+                    {entry.relation==="Other"&&(
+                      <div className="mb-2.5"><label className={LC}>Please specify relationship</label>
+                        <input value={entry.relationOther} onChange={e=>setEntry("relationOther",e.target.value)} className={IC}/></div>
+                    )}
+                    <div className="grid grid-cols-2 gap-2.5">
+                      <div><label className={LC}>{LBL_ID_TYPE}</label>
+                        <select value={entry.idType} onChange={e=>setEntry("idType",e.target.value)} className={IC+" appearance-none"}>
+                          {ID_TYPES.map(t=><option key={t}>{t}</option>)}
+                        </select>
+                      </div>
+                      <div><label className={LC}>{LBL_ID_NUMBER}</label><input value={entry.idNumber} onChange={e=>setEntry("idNumber",e.target.value)} className={IC} title={TIP_NO_ID_SAVED}/></div>
+                    </div>
+                  </div>
+                );
+              })}
+              <button onClick={()=>setWill(p=>({...p, goanResidue:[...p.goanResidue,{name:"",relation:"",relationOther:"",idType:"Aadhaar Card",idNumber:""}]}))}
+                className="text-xs text-[#d09d61] hover:text-[#b6844a] font-semibold flex items-center gap-1"><Plus size={12}/>Add another residuary beneficiary</button>
+            </FormBlock>
           ):(
             <FormBlock title="Section V — Rest & Residue Clause">
               <p className="text-slate-400 text-xs mb-3 leading-relaxed">All property not specifically mentioned in this Will — including future acquisitions or inadvertently omitted assets — shall vest in the residual beneficiary.</p>
@@ -797,6 +1014,102 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
           <div className="bg-[#d09d61]/8 border border-[#d09d61]/25 rounded-xl p-3.5 text-xs text-[#8a6d3b] leading-relaxed">
             <strong className="text-slate-900">Who can be a witness?</strong> Under the Indian Succession Act, 1925, a Will needs at least two witnesses. Any adult (18+) of sound mind who can sign their own name qualifies — they don't need to know the contents, and don't need to be related to you. Each witness must see you sign (or be told directly that you've signed), then sign it themselves in your presence. Avoid using someone who also inherits under the Will as a witness — for Christians and Parsis this can cancel that person's inheritance. Your executor is allowed to be a witness.
           </div>
+          {willType==="goan"&&(()=>{
+            const witnessFields=(w: WillState["goanWitnesses"][number], setW: (k: string, v: string)=>void)=>(
+              <>
+                <div className="grid grid-cols-2 gap-2.5">
+                  <div><label className={LC}>Name</label><input value={w.name} onChange={e=>setW("name",e.target.value)} className={IC}/></div>
+                  <div><label className={LC}>Age (Years)</label><input type="number" value={w.age} onChange={e=>setW("age",e.target.value)} className={IC}/></div>
+                </div>
+                <div className="grid grid-cols-2 gap-2.5 mt-2.5">
+                  <div><label className={LC}>Relation</label>
+                    <select value={w.parentRelation} onChange={e=>setW("parentRelation",e.target.value)} className={IC+" appearance-none"}>
+                      <option value="s/o.">Son of</option><option value="d/o.">Daughter of</option><option value="w/o.">Wife of</option>
+                    </select>
+                  </div>
+                  <div><label className={LC}>Name of that person</label><input value={w.parentName} onChange={e=>setW("parentName",e.target.value)} className={IC}/></div>
+                </div>
+                <div className="grid grid-cols-2 gap-2.5 mt-2.5">
+                  <div><label className={LC}>Marital Status</label>
+                    <select value={w.maritalStatus} onChange={e=>setW("maritalStatus",e.target.value)} className={IC+" appearance-none"}>
+                      <option value="">Select...</option>
+                      <option value="Married">Married</option><option value="Unmarried">Unmarried</option>
+                      <option value="Widowed">Widowed</option><option value="Divorced">Divorced</option>
+                    </select>
+                  </div>
+                  <div><label className={LC}>Occupation</label>
+                    <select value={w.occupation} onChange={e=>setW("occupation",e.target.value)} className={IC+" appearance-none"}>
+                      <option value="">Select...</option>
+                      {GOAN_WITNESS_OCCUPATIONS.map(o=><option key={o}>{o}</option>)}
+                    </select>
+                  </div>
+                </div>
+                <div className="mt-2.5"><label className={LC}>Residential Address</label>
+                  <textarea value={w.address} onChange={e=>setW("address",e.target.value)} rows={2} className={IC+" resize-none"}/></div>
+                <div className="grid grid-cols-2 gap-2.5 mt-2.5">
+                  <div><label className={LC}>PAN Card No.</label><input value={w.pan} onChange={e=>setW("pan",e.target.value)} className={IC} title={TIP_NO_ID_SAVED}/></div>
+                  <div><label className={LC}>Aadhaar Card No.</label><input value={w.aadhaarNumber} onChange={e=>setW("aadhaarNumber",e.target.value)} className={IC} title={TIP_NO_ID_SAVED}/></div>
+                </div>
+              </>
+            );
+            return(
+              <>
+                <FormBlock title="Witnesses">
+                  {will.goanWitnesses.map((w,i)=>{
+                    const setW=(k: string, v: string)=>setWill(p=>({...p,goanWitnesses:p.goanWitnesses.map((x,j)=>j===i?{...x,[k]:v}:x)}));
+                    return(
+                      <div key={i} className={i>0?"mt-4 pt-4 border-t border-slate-200":""}>
+                        <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-2">Witness {i+1}</p>
+                        {witnessFields(w,setW)}
+                        {will.goanWitnesses.length>2&&(
+                          <button onClick={()=>setWill(p=>({...p,goanWitnesses:p.goanWitnesses.filter((_,j)=>j!==i)}))} className="text-red-400 hover:text-red-500 text-xs font-semibold mt-2.5">Remove</button>
+                        )}
+                      </div>
+                    );
+                  })}
+                  <button onClick={()=>setWill(p=>({...p,goanWitnesses:[...p.goanWitnesses,{name:"",parentRelation:"s/o.",parentName:"",age:"",maritalStatus:"",occupation:"",address:"",pan:"",aadhaarNumber:""}]}))}
+                    className="text-xs text-[#d09d61] hover:text-[#b6844a] font-semibold flex items-center gap-1 mt-3"><Plus size={12}/>Add another witness</button>
+                </FormBlock>
+
+                {will.goanTestator.maritalStatus==="married"&&(
+                  <FormBlock title="Deed of Consent">
+                    <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 text-xs text-slate-600 mb-3 leading-relaxed">
+                      <strong className="text-slate-900">What is a Deed of Consent?</strong> Because you and your spouse jointly hold property in Goa, Goan succession law requires you to formally authorise each other to each bequeath your share by way of two separate Wills — executed the same day. That mutual authorisation is recorded in this one shared Deed of Consent, signed by both of you together.
+                    </div>
+                    <div className="grid grid-cols-2 gap-2.5 mb-3">
+                      <div><label className={LC}>Your Alias / Also known as <span className="text-slate-400 normal-case font-normal">(optional)</span></label>
+                        <input value={will.goanTestator.alias} onChange={e=>set("goanTestator.alias",e.target.value)} className={IC}/></div>
+                      <div><label className={LC}>Spouse's Alias / Also known as <span className="text-slate-400 normal-case font-normal">(optional)</span></label>
+                        <input value={will.goanSpouse.alias} onChange={e=>set("goanSpouse.alias",e.target.value)} className={IC}/></div>
+                    </div>
+                    <label className="flex items-center gap-2 text-xs text-slate-600 mb-3">
+                      <input type="checkbox" checked={will.goanDeedSameWitnesses} onChange={e=>setWill(p=>({...p,goanDeedSameWitnesses:e.target.checked}))}/>
+                      Use the same two witnesses as the Will for this Deed too
+                    </label>
+                    {!will.goanDeedSameWitnesses&&(
+                      <>
+                        {will.goanDeedWitnesses.map((w,i)=>{
+                          const setW=(k: string, v: string)=>setWill(p=>({...p,goanDeedWitnesses:p.goanDeedWitnesses.map((x,j)=>j===i?{...x,[k]:v}:x)}));
+                          return(
+                            <div key={i} className={i>0?"mt-4 pt-4 border-t border-slate-200":""}>
+                              <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-2">Deed Witness {i+1}</p>
+                              {witnessFields(w,setW)}
+                              {will.goanDeedWitnesses.length>2&&(
+                                <button onClick={()=>setWill(p=>({...p,goanDeedWitnesses:p.goanDeedWitnesses.filter((_,j)=>j!==i)}))} className="text-red-400 hover:text-red-500 text-xs font-semibold mt-2.5">Remove</button>
+                              )}
+                            </div>
+                          );
+                        })}
+                        <button onClick={()=>setWill(p=>({...p,goanDeedWitnesses:[...p.goanDeedWitnesses,{name:"",parentRelation:"s/o.",parentName:"",age:"",maritalStatus:"",occupation:"",address:"",pan:"",aadhaarNumber:""}]}))}
+                          className="text-xs text-[#d09d61] hover:text-[#b6844a] font-semibold flex items-center gap-1 mt-3"><Plus size={12}/>Add another witness for the Deed</button>
+                      </>
+                    )}
+                  </FormBlock>
+                )}
+              </>
+            );
+          })()}
+          {willType!=="goan"&&(
           <FormBlock title="Witnesses">
             {will.witnesses.map((w,i)=>{
               const setW=(k: string, v: string)=>setWill(p=>({...p,witnesses:p.witnesses.map((x,j)=>j===i?{...x,[k]:v}:x)}));
@@ -854,7 +1167,8 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
               );
             })}
           </FormBlock>
-          {willType!=="allindia"&&(
+          )}
+          {willType!=="allindia"&&willType!=="goan"&&(
             <div className="bg-[#d09d61]/8 border border-[#d09d61]/20 rounded-xl p-4 text-xs text-[#b88d48]">
               All rest, residue and remainder of my estate shall vest absolutely in <strong>{will.beneficiaries.find(b=>String(b.id)===String(will.residualBeneId))?.name||"Selected Beneficiary"}</strong>.
             </div>

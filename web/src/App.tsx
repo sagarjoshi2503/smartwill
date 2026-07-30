@@ -19,6 +19,7 @@ import LiveDocPreview from "./features/create-will/LiveDocPreview";
 import AllIndiaLiveDocPreview from "./features/create-will/AllIndiaLiveDocPreview";
 import WillDocument from "./features/create-will/WillDocument";
 import AllIndiaWillDocument from "./features/create-will/AllIndiaWillDocument";
+import GoanDocumentsView from "./features/create-will/GoanDocumentsView";
 import ChatWidget from "./features/chatbot/ChatWidget";
 import { allocTotal } from "./utils/allocation";
 import { authFetch } from "./utils/apiBase";
@@ -364,6 +365,8 @@ export default function SmartWill() {
   if(showWillDoc) return willType==="allindia" ? (
     <AllIndiaWillDocument will={will} residualBene={residualBene}
       onBack={()=>setShowWillDoc(false)} onPrint={handlePrint} willDocRef={willDocRef} />
+  ) : willType==="goan" ? (
+    <GoanDocumentsView will={will} onBack={()=>setShowWillDoc(false)} onPrint={handlePrint} />
   ) : (
     <WillDocument will={will} residualBene={residualBene}
       onBack={()=>setShowWillDoc(false)} onPrint={handlePrint} willDocRef={willDocRef} />
@@ -524,7 +527,13 @@ export default function SmartWill() {
               />
             </div>
             <div className="hidden lg:flex lg:w-[50%] bg-slate-100 p-5 overflow-y-auto items-start justify-center">
-              {willType==="allindia" ? <AllIndiaLiveDocPreview will={will}/> : <LiveDocPreview will={will} residualBene={residualBene}/>}
+              {willType==="allindia" ? <AllIndiaLiveDocPreview will={will}/> : willType==="goan" ? (
+                <div className="w-full max-w-[420px] bg-white border border-slate-200 rounded-2xl shadow-xl p-6 text-center">
+                  <Scale size={22} className="text-[#d09d61] mx-auto mb-3"/>
+                  <p className="text-slate-900 text-sm font-semibold mb-1.5">Goan Will &amp; Deed of Consent</p>
+                  <p className="text-slate-500 text-xs leading-relaxed">Your document(s) — the Open Will, and if married, your spouse's Open Will and a shared Deed of Consent — become available to preview and download once you reach the final step and click Generate.</p>
+                </div>
+              ) : <LiveDocPreview will={will} residualBene={residualBene}/>}
             </div>
           </div>
         </div>

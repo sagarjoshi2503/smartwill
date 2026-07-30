@@ -16,8 +16,56 @@ const ASSET_CATEGORY_LABELS: Record<keyof WillState["allIndiaAssets"], string> =
 // document renders these blanks verbatim. Only checks entries that are
 // actually in use (e.g. an untouched, still-blank asset row is skipped) so
 // optional sections don't block generation.
+function missingAssetIdFields(assets: WillState["allIndiaAssets"] | WillState["goanAssets"], missing: string[]): void {
+  (Object.keys(assets) as (keyof WillState["allIndiaAssets"])[]).forEach((key) => {
+    const items = assets[key];
+    items.forEach((item, i) => {
+      const inUse = item.description.trim() || item.beneficiary.trim();
+      if (inUse && !item.idNumber.trim()) {
+        const label = items.length > 1 ? `${ASSET_CATEGORY_LABELS[key]} #${i + 1}` : ASSET_CATEGORY_LABELS[key];
+        missing.push(`${label} ${item.idType || "ID"} Number`);
+      }
+    });
+  });
+}
+
 export function getMissingIdFields(will: WillState, willType: WillType): string[] {
   const missing: string[] = [];
+
+  if (willType === "goan") {
+    const { goanTestator, goanSpouse, goanWitnesses, goanAssets, goanResidue, goanDeedSameWitnesses, goanDeedWitnesses } = will;
+    const isMarried = goanTestator.maritalStatus === "married";
+
+    if (!goanTestator.pan.trim()) missing.push("Testator PAN Number");
+    if (!goanTestator.aadhaarNumber.trim()) missing.push("Testator Aadhaar Number");
+    if (isMarried) {
+      if (!goanSpouse.pan.trim()) missing.push("Spouse PAN Number");
+      if (!goanSpouse.aadhaarNumber.trim()) missing.push("Spouse Aadhaar Number");
+    }
+
+    goanWitnesses.forEach((w, i) => {
+      if (!w.pan.trim()) missing.push(`Witness ${i + 1} PAN Number`);
+      if (!w.aadhaarNumber.trim()) missing.push(`Witness ${i + 1} Aadhaar Number`);
+    });
+    if (isMarried && !goanDeedSameWitnesses) {
+      goanDeedWitnesses.forEach((w, i) => {
+        if (!w.pan.trim()) missing.push(`Deed Witness ${i + 1} PAN Number`);
+        if (!w.aadhaarNumber.trim()) missing.push(`Deed Witness ${i + 1} Aadhaar Number`);
+      });
+    }
+
+    missingAssetIdFields(goanAssets, missing);
+    goanResidue.forEach((entry, i) => {
+      const inUse = entry.relation.trim() || entry.name.trim();
+      if (inUse && !entry.idNumber.trim()) {
+        const label = goanResidue.length > 1 ? `Residuary Beneficiary #${i + 1}` : "Residuary Beneficiary";
+        missing.push(`${label} ${entry.idType || "ID"} Number`);
+      }
+    });
+
+    return missing;
+  }
+
   const { testator, executor, guardian, witnesses, allIndiaAssets, allIndiaResidue, residualIdNumber } = will;
 
   if (!testator.pan.trim()) missing.push("Testator PAN Number");
@@ -46,16 +94,7 @@ export function getMissingIdFields(will: WillState, willType: WillType): string[
   });
 
   if (willType === "allindia") {
-    (Object.keys(allIndiaAssets) as (keyof WillState["allIndiaAssets"])[]).forEach((key) => {
-      const items = allIndiaAssets[key];
-      items.forEach((item, i) => {
-        const inUse = item.description.trim() || item.beneficiary.trim();
-        if (inUse && !item.idNumber.trim()) {
-          const label = items.length > 1 ? `${ASSET_CATEGORY_LABELS[key]} #${i + 1}` : ASSET_CATEGORY_LABELS[key];
-          missing.push(`${label} ${item.idType || "ID"} Number`);
-        }
-      });
-    });
+    missingAssetIdFields(allIndiaAssets, missing);
     allIndiaResidue.forEach((entry, i) => {
       const inUse = entry.relation.trim() || entry.name.trim();
       if (inUse && !entry.idNumber.trim()) {

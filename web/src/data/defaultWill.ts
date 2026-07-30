@@ -1,5 +1,16 @@
 import { today } from "../utils/format";
-import type { WillState } from "../types";
+import type { GoanPerson, GoanWitness, WillState } from "../types";
+
+const newGoanPerson = (): GoanPerson => ({
+  name:"", gender:"", age:"", parentRelation:"son of", parentName:"",
+  maritalStatus:"", occupation:"", occupationOther:"", nationality:"Indian",
+  pan:"", aadhaarNumber:"", address:"", alias:"",
+});
+const newGoanWitness = (): GoanWitness => ({
+  name:"", parentRelation:"s/o.", parentName:"", age:"", maritalStatus:"",
+  occupation:"", address:"", pan:"", aadhaarNumber:"",
+});
+const newGoanAssetItem = () => ({description:"",beneficiary:"",relation:"",relationOther:"",idType:"Aadhaar Card",idNumber:""});
 
 export const DEFAULT_WILL: WillState = {
   // Section 0 - Identity
@@ -57,6 +68,23 @@ export const DEFAULT_WILL: WillState = {
   // name, nationality, occupation, ID proof — more than one allowed) — only
   // used when willType==="allindia".
   allIndiaResidue:[{relation:"",relationOther:"",name:"",nationality:"",occupation:"",occupationOther:"",idType:"Aadhaar Card",idNumber:""}],
+  // Goan Will format — only used/shown when willType==="goan". nationality
+  // defaults to "Indian" to match the reference form (still fully editable).
+  goanTestator: newGoanPerson(),
+  goanSpouse: newGoanPerson(),
+  goanAssets:{
+    houseFlat:[newGoanAssetItem()],
+    landPlot:[newGoanAssetItem()],
+    commercialProperty:[newGoanAssetItem()],
+    vehicle:[newGoanAssetItem()],
+    jewellery:[newGoanAssetItem()],
+    socialMediaDigital:[newGoanAssetItem()],
+    intellectualProperty:[newGoanAssetItem()],
+  },
+  goanResidue:[{name:"",relation:"",relationOther:"",idType:"Aadhaar Card",idNumber:""}],
+  goanWitnesses:[newGoanWitness(),newGoanWitness()],
+  goanDeedSameWitnesses:true,
+  goanDeedWitnesses:[newGoanWitness(),newGoanWitness()],
   // Section V - Residual — no beneficiary pre-selected until the user adds one
   residualBeneId:"",
   residualIdType:"Aadhaar Card",
