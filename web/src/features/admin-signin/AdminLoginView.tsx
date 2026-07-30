@@ -6,10 +6,11 @@ import { encodePassword } from "../../utils/encode";
 import { API_ADMIN_LOGIN, EMAIL_REGEX, LBL_EMAIL_ADDR, LBL_PASSWORD, PH_LAWFIRM_EMAIL, ROLE_ADMIN } from "../../constants";
 import type { AdminProfile } from "../../types";
 
-export default function AdminLoginView({onLogin,onBack,onSignup}:{
+export default function AdminLoginView({onLogin,onBack,onSignup,signupEnabled}:{
   onLogin: (admin: AdminProfile) => void;
   onBack: () => void;
   onSignup: () => void;
+  signupEnabled: boolean;
 }){
   const [email,setEmail]=useState("");
   const [password,setPassword]=useState("");
@@ -69,9 +70,11 @@ export default function AdminLoginView({onLogin,onBack,onSignup}:{
           </button>
           <button type="button" onClick={onBack} className="w-full text-slate-500 hover:text-slate-900 text-sm py-1 transition-colors">← Back</button>
         </form>
-        <p className="text-center text-slate-600 text-sm mt-5">
-          New to SmartWill? <button type="button" onClick={onSignup} className="text-[#d09d61] font-semibold hover:text-[#b88442] transition-colors">Sign up</button>
-        </p>
+        {signupEnabled&&(
+          <p className="text-center text-slate-600 text-sm mt-5">
+            New to SmartWill? <button type="button" onClick={onSignup} className="text-[#d09d61] font-semibold hover:text-[#b88442] transition-colors">Sign up</button>
+          </p>
+        )}
       </div>
     </div>
   );

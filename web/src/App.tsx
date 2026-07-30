@@ -27,7 +27,7 @@ import { clearAuthToken } from "./utils/auth";
 import { getMissingIdFields } from "./utils/willValidation";
 import { trackPageview } from "./utils/analytics";
 import {
-  ADMIN_PATH, API_FLAGS, API_RAZORPAY_FLAG, API_CHATBOT_FLAG, API_WILL_SAVE, apiPathSendBack,
+  ADMIN_PATH, API_FLAGS, API_RAZORPAY_FLAG, API_CHATBOT_FLAG, API_ADMIN_SIGNUP_FLAG, API_WILL_SAVE, apiPathSendBack,
   OTP_LENGTH, STATUS_DRAFT, STATUS_PENDING_REVIEW, STATUS_COMPLETED,
   SEND_BACK_REDIRECT_MS, DRAFT_RESET_MS, WIZARD_REDIRECT_MS,
   MSG_VIEW_ONLY, MSG_SAVING, BTN_SAVE_AS_DRAFT, ROLE_ADMIN, ROLE_TESTATOR,
@@ -86,6 +86,7 @@ export default function SmartWill() {
   const [showAdminButton, setShowAdminButton] = useState(false);
   const [razorpayEnabled, setRazorpayEnabled] = useState(false);
   const [chatbotEnabled, setChatbotEnabled] = useState(false);
+  const [adminSignupEnabled, setAdminSignupEnabled] = useState(false);
   const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
   const willDocRef = useRef<HTMLDivElement | null>(null);
 
@@ -153,6 +154,29 @@ export default function SmartWill() {
       .catch(() => {});
     return () => { cancelled = true; };
   }, []);
+
+  // Admin Portal signup is gated behind the "enable-admin-signup" Vercel
+  // Flag — same fail-closed pattern as the flags above. Distinct from
+  // "enable-admin-button" (which only gates the header's nav button):
+  // this one gates the "Sign up" link on the login screen AND the signup
+  // screen itself (see the view render below), not just a button's visibility.
+  useEffect(() => {
+    let cancelled = false;
+    fetch(API_ADMIN_SIGNUP_FLAG)
+      .then(res => res.ok ? res.json() : { enabled: false })
+      .then(data => { if(!cancelled) setAdminSignupEnabled(!!data?.enabled); })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, []);
+
+  // Defense in depth: if `view` ever becomes "adminSignup" while the flag is
+  // off (there's no way to do this through the UI once the "Sign up" link
+  // itself is hidden below, but this guards against any other path — e.g. a
+  // stale browser-back state, or the flag flipping off mid-session), bounce
+  // back to the login screen rather than silently rendering nothing.
+  useEffect(() => {
+    if(view==="adminSignup" && !adminSignupEnabled) setView("adminLogin");
+  }, [view, adminSignupEnabled]);
 
   // Auth
   const handleGoogleSuccess = (profile: GoogleProfile) => {
@@ -425,8 +449,8 @@ export default function SmartWill() {
       {view==="otp" && <OtpView otp={otp} handleOtp={handleOtp} otpRefs={otpRefs} phone={signup.phone} email={signup.email} onNext={handleOtpVerified}/>}
       {view==="disclaimer" && <DisclaimerView dchecks={dchecks} setDchecks={setDchecks} allChecked={allDchecked} onAgree={()=>setView("wizard")} onBack={()=>setView("myWills")}/>}
       {view==="myWills" && <TestatorWillsView email={signup.email} onCreateNew={handleCreateNewWill} onEditWill={handleEditWill} onViewWill={handleViewWill}/>}
-      {view==="adminLogin" && <AdminLoginView onLogin={(admin)=>{setAdminProfile(admin);setView("admin");}} onBack={()=>setView("landing")} onSignup={()=>setView("adminSignup")}/>}
-      {view==="adminSignup" && <AdminSignupView onSignup={(admin)=>{setAdminProfile(admin);setView("admin");}} onBack={()=>setView("adminLogin")} onGoToLogin={()=>setView("adminLogin")}/>}
+      {view==="adminLogin" && <AdminLoginView onLogin={(admin)=>{setAdminProfile(admin);setView("admin");}} onBack={()=>setView("landing")} onSignup={()=>setView("adminSignup")} signupEnabled={adminSignupEnabled}/>}
+      {view==="adminSignup" && adminSignupEnabled && <AdminSignupView onSignup={(admin)=>{setAdminProfile(admin);setView("admin");}} onBack={()=>setView("adminLogin")} onGoToLogin={()=>setView("adminLogin")}/>}
       {view==="admin" && adminProfile && <AdminPortal admin={adminProfile} onCreateWill={handleAdminCreateWill} onReviewWill={handleAdminReviewWill}/>}
 
       {view==="wizard" && (

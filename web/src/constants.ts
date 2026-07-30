@@ -30,6 +30,10 @@ export const API_FLAGS = "/api/flags?key=enable-admin-button";
 export const API_RAZORPAY_FLAG = "/api/flags?key=use-razorpay";
 // Vercel Flag gating whether the SmartWill Assistant chat widget is shown at all — see App.tsx.
 export const API_CHATBOT_FLAG = "/api/flags?key=enable-chat-bot";
+// Vercel Flag gating both the "Sign up" link on the Admin Portal login
+// screen AND the admin signup screen itself (so it's blocked even if
+// reached some way other than clicking that link) — see App.tsx.
+export const API_ADMIN_SIGNUP_FLAG = "/api/flags?key=enable-admin-signup";
 export const API_PAYMENTS_CREATE_ORDER = "/api/payments/create-order";
 export const API_PAYMENTS_VERIFY = "/api/payments/verify";
 export const API_PAYMENTS_MARK_FAILED = "/api/payments/mark-failed";
