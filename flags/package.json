@@ -5,6 +5,10 @@
   "type": "module",
   "dependencies": {
     "@flags-sdk/vercel": "^1.4.5",
-    "flags": "^4.2.0"
+    "flags": "^4.2.0",
+    "tsx": "^4.19.2"
+  },
+  "scripts": {
+    "start": "tsx server.ts"
   }
 }

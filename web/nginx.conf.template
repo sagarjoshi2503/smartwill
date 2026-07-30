@@ -1,0 +1,32 @@
+server {
+    listen 5174;
+    server_name _;
+    root /usr/share/nginx/html;
+    index index.html;
+
+    # web/src/constants.ts's API_FLAGS/API_RAZORPAY_FLAG/API_CHATBOT_FLAG
+    # always fetch() this as a same-origin relative path (no VITE_*_BASE_URL
+    # involved), matching how Vercel routes /api/flags to its own flags
+    # service — so every deployment (Vercel, AKS, local Docker) needs this
+    # origin to itself resolve /api/flags to the smartwill-flags service.
+    # FLAGS_UPSTREAM is a plain container env var (e.g. "flags:8020" locally,
+    # the ClusterIP service DNS name on AKS), substituted into this file at
+    # container startup by the official nginx image's envsubst-templating
+    # entrypoint — not a build-time value, so the same image works in every
+    # environment.
+    location /api/flags {
+        proxy_pass http://${FLAGS_UPSTREAM};
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+
+    # SPA fallback: any unknown path serves index.html so client-side routing works.
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    location ~* \.(?:js|css|svg|png|jpg|jpeg|gif|ico|woff2?)$ {
+        expires 30d;
+        access_log off;
+    }
+}

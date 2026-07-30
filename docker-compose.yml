@@ -1,0 +1,83 @@
+# Local-only orchestration for all 5 services. Every inter-service URL here
+# points at another container in this same compose network (or, for web's
+# browser-facing build args, at localhost) — never at an AKS or Vercel
+# endpoint, so this stack is fully self-contained and works with no internet
+# dependency on the rest of the deployed infrastructure (besides the
+# third-party APIs each service already talks to: MongoDB, Twilio, Resend,
+# Anthropic, Razorpay, Vercel Flags evaluation).
+#
+# Usage: docker compose up --build
+# Web:      http://localhost:5174
+# API:      http://localhost:8051
+# MCP:      http://localhost:8000 (internal-only in AKS/Vercel; published
+#           here purely for local debugging convenience)
+# Chatbot:  http://localhost:8010
+# Flags:    http://localhost:8020
+
+services:
+  api:
+    build: ./api
+    ports:
+      - "8051:8051"
+    env_file:
+      - ./api/.env.local
+
+  mcp:
+    build: ./mcp
+    ports:
+      - "8000:8000"
+    environment:
+      # Server-to-server call, within this compose network — the compose
+      # service name "api" resolves via Docker's embedded DNS.
+      API_BASE_URL: http://api:8051
+    depends_on:
+      - api
+
+  chatbot:
+    build: ./chatbot
+    ports:
+      - "8010:8010"
+    env_file:
+      - ./chatbot/.env.local
+    environment:
+      # Overrides chatbot/.env.local's MCP_SERVER_URL (which points at
+      # host.docker.internal for the "chatbot alone in Docker, mcp on the
+      # host" workflow) with the in-network service name, since mcp is also
+      # containerized here.
+      MCP_SERVER_URL: http://mcp:8000
+    depends_on:
+      - mcp
+
+  flags:
+    build: ./flags
+    ports:
+      - "8020:8020"
+    environment:
+      FLAGS_SECRET: ${FLAGS_SECRET}
+      FLAGS: ${FLAGS}
+
+  web:
+    build:
+      context: ./web
+      args:
+        # VITE_* args are inlined into the browser bundle at build time, so
+        # they must be addresses the browser (running on the host, not
+        # inside this compose network) can actually reach — hence localhost
+        # with the published host ports above, not container service names.
+        VITE_GOOGLE_CLIENT_ID: ${VITE_GOOGLE_CLIENT_ID}
+        VITE_API_BASE_URL: http://localhost:8051
+        VITE_RAZORPAY_KEY_ID: ${VITE_RAZORPAY_KEY_ID}
+        VITE_GA_MEASUREMENT_ID: ${VITE_GA_MEASUREMENT_ID}
+        VITE_CHATBOT_BASE_URL: http://localhost:8010
+    ports:
+      - "5174:5174"
+    environment:
+      # Read server-side by nginx at container start (envsubst templating —
+      # see nginx.conf.template) to proxy the same-origin /api/flags path
+      # the frontend always calls, matching how Vercel/AKS each route it to
+      # their own flags service.
+      FLAGS_UPSTREAM: flags:8020
+    depends_on:
+      - api
+      - chatbot
+      - flags

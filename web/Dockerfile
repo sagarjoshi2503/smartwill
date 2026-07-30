@@ -23,7 +23,13 @@ RUN npm run build
 
 # --- Serve stage ---
 FROM nginx:1.27-alpine AS serve
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# .template + /etc/nginx/templates/ is the official nginx image's own
+# envsubst-at-startup convention — resolves FLAGS_UPSTREAM from whatever
+# container env var is set at `docker run`/deployment time (not baked in at
+# build time), so the same image works locally and on AKS. Only variables
+# that are actual environment variables get substituted, so nginx's own
+# $uri/$host/etc. runtime variables are left untouched.
+COPY nginx.conf.template /etc/nginx/templates/default.conf.template
 COPY --from=build /app/dist /usr/share/nginx/html
 
 EXPOSE 5174

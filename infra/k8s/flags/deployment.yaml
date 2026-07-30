@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: smartwill-flags
+  namespace: smartwill-flags
+spec:
+  replicas: 1
+  # Recreate: the single small cluster node doesn't have spare CPU to run
+  # an old+new pod simultaneously during a rollout once 5 services share it.
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: smartwill-flags
+  template:
+    metadata:
+      labels:
+        app: smartwill-flags
+    spec:
+      containers:
+        - name: smartwill-flags
+          image: smartwillacr.azurecr.io/smartwill-flags:latest
+          ports:
+            - containerPort: 8020
+          envFrom:
+            - secretRef:
+                name: smartwill-flags-secrets
+          volumeMounts:
+            - name: secrets-store
+              mountPath: /mnt/secrets-store
+              readOnly: true
+          resources:
+            requests:
+              cpu: 50m
+              memory: 100Mi
+            limits:
+              cpu: 200m
+              memory: 200Mi
+          livenessProbe:
+            tcpSocket:
+              port: 8020
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe:
+            tcpSocket:
+              port: 8020
+            initialDelaySeconds: 5
+            periodSeconds: 10
+      volumes:
+        - name: secrets-store
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: smartwill-kv-secrets

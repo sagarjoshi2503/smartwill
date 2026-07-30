@@ -6,7 +6,7 @@ metadata:
 spec:
   replicas: 1
   # Recreate: the single small cluster node doesn't have spare CPU to run
-  # an old+new pod simultaneously during a rollout once 4 services share it.
+  # an old+new pod simultaneously during a rollout once 5 services share it.
   strategy:
     type: Recreate
   selector:
@@ -22,6 +22,14 @@ spec:
           image: smartwillacr.azurecr.io/smartwill-web:latest
           ports:
             - containerPort: 5174
+          env:
+            # Read by nginx at container start (envsubst templating — see
+            # web/nginx.conf.template) to proxy the same-origin /api/flags
+            # path the frontend always calls to smartwill-flags' in-cluster
+            # DNS name — that Service has no public IP by design (see
+            # infra/k8s/flags/service.yaml).
+            - name: FLAGS_UPSTREAM
+              value: "smartwill-flags.smartwill-flags.svc.cluster.local"
           resources:
             requests:
               cpu: 50m
