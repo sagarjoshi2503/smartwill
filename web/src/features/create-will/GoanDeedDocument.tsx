@@ -39,7 +39,10 @@ export default function GoanDeedDocument({will,onBack,onPrint,willDocRef}:{
   return(
     <div className="min-h-screen bg-slate-800 print:bg-white">
       <style>{`
-        @page { size: A4; margin: 15mm; }
+        /* Same Goan output spec as GoanWillDocument.tsx — A4, double line
+           spacing, Times New Roman, Top 3cm / Right 1cm / Bottom 3cm /
+           Left 5cm margins, matching GOAN DEED OF CONSENT.pdf. */
+        @page { size: A4; margin: 3cm 1cm 3cm 5cm; }
         @media print {
           .no-print{display:none!important}
           body{margin:0;padding:0}
@@ -48,7 +51,6 @@ export default function GoanDeedDocument({will,onBack,onPrint,willDocRef}:{
           .pdf-page-break{break-after:page}
           .pdf-sig-line{break-inside:avoid;break-before:avoid}
         }
-        @import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;0,700;1,400&display=swap');
       `}</style>
       <div className="no-print sticky top-0 z-50 bg-white border-b border-slate-200 px-5 py-3 flex items-center justify-between">
         <button onClick={onBack} className="flex items-center gap-2 text-slate-600 hover:text-slate-900 transition-colors text-sm"><ChevronLeft size={16}/>Back</button>
@@ -68,7 +70,7 @@ export default function GoanDeedDocument({will,onBack,onPrint,willDocRef}:{
 
       <div className="py-10 px-5 flex justify-center" ref={willDocRef}>
         <div className="will-print-page bg-white shadow-2xl rounded-lg max-w-[780px] w-full p-14 print:p-10"
-          style={{fontFamily:"'EB Garamond','Times New Roman',Georgia,serif",fontSize:"14px",lineHeight:"1.85",color:"#1a1a1a"}}>
+          style={{fontFamily:"'Times New Roman',Times,Georgia,serif",fontSize:"12pt",lineHeight:"2",color:"#1a1a1a"}}>
 
           <Page>
             <h1 className="text-center text-2xl font-bold tracking-widest uppercase mb-6">Deed of Consent</h1>

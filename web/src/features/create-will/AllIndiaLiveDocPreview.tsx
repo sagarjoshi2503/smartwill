@@ -38,7 +38,7 @@ export default function AllIndiaLiveDocPreview({will}:{
         <div className="w-2.5 h-2.5 rounded-full bg-red-400/80"/><div className="w-2.5 h-2.5 rounded-full bg-amber-400/80"/><div className="w-2.5 h-2.5 rounded-full bg-[#d09d61]/80"/>
         <span className="text-slate-400 text-xs ml-2 flex items-center gap-1.5"><Eye size={10}/>Live Preview — All India Will</span>
       </div>
-      <div className="bg-[#fefcf3] p-7 text-[12.5px] leading-relaxed" style={{fontFamily:"'EB Garamond','Times New Roman',serif",color:"#2d2a1e"}}>
+      <div className="bg-[#fefcf3] p-7 text-[12.5px]" style={{fontFamily:"'Times New Roman',Times,serif",lineHeight:"1.15",color:"#2d2a1e"}}>
         <h1 className="text-center text-base font-bold tracking-widest uppercase mb-4">WILL</h1>
 
         <p className="text-justify mb-3">

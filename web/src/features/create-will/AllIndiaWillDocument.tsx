@@ -83,7 +83,6 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,w
              line appearing alone. */
           .pdf-sig-line{break-inside:avoid;break-before:avoid}
         }
-        @import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;0,700;1,400&display=swap');
       `}</style>
       {/* Top bar */}
       <div className="no-print sticky top-0 z-50 bg-white border-b border-slate-200 px-5 py-3 flex items-center justify-between">
@@ -105,7 +104,7 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,w
       {/* Document */}
       <div className="py-10 px-5 flex justify-center" ref={willDocRef}>
         <div className="will-print-page bg-white shadow-2xl rounded-lg max-w-[780px] w-full p-14 print:p-10"
-          style={{fontFamily:"'EB Garamond','Times New Roman',Georgia,serif",fontSize:"14px",lineHeight:"1.85",color:"#1a1a1a"}}>
+          style={{fontFamily:"'Times New Roman',Times,Georgia,serif",fontSize:"12pt",lineHeight:"1.15",color:"#1a1a1a"}}>
 
           <Page>
             <h1 className="text-center text-2xl font-bold tracking-widest uppercase mb-6">WILL</h1>
