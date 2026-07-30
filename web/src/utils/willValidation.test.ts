@@ -59,21 +59,21 @@ describe("getMissingIdFields", () => {
       ...FILLED_WILL,
       allIndiaAssets: {
         ...FILLED_WILL.allIndiaAssets,
-        houseFlat: [{ description: "Flat 1", beneficiary: "Bob", relation: "Son", idType: "PAN Card", idNumber: "" }],
+        houseFlat: [{ description: "Flat 1", beneficiary: "Bob", relation: "Son", relationOther: "", idType: "PAN Card", idNumber: "" }],
       },
     };
     expect(getMissingIdFields(inUse, "allindia")).toContain("House / Flat PAN Card Number");
   });
 
-  it("skips untouched All India residue entries but requires Aadhaar once one is filled in", () => {
+  it("skips untouched All India residue entries but requires the ID Number once one is filled in", () => {
     const untouched = getMissingIdFields(FILLED_WILL, "allindia");
     expect(untouched).not.toEqual(expect.arrayContaining([expect.stringContaining("Residuary Beneficiary")]));
 
     const inUse: WillState = {
       ...FILLED_WILL,
-      allIndiaResidue: [{ relation: "Brother", name: "Sam", aadhaarNumber: "" }],
+      allIndiaResidue: [{ relation: "Brother", relationOther: "", name: "Sam", nationality: "", occupation: "", occupationOther: "", idType: "Aadhaar Card", idNumber: "" }],
     };
-    expect(getMissingIdFields(inUse, "allindia")).toContain("Residuary Beneficiary Aadhaar Number");
+    expect(getMissingIdFields(inUse, "allindia")).toContain("Residuary Beneficiary Aadhaar Card Number");
   });
 
   it("does not require the generic residualIdNumber for allindia wills", () => {

@@ -4,6 +4,12 @@ import { ChevronLeft, Scale, Printer, Download } from "lucide-react";
 import { numberToWords } from "../../utils/format";
 import type { AllIndiaAssetItem, Beneficiary, WillState } from "../../types";
 
+// "Other" relationship/occupation choices carry their free-text value in a
+// sibling *Other field — these resolve to whichever is actually meant to
+// print in the generated document.
+const relOf = (it: {relation: string; relationOther: string}) => it.relation==="Other" ? it.relationOther : it.relation;
+const occupationOf = (it: {occupation: string; occupationOther: string}) => it.occupation==="Other" ? it.occupationOther : it.occupation;
+
 // Renders the Will exactly per the "WILL NONGOAN FORWARDLEGACY FORMAT.pdf"
 // template — wording, clause order, and asset sections (A-E) match the PDF
 // verbatim, with blanks filled from the collected data. Used only when
@@ -37,7 +43,7 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,w
   const renderAssetList = (items: AllIndiaAssetItem[], label: string) => {
     const numbered = items.length>1;
     return items.map((item,i)=>(
-      <p key={i} className="mb-1">{numbered?`(${i+1}) `:""}{label}: <strong>{item.description||blank}</strong> Bequeathed to: <strong>{item.beneficiary||blank}</strong> Relationship: <strong>{item.relation||blank}</strong>, bearing {item.idType||"Aadhaar Card"} Number: <strong>{item.idNumber||blank}</strong>.</p>
+      <p key={i} className="mb-1">{numbered?`(${i+1}) `:""}{label}: <strong>{item.description||blank}</strong> Bequeathed to: <strong>{item.beneficiary||blank}</strong> Relationship: <strong>{relOf(item)||blank}</strong>, bearing {item.idType||"Aadhaar Card"} Number: <strong>{item.idNumber||blank}</strong>.</p>
     ));
   };
 
@@ -105,7 +111,7 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,w
             <h1 className="text-center text-2xl font-bold tracking-widest uppercase mb-6">WILL</h1>
 
             <p className="text-justify mb-5">
-              I, <strong>{testator.fullName||blank}</strong>, having PAN <strong>{testator.pan||blank}</strong>, Aadhar no <strong>{testator.aadhaarNumber||blank}</strong> {testator.relation} of <strong>{testator.parentSpouseName||blank}</strong>, aged <strong>{testator.age||"___"}</strong>, {testator.maritalStatus}, resident of <strong>{testator.address||blank}</strong>
+              I, <strong>{testator.fullName||blank}</strong>, having PAN <strong>{testator.pan||blank}</strong>, Aadhar no <strong>{testator.aadhaarNumber||blank}</strong> {testator.relation} of <strong>{testator.parentSpouseName||blank}</strong>, aged <strong>{testator.age||"___"}</strong>, {testator.maritalStatus}, nationality <strong>{testator.nationality||blank}</strong>, occupation <strong>{occupationOf(testator)||blank}</strong>, resident of <strong>{testator.address||blank}</strong>
               {testator.maritalStatus==="married"&&(
                 <>, I am married to <strong>{testator.spouseName||blank}</strong>, bearing Aadhar No. <strong>{testator.spouseAadhaarNumber||blank}</strong> and I have {sonNames.length===1?"one":sonNames.length||"___"} son, namely, <strong>{sonNames.join(", ")||blank}</strong> and {daughterNames.length===1?"one":daughterNames.length||"___"} daughter, namely, <strong>{daughterNames.join(", ")||blank}</strong>
                 </>
@@ -119,7 +125,7 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,w
             <div className="mb-5 space-y-3">
               {witnesses.map((w,i)=>(
                 <p key={i} className="text-justify">
-                  {String.fromCharCode(97+i)}) <strong>{w.name||blank}</strong> {w.parentRelation} of <strong>{w.parentName||blank}</strong> aged <strong>{w.age||"___"}</strong>{i===1&&<>, {w.maritalStatus}</>}, resident of <strong>{w.address||blank}</strong> bearing Aadhaar Number <strong>{w.aadhaarNumber||blank}</strong>
+                  {String.fromCharCode(97+i)}) <strong>{w.name||blank}</strong> {w.parentRelation} of <strong>{w.parentName||blank}</strong> aged <strong>{w.age||"___"}</strong>, {w.maritalStatus}, nationality <strong>{w.nationality||blank}</strong>, occupation <strong>{occupationOf(w)||blank}</strong>, resident of <strong>{w.address||blank}</strong> bearing Aadhaar Number <strong>{w.aadhaarNumber||blank}</strong>
                 </p>
               ))}
             </div>
@@ -156,10 +162,10 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,w
 
             <p className="font-bold mb-1">E. Digital &amp; Miscellaneous Assets:</p>
             {allIndiaAssets.socialMediaDigital.map((item,i)=>(
-              <p key={i} className="mb-1">{i===0?"(1) ":""}Social Media / Digital: <strong>{item.description||blank}</strong> Bequeathed to: <strong>{item.beneficiary||blank}</strong> Relationship: <strong>{item.relation||blank}</strong>, bearing {item.idType||"Aadhaar Card"} Number: <strong>{item.idNumber||blank}</strong>.</p>
+              <p key={i} className="mb-1">{i===0?"(1) ":""}Social Media / Digital: <strong>{item.description||blank}</strong> Bequeathed to: <strong>{item.beneficiary||blank}</strong> Relationship: <strong>{relOf(item)||blank}</strong>, bearing {item.idType||"Aadhaar Card"} Number: <strong>{item.idNumber||blank}</strong>.</p>
             ))}
             {allIndiaAssets.intellectualProperty.map((item,i)=>(
-              <p key={i} className="mb-5">{i===0?"(2) ":""}Intellectual Property: <strong>{item.description||blank}</strong> Bequeathed to: <strong>{item.beneficiary||blank}</strong> Relationship: <strong>{item.relation||blank}</strong>, bearing {item.idType||"Aadhaar Card"} Number: <strong>{item.idNumber||blank}</strong>.</p>
+              <p key={i} className="mb-5">{i===0?"(2) ":""}Intellectual Property: <strong>{item.description||blank}</strong> Bequeathed to: <strong>{item.beneficiary||blank}</strong> Relationship: <strong>{relOf(item)||blank}</strong>, bearing {item.idType||"Aadhaar Card"} Number: <strong>{item.idNumber||blank}</strong>.</p>
             ))}
           </Page>
 
@@ -167,7 +173,7 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,w
             <p className="text-justify mb-5">
               I hereby declare, direct, and devise that all the Rest and Residue of my estate, including any property or assets, both movable and immovable, which I may acquire after the execution of this Will, or which has been inadvertently omitted from this document, shall be given entirely to {allIndiaResidue.length>1&&"the following, in equal shares: "}
               {allIndiaResidue.map((entry,i)=>(
-                <span key={i}><strong>{entry.relation||blank}</strong> (Relationship), <strong>{entry.name||blank}</strong> bearing Aadhaar Card number: <strong>{entry.aadhaarNumber||blank}</strong>{i<allIndiaResidue.length-1?"; ":"."}</span>
+                <span key={i}><strong>{relOf(entry)||blank}</strong> (Relationship), <strong>{entry.name||blank}</strong>, nationality <strong>{entry.nationality||blank}</strong>, occupation <strong>{occupationOf(entry)||blank}</strong>, bearing {entry.idType||"Aadhaar Card"} Number: <strong>{entry.idNumber||blank}</strong>{i<allIndiaResidue.length-1?"; ":"."}</span>
               ))}
             </p>
 

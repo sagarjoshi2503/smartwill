@@ -11,7 +11,8 @@ export const DEFAULT_WILL: WillState = {
   testator: {
     email:"", fullName:"", pan:"", aadhaarNumber:"",
     relation:"son", parentSpouseName:"",
-    age:"", maritalStatus:"unmarried", spouseName:"", spouseAadhaarNumber:"",
+    age:"", maritalStatus:"unmarried", nationality:"", occupation:"", occupationOther:"",
+    spouseName:"", spouseAadhaarNumber:"",
     sonNames:[""], daughterNames:[""],
     address:"", country:"India",
     signPlace:"", signDay:String(today.day), signMonth:today.month, signYear:String(today.year),
@@ -44,17 +45,18 @@ export const DEFAULT_WILL: WillState = {
   // Fixed asset line-items from the All India (Non-Goan) Will PDF template —
   // only used/shown when willType==="allindia".
   allIndiaAssets:{
-    houseFlat:[{description:"",beneficiary:"",relation:"",idType:"Aadhaar Card",idNumber:""}],
-    landPlot:[{description:"",beneficiary:"",relation:"",idType:"Aadhaar Card",idNumber:""}],
-    commercialProperty:[{description:"",beneficiary:"",relation:"",idType:"Aadhaar Card",idNumber:""}],
-    vehicle:[{description:"",beneficiary:"",relation:"",idType:"Aadhaar Card",idNumber:""}],
-    jewellery:[{description:"",beneficiary:"",relation:"",idType:"Aadhaar Card",idNumber:""}],
-    socialMediaDigital:[{description:"",beneficiary:"",relation:"",idType:"Aadhaar Card",idNumber:""}],
-    intellectualProperty:[{description:"",beneficiary:"",relation:"",idType:"Aadhaar Card",idNumber:""}],
+    houseFlat:[{description:"",beneficiary:"",relation:"",relationOther:"",idType:"Aadhaar Card",idNumber:""}],
+    landPlot:[{description:"",beneficiary:"",relation:"",relationOther:"",idType:"Aadhaar Card",idNumber:""}],
+    commercialProperty:[{description:"",beneficiary:"",relation:"",relationOther:"",idType:"Aadhaar Card",idNumber:""}],
+    vehicle:[{description:"",beneficiary:"",relation:"",relationOther:"",idType:"Aadhaar Card",idNumber:""}],
+    jewellery:[{description:"",beneficiary:"",relation:"",relationOther:"",idType:"Aadhaar Card",idNumber:""}],
+    socialMediaDigital:[{description:"",beneficiary:"",relation:"",relationOther:"",idType:"Aadhaar Card",idNumber:""}],
+    intellectualProperty:[{description:"",beneficiary:"",relation:"",relationOther:"",idType:"Aadhaar Card",idNumber:""}],
   },
-  // Residuary beneficiaries for the All India Will format (relationship +
-  // name + Aadhaar, more than one allowed) — only used when willType==="allindia".
-  allIndiaResidue:[{relation:"",name:"",aadhaarNumber:""}],
+  // Residuary beneficiaries for the All India Will format (relationship,
+  // name, nationality, occupation, ID proof — more than one allowed) — only
+  // used when willType==="allindia".
+  allIndiaResidue:[{relation:"",relationOther:"",name:"",nationality:"",occupation:"",occupationOther:"",idType:"Aadhaar Card",idNumber:""}],
   // Section V - Residual — no beneficiary pre-selected until the user adds one
   residualBeneId:"",
   residualIdType:"Aadhaar Card",
@@ -66,7 +68,7 @@ export const DEFAULT_WILL: WillState = {
   // Witnesses: the Indian Succession Act requires exactly two, so the two slots
   // stay (the UI has no "add witness" control), but with no fabricated identities
   witnesses:[
-    { name:"", parentRelation:"son", parentName:"", age:"", maritalStatus:"unmarried", address:"", aadhaarNumber:"" },
-    { name:"", parentRelation:"son", parentName:"", age:"", maritalStatus:"unmarried", address:"", aadhaarNumber:"" },
+    { name:"", parentRelation:"son", parentName:"", age:"", maritalStatus:"unmarried", nationality:"", occupation:"", occupationOther:"", address:"", aadhaarNumber:"" },
+    { name:"", parentRelation:"son", parentName:"", age:"", maritalStatus:"unmarried", nationality:"", occupation:"", occupationOther:"", address:"", aadhaarNumber:"" },
   ],
 };

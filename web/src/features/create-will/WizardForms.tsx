@@ -3,7 +3,7 @@ import {
   User, UserCheck, Baby, Users, Briefcase, BookOpen, Lock, Info, Plus, Trash2,
   Check, AlertTriangle, CheckCircle, FileText, Send,
 } from "lucide-react";
-import { ID_TYPES, RELATIONS, MONTHS } from "../../data/options";
+import { ID_TYPES, RELATIONS, MONTHS, OCCUPATIONS, ALLINDIA_RELATIONSHIP_OPTIONS } from "../../data/options";
 import { ASSET_CATALOGUE, COLOR } from "../../data/assetCatalogue";
 import { WILL_TYPE_OPTIONS } from "../../data/willTypes";
 import StepHeader from "../../components/shared/StepHeader";
@@ -247,13 +247,9 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                 className={IC+(!testatorEmailEditable?" pr-8 cursor-not-allowed text-slate-500":"")} placeholder="you@example.com"/>
             </div>
           </div>
-          <div>
-            <label className={LC}>{LBL_LEGAL_NAME}</label>
-            <input value={will.testator.fullName} onChange={e=>set("testator.fullName",e.target.value)} className={IC} placeholder="As per Aadhaar / PAN"/>
-          </div>
           <div className="grid grid-cols-2 gap-3">
-            <div><label className={LC}>PAN Number</label><input value={will.testator.pan} onChange={e=>set("testator.pan",e.target.value)} className={IC} placeholder="ABCDE1234F" title={TIP_NO_ID_SAVED}/></div>
-            <div><label className={LC}>Aadhaar Number</label><input value={will.testator.aadhaarNumber} onChange={e=>set("testator.aadhaarNumber",e.target.value)} className={IC} placeholder="XXXX XXXX XXXX" title={TIP_NO_ID_SAVED}/></div>
+            <div className="col-span-2"><label className={LC}>{LBL_LEGAL_NAME}</label>
+              <input value={will.testator.fullName} onChange={e=>set("testator.fullName",e.target.value)} className={IC} placeholder="As per Aadhaar / PAN"/></div>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
@@ -268,13 +264,10 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <div><label className={LC}>Age (Years)</label><input type="number" value={will.testator.age} onChange={e=>set("testator.age",e.target.value)} className={IC}/></div>
-            <div><label className={LC}>Country <span className="text-red-400 normal-case text-[9px]">(Locked)</span></label>
-              <div className="relative"><Lock size={11} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-600"/>
-                <input value="India" disabled className={IC+" cursor-not-allowed text-slate-500 pr-8"}/></div></div>
+            <div><label className={LC}>PAN Number</label><input value={will.testator.pan} onChange={e=>set("testator.pan",e.target.value)} className={IC} placeholder="ABCDE1234F" title={TIP_NO_ID_SAVED}/></div>
+            <div><label className={LC}>Aadhaar Number</label><input value={will.testator.aadhaarNumber} onChange={e=>set("testator.aadhaarNumber",e.target.value)} className={IC} placeholder="XXXX XXXX XXXX" title={TIP_NO_ID_SAVED}/></div>
           </div>
-          <div><label className={LC}>Permanent Residential Address</label>
-            <textarea value={will.testator.address} onChange={e=>set("testator.address",e.target.value)} rows={2} className={IC+" resize-none"}/></div>
+          <div><label className={LC}>Age (Years)</label><input type="number" value={will.testator.age} onChange={e=>set("testator.age",e.target.value)} className={IC+" max-w-[140px]"}/></div>
           <FormBlock title="Marital Status">
             <div className="flex gap-3">
               {[{v:"unmarried",l:"Unmarried"},{v:"married",l:"Married"}].map(o=>(
@@ -294,6 +287,21 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
               </div>
             )}
           </FormBlock>
+          <div className="grid grid-cols-2 gap-3">
+            <div><label className={LC}>Nationality</label><input value={will.testator.nationality} onChange={e=>set("testator.nationality",e.target.value)} className={IC} placeholder="e.g. Indian"/></div>
+            <div><label className={LC}>Occupation</label>
+              <select value={will.testator.occupation} onChange={e=>set("testator.occupation",e.target.value)} className={IC+" appearance-none"}>
+                <option value="">Select...</option>
+                {OCCUPATIONS.map(o=><option key={o}>{o}</option>)}
+              </select>
+            </div>
+          </div>
+          {will.testator.occupation==="Other"&&(
+            <div><label className={LC}>Please specify occupation</label>
+              <input value={will.testator.occupationOther} onChange={e=>set("testator.occupationOther",e.target.value)} className={IC}/></div>
+          )}
+          <div><label className={LC}>Permanent Residential Address</label>
+            <textarea value={will.testator.address} onChange={e=>set("testator.address",e.target.value)} rows={2} className={IC+" resize-none"}/></div>
           {will.testator.maritalStatus==="married"&&(()=>{
             const updateChild=(field: "sonNames"|"daughterNames", idx: number, value: string)=>
               setWill(p=>({...p, testator:{...p.testator, [field]: p.testator[field].map((n,j)=>j===idx?value:n)}}));
@@ -468,9 +476,9 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
           <StepHeader icon={<Briefcase size={17}/>} title="Asset Selection" sub="Sections B–E — Bequests as per the All India Will format"/>
           {(()=>{
             type AllIndiaKey = keyof WillState["allIndiaAssets"];
-            const addItem=(key: AllIndiaKey)=>setWill(p=>({...p, allIndiaAssets:{...p.allIndiaAssets, [key]:[...p.allIndiaAssets[key],{description:"",beneficiary:"",relation:"",idType:"Aadhaar Card",idNumber:""}]}}));
+            const addItem=(key: AllIndiaKey)=>setWill(p=>({...p, allIndiaAssets:{...p.allIndiaAssets, [key]:[...p.allIndiaAssets[key],{description:"",beneficiary:"",relation:"",relationOther:"",idType:"Aadhaar Card",idNumber:""}]}}));
             const removeItem=(key: AllIndiaKey, idx: number)=>setWill(p=>({...p, allIndiaAssets:{...p.allIndiaAssets, [key]:p.allIndiaAssets[key].filter((_,j)=>j!==idx)}}));
-            const setItem=(key: AllIndiaKey, idx: number, field: "description"|"beneficiary"|"relation"|"idType"|"idNumber", value: string)=>
+            const setItem=(key: AllIndiaKey, idx: number, field: "description"|"beneficiary"|"relation"|"relationOther"|"idType"|"idNumber", value: string)=>
               setWill(p=>({...p, allIndiaAssets:{...p.allIndiaAssets, [key]:p.allIndiaAssets[key].map((item,j)=>j===idx?{...item,[field]:value}:item)}}));
             const Category=({itemKey,label,placeholder}:{itemKey: AllIndiaKey; label: string; placeholder: string})=>(
               <div>
@@ -485,7 +493,12 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                       </div>
                     </div>
                     <div className="grid grid-cols-3 gap-2.5">
-                      <div><label className={LC}>Relationship</label><input value={item.relation} onChange={e=>setItem(itemKey,idx,"relation",e.target.value)} className={IC} placeholder="Spouse / Son / Daughter / Other"/></div>
+                      <div><label className={LC}>Relationship</label>
+                        <select value={item.relation} onChange={e=>setItem(itemKey,idx,"relation",e.target.value)} className={IC+" appearance-none"}>
+                          <option value="">Select...</option>
+                          {ALLINDIA_RELATIONSHIP_OPTIONS.map(r=><option key={r}>{r}</option>)}
+                        </select>
+                      </div>
                       <div><label className={LC}>{LBL_ID_TYPE}</label>
                         <select value={item.idType} onChange={e=>setItem(itemKey,idx,"idType",e.target.value)} className={IC+" appearance-none"}>
                           {ID_TYPES.map(t=><option key={t}>{t}</option>)}
@@ -493,6 +506,10 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                       </div>
                       <div><label className={LC}>{LBL_ID_NUMBER}</label><input value={item.idNumber} onChange={e=>setItem(itemKey,idx,"idNumber",e.target.value)} className={IC} placeholder="ID number" title={TIP_NO_ID_SAVED}/></div>
                     </div>
+                    {item.relation==="Other"&&(
+                      <div className="mt-2.5"><label className={LC}>Please specify relationship</label>
+                        <input value={item.relationOther} onChange={e=>setItem(itemKey,idx,"relationOther",e.target.value)} className={IC}/></div>
+                    )}
                   </div>
                 ))}
                 <button onClick={()=>addItem(itemKey)} className="text-xs text-[#d09d61] hover:text-[#b6844a] font-semibold flex items-center gap-1"><Plus size={12}/>Add another {label}</button>
@@ -705,20 +722,52 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
             <FormBlock title="Section V — Rest & Residue Clause">
               <p className="text-slate-500 text-xs mb-3 leading-relaxed">Even with careful planning, it's possible to miss mentioning an asset in this Will, or to acquire something new after signing it. A residuary clause is a safety net for exactly this. Any such asset should go to the following (more than one beneficiary shares equally):</p>
               {will.allIndiaResidue.map((entry,idx)=>{
-                const setEntry=(field: "relation"|"name"|"aadhaarNumber", value: string)=>
+                const setEntry=(field: "relation"|"relationOther"|"name"|"nationality"|"occupation"|"occupationOther"|"idType"|"idNumber", value: string)=>
                   setWill(p=>({...p, allIndiaResidue:p.allIndiaResidue.map((e,j)=>j===idx?{...e,[field]:value}:e)}));
                 return(
-                  <div key={idx} className="grid grid-cols-3 gap-2.5 mb-2.5">
-                    <div><label className={LC}>Relationship</label><input value={entry.relation} onChange={e=>setEntry("relation",e.target.value)} className={IC} placeholder="e.g. Brother"/></div>
-                    <div><label className={LC}>Full Name</label><input value={entry.name} onChange={e=>setEntry("name",e.target.value)} className={IC}/></div>
-                    <div className="flex gap-2 items-end">
-                      <div className="flex-1"><label className={LC}>Aadhaar No.</label><input value={entry.aadhaarNumber} onChange={e=>setEntry("aadhaarNumber",e.target.value)} className={IC} title={TIP_NO_ID_SAVED}/></div>
-                      {will.allIndiaResidue.length>1&&<button onClick={()=>setWill(p=>({...p, allIndiaResidue:p.allIndiaResidue.filter((_,j)=>j!==idx)}))} className="text-red-400 hover:text-red-500 shrink-0 mb-2.5"><Trash2 size={14}/></button>}
+                  <div key={idx} className="bg-slate-50 border border-slate-200 rounded-xl p-3 mb-2.5">
+                    <div className="flex justify-between items-center mb-2.5">
+                      <span className="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Residuary Beneficiary {idx+1}</span>
+                      {will.allIndiaResidue.length>1&&<button onClick={()=>setWill(p=>({...p, allIndiaResidue:p.allIndiaResidue.filter((_,j)=>j!==idx)}))} className="text-red-400 hover:text-red-500 shrink-0"><Trash2 size={14}/></button>}
+                    </div>
+                    <div className="grid grid-cols-2 gap-2.5 mb-2.5">
+                      <div><label className={LC}>Full Name</label><input value={entry.name} onChange={e=>setEntry("name",e.target.value)} className={IC}/></div>
+                      <div><label className={LC}>Relationship</label>
+                        <select value={entry.relation} onChange={e=>setEntry("relation",e.target.value)} className={IC+" appearance-none"}>
+                          <option value="">Select...</option>
+                          {ALLINDIA_RELATIONSHIP_OPTIONS.map(r=><option key={r}>{r}</option>)}
+                        </select>
+                      </div>
+                    </div>
+                    {entry.relation==="Other"&&(
+                      <div className="mb-2.5"><label className={LC}>Please specify relationship</label>
+                        <input value={entry.relationOther} onChange={e=>setEntry("relationOther",e.target.value)} className={IC}/></div>
+                    )}
+                    <div className="grid grid-cols-2 gap-2.5 mb-2.5">
+                      <div><label className={LC}>Nationality</label><input value={entry.nationality} onChange={e=>setEntry("nationality",e.target.value)} className={IC} placeholder="e.g. Indian"/></div>
+                      <div><label className={LC}>Occupation</label>
+                        <select value={entry.occupation} onChange={e=>setEntry("occupation",e.target.value)} className={IC+" appearance-none"}>
+                          <option value="">Select...</option>
+                          {OCCUPATIONS.map(o=><option key={o}>{o}</option>)}
+                        </select>
+                      </div>
+                    </div>
+                    {entry.occupation==="Other"&&(
+                      <div className="mb-2.5"><label className={LC}>Please specify occupation</label>
+                        <input value={entry.occupationOther} onChange={e=>setEntry("occupationOther",e.target.value)} className={IC}/></div>
+                    )}
+                    <div className="grid grid-cols-2 gap-2.5">
+                      <div><label className={LC}>{LBL_ID_TYPE}</label>
+                        <select value={entry.idType} onChange={e=>setEntry("idType",e.target.value)} className={IC+" appearance-none"}>
+                          {ID_TYPES.map(t=><option key={t}>{t}</option>)}
+                        </select>
+                      </div>
+                      <div><label className={LC}>{LBL_ID_NUMBER}</label><input value={entry.idNumber} onChange={e=>setEntry("idNumber",e.target.value)} className={IC} title={TIP_NO_ID_SAVED}/></div>
                     </div>
                   </div>
                 );
               })}
-              <button onClick={()=>setWill(p=>({...p, allIndiaResidue:[...p.allIndiaResidue,{relation:"",name:"",aadhaarNumber:""}]}))}
+              <button onClick={()=>setWill(p=>({...p, allIndiaResidue:[...p.allIndiaResidue,{relation:"",relationOther:"",name:"",nationality:"",occupation:"",occupationOther:"",idType:"Aadhaar Card",idNumber:""}]}))}
                 className="text-xs text-[#d09d61] hover:text-[#b6844a] font-semibold flex items-center gap-1"><Plus size={12}/>Add another beneficiary</button>
             </FormBlock>
           ):(
@@ -778,20 +827,38 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                         <option value="unmarried">Unmarried</option><option value="married">Married</option>
                       </select>
                     </div>
+                    <div><label className={LC}>Nationality</label>
+                      <input value={w.nationality} onChange={e=>setW("nationality",e.target.value)} className={IC} placeholder="e.g. Indian"/>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2.5 mt-2.5">
+                    <div><label className={LC}>Occupation</label>
+                      <select value={w.occupation} onChange={e=>setW("occupation",e.target.value)} className={IC+" appearance-none"}>
+                        <option value="">Select...</option>
+                        {OCCUPATIONS.map(o=><option key={o}>{o}</option>)}
+                      </select>
+                    </div>
                     <div><label className={LC}>Aadhaar Number</label>
                       <input value={w.aadhaarNumber} onChange={e=>setW("aadhaarNumber",e.target.value)} className={IC} title={TIP_NO_ID_SAVED}/>
                     </div>
                   </div>
-                  <div className="mt-2.5"><label className={LC}>Address</label>
+                  {w.occupation==="Other"&&(
+                    <div className="mt-2.5"><label className={LC}>Please specify occupation</label>
+                      <input value={w.occupationOther} onChange={e=>setW("occupationOther",e.target.value)} className={IC}/>
+                    </div>
+                  )}
+                  <div className="mt-2.5"><label className={LC}>Resident of (Address)</label>
                     <input value={w.address} onChange={e=>setW("address",e.target.value)} className={IC}/>
                   </div>
                 </div>
               );
             })}
           </FormBlock>
-          <div className="bg-[#d09d61]/8 border border-[#d09d61]/20 rounded-xl p-4 text-xs text-[#b88d48]">
-            All rest, residue and remainder of my estate shall vest absolutely in <strong>{will.beneficiaries.find(b=>String(b.id)===String(will.residualBeneId))?.name||"Selected Beneficiary"}</strong>.
-          </div>
+          {willType!=="allindia"&&(
+            <div className="bg-[#d09d61]/8 border border-[#d09d61]/20 rounded-xl p-4 text-xs text-[#b88d48]">
+              All rest, residue and remainder of my estate shall vest absolutely in <strong>{will.beneficiaries.find(b=>String(b.id)===String(will.residualBeneId))?.name||"Selected Beneficiary"}</strong>.
+            </div>
+          )}
           <div className="flex flex-col gap-3">
             {willStatus!==STATUS_COMPLETED&&(
               <button onClick={handleSaveAndSubmit} disabled={submitStatus==="saving"||viewOnly}

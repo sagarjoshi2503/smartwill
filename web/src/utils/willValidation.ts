@@ -58,9 +58,9 @@ export function getMissingIdFields(will: WillState, willType: WillType): string[
     });
     allIndiaResidue.forEach((entry, i) => {
       const inUse = entry.relation.trim() || entry.name.trim();
-      if (inUse && !entry.aadhaarNumber.trim()) {
+      if (inUse && !entry.idNumber.trim()) {
         const label = allIndiaResidue.length > 1 ? `Residuary Beneficiary #${i + 1}` : "Residuary Beneficiary";
-        missing.push(`${label} Aadhaar Number`);
+        missing.push(`${label} ${entry.idType || "ID"} Number`);
       }
     });
   } else if (!residualIdNumber.trim()) {

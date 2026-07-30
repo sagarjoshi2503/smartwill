@@ -9,6 +9,9 @@ export interface Testator {
   parentSpouseName: string;
   age: string;
   maritalStatus: "unmarried" | "married";
+  nationality: string;
+  occupation: string;
+  occupationOther: string;
   spouseName: string;
   spouseAadhaarNumber: string;
   sonNames: string[];
@@ -65,6 +68,9 @@ export interface Witness {
   parentName: string;
   age: string;
   maritalStatus: "unmarried" | "married";
+  nationality: string;
+  occupation: string;
+  occupationOther: string;
   address: string;
   aadhaarNumber: string;
 }
@@ -110,6 +116,7 @@ export interface AllIndiaAssetItem {
   description: string;
   beneficiary: string;
   relation: string;
+  relationOther: string;
   idType: string;
   idNumber: string;
 }
@@ -130,12 +137,18 @@ export interface AllIndiaAssets {
 }
 
 // The All India Will's residuary clause allows more than one beneficiary
-// (in equal shares), each identified by relationship + name + Aadhaar,
-// independent of the app's generic Beneficiary list.
+// (in equal shares), each identified by relationship, name, nationality,
+// occupation, and an ID proof — independent of the app's generic
+// Beneficiary list.
 export interface AllIndiaResidueEntry {
   relation: string;
+  relationOther: string;
   name: string;
-  aadhaarNumber: string;
+  nationality: string;
+  occupation: string;
+  occupationOther: string;
+  idType: string;
+  idNumber: string;
 }
 
 export interface WillState {
