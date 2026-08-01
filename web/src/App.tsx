@@ -339,7 +339,13 @@ export default function SmartWill() {
     const allocs = catItem.allowSplit
       ? will.beneficiaries.reduce((o,b)=>({...o,[b.id]:""}),{} as Record<string,string>)
       : {sole: String(will.beneficiaries[0]?.id||"")};
-    setWill(p=>({...p, assets:[...p.assets,{uid:Date.now(),typeId:catItem.id,catItem,data:{...catItem.defaults},allocs,allowSplit:catItem.allowSplit}]}));
+    // Starts empty, not catItem.defaults — those are illustrative sample
+    // values (a fake bank name, a fake policy number, ...), and pre-filling
+    // the actual form with them risked a testator leaving one unedited and
+    // submitting fabricated data as if it were their own. Every field's own
+    // placeholder already shows the same example text as ghost hint text,
+    // so nothing is lost by not pre-filling the real value.
+    setWill(p=>({...p, assets:[...p.assets,{uid:Date.now(),typeId:catItem.id,catItem,data:{},allocs,allowSplit:catItem.allowSplit}]}));
   };
   const removeAsset = (uid: number) => setWill(p=>({...p, assets:p.assets.filter(a=>a.uid!==uid)}));
   const updateAssetData = (uid: number, k: string, v: string) => setWill(p=>({...p, assets:p.assets.map(a=>a.uid===uid?{...a,data:{...a.data,[k]:v}}:a)}));
