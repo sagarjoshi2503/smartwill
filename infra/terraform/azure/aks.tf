@@ -22,6 +22,21 @@ resource "azurerm_kubernetes_cluster" "this" {
     secret_rotation_enabled = true
   }
 
+  # Both found enabled live but missing from this file (discovered via a
+  # `terraform plan` drift check against rg-test-deletelater) — declared here
+  # so `apply` doesn't silently turn them back off. Note: the cluster's own
+  # OIDC issuer is distinct from the GitHub Actions OIDC federation in
+  # cicd/CLAUDE.md (that's a separate, tenant-level app registration); AKS
+  # workload_identity is NOT enabled alongside it, so today this issuer has
+  # no federated credential actually trusting it — confirm with whoever
+  # enabled it whether pod workload identity is coming, or whether this
+  # should be turned off instead.
+  oidc_issuer_enabled = true
+
+  workload_autoscaler_profile {
+    keda_enabled = true
+  }
+
   tags = var.tags
 }
 
