@@ -53,7 +53,7 @@ export default function AllIndiaLiveDocPreview({will}:{
   return(
     <div className="w-full max-w-[520px] rounded-xl shadow-2xl overflow-hidden border border-amber-900/20">
       <div className="bg-slate-700 px-4 py-2 flex items-center gap-2">
-        <div className="w-2.5 h-2.5 rounded-full bg-red-400/80"/><div className="w-2.5 h-2.5 rounded-full bg-amber-400/80"/><div className="w-2.5 h-2.5 rounded-full bg-[#d09d61]/80"/>
+        <div className="w-2.5 h-2.5 rounded-full bg-red-400/80"/><div className="w-2.5 h-2.5 rounded-full bg-amber-400/80"/><div className="w-2.5 h-2.5 rounded-full bg-[#2F8132]/80"/>
         <span className="text-slate-400 text-xs ml-2 flex items-center gap-1.5"><Eye size={10}/>Live Preview — All India Will</span>
       </div>
       <div className="bg-[#fefcf3] p-7 text-[12.5px]" style={{fontFamily:"'Times New Roman',Times,serif",lineHeight:"1.15",color:"#2d2a1e"}}>

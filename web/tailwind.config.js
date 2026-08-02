@@ -3,21 +3,21 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Epilogue', 'Montserrat', 'sans-serif'],
-        serif: ['Cinzel', 'Georgia', 'serif'],
+        sans: ['Inter', 'sans-serif'],
+        serif: ['Plus Jakarta Sans', 'sans-serif'],
       },
       colors: {
         brand: {
-          50: '#f6efe0',
-          100: '#ebddc1',
-          200: '#dcb790',
-          300: '#c59560',
-          400: '#b67945',
-          500: '#d09d61',
-          600: '#a17240',
-          700: '#7b5130',
-          800: '#5d3c24',
-          900: '#3b2618',
+          50: '#EDF6EA',
+          100: '#D3EACB',
+          200: '#A8D69C',
+          300: '#8BC34A',
+          400: '#5FA045',
+          500: '#2F8132',
+          600: '#256A28',
+          700: '#1E5B22',
+          800: '#17441A',
+          900: '#0F2D11',
         },
       },
     },

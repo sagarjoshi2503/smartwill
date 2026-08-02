@@ -410,9 +410,9 @@ export default function SmartWill() {
         <header className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-slate-200">
           <div className="max-w-7xl mx-auto px-5 h-[58px] flex items-center justify-between">
             <div className="flex items-center gap-2 cursor-pointer" onClick={()=>setView("landing")}>
-              <div className="w-8 h-8 bg-[#d09d61] rounded-lg flex items-center justify-center shadow-lg shadow-[#d09d61]/15"><Scale size={15} className="text-white"/></div>
+              <div className="w-8 h-8 bg-[#2F8132] rounded-lg flex items-center justify-center shadow-lg shadow-[#2F8132]/15"><Scale size={15} className="text-white"/></div>
               <span className="text-slate-900 font-bold text-lg serif">SmartWill</span>
-              <span className="text-[9px] font-bold tracking-[0.35em] text-[#924d06] bg-[#f8edd1] border border-[#d09d61] px-1.5 py-0.5 rounded">{LBL_INDIA_BADGE}</span>
+              <span className="text-[9px] font-bold tracking-[0.35em] text-[#924d06] bg-[#f8edd1] border border-[#2F8132] px-1.5 py-0.5 rounded">{LBL_INDIA_BADGE}</span>
             </div>
             <div className="flex items-center gap-3">
               {view==="admin" && adminProfile ? (
@@ -421,7 +421,7 @@ export default function SmartWill() {
                     <div className="w-6 h-6 bg-slate-200 rounded-full flex items-center justify-center text-[9px] font-bold text-slate-900">
                       {adminProfile.name.split(" ").slice(0,2).map(n=>n[0]).join("").toUpperCase()}
                     </div>
-                    <span className="text-[#d09d61] text-sm">{adminProfile.name}</span>
+                    <span className="text-[#2F8132] text-sm">{adminProfile.name}</span>
                   </div>
                   <button onClick={()=>{clearAuthToken(ROLE_ADMIN);setAdminProfile(null);setView("landing");}} className="flex items-center gap-1.5 text-slate-600 hover:text-slate-900 text-sm transition-colors"><LogOut size={13}/>{BTN_LOGOUT}</button>
                 </>
@@ -431,7 +431,7 @@ export default function SmartWill() {
                     <div className="w-6 h-6 bg-slate-200 rounded-full flex items-center justify-center text-[9px] font-bold text-slate-900">
                       {(signup.name||signup.email).split(" ").slice(0,2).map(n=>n[0]).join("").toUpperCase()}
                     </div>
-                    <span className="text-[#d09d61] text-sm">{signup.name||signup.email}</span>
+                    <span className="text-[#2F8132] text-sm">{signup.name||signup.email}</span>
                   </div>
                   <button onClick={handleTestatorLogout} className="flex items-center gap-1.5 text-slate-600 hover:text-slate-900 text-sm transition-colors"><LogOut size={13}/>{BTN_LOGOUT}</button>
                 </>
@@ -440,7 +440,7 @@ export default function SmartWill() {
                   {showAdminButton && (
                     <button onClick={()=>setView("adminLogin")} className="flex items-center gap-1.5 text-slate-600 hover:text-slate-900 border border-slate-200 hover:border-slate-300 rounded-lg px-3 py-1.5 text-sm transition-all"><LogIn size={13}/>{BTN_ADMIN_PORTAL}</button>
                   )}
-                  <button onClick={()=>setView("authChoice")} className="flex items-center gap-1.5 bg-[#d09d61] hover:bg-[#d7a46a] text-[#020617] rounded-lg px-4 py-2 text-sm font-semibold transition-colors shadow-lg shadow-[#d09d61]/20">{BTN_CREATE_YOUR_WILL} <ArrowRight size={13}/></button>
+                  <button onClick={()=>setView("authChoice")} className="flex items-center gap-1.5 bg-[#2F8132] hover:bg-[#1E5B22] text-[#ffffff] rounded-lg px-4 py-2 text-sm font-semibold transition-colors shadow-lg shadow-[#2F8132]/20">{BTN_CREATE_YOUR_WILL} <ArrowRight size={13}/></button>
                 </>
               )}
             </div>
@@ -465,7 +465,7 @@ export default function SmartWill() {
           <div className="flex-none bg-white/95 border-b border-slate-200 px-4 h-[60px] flex items-center justify-between">
             <div className="flex items-center gap-3">
               <button onClick={()=>setView(adminProfile?"admin":(signup.email?"myWills":"landing"))} className="text-slate-600 hover:text-slate-900 transition-colors"><ChevronLeft size={16}/></button>
-              <div className="w-8 h-8 bg-[#d09d61] rounded-2xl flex items-center justify-center shadow-lg shadow-[#d09d61]/15"><Scale size={12} className="text-[#020617]"/></div>
+              <div className="w-8 h-8 bg-[#2F8132] rounded-2xl flex items-center justify-center shadow-lg shadow-[#2F8132]/15"><Scale size={12} className="text-[#ffffff]"/></div>
               <div>
                 <div className="text-slate-900 font-semibold serif text-sm">SmartWill</div>
                 <div className="text-slate-500 text-[10px]">{LBL_WILL_DRAFTING}{willType&&` - ${WILL_TYPE_LBL_SHORT[willType]}`}</div>
@@ -474,7 +474,7 @@ export default function SmartWill() {
             <div className="flex items-center gap-1">
               {WIZARD_STEPS.filter(s=>!(skipWillTypeStep&&s.n===1)).map(s=>(
                 <button key={s.n} onClick={()=>setWizardStep(s.n)}
-                    className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-[10px] font-semibold transition-all ${wizardStep===s.n?"bg-[#d09d61] text-[#020617]":"border border-slate-200 text-slate-600 hover:bg-slate-100 hover:text-slate-900"}`}>
+                    className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-[10px] font-semibold transition-all ${wizardStep===s.n?"bg-[#2F8132] text-[#ffffff]":"border border-slate-200 text-slate-600 hover:bg-slate-100 hover:text-slate-900"}`}>
                   {wizardStep>s.n?<Check size={9}/>:<span>{s.n}</span>}
                   <span className="hidden md:inline">{s.label}</span>
                 </button>
@@ -513,7 +513,7 @@ export default function SmartWill() {
                   )}
                 </div>
               )}
-              <button onClick={handleGenerateWill} className="flex items-center gap-1.5 text-xs text-[#d09d61] hover:text-[#b6844a] border border-[#d09d61]/30 hover:border-[#d09d61]/60 rounded-lg px-3 py-1.5 transition-all font-semibold">
+              <button onClick={handleGenerateWill} className="flex items-center gap-1.5 text-xs text-[#2F8132] hover:text-[#1E5B22] border border-[#2F8132]/30 hover:border-[#2F8132]/60 rounded-lg px-3 py-1.5 transition-all font-semibold">
                 <Eye size={12}/>{BTN_GENERATE_WILL}
               </button>
             </div>
@@ -559,7 +559,7 @@ export default function SmartWill() {
             <div className="hidden lg:flex lg:w-[50%] bg-slate-100 p-5 overflow-y-auto items-start justify-center">
               {willType==="allindia" ? <AllIndiaLiveDocPreview will={will}/> : willType==="goan" ? (
                 <div className="w-full max-w-[420px] bg-white border border-slate-200 rounded-2xl shadow-xl p-6 text-center">
-                  <Scale size={22} className="text-[#d09d61] mx-auto mb-3"/>
+                  <Scale size={22} className="text-[#2F8132] mx-auto mb-3"/>
                   <p className="text-slate-900 text-sm font-semibold mb-1.5">Goan Will &amp; Deed of Consent</p>
                   <p className="text-slate-500 text-xs leading-relaxed">Your document(s) — the Open Will, and if married, your spouse's Open Will and a shared Deed of Consent — become available to preview and download once you reach the final step and click Generate.</p>
                 </div>

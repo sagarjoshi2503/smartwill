@@ -11,7 +11,7 @@ import type { TestatorWill, WillState, WillType } from "../../types";
 
 const STATUS_STYLE: Record<TestatorWill["status"], string> = {
   Draft: "bg-slate-100 text-slate-600 border-slate-200",
-  PendingReview: "bg-[#d09d61]/10 text-[#b6844a] border-[#d09d61]/30",
+  PendingReview: "bg-[#2F8132]/10 text-[#1E5B22] border-[#2F8132]/30",
   Completed: "bg-emerald-50 text-emerald-600 border-emerald-200",
 };
 
@@ -130,7 +130,7 @@ export default function TestatorWillsView({email,onCreateNew,onEditWill,onViewWi
                   {v:STATUS_COMPLETED,label:STATUS_LBL[STATUS_COMPLETED],count:completedCount},
                 ] as const).map(f=>(
                   <button key={f.v} onClick={()=>setStatusFilter(f.v)}
-                    className={`text-[10px] font-bold px-2.5 py-1 rounded-full border transition-colors ${statusFilter===f.v?"bg-[#d09d61] text-[#020617] border-[#d09d61] hover:bg-[#d09d61] hover:text-[#020617]":"bg-white text-slate-600 border-slate-200 hover:border-slate-300"}`}>
+                    className={`text-[10px] font-bold px-2.5 py-1 rounded-full border transition-colors ${statusFilter===f.v?"bg-[#2F8132] text-[#ffffff] border-[#2F8132] hover:bg-[#2F8132] hover:text-[#ffffff]":"bg-white text-slate-600 border-slate-200 hover:border-slate-300"}`}>
                     {f.label} <span className="opacity-70">{f.count}</span>
                   </button>
                 ))}
@@ -174,7 +174,7 @@ export default function TestatorWillsView({email,onCreateNew,onEditWill,onViewWi
                         </button>
                         {w.status===STATUS_DRAFT ? (
                           <button onClick={()=>handleEdit(w.willId)} disabled={busyId===w.willId}
-                            className="flex items-center gap-1.5 text-[#d09d61] hover:text-[#b88442] text-xs font-semibold transition-colors disabled:opacity-50">
+                            className="flex items-center gap-1.5 text-[#2F8132] hover:text-[#1E5B22] text-xs font-semibold transition-colors disabled:opacity-50">
                             <Edit3 size={11}/>Edit
                           </button>
                         ) : (

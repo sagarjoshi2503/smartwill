@@ -141,7 +141,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
       name: "SmartWill",
       description: "Will submission for admin review",
       prefill: { name: will.testator.fullName, email: will.testator.email },
-      theme: { color: "#d09d61" },
+      theme: { color: "#2F8132" },
       handler: (response) => { handlePaymentSuccess(savedWillId, order.amount, response); },
       modal: {
         ondismiss: () => {
@@ -217,12 +217,12 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
           <div className="space-y-3">
             {WILL_TYPE_OPTIONS.map(opt=>(
               <label key={opt.id}
-                className={`flex items-start gap-3 p-4 rounded-2xl border cursor-pointer transition-all ${willType===opt.id?"border-[#d09d61]/60 bg-[#d09d61]/10":"border-slate-200 hover:border-[#d09d61]/30"} ${viewOnly?"cursor-not-allowed opacity-70":""}`}>
+                className={`flex items-start gap-3 p-4 rounded-2xl border cursor-pointer transition-all ${willType===opt.id?"border-[#2F8132]/60 bg-[#2F8132]/10":"border-slate-200 hover:border-[#2F8132]/30"} ${viewOnly?"cursor-not-allowed opacity-70":""}`}>
                 <input type="radio" name="willType" className="sr-only" checked={willType===opt.id} disabled={viewOnly} onChange={()=>setWillType(opt.id)}/>
-                <div className={`w-4 h-4 mt-0.5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all ${willType===opt.id?"border-[#d09d61] bg-[#d09d61]":"border-slate-300"}`}>
+                <div className={`w-4 h-4 mt-0.5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all ${willType===opt.id?"border-[#2F8132] bg-[#2F8132]":"border-slate-300"}`}>
                   {willType===opt.id&&<div className="w-1.5 h-1.5 rounded-full bg-white"/>}
                 </div>
-                <div className="text-[#d09d61] mt-0.5">{opt.icon}</div>
+                <div className="text-[#2F8132] mt-0.5">{opt.icon}</div>
                 <div>
                   <div className="text-slate-900 text-sm font-semibold">{opt.label}</div>
                   <div className="text-slate-500 text-xs mt-0.5">{opt.description}</div>
@@ -278,9 +278,9 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
             <div className="flex gap-3">
               {[{v:"unmarried",l:"Unmarried"},{v:"married",l:"Married"}].map(o=>(
                 <label key={o.v}
-                  className={`flex-1 flex items-center gap-2 p-3 rounded-xl border cursor-pointer transition-all ${will.testator.maritalStatus===o.v?"border-[#d09d61]/50 bg-[#d09d61]/10":"border-slate-200 hover:border-slate-300"}`}>
+                  className={`flex-1 flex items-center gap-2 p-3 rounded-xl border cursor-pointer transition-all ${will.testator.maritalStatus===o.v?"border-[#2F8132]/50 bg-[#2F8132]/10":"border-slate-200 hover:border-slate-300"}`}>
                   <input type="radio" name="maritalStatus" className="sr-only" checked={will.testator.maritalStatus===o.v} onChange={()=>set("testator.maritalStatus",o.v)}/>
-                  <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all ${will.testator.maritalStatus===o.v?"border-[#d09d61] bg-[#d09d61]":"border-slate-300"}`}>
+                  <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all ${will.testator.maritalStatus===o.v?"border-[#2F8132] bg-[#2F8132]":"border-slate-300"}`}>
                     {will.testator.maritalStatus===o.v&&<div className="w-1.5 h-1.5 rounded-full bg-white"/>}
                   </div>
                   <span className="text-slate-700 text-xs">{o.l}</span>
@@ -325,7 +325,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                     {will.testator.sonNames.length>1&&<button onClick={()=>removeChild("sonNames",i)} className="text-red-400 hover:text-red-500 shrink-0"><Trash2 size={14}/></button>}
                   </div>
                 ))}
-                <button onClick={()=>addChild("sonNames")} className="text-xs text-[#d09d61] hover:text-[#b6844a] font-semibold flex items-center gap-1 mb-4"><Plus size={12}/>Add Son</button>
+                <button onClick={()=>addChild("sonNames")} className="text-xs text-[#2F8132] hover:text-[#1E5B22] font-semibold flex items-center gap-1 mb-4"><Plus size={12}/>Add Son</button>
 
                 <label className={LC}>Daughters</label>
                 {will.testator.daughterNames.map((name,i)=>(
@@ -334,7 +334,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                     {will.testator.daughterNames.length>1&&<button onClick={()=>removeChild("daughterNames",i)} className="text-red-400 hover:text-red-500 shrink-0"><Trash2 size={14}/></button>}
                   </div>
                 ))}
-                <button onClick={()=>addChild("daughterNames")} className="text-xs text-[#d09d61] hover:text-[#b6844a] font-semibold flex items-center gap-1"><Plus size={12}/>Add Daughter</button>
+                <button onClick={()=>addChild("daughterNames")} className="text-xs text-[#2F8132] hover:text-[#1E5B22] font-semibold flex items-center gap-1"><Plus size={12}/>Add Daughter</button>
               </FormBlock>
             );
           })()}
@@ -407,7 +407,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
             </div>
             <div><label className={LC}>Residential Address</label>
               <textarea value={person.address} onChange={e=>set(path+".address",e.target.value)} rows={2} className={IC+" resize-none"}/>
-              {goaHint(person.address)&&<p className="text-[#b88d48] text-[11px] mt-1">This Will is drafted under the Goa Succession framework — double-check this is a Goa address, matching your ID documents.</p>}
+              {goaHint(person.address)&&<p className="text-[#1E5B22] text-[11px] mt-1">This Will is drafted under the Goa Succession framework — double-check this is a Goa address, matching your ID documents.</p>}
             </div>
           </>
         );
@@ -434,7 +434,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
             </FormBlock>
             {isMarried&&(
               <>
-                <div className="bg-[#1B498A] text-white text-xs font-semibold rounded-xl p-3.5">
+                <div className="bg-[#1E5B22] text-white text-xs font-semibold rounded-xl p-3.5">
                   Because you selected "Married", we'll also collect your spouse's details below — their own Will is generated at the same time, along with a Deed of Consent that you'll both need to sign.
                 </div>
                 <FormBlock title="Spouse's Details">
@@ -472,9 +472,9 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
             <div className="flex gap-3">
               {[{v:"jointly",l:"Jointly (Must act together)"},{v:"jointly_severally",l:"Jointly & Severally (May act independently)"}].map(o=>(
                 <label key={o.v}
-                  className={`flex-1 flex items-center gap-2 p-3 rounded-xl border cursor-pointer transition-all ${will.executor.adminType===o.v?"border-[#d09d61]/50 bg-[#d09d61]/10":"border-slate-700 hover:border-slate-600"}`}>
+                  className={`flex-1 flex items-center gap-2 p-3 rounded-xl border cursor-pointer transition-all ${will.executor.adminType===o.v?"border-[#2F8132]/50 bg-[#2F8132]/10":"border-slate-700 hover:border-slate-600"}`}>
                   <input type="radio" name="adminType" className="sr-only" checked={will.executor.adminType===o.v} onChange={()=>set("executor.adminType",o.v)}/>
-                  <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all ${will.executor.adminType===o.v?"border-[#d09d61] bg-[#d09d61]":"border-slate-600"}`}>
+                  <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all ${will.executor.adminType===o.v?"border-[#2F8132] bg-[#2F8132]":"border-slate-600"}`}>
                     {will.executor.adminType===o.v&&<div className="w-1.5 h-1.5 rounded-full bg-white"/>}
                   </div>
                   <span className="text-slate-700 text-xs">{o.l}</span>
@@ -566,7 +566,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
               </div>
             ))}
           </div>
-          <button onClick={addBene} className="w-full border-2 border-dashed border-slate-700 hover:border-[#d09d61] text-slate-500 hover:text-[#d09d61] rounded-xl py-2.5 flex items-center justify-center gap-2 transition-all text-sm">
+          <button onClick={addBene} className="w-full border-2 border-dashed border-slate-700 hover:border-[#2F8132] text-slate-500 hover:text-[#2F8132] rounded-xl py-2.5 flex items-center justify-center gap-2 transition-all text-sm">
             <Plus size={14}/>Add Beneficiary
           </button>
           <Nav onNext={onNext} onPrev={onPrev}/>
@@ -615,16 +615,16 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                     )}
                   </div>
                 ))}
-                <button onClick={()=>addItem(itemKey)} className="text-xs text-[#d09d61] hover:text-[#b6844a] font-semibold flex items-center gap-1"><Plus size={12}/>Add another {label}</button>
+                <button onClick={()=>addItem(itemKey)} className="text-xs text-[#2F8132] hover:text-[#1E5B22] font-semibold flex items-center gap-1"><Plus size={12}/>Add another {label}</button>
               </div>
             );
             return(
               <>
-                <div className="bg-[#d09d61]/8 border border-[#d09d61]/25 rounded-xl p-4">
-                  <span className="inline-block bg-[#d09d61] text-[#020617] text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full mb-2">Included Automatically</span>
+                <div className="bg-[#2F8132]/8 border border-[#2F8132]/25 rounded-xl p-4">
+                  <span className="inline-block bg-[#2F8132] text-[#ffffff] text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full mb-2">Included Automatically</span>
                   <p className="text-slate-900 text-sm font-semibold mb-1">A. Financial Assets</p>
                   <p className="text-slate-600 text-xs leading-relaxed">I bequeath all my financial assets — including Bank Accounts, Fixed Deposits (FDs), Recurring Deposits (RDs), Public Provident Fund (PPF), Life Insurance, Stocks, Mutual Funds, Cryptocurrency (Crypto), Digital Wallets, National Pension System (NPS), Bonds, Alternative Investment Fund (AIF), Specialized Investment Fund (SIF), and Portfolio Management Services (PMS) — entirely to the nominees registered in those financial instruments.</p>
-                  <p className="text-[#8a6d3b] text-xs leading-relaxed mt-2.5 pt-2.5 border-t border-dashed border-[#d09d61]/30"><strong>Why we recommend this:</strong> it's advisable to pass on financial assets by nomination rather than by listing individual accounts — nominations stay current automatically as balances and accounts change, so you don't need to update this Will every time. Just keep your nominations up to date.</p>
+                  <p className="text-[#1E5B22] text-xs leading-relaxed mt-2.5 pt-2.5 border-t border-dashed border-[#2F8132]/30"><strong>Why we recommend this:</strong> it's advisable to pass on financial assets by nomination rather than by listing individual accounts — nominations stay current automatically as balances and accounts change, so you don't need to update this Will every time. Just keep your nominations up to date.</p>
                 </div>
                 <FormBlock title="B. Immovable Property">
                   <div className="space-y-4">
@@ -693,16 +693,16 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                     )}
                   </div>
                 ))}
-                <button onClick={()=>addItem(itemKey)} className="text-xs text-[#d09d61] hover:text-[#b6844a] font-semibold flex items-center gap-1"><Plus size={12}/>Add another {label}</button>
+                <button onClick={()=>addItem(itemKey)} className="text-xs text-[#2F8132] hover:text-[#1E5B22] font-semibold flex items-center gap-1"><Plus size={12}/>Add another {label}</button>
               </div>
             );
             return(
               <>
-                <div className="bg-[#d09d61]/8 border border-[#d09d61]/25 rounded-xl p-4">
-                  <span className="inline-block bg-[#d09d61] text-[#020617] text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full mb-2">Included Automatically</span>
+                <div className="bg-[#2F8132]/8 border border-[#2F8132]/25 rounded-xl p-4">
+                  <span className="inline-block bg-[#2F8132] text-[#ffffff] text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full mb-2">Included Automatically</span>
                   <p className="text-slate-900 text-sm font-semibold mb-1">A. Financial Assets</p>
                   <p className="text-slate-600 text-xs leading-relaxed">I bequeath all my financial assets — including Bank Accounts, FDs, RDs, PPF, Life Insurance, Stocks, Mutual Funds, Crypto, Digital Wallets, NPS, Bonds, AIF, SIF, and PMS — entirely to the nominees registered in those financial instruments.</p>
-                  <p className="text-[#8a6d3b] text-xs leading-relaxed mt-2.5 pt-2.5 border-t border-dashed border-[#d09d61]/30"><strong>Why we recommend this:</strong> it's advisable to pass on financial assets by nomination rather than by listing individual accounts — nominations stay current automatically as balances and accounts change, so you don't need to update this Will every time. Just keep your nominations up to date.</p>
+                  <p className="text-[#1E5B22] text-xs leading-relaxed mt-2.5 pt-2.5 border-t border-dashed border-[#2F8132]/30"><strong>Why we recommend this:</strong> it's advisable to pass on financial assets by nomination rather than by listing individual accounts — nominations stay current automatically as balances and accounts change, so you don't need to update this Will every time. Just keep your nominations up to date.</p>
                 </div>
                 <FormBlock title="B. Immovable Property">
                   <div className="space-y-4">
@@ -738,9 +738,9 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
             <div className="flex gap-2.5">
               {[{v:"itemized",l:"Itemized (Specific assets to specific people)"},{v:"global",l:"Global (Divide entire estate at once)"}].map(o=>(
                 <label key={o.v}
-                  className={`flex-1 flex items-start gap-2 p-3 rounded-xl border cursor-pointer transition-all ${will.distributionMode===o.v?"border-[#d09d61]/50 bg-[#d09d61]/10":"border-slate-700 hover:border-slate-600"}`}>
+                  className={`flex-1 flex items-start gap-2 p-3 rounded-xl border cursor-pointer transition-all ${will.distributionMode===o.v?"border-[#2F8132]/50 bg-[#2F8132]/10":"border-slate-700 hover:border-slate-600"}`}>
                   <input type="radio" name="distributionMode" className="sr-only" checked={will.distributionMode===o.v} onChange={()=>setWill(p=>({...p,distributionMode:o.v as WillState["distributionMode"]}))}/>
-                  <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center mt-0.5 transition-all ${will.distributionMode===o.v?"border-[#d09d61] bg-[#d09d61]":"border-slate-600"}`}>
+                  <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center mt-0.5 transition-all ${will.distributionMode===o.v?"border-[#2F8132] bg-[#2F8132]":"border-slate-600"}`}>
                     {will.distributionMode===o.v&&<div className="w-1.5 h-1.5 rounded-full bg-white"/>}
                   </div>
                   <span className="text-slate-700 text-xs">{o.l}</span>
@@ -755,9 +755,9 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
               <div className="flex gap-2.5 mb-3">
                 {[{v:"equal",l:"Equal share among all"},{v:"percentage",l:"Specified percentages"}].map(o=>(
                   <label key={o.v}
-                    className={`flex-1 flex items-center gap-2 p-2.5 rounded-xl border cursor-pointer transition-all ${will.globalMode===o.v?"border-[#d09d61]/50 bg-[#d09d61]/10":"border-slate-700"}`}>
+                    className={`flex-1 flex items-center gap-2 p-2.5 rounded-xl border cursor-pointer transition-all ${will.globalMode===o.v?"border-[#2F8132]/50 bg-[#2F8132]/10":"border-slate-700"}`}>
                     <input type="radio" name="globalMode" className="sr-only" checked={will.globalMode===o.v} onChange={()=>setWill(p=>({...p,globalMode:o.v as WillState["globalMode"]}))}/>
-                    <div className={`w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center transition-all ${will.globalMode===o.v?"border-[#d09d61] bg-[#d09d61]":"border-slate-600"}`}>
+                    <div className={`w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center transition-all ${will.globalMode===o.v?"border-[#2F8132] bg-[#2F8132]":"border-slate-600"}`}>
                       {will.globalMode===o.v&&<div className="w-1 h-1 rounded-full bg-white"/>}
                     </div>
                     <span className="text-slate-700 text-xs">{o.l}</span>
@@ -770,7 +770,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                     <div key={b.id}>
                       <div className="flex items-center justify-between mb-1">
                         <span className="text-slate-700 text-xs">{b.name||"Unnamed"} <span className="text-slate-500">({b.relation})</span></span>
-                        <span className="text-[#d09d61] text-xs font-bold">{will.globalPercentages[b.id]||0}%</span>
+                        <span className="text-[#2F8132] text-xs font-bold">{will.globalPercentages[b.id]||0}%</span>
                       </div>
                       <input type="range" min="0" max="100" value={will.globalPercentages[b.id]||0}
                         onChange={e=>setWill(p=>({...p,globalPercentages:{...p.globalPercentages,[b.id]:e.target.value}}))}
@@ -779,7 +779,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                   ))}
                   <div className="flex justify-between text-xs mt-2 pt-2 border-t border-slate-700">
                     <span className="text-slate-500">Total Allocated</span>
-                    <span className={`font-bold ${will.beneficiaries.reduce((s,b)=>s+(parseFloat(will.globalPercentages[b.id])||0),0)===100?"text-[#d09d61]":"text-amber-400"}`}>
+                    <span className={`font-bold ${will.beneficiaries.reduce((s,b)=>s+(parseFloat(will.globalPercentages[b.id])||0),0)===100?"text-[#2F8132]":"text-amber-400"}`}>
                       {will.beneficiaries.reduce((s,b)=>s+(parseFloat(will.globalPercentages[b.id])||0),0)}%
                       {will.beneficiaries.reduce((s,b)=>s+(parseFloat(will.globalPercentages[b.id])||0),0)!==100&&
                         <span className="ml-2 text-amber-400 text-[10px] border border-amber-400/30 bg-amber-400/10 px-1.5 py-0.5 rounded-full">Must equal 100%</span>
@@ -864,9 +864,9 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                               <div className="flex items-center justify-between mt-1.5 pt-2 border-t border-slate-800">
                                 <span className="text-slate-500 text-xs">Total</span>
                                 <div className="flex items-center gap-2">
-                                  <span className={`font-bold serif ${valid?"text-[#d09d61]":"text-amber-400"}`}>{total}%</span>
+                                  <span className={`font-bold serif ${valid?"text-[#2F8132]":"text-amber-400"}`}>{total}%</span>
                                   {!valid&&<span className="flex items-center gap-1 bg-amber-500/10 border border-amber-500/25 text-amber-400 text-[10px] px-2 py-0.5 rounded-full"><AlertTriangle size={9}/>Must equal 100%</span>}
-                                  {valid&&<CheckCircle size={12} className="text-[#d09d61]"/>}
+                                  {valid&&<CheckCircle size={12} className="text-[#2F8132]"/>}
                                 </div>
                               </div>
                             </div>
@@ -951,7 +951,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                 );
               })}
               <button onClick={()=>setWill(p=>({...p, allIndiaResidue:[...p.allIndiaResidue,{relation:"",relationOther:"",name:"",nationality:"",occupation:"",occupationOther:"",idType:"Aadhaar Card",idNumber:""}]}))}
-                className="text-xs text-[#d09d61] hover:text-[#b6844a] font-semibold flex items-center gap-1"><Plus size={12}/>Add another beneficiary</button>
+                className="text-xs text-[#2F8132] hover:text-[#1E5B22] font-semibold flex items-center gap-1"><Plus size={12}/>Add another beneficiary</button>
             </FormBlock>
           ):willType==="goan"?(
             <FormBlock title="Residuary Clause">
@@ -992,7 +992,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                 );
               })}
               <button onClick={()=>setWill(p=>({...p, goanResidue:[...p.goanResidue,{name:"",relation:"",relationOther:"",idType:"Aadhaar Card",idNumber:""}]}))}
-                className="text-xs text-[#d09d61] hover:text-[#b6844a] font-semibold flex items-center gap-1"><Plus size={12}/>Add another residuary beneficiary</button>
+                className="text-xs text-[#2F8132] hover:text-[#1E5B22] font-semibold flex items-center gap-1"><Plus size={12}/>Add another residuary beneficiary</button>
             </FormBlock>
           ):(
             <FormBlock title="Section V — Rest & Residue Clause">
@@ -1018,7 +1018,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
               className={IC+" resize-none"}
               placeholder="e.g. My funeral shall be performed according to Hindu rites. I request my family to donate my usable organs..."/>
           </FormBlock>
-          <div className="bg-[#d09d61]/8 border border-[#d09d61]/25 rounded-xl p-3.5 text-xs text-[#8a6d3b] leading-relaxed">
+          <div className="bg-[#2F8132]/8 border border-[#2F8132]/25 rounded-xl p-3.5 text-xs text-[#1E5B22] leading-relaxed">
             <strong className="text-slate-900">Who can be a witness?</strong> Under the Indian Succession Act, 1925, a Will needs at least two witnesses. Any adult (18+) of sound mind who can sign their own name qualifies — they don't need to know the contents, and don't need to be related to you. Each witness must see you sign (or be told directly that you've signed), then sign it themselves in your presence. Avoid using someone who also inherits under the Will as a witness — for Christians and Parsis this can cancel that person's inheritance. Your executor is allowed to be a witness.
           </div>
           {willType==="goan"&&(()=>{
@@ -1075,7 +1075,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                     );
                   })}
                   <button onClick={()=>setWill(p=>({...p,goanWitnesses:[...p.goanWitnesses,{name:"",parentRelation:"s/o.",parentName:"",age:"",maritalStatus:"",occupation:"",address:"",pan:"",aadhaarNumber:""}]}))}
-                    className="text-xs text-[#d09d61] hover:text-[#b6844a] font-semibold flex items-center gap-1 mt-3"><Plus size={12}/>Add another witness</button>
+                    className="text-xs text-[#2F8132] hover:text-[#1E5B22] font-semibold flex items-center gap-1 mt-3"><Plus size={12}/>Add another witness</button>
                 </FormBlock>
 
                 {will.goanTestator.maritalStatus==="married"&&(
@@ -1108,7 +1108,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                           );
                         })}
                         <button onClick={()=>setWill(p=>({...p,goanDeedWitnesses:[...p.goanDeedWitnesses,{name:"",parentRelation:"s/o.",parentName:"",age:"",maritalStatus:"",occupation:"",address:"",pan:"",aadhaarNumber:""}]}))}
-                          className="text-xs text-[#d09d61] hover:text-[#b6844a] font-semibold flex items-center gap-1 mt-3"><Plus size={12}/>Add another witness for the Deed</button>
+                          className="text-xs text-[#2F8132] hover:text-[#1E5B22] font-semibold flex items-center gap-1 mt-3"><Plus size={12}/>Add another witness for the Deed</button>
                       </>
                     )}
                   </FormBlock>
@@ -1187,7 +1187,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
           </FormBlock>
           )}
           {willType!=="allindia"&&willType!=="goan"&&(
-            <div className="bg-[#d09d61]/8 border border-[#d09d61]/20 rounded-xl p-4 text-xs text-[#b88d48]">
+            <div className="bg-[#2F8132]/8 border border-[#2F8132]/20 rounded-xl p-4 text-xs text-[#1E5B22]">
               All rest, residue and remainder of my estate shall vest absolutely in <strong>{will.beneficiaries.find(b=>String(b.id)===String(will.residualBeneId))?.name||"Selected Beneficiary"}</strong>.
             </div>
           )}
@@ -1199,7 +1199,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                 <Send size={16} className="shrink-0"/>{submitStatus==="saving"?MSG_SAVING:(adminReview||adminComplete)?BTN_COMPLETE_REVIEW:BTN_SUBMIT_REVIEW}
               </button>
             )}
-            <button onClick={()=>setShowGenerateInstructions(true)} className="w-full bg-[#d09d61] hover:bg-[#b88442] text-[#020617] font-bold py-3.5 rounded-xl text-sm transition-colors flex items-center justify-center gap-2 whitespace-nowrap">
+            <button onClick={()=>setShowGenerateInstructions(true)} className="w-full bg-[#2F8132] hover:bg-[#1E5B22] text-[#ffffff] font-bold py-3.5 rounded-xl text-sm transition-colors flex items-center justify-center gap-2 whitespace-nowrap">
               <FileText size={16} className="shrink-0"/>Generate Complete Will Document <span aria-hidden="true">→</span>
             </button>
           </div>
@@ -1217,7 +1217,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                 </ul>
                 <div className="flex flex-col sm:flex-row gap-3">
                   <button onClick={()=>setShowGenerateInstructions(false)} className="w-full sm:w-auto px-5 py-3 rounded-full border border-slate-200 text-slate-600 hover:text-slate-900 text-sm font-medium transition-all">← Back</button>
-                  <button onClick={()=>{setShowGenerateInstructions(false);onGenerate();}} className="flex-1 bg-[#d09d61] hover:bg-[#b88442] text-[#020617] font-bold py-3 rounded-full text-sm transition-colors">
+                  <button onClick={()=>{setShowGenerateInstructions(false);onGenerate();}} className="flex-1 bg-[#2F8132] hover:bg-[#1E5B22] text-[#ffffff] font-bold py-3 rounded-full text-sm transition-colors">
                     Got it — Generate Document
                   </button>
                 </div>

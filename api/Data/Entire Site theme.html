@@ -1,0 +1,1078 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Forward Legacy — Estate & Succession Planning</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#14181B;
+    --ink-soft:#5C6570;
+    --ink-faint:#8A9096;
+    --green:#2F8132;
+    --green-dark:#1E5B22;
+    --green-light:#8BC34A;
+    --green-tint:#EDF6EA;
+    --bg:#FFFFFF;
+    --bg-soft:#F5F7F3;
+    --border:#E5E8E3;
+    --radius-sm:10px;
+    --radius:16px;
+    --radius-lg:24px;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink-soft);
+    font-family:'Inter', sans-serif;
+    line-height:1.65;
+    font-size:17px;
+  }
+  h1,h2,h3,h4{
+    font-family:'Plus Jakarta Sans', sans-serif;
+    color:var(--ink);
+    margin:0 0 0.5em;
+    font-weight:800;
+    letter-spacing:-0.02em;
+    line-height:1.15;
+  }
+  a{color:inherit;text-decoration:none;}
+  button,input,textarea,select{font-family:'Inter', sans-serif;}
+  .eyebrow{
+    font-family:'Inter', sans-serif;
+    text-transform:uppercase;
+    letter-spacing:0.12em;
+    font-size:0.78rem;
+    font-weight:700;
+    color:var(--green);
+  }
+  .btn{
+    display:inline-flex; align-items:center; gap:0.5em;
+    font-family:'Inter', sans-serif;
+    font-weight:600;
+    font-size:0.95rem;
+    padding:0.9em 1.8em;
+    border-radius:999px;
+    border:1.5px solid transparent;
+    cursor:pointer;
+    transition:transform 0.15s ease, background 0.2s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  .btn:hover{transform:translateY(-1px);}
+  .btn:focus-visible{outline:3px solid var(--green-light); outline-offset:2px;}
+  .btn-primary{background:var(--green); color:#fff; box-shadow:0 10px 22px -12px rgba(47,129,50,0.55);}
+  .btn-primary:hover{background:var(--green-dark);}
+  .btn-outline{background:transparent; color:var(--green); border-color:var(--green);}
+  .btn-outline:hover{background:var(--green); color:#fff;}
+  .btn-ink{background:var(--ink); color:#fff;}
+  .btn-ink:hover{background:#000;}
+  .btn-sm{padding:0.65em 1.3em; font-size:0.85rem;}
+  .btn-ghost{background:none; border:1.5px solid var(--border); color:var(--ink); border-radius:999px; padding:0.55em 1.1em 0.55em 0.6em;}
+  .btn-ghost:hover{border-color:var(--green); color:var(--green);}
+  .play-circle{
+    width:2.1em; height:2.1em; border-radius:50%; border:1.5px solid var(--green);
+    display:inline-flex; align-items:center; justify-content:center; color:var(--green); flex-shrink:0;
+  }
+  .wrap{max-width:1180px; margin:0 auto; padding:0 clamp(1.2rem,4vw,3rem);}
+  section{padding:clamp(3rem,7vw,5.5rem) 0;}
+  .band{background:var(--bg-soft);}
+
+  /* ===== HEADER ===== */
+  header.site-header{
+    position:sticky; top:0; z-index:200;
+    background:rgba(255,255,255,0.92);
+    backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--border);
+  }
+  .header-inner{
+    max-width:1180px; margin:0 auto; padding:0 clamp(1.2rem,4vw,3rem);
+    display:flex; align-items:center; justify-content:space-between;
+    height:80px;
+  }
+  .logo{display:flex; align-items:center; gap:0.65em; cursor:pointer;}
+  .logo-mark{flex-shrink:0; display:flex;}
+  .logo-text{
+    font-family:'Plus Jakarta Sans', sans-serif;
+    font-size:1rem;
+    font-weight:800;
+    color:var(--ink);
+    line-height:1.15;
+    letter-spacing:-0.01em;
+  }
+  .logo-text small{
+    display:block; font-family:'Inter',sans-serif; font-size:0.62rem; font-weight:600;
+    letter-spacing:0.14em; color:var(--ink-faint); margin-top:0.15em;
+  }
+  nav.primary-nav{display:flex; align-items:center; gap:2rem;}
+  nav.primary-nav a{
+    font-family:'Inter', sans-serif;
+    font-size:0.9rem;
+    font-weight:600;
+    color:var(--ink-soft);
+    padding:0.4em 0;
+    border-bottom:2px solid transparent;
+    transition:color 0.2s, border-color 0.2s;
+    cursor:pointer;
+  }
+  nav.primary-nav a:hover, nav.primary-nav a.active{color:var(--green); border-color:var(--green);}
+  nav.primary-nav a.login-link{
+    color:#fff; background:var(--green); border-radius:999px;
+    padding:0.65em 1.3em; border-bottom:none;
+  }
+  nav.primary-nav a.login-link:hover{background:var(--green-dark); color:#fff;}
+  .menu-toggle{display:none; background:none; border:none; cursor:pointer; padding:0.5rem;}
+  .menu-toggle span{display:block; width:24px; height:2px; background:var(--ink); margin:5px 0; transition:0.3s;}
+
+  @media(max-width:900px){
+    nav.primary-nav{
+      position:fixed; top:80px; right:0; height:calc(100vh - 80px); width:min(78vw,320px);
+      background:#fff; flex-direction:column; align-items:flex-start; gap:0;
+      padding:1.5rem clamp(1.2rem,4vw,3rem); border-left:1px solid var(--border);
+      transform:translateX(100%); transition:transform 0.3s ease;
+      overflow-y:auto;
+    }
+    nav.primary-nav.open{transform:translateX(0);}
+    nav.primary-nav a{width:100%; padding:0.9em 0; border-bottom:1px solid var(--border);}
+    nav.primary-nav a.login-link{margin-top:0.8em; text-align:center;}
+    .menu-toggle{display:block;}
+  }
+
+  /* ===== HERO ===== */
+  .hero{padding:clamp(3rem,7vw,5rem) 0 clamp(2rem,5vw,3.5rem);}
+  .hero-grid{display:grid; grid-template-columns:1fr 1fr; gap:3rem; align-items:center;}
+  @media(max-width:900px){.hero-grid{grid-template-columns:1fr;}}
+  .hero h1{font-size:clamp(2.2rem,4.2vw,3.1rem); max-width:14ch;}
+  .hero h1 .accent{color:var(--green);}
+  .hero p.lead{font-size:1.05rem; max-width:42ch; margin-bottom:1.8rem;}
+  .hero-actions{display:flex; flex-wrap:wrap; align-items:center; gap:1.4rem;}
+
+  .hero-visual{
+    position:relative; aspect-ratio:1/0.85; border-radius:var(--radius-lg);
+    background:linear-gradient(160deg, var(--green-tint) 0%, #fff 65%);
+    border:1px solid var(--border);
+    overflow:hidden;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .hero-visual .chevrons{position:absolute; bottom:-6%; right:-6%; width:60%; opacity:0.9;}
+  .hero-visual .doc-card{
+    position:relative; z-index:2; background:#fff; border-radius:var(--radius);
+    box-shadow:0 30px 60px -25px rgba(20,24,27,0.25); padding:1.8rem 2rem; width:min(78%,320px);
+  }
+  .hero-visual .doc-card .icon-circle{width:2.6em; height:2.6em; margin-bottom:0.9rem;}
+  .hero-visual .doc-card h4{font-size:1rem; margin-bottom:0.3em;}
+  .hero-visual .doc-card p{font-size:0.85rem; margin:0; color:var(--ink-soft);}
+  .hero-visual .stat-chip{
+    position:absolute; top:8%; left:8%; z-index:3; background:#fff; border-radius:999px;
+    padding:0.6em 1.1em; display:flex; align-items:center; gap:0.5em; box-shadow:0 14px 30px -18px rgba(20,24,27,0.3);
+    font-family:'Inter',sans-serif; font-size:0.8rem; font-weight:700; color:var(--ink);
+  }
+  .stat-chip .dot{width:8px; height:8px; border-radius:50%; background:var(--green); flex-shrink:0;}
+
+  /* ===== ICON FEATURE STRIP ===== */
+  .feature-strip{
+    background:var(--bg-soft); border-radius:var(--radius-lg);
+    padding:2rem clamp(1.2rem,4vw,2.5rem);
+    display:grid; grid-template-columns:repeat(4,1fr); gap:1.5rem;
+  }
+  @media(max-width:800px){.feature-strip{grid-template-columns:repeat(2,1fr);}}
+  @media(max-width:480px){.feature-strip{grid-template-columns:1fr;}}
+  .feature-item{display:flex; align-items:center; gap:0.9rem;}
+  .icon-circle{
+    width:2.6em; height:2.6em; border-radius:50%; background:#fff; color:var(--green);
+    display:flex; align-items:center; justify-content:center; flex-shrink:0;
+    border:1px solid var(--border);
+  }
+  .feature-item h4{font-size:0.92rem; margin:0 0 0.15em; font-weight:700;}
+  .feature-item p{font-size:0.82rem; margin:0; color:var(--ink-soft);}
+
+  /* ===== ABOUT TEASER (home) ===== */
+  .about-teaser{display:grid; grid-template-columns:0.9fr 1.1fr; gap:3rem; align-items:center;}
+  @media(max-width:860px){.about-teaser{grid-template-columns:1fr;}}
+  .about-visual{
+    aspect-ratio:1/0.95; border-radius:var(--radius-lg); background:var(--green-tint);
+    border:1px solid var(--border); display:flex; align-items:center; justify-content:center;
+  }
+  .about-visual .icon-circle{width:5.5rem; height:5.5rem; background:#fff; color:var(--green); box-shadow:0 20px 40px -22px rgba(20,24,27,0.25);}
+  .about-teaser p{font-size:1rem; margin-bottom:1.4rem;}
+
+  /* ===== PLAN OPTIONS ===== */
+  .section-head{text-align:center; max-width:640px; margin:0 auto 3rem;}
+  .section-head h2{font-size:clamp(1.7rem,3vw,2.3rem);}
+  .plan-grid{
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:1.5rem;
+  }
+  .plan-card{
+    background:#fff; border:1px solid var(--border); border-radius:var(--radius);
+    padding:2rem 1.6rem; display:flex; flex-direction:column; position:relative;
+    transition:box-shadow 0.2s, transform 0.2s;
+  }
+  .plan-card:hover{box-shadow:0 20px 40px -22px rgba(20,24,27,0.18); transform:translateY(-3px);}
+  .plan-card.featured{border-color:var(--green); border-width:2px; background:var(--green-tint);}
+  .badge{
+    position:absolute; top:-13px; left:1.6rem;
+    background:var(--green); color:#fff; font-family:'Inter',sans-serif;
+    font-size:0.68rem; font-weight:700; letter-spacing:0.06em; text-transform:uppercase;
+    padding:0.35em 0.9em; border-radius:999px;
+  }
+  .plan-card h3{font-size:1.1rem; letter-spacing:0.02em; margin-bottom:0.3em; color:var(--ink);}
+  .plan-price{font-family:'Inter',sans-serif; font-weight:700; color:var(--green); font-size:1.3rem; margin-bottom:1rem;}
+  .plan-highlight{
+    font-family:'Inter',sans-serif; font-size:0.86rem; line-height:1.55;
+    background:#fff; border-left:3px solid var(--green);
+    padding:0.8em 1em; margin-bottom:1.2rem; border-radius:0 8px 8px 0;
+  }
+  .plan-features{list-style:none; padding:0; margin:0 0 1.4rem; flex:1;}
+  .plan-features li{
+    font-family:'Inter',sans-serif; font-size:0.88rem; margin-bottom:0.85em; padding-left:1.4em; position:relative;
+  }
+  .plan-features li::before{content:"✓"; position:absolute; left:0; color:var(--green); font-weight:700;}
+  .plan-note{font-family:'Inter',sans-serif; font-size:0.78rem; color:var(--ink-faint); margin-bottom:1.2rem;}
+
+  /* ===== GIFT SECTION ===== */
+  .gift-section{
+    background:var(--green-tint); border:1px solid var(--border); color:var(--ink);
+    border-radius:var(--radius-lg); padding:clamp(2.2rem,5vw,3.5rem);
+    display:grid; gap:2.5rem; grid-template-columns:1.1fr 1fr; align-items:center;
+  }
+  @media(max-width:800px){.gift-section{grid-template-columns:1fr;}}
+  .gift-steps{list-style:none; margin:1.5rem 0; padding:0; counter-reset:step;}
+  .gift-steps li{
+    counter-increment:step; padding-left:2.6em; position:relative; margin-bottom:1.1em;
+    font-family:'Inter',sans-serif; font-size:0.92rem;
+  }
+  .gift-steps li::before{
+    content:counter(step); position:absolute; left:0; top:0; width:1.8em; height:1.8em;
+    background:var(--green); color:#fff; border-radius:50%;
+    display:flex; align-items:center; justify-content:center; font-size:0.78rem; font-weight:700;
+  }
+  .gift-steps strong{color:var(--ink); display:block; font-family:'Plus Jakarta Sans',sans-serif; font-size:1.02rem; font-weight:700;}
+  .gift-form{background:#fff; padding:1.6rem; border-radius:var(--radius); border:1px solid var(--border);}
+  .gift-form label{display:block; font-family:'Inter',sans-serif; font-size:0.78rem; margin-bottom:0.4em; color:var(--ink-soft); font-weight:600;}
+  .gift-form .row{display:flex; gap:0.6rem; margin-bottom:1rem;}
+  .gift-form input{
+    flex:1; padding:0.75em 0.9em; border-radius:999px; border:1px solid var(--border);
+    background:var(--bg-soft); color:var(--ink); font-size:0.86rem;
+  }
+  .gift-form .btn-outline{border-color:var(--border); color:var(--ink);}
+  .gift-form .btn-outline:hover{border-color:var(--green); color:var(--green); background:none;}
+  .gift-form .btn-primary{width:100%; text-align:center; justify-content:center;}
+
+  /* ===== WHY MATTERS ===== */
+  .stat-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:1.4rem; margin-top:2.5rem;}
+  .stat-card{
+    background:#fff; border-radius:var(--radius); padding:2rem 1.7rem; border:1px solid var(--border); border-top:4px solid var(--green);
+  }
+  .stat-card h3{font-size:1.05rem; margin-bottom:0.6em;}
+  .stat-card p{font-size:0.92rem; color:var(--ink-soft); opacity:1;}
+  .stat-icon{font-size:1.4rem; margin-right:0.3em;}
+
+  /* ===== ABOUT PAGE ===== */
+  .about-hero{background:var(--bg-soft); padding:clamp(3.5rem,7vw,5.5rem) 0 3rem;}
+  .about-hero h1{font-size:clamp(1.9rem,3.6vw,2.6rem); max-width:22ch;}
+  .about-copy{max-width:760px;}
+  .about-copy p{margin-bottom:1.2em;}
+  .why-list{list-style:none; padding:0; margin:2rem 0 0; display:grid; gap:1.3rem;}
+  .why-list li{
+    background:#fff; padding:1.4rem 1.6rem; border-radius:var(--radius); border-left:4px solid var(--green); border:1px solid var(--border); border-left-width:4px; border-left-color:var(--green);
+    font-size:0.98rem;
+  }
+  .team-grid{
+    display:grid; grid-template-columns:repeat(3,1fr); gap:1.8rem; margin-top:2.5rem;
+  }
+  @media(max-width:760px){.team-grid{grid-template-columns:repeat(2,1fr);}}
+  @media(max-width:480px){.team-grid{grid-template-columns:1fr;}}
+  .team-card{background:#fff; border-radius:var(--radius); padding:1.8rem 1.4rem; text-align:center; border:1px solid var(--border);}
+  .team-circle{
+    width:64px; height:64px; border-radius:50%; background:var(--green-tint); color:var(--green);
+    display:flex; align-items:center; justify-content:center; margin:0 auto 1rem;
+    font-family:'Plus Jakarta Sans',sans-serif; font-size:1.2rem; font-weight:700;
+  }
+  .team-card h4{font-size:1rem; margin-bottom:0.15em;}
+  .team-role{font-family:'Inter',sans-serif; font-size:0.72rem; text-transform:uppercase; letter-spacing:0.07em; color:var(--green); font-weight:700; display:block; margin-bottom:0.7em;}
+  .team-card p{font-size:0.85rem; color:var(--ink-soft); margin:0;}
+
+  /* ===== SERVICES PAGE ===== */
+  .service-block{
+    display:grid; grid-template-columns:0.9fr 1.4fr; gap:2.5rem; align-items:start;
+    padding:2.6rem 0; border-bottom:1px solid var(--border);
+  }
+  .service-block:last-child{border-bottom:none;}
+  @media(max-width:760px){.service-block{grid-template-columns:1fr; gap:1rem;}}
+  .service-label{position:sticky; top:100px;}
+  .service-label .eyebrow{display:block; margin-bottom:0.4em;}
+  .service-price{font-family:'Inter',sans-serif; font-weight:700; color:var(--green); font-size:1.05rem;}
+  .service-body ul{padding-left:1.2em; margin:0.8em 0;}
+  .service-body li{margin-bottom:0.6em; font-size:0.95rem;}
+  .service-actions{display:flex; flex-wrap:wrap; gap:0.7rem; margin-top:1.2rem;}
+
+  /* ===== PARTNER PAGE ===== */
+  .partner-list{list-style:none; padding:0; margin:1.6rem 0; display:grid; grid-template-columns:repeat(2,1fr); gap:0.9rem;}
+  @media(max-width:600px){.partner-list{grid-template-columns:1fr;}}
+  .partner-list li{
+    font-family:'Inter',sans-serif; font-size:0.92rem; padding:0.8em 1em; background:#fff;
+    border-radius:var(--radius-sm); border:1px solid var(--border); border-left:3px solid var(--green);
+  }
+  .callout{
+    background:var(--ink); color:#fff; font-family:'Inter',sans-serif; font-weight:600;
+    padding:1.3em 1.6em; border-radius:var(--radius); margin:2rem 0; display:inline-block; cursor:pointer;
+  }
+  .form-card{background:#fff; border-radius:var(--radius-lg); padding:clamp(1.6rem,4vw,2.6rem); margin-top:1rem; border:1px solid var(--border);}
+  .form-card .form-sub{font-size:0.88rem; margin-bottom:1.6rem;}
+  .form-card .form-sub a{color:var(--green); font-weight:600; cursor:pointer;}
+  .form-grid{display:grid; grid-template-columns:1fr 1fr; gap:1rem;}
+  @media(max-width:600px){.form-grid{grid-template-columns:1fr;}}
+  .field{margin-bottom:1.1rem;}
+  .field label{display:block; font-family:'Inter',sans-serif; font-size:0.8rem; font-weight:600; margin-bottom:0.4em; color:var(--ink);}
+  .field input, .field select, .field textarea{
+    width:100%; padding:0.75em 0.9em; border:1px solid var(--border); border-radius:var(--radius-sm);
+    font-size:0.9rem; background:var(--bg-soft); color:var(--ink);
+  }
+  .field input:focus, .field select:focus, .field textarea:focus{outline:2px solid var(--green); outline-offset:1px;}
+  .checkbox-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:0.6rem;}
+  @media(max-width:600px){.checkbox-grid{grid-template-columns:1fr;}}
+  .checkbox-item{display:flex; align-items:center; gap:0.55em; font-family:'Inter',sans-serif; font-size:0.86rem;}
+  .checkbox-item input{width:auto; accent-color:var(--green);}
+  .consent-row{display:flex; align-items:flex-start; gap:0.6em; font-family:'Inter',sans-serif; font-size:0.82rem; margin:1.4rem 0;}
+  .consent-row input{width:auto; margin-top:0.25em; accent-color:var(--green);}
+
+  /* ===== FAQ PAGE ===== */
+  .faq-section{margin-bottom:2.6rem;}
+  .faq-section > h3{font-size:1.2rem; border-bottom:2px solid var(--green); padding-bottom:0.5em; margin-bottom:1rem;}
+  .faq-item{background:#fff; border-radius:var(--radius-sm); margin-bottom:0.7rem; overflow:hidden; border:1px solid var(--border);}
+  .faq-q{
+    width:100%; text-align:left; background:none; border:none; cursor:pointer;
+    padding:1.1em 1.3em; font-family:'Inter',sans-serif; font-weight:600; font-size:0.93rem;
+    display:flex; justify-content:space-between; align-items:center; color:var(--ink);
+  }
+  .faq-q::after{content:"+"; font-size:1.3rem; color:var(--green); transition:transform 0.2s;}
+  .faq-item.open .faq-q::after{transform:rotate(45deg);}
+  .faq-a{max-height:0; overflow:hidden; transition:max-height 0.25s ease;}
+  .faq-a p{padding:0 1.3em 1.2em; margin:0; font-size:0.9rem; color:var(--ink-soft);}
+  .faq-note{
+    font-family:'Inter',sans-serif; font-size:0.82rem; background:var(--bg-soft);
+    border-left:3px solid var(--green); padding:1em 1.3em; border-radius:var(--radius-sm); margin-bottom:2rem;
+  }
+
+  /* ===== LOGIN PAGE ===== */
+  .login-box{max-width:420px; margin:0 auto; background:#fff; border-radius:var(--radius-lg); padding:2.4rem; border:1px solid var(--border);}
+  .login-box .field{margin-bottom:1.2rem;}
+
+  /* ===== FOOTER ===== */
+  footer.site-footer{background:var(--bg-soft); padding:clamp(3rem,6vw,4.5rem) 0 2rem; border-top:1px solid var(--border);}
+  .footer-grid{display:grid; grid-template-columns:1fr 1.3fr; gap:3rem;}
+  @media(max-width:800px){.footer-grid{grid-template-columns:1fr;}}
+  .contact-row{display:flex; align-items:center; gap:1rem; margin-bottom:1.5rem;}
+  .contact-circle{
+    width:46px; height:46px; border-radius:50%; background:#fff; color:var(--green);
+    display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:1.1rem;
+    border:1px solid var(--border);
+  }
+  .contact-row .c-label{font-family:'Inter',sans-serif; font-size:0.72rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--green); font-weight:700; display:block;}
+  .contact-row .c-value{font-size:0.95rem; color:var(--ink);}
+  .enquiry-form h3{margin-bottom:1rem;}
+  .footer-bottom{
+    margin-top:2.5rem; padding-top:1.5rem; border-top:1px solid var(--border);
+    font-family:'Inter',sans-serif; font-size:0.78rem; color:var(--ink-faint); text-align:center;
+  }
+
+  /* ===== PAGE SWITCH / UTILITY ===== */
+  .page{display:none;}
+  .page.active{display:block;}
+  .hidden{display:none !important;}
+  .toast{
+    position:fixed; bottom:1.5rem; right:1.5rem; background:var(--ink); color:#fff;
+    font-family:'Inter',sans-serif; font-size:0.86rem; padding:0.9em 1.4em; border-radius:var(--radius-sm);
+    box-shadow:0 10px 25px -10px rgba(0,0,0,0.4); z-index:500; opacity:0; transform:translateY(10px);
+    transition:opacity 0.25s, transform 0.25s; pointer-events:none;
+  }
+  .toast.show{opacity:1; transform:translateY(0);}
+  @media(prefers-reduced-motion:reduce){
+    *{transition:none !important; scroll-behavior:auto !important;}
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <div class="logo" data-nav="home">
+      <span class="logo-mark">
+        <svg width="34" height="34" viewBox="0 0 40 40" aria-hidden="true">
+          <polygon points="2,4 22,4 36,20 22,36 2,36 16,20" fill="#8BC34A"/>
+          <polygon points="14,10 30,10 38,20 30,30 14,30 22,20" fill="#1E7B27"/>
+        </svg>
+      </span>
+      <span class="logo-text">FORWARD LEGACY<small>ESTATE &amp; SUCCESSION PLANNING</small></span>
+    </div>
+    <button class="menu-toggle" id="menuToggle" aria-label="Toggle navigation"><span></span><span></span><span></span></button>
+    <nav class="primary-nav" id="primaryNav">
+      <a data-nav="home">Home</a>
+      <a data-nav="about">About Us</a>
+      <a data-nav="services">Our Services</a>
+      <a data-nav="faq">FAQ</a>
+      <a data-nav="contact">Contact Us</a>
+      <a data-nav="partner">Partner with Us</a>
+      <a data-nav="login" class="login-link">Client Login</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+<!-- ============ PAGE 1: HOME ============ -->
+<section class="page active" id="page-home">
+
+  <div class="hero">
+    <div class="wrap">
+      <div class="hero-grid">
+        <div>
+          <h1>Plan Today.<br>Protect Tomorrow.<br><span class="accent">Pass on Peace.</span></h1>
+          <p class="lead">Create a legally valid Will built for Goa's unique succession law, in a few simple steps. Fill it, review it, sign it.</p>
+          <div class="hero-actions">
+            <button class="btn btn-primary" data-nav="login">Create Your Will</button>
+            <a class="btn" style="padding-left:0;color:var(--ink);font-weight:600;" onclick="goToPage('services')">
+              <span class="play-circle">
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor"><polygon points="2,1 11,6 2,11"/></svg>
+              </span> How It Works
+            </a>
+          </div>
+        </div>
+        <div class="hero-visual">
+          <svg class="chevrons" viewBox="0 0 200 200" aria-hidden="true">
+            <polygon points="20,20 120,20 180,100 120,180 20,180 80,100" fill="#8BC34A" opacity="0.35"/>
+            <polygon points="70,50 150,50 190,100 150,150 70,150 110,100" fill="#1E7B27" opacity="0.45"/>
+          </svg>
+          <div class="stat-chip"><span class="dot"></span> 500+ Wills Drafted</div>
+          <div class="doc-card">
+            <div class="icon-circle">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>
+            </div>
+            <h4>Goa Will</h4>
+            <p>Drafted under the Goa Succession, Special Notaries and Inventory Proceeding Act, 2016.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section style="padding-top:0;">
+    <div class="wrap">
+      <div class="feature-strip">
+        <div class="feature-item">
+          <div class="icon-circle">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l8 3v6c0 5-3.5 9.5-8 11-4.5-1.5-8-6-8-11V5z"/><polyline points="9 12 11 14 15 10"/></svg>
+          </div>
+          <div><h4>Legally Valid</h4><p>As per Goa succession law</p></div>
+        </div>
+        <div class="feature-item">
+          <div class="icon-circle">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+          </div>
+          <div><h4>Secure &amp; Private</h4><p>Your documents stay confidential</p></div>
+        </div>
+        <div class="feature-item">
+          <div class="icon-circle">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h3"/></svg>
+          </div>
+          <div><h4>Clear Process</h4><p>Structured steps, no guesswork</p></div>
+        </div>
+        <div class="feature-item">
+          <div class="icon-circle">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 15v-3a8 8 0 0 1 16 0v3"/><path d="M20 15a2 2 0 0 1-2 2h-1v-5h1a2 2 0 0 1 2 2z"/><path d="M4 15a2 2 0 0 0 2 2h1v-5H6a2 2 0 0 0-2 2z"/></svg>
+          </div>
+          <div><h4>Expert Support</h4><p>Real people, we're here to help</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap about-teaser">
+      <div class="about-visual">
+        <div class="icon-circle">
+          <svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 3v18M5 7l-3 6a3 3 0 0 0 6 0zM19 7l-3 6a3 3 0 0 0 6 0z"/><path d="M5 7h14M8 21h8"/></svg>
+        </div>
+      </div>
+      <div>
+        <span class="eyebrow">About Us</span>
+        <h2>A Simple Way to Secure What Matters</h2>
+        <p>Forward Legacy is a Goa-based estate and succession planning practice that helps individuals and families create Wills, Trusts and Succession Deeds — simply, securely, and correctly under Goa's unique civil framework.</p>
+        <button class="btn btn-outline" data-nav="about">Learn More</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="band">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">Plan Options</span>
+        <h2>Choose Your Plan</h2>
+      </div>
+      <div class="plan-grid">
+
+        <div class="plan-card">
+          <h3>WILL</h3>
+          <div class="plan-price">₹4,999 per will</div>
+          <ul class="plan-features">
+            <li>Legally Compliant: Fully drafted per the Indian Succession Act, 1925.</li>
+            <li>Expert Review: Structured and verified by legal professionals.</li>
+            <li>Simple Process: Just print, sign, and register.</li>
+            <li>Perfect For: Simple estates and small families.</li>
+          </ul>
+          <div class="plan-note">Service covers drafting and review only; registration is optional and at the client's discretion.</div>
+          <button class="btn btn-primary" data-nav="login">Select Plan</button>
+        </div>
+
+        <div class="plan-card featured">
+          <span class="badge">Most Popular</span>
+          <h3>GOA WILL</h3>
+          <div class="plan-price">₹6,999 per will</div>
+          <div class="plan-highlight">Understanding Your Succession: As per the unique civil framework in Goa, your Will requires a specialized approach. We ensure your document is fully compliant with local laws and protects the mandatory rights of your family.</div>
+          <ul class="plan-features">
+            <li>Goa Civil Code Expert: Drafted under the Goa Succession, Special Notaries and Inventory Proceeding Act, 2016.</li>
+            <li>Legitime Compliance: Protects mandatory hereditary shares for spouses and children.</li>
+            <li>Local Jurisprudence: Structured by attorneys specializing in Goa's unique civil system.</li>
+            <li>Value Add: Includes a free Deed of Consent.</li>
+          </ul>
+          <div class="plan-note">Service covers drafting and review only; registration is the client's responsibility.</div>
+          <button class="btn btn-primary" data-nav="login">Select Plan</button>
+        </div>
+
+        <div class="plan-card">
+          <span class="badge">Tailored Approach</span>
+          <h3>CUSTOMIZED WILL</h3>
+          <div class="plan-price">Starting at ₹999</div>
+          <ul class="plan-features">
+            <li>For NRI &amp; OCI: Global asset structuring and compliance for your assets in India. Or anyone seeking personalized guidance for anyone seeking a tailored approach to their estate planning.</li>
+            <li>Business &amp; Complex Estates: Perfect for those with complex business structures and assets.</li>
+            <li>Lawyer Assignment: Drafted directly by a lawyer assigned to your file.</li>
+            <li>Legal Manager: A dedicated legal manager handles your communication from start to finish.</li>
+            <li>Consultations: Face-to-face video or audio consultations to discuss your family structure.</li>
+            <li>Refinements: Multiple drafts and feedback sessions.</li>
+            <li>Registration Note: Currently available in Goa only; we are expanding to other states very soon.</li>
+          </ul>
+          <button class="btn btn-primary" data-nav="login">Select Plan</button>
+        </div>
+
+        <div class="plan-card">
+          <span class="badge">Special Notary Process</span>
+          <h3>DEED OF DECLARATION OF HEIRSHIP</h3>
+          <ul class="plan-features">
+            <li>Goa-Specific Legal Process: Drafted in accordance with the Goa Succession, Special Notaries and Inventory Proceeding Act.</li>
+            <li>Proof of Heirship: A formal document to establish your legal rights as a successor when mandatory inventory proceedings are not required.</li>
+            <li>Easy Process: Simply provide your details, review the draft, and appear before the Special Notary for signing.</li>
+            <li>Deed Drafting &amp; Review: We handle the end-to-end drafting and legal verification of your deed.</li>
+            <li>Official Recognition: Once registered with the Special Notary, this deed serves as legal evidence for mutation, share transfers, and bank settlements.</li>
+          </ul>
+          <button class="btn btn-primary" data-nav="login">Select Plan</button>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="gift-section">
+        <div>
+          <span class="eyebrow">Digital Gift Voucher</span>
+          <h2>Gift a Will</h2>
+          <ol class="gift-steps">
+            <li><strong>Select Your Plan</strong>Choose from our Customized Will, NRI/OCI Estate Planning, or Full Succession Suite.</li>
+            <li><strong>Personalize Your Gift</strong>Enter the recipient's details and add a custom message.</li>
+            <li><strong>Redemption</strong>The recipient will receive a unique code to book / make their will.</li>
+          </ol>
+        </div>
+        <div class="gift-form">
+          <label for="couponCode">Have a coupon code?</label>
+          <div class="row">
+            <input type="text" id="couponCode" placeholder="Enter Coupon Code">
+            <button class="btn btn-outline" onclick="applyCoupon()">Apply</button>
+          </div>
+          <button class="btn btn-primary" onclick="showToast('Redirecting to gift checkout…')">Buy Now</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="section-head" style="max-width:720px;">
+        <h2>Why Legacy Planning Matters</h2>
+        <p style="font-size:0.98rem;">Most families assume succession will sort itself out. The numbers tell a different story.</p>
+      </div>
+      <div class="stat-grid">
+        <div class="stat-card">
+          <h3><span class="stat-icon">➕</span>Family Legal Disputes — 84.8% Have No Will</h3>
+          <p>84.8% of Indian families have no Will in place. Among them, 30.5% report having faced a bitter inheritance-related dispute — 23.3% minor, 7.2% major legal battles that drain family capital.</p>
+        </div>
+        <div class="stat-card">
+          <h3><span class="stat-icon">➕</span>Delayed Asset Transfer — Months to Years</h3>
+          <p>Without a Will, legal heirs must secure a Legal Heir Certificate and then a court-issued Succession Certificate before accessing property or financial assets. This process typically takes several months, stretching into years if any heir contests it, with heavy legal fees accumulating throughout.</p>
+        </div>
+        <div class="stat-card">
+          <h3><span class="stat-icon">➕</span>Unclaimed Deposits &amp; Investments — ₹73,241+ Cr</h3>
+          <p>More than ₹73,241 Cr in unclaimed assets sits frozen across Indian banks, insurance, and mutual funds — ₹60,518 Cr in bank deposits (83%), ₹8,974 Cr in insurance (12%), and ₹3,749 Cr in mutual funds (5%). This happens simply because nominations were never updated and no Will exists to direct where the money should go.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</section>
+
+<!-- ============ PAGE 2: ABOUT US ============ -->
+<section class="page" id="page-about">
+  <div class="about-hero">
+    <div class="wrap">
+      <span class="eyebrow">About Us</span>
+      <h1>A legacy practice built the way we'd want our own family's estate handled.</h1>
+    </div>
+  </div>
+
+  <section>
+    <div class="wrap about-copy">
+      <h2>Why we Exist</h2>
+      <p>Forward Legacy came from a very simple observation.</p>
+      <p>After handling numerous succession cases, we kept seeing the same thing — families who had spent a lifetime building something, left with nothing to show for it but paperwork, waiting, and in many cases, a dispute that could have been entirely avoided.</p>
+      <p>A property stuck in limbo because there was no Will. A spouse unable to access a joint account because the nominee column was blank. Children fighting over an ancestral home because nobody ever sat down and wrote out what should happen to it.</p>
+      <p>None of it was inevitable. All of it was preventable.</p>
+      <p>What struck us most was that the problem was rarely ignorance. Most people knew they should make a Will. They just never had someone to make it easy enough — or local enough — to actually get it done.</p>
+      <p>That's what ForwardLegacy is.</p>
+    </div>
+  </section>
+
+  <section class="band">
+    <div class="wrap about-copy">
+      <h2>Why Choose us?</h2>
+      <ul class="why-list">
+        <li>We help individuals and families put a proper plan in place — Wills, Trusts, Succession Deeds, Gift Deeds, Letters of Instruction, Executorship. Everything your family needs, in one place.</li>
+        <li>We understand Goa's succession framework in a way most national platforms simply don't. From the Legitime and the Communion of Property to the Special Notary process and Consent Deeds—for Goan families, these aren't just technicalities; they determine whether your Will is valid at all.</li>
+        <li>Goa follows its own set of succession laws, and if you draft a Will without accounting for them, you could get it entirely wrong. That is why we don't just know these rules on paper; we know how the system actually works on the ground. We have built our entire process—and the tools we use—specifically to navigate this framework correctly.</li>
+        <li>We cater to a wide range including NRI heirs, foreign residency, and property held across more than one country.</li>
+        <li>Our Letter of Instruction is one of them: a unique document we created specifically to make sure nothing gets lost, missed, or left to guesswork.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">Team</span>
+        <h2>The People Behind Forward Legacy</h2>
+        <p style="font-size:0.98rem;">Your legacy is our sole priority.</p>
+      </div>
+      <div class="team-grid">
+        <div class="team-card">
+          <div class="team-circle">AP</div>
+          <h4>Anup Prabhu Verlekar</h4>
+          <span class="team-role">Founder &amp; Legal Architect</span>
+          <p>Founded Forward Legacy, developed the idea, and built its legal foundation.</p>
+        </div>
+        <div class="team-card">
+          <div class="team-circle">AK</div>
+          <h4>Anushka Kamat</h4>
+          <span class="team-role">Product &amp; Brand</span>
+          <p>Helped shape the product's early direction and identity.</p>
+        </div>
+        <div class="team-card">
+          <div class="team-circle">SJ</div>
+          <h4>Sagar Joshi</h4>
+          <span class="team-role">Technology &amp; Platform</span>
+          <p>Designed and built the platform end-to-end — from backend systems to a clean, usable interface.</p>
+        </div>
+        <div class="team-card">
+          <div class="team-circle">PK</div>
+          <h4>Pooja Kanekar</h4>
+          <span class="team-role">Client Success Lead</span>
+          <p>Guides clients through complex cases, ensuring every detail is handled with care.</p>
+        </div>
+        <div class="team-card">
+          <div class="team-circle">PS</div>
+          <h4>Paraj Swar</h4>
+          <span class="team-role">Client Relationship Lead</span>
+          <p>Manages client relationships end-to-end, ensuring seamless execution from start to finish.</p>
+        </div>
+        <div class="team-card">
+          <div class="team-circle">EL</div>
+          <h4>Empanelled Lawyer</h4>
+          <span class="team-role">Legal Compliance</span>
+          <p>Verifies drafting accuracy and legal compliance.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</section>
+
+<!-- ============ PAGE 3: OUR SERVICES ============ -->
+<section class="page" id="page-services">
+  <section style="padding-bottom:1rem;">
+    <div class="wrap">
+      <span class="eyebrow">What We Offer</span>
+      <h1>Our Services</h1>
+    </div>
+  </section>
+
+  <section style="padding-top:1rem;">
+    <div class="wrap">
+
+      <div class="service-block" id="svc-wills">
+        <div class="service-label">
+          <span class="eyebrow">Service</span>
+          <h3>WILLS</h3>
+          <div class="service-price">starting at ₹4,999/-</div>
+        </div>
+        <div class="service-body">
+          <p>Will Drafting: We draft a legally binding Last Will and Testament tailored to your family structure and asset distribution wishes.</p>
+          <div class="service-actions">
+            <button class="btn btn-primary btn-sm" data-nav="home">See Will Pricing Options</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="service-block" id="svc-trusts">
+        <div class="service-label">
+          <span class="eyebrow">Service</span>
+          <h3>TRUSTS</h3>
+          <div class="service-price">starting at ₹19,999/-</div>
+        </div>
+        <div class="service-body">
+          <p><strong>What is a Trust?</strong> We guide you on how a trust works—a legal vehicle to hold, protect, and manage your wealth for your beneficiaries over time without going through the courts.</p>
+          <p><strong>Special Needs Trusts:</strong> We formulate tailored trusts specifically designed to ensure uninterrupted financial security and long-term care for dependents with special needs.</p>
+          <div class="service-actions">
+            <button class="btn btn-primary btn-sm" data-nav="login">Choose Plan</button>
+            <button class="btn btn-outline btn-sm" data-nav="contact">Contact Us</button>
+            <button class="btn btn-outline btn-sm" onclick="goFaq('faq-trusts')">Got a query?</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="service-block" id="svc-succession">
+        <div class="service-label">
+          <span class="eyebrow">Service</span>
+          <h3>SUCCESSION SERVICES</h3>
+          <div class="service-price">starting at ₹9,999/-</div>
+        </div>
+        <div class="service-body">
+          <ul>
+            <li><strong>Succession Deeds (Declaration of Heirship):</strong> We handle the complete legal drafting and support for deeds governed by Goa's unique civil system. This is an efficient way to prove heirship without formal inventory proceedings.</li>
+            <li><strong>Succession Certificates:</strong> End-to-end legal assistance to help your family obtain court-certified certificates, essential for transferring bank accounts and investments across India.</li>
+            <li><strong>Inventory Proceedings:</strong> Professional guidance for families requiring formal partition of assets through the court.</li>
+          </ul>
+          <div class="service-actions">
+            <button class="btn btn-primary btn-sm" data-nav="login">Choose Plan</button>
+            <button class="btn btn-outline btn-sm" data-nav="contact">Contact Us</button>
+            <button class="btn btn-outline btn-sm" onclick="goFaq('faq-succession')">Got a query?</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="service-block" id="svc-advisory">
+        <div class="service-label">
+          <span class="eyebrow">Service</span>
+          <h3>COMPREHENSIVE ESTATE PLAN ADVISORY</h3>
+          <div class="service-price">pricing based on case to case basis</div>
+        </div>
+        <div class="service-body">
+          <p>We provide personalized, step-by-step handholding to ensure your wealth transitions seamlessly and without family conflict. This is a strategic process where we audit and structure your entire estate.</p>
+          <p>Our advisory covers everything from aligning your financial nominations, creating Powers of Attorney (PoA), and planning business succession, to structuring Guardianship, minimizing tax burdens, and securing your digital assets.</p>
+          <div class="service-actions">
+            <button class="btn btn-primary btn-sm" data-nav="login">Choose Plan</button>
+            <button class="btn btn-outline btn-sm" data-nav="contact">Contact Us</button>
+            <button class="btn btn-outline btn-sm" onclick="goFaq('faq-advisory')">Got a query?</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="service-block" id="svc-nri">
+        <div class="service-label">
+          <span class="eyebrow">Service</span>
+          <h3>NRI SUCCESSION ADVISORY</h3>
+          <div class="service-price">pricing based on case to case basis</div>
+        </div>
+        <div class="service-body">
+          <p>We provide specialized cross-border legal structuring for Non-Resident Indians (NRIs) and Overseas Citizens of India (OCIs) to smoothly secure, manage, and transfer their Indian-based assets without jurisdictional hassles.</p>
+          <div class="service-actions">
+            <button class="btn btn-primary btn-sm" data-nav="login">Choose Plan</button>
+            <button class="btn btn-outline btn-sm" data-nav="contact">Contact Us</button>
+            <button class="btn btn-outline btn-sm" onclick="goFaq('faq-nri')">Got a query?</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+</section>
+
+<!-- ============ PAGE 4: PARTNER WITH US ============ -->
+<section class="page" id="page-partner">
+  <section style="padding-bottom:1rem;">
+    <div class="wrap">
+      <span class="eyebrow">Who Is This For?</span>
+      <h1>Partner with Us</h1>
+      <h3 style="margin-top:1.5rem;">Are You One of These Professionals? This Is for You:</h3>
+      <ul class="partner-list">
+        <li>✔ Financial Advisors</li>
+        <li>✔ CFP®, RIA, or Mutual Fund Distributors</li>
+        <li>✔ CAs, CS, Tax Consultants</li>
+        <li>✔ Lawyers &amp; Law Graduates</li>
+        <li>✔ Real Estate &amp; Insurance Professionals</li>
+        <li>✔ Lawyers</li>
+      </ul>
+      <div class="callout" data-nav="contact">We would love to collaborate with you (contact us)</div>
+    </div>
+  </section>
+
+  <section class="band" style="padding-top:1rem;">
+    <div class="wrap">
+      <div class="form-card">
+        <h3>Let's get you onboarded</h3>
+        <p class="form-sub">Already have an account? <a data-nav="login">Login here</a></p>
+        <form id="partnerForm" onsubmit="return handleFormSubmit(event,'Partner application submitted. We will be in touch shortly.')">
+          <div class="field">
+            <label>Select Services</label>
+            <div class="checkbox-grid">
+              <label class="checkbox-item"><input type="checkbox" name="service" value="Will"> Will</label>
+              <label class="checkbox-item"><input type="checkbox" name="service" value="Trust"> Trust</label>
+              <label class="checkbox-item"><input type="checkbox" name="service" value="Succession Services"> Succession Services</label>
+              <label class="checkbox-item"><input type="checkbox" name="service" value="Estate Plan Advisory"> Estate Plan Advisory</label>
+              <label class="checkbox-item"><input type="checkbox" name="service" value="NRI Succession Advisory"> NRI Succession Advisory</label>
+              <label class="checkbox-item"><input type="checkbox" name="service" value="Partner With Us"> Partner With Us</label>
+              <label class="checkbox-item"><input type="checkbox" name="service" value="Other"> Other</label>
+            </div>
+          </div>
+          <div class="form-grid">
+            <div class="field"><label>Your name*</label><input type="text" required></div>
+            <div class="field"><label>Your Phone number*</label><input type="tel" required></div>
+            <div class="field"><label>Email ID*</label><input type="email" required></div>
+            <div class="field"><label>State of Residence*</label><input type="text" required></div>
+          </div>
+          <div class="consent-row">
+            <input type="checkbox" id="partnerConsent" required>
+            <label for="partnerConsent">I am an adult &amp; have read the Disclaimer, Terms of Use and Privacy Policy</label>
+          </div>
+          <div class="service-actions">
+            <button type="button" class="btn btn-outline" onclick="showToast('Human verification started…')">Start human verification</button>
+            <button type="submit" class="btn btn-primary">Submit</button>
+            <button type="button" class="btn btn-ink" onclick="showToast('Redirecting to sign up…')">Sign Up</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+</section>
+
+<!-- ============ PAGE 5: FAQ ============ -->
+<section class="page" id="page-faq">
+  <section style="padding-bottom:1rem;">
+    <div class="wrap">
+      <span class="eyebrow">Support</span>
+      <h1>FAQ</h1>
+      <div class="faq-note">This FAQ page is built to hold your finalized, verbatim questions and answers. The source brief referenced content that wasn't included here — send over the approved Q&amp;A copy for each section and it'll drop straight into the accordions below (structure and section grouping already match the spec).</div>
+    </div>
+  </section>
+
+  <section style="padding-top:0;">
+    <div class="wrap">
+
+      <div class="faq-section" id="faq-wills">
+        <h3>Section A: All You Need to Know About Wills</h3>
+        <div class="faq-item">
+          <button class="faq-q">Placeholder question — Wills</button>
+          <div class="faq-a"><p>Placeholder answer. Replace with verbatim approved copy.</p></div>
+        </div>
+      </div>
+
+      <div class="faq-section" id="faq-goa">
+        <h3>Section B: Goa Succession Law — What Makes It Different</h3>
+        <div class="faq-item">
+          <button class="faq-q">Placeholder question — Goa Succession Law</button>
+          <div class="faq-a"><p>Placeholder answer. Replace with verbatim approved copy.</p></div>
+        </div>
+      </div>
+
+      <div class="faq-section" id="faq-trusts">
+        <h3>Section C: Trusts</h3>
+        <div class="faq-item">
+          <button class="faq-q">Placeholder question — Trusts</button>
+          <div class="faq-a"><p>Placeholder answer. Replace with verbatim approved copy.</p></div>
+        </div>
+      </div>
+
+      <div class="faq-section" id="faq-succession">
+        <h3>Section D: Succession Services</h3>
+        <div class="faq-item">
+          <button class="faq-q">Placeholder question — Succession Services</button>
+          <div class="faq-a"><p>Placeholder answer. Replace with verbatim approved copy.</p></div>
+        </div>
+      </div>
+
+      <div class="faq-section" id="faq-nri">
+        <h3>Section E: NRI &amp; Cross-Border Succession</h3>
+        <div class="faq-item">
+          <button class="faq-q">Placeholder question — NRI &amp; Cross-Border Succession</button>
+          <div class="faq-a"><p>Placeholder answer. Replace with verbatim approved copy.</p></div>
+        </div>
+      </div>
+
+      <div class="faq-section" id="faq-advisory">
+        <h3>Estate Plan Advisory</h3>
+        <div class="faq-item">
+          <button class="faq-q">Placeholder question — Estate Plan Advisory</button>
+          <div class="faq-a"><p>Placeholder answer. Replace with verbatim approved copy.</p></div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+</section>
+
+<!-- ============ CLIENT LOGIN (stub, linked from nav/buttons) ============ -->
+<section class="page" id="page-login">
+  <section>
+    <div class="wrap">
+      <div class="section-head" style="margin-bottom:2rem;">
+        <span class="eyebrow">Client Login</span>
+        <h1>Sign in to your account</h1>
+      </div>
+      <div class="login-box">
+        <form onsubmit="return handleFormSubmit(event,'Signed in. Redirecting to your dashboard…')">
+          <div class="field"><label>Email ID</label><input type="email" required></div>
+          <div class="field"><label>Password</label><input type="password" required></div>
+          <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center;">Login</button>
+        </form>
+        <p style="text-align:center; font-size:0.85rem; margin-top:1.4rem;">New here? <a data-nav="partner" style="color:var(--green); font-weight:600;">Partner with us</a> or <a data-nav="home" style="color:var(--green); font-weight:600;">choose a plan</a>.</p>
+      </div>
+    </div>
+  </section>
+</section>
+
+</main>
+
+<!-- ============ FOOTER & CONTACT (all pages) ============ -->
+<footer class="site-footer" id="page-contact-anchor">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div>
+        <span class="eyebrow">Get in Touch</span>
+        <h3 style="margin:0.6rem 0 1.6rem;">Office &amp; Contact</h3>
+        <div class="contact-row">
+          <div class="contact-circle">🏢</div>
+          <div><span class="c-label">Office</span><span class="c-value">Mapusa, Goa, 403507</span></div>
+        </div>
+        <div class="contact-row">
+          <div class="contact-circle">📞</div>
+          <div><span class="c-label">Phone</span><span class="c-value">+91 XXXXX XXXXX</span></div>
+        </div>
+        <div class="contact-row">
+          <div class="contact-circle">✉️</div>
+          <div><span class="c-label">Email</span><span class="c-value">office@forwardlegacy.co.in / admin@forwardlegacy.co.in / WhatsApp</span></div>
+        </div>
+      </div>
+      <div class="enquiry-form">
+        <h3>Submit Enquiry</h3>
+        <form onsubmit="return handleFormSubmit(event,'Enquiry sent. We will get back to you shortly.')">
+          <div class="form-grid">
+            <div class="field"><label>First Name</label><input type="text" required></div>
+            <div class="field"><label>Last Name</label><input type="text" required></div>
+            <div class="field"><label>Email</label><input type="email" required></div>
+            <div class="field"><label>Phone</label><input type="tel" required></div>
+          </div>
+          <div class="field"><label>Tell us about your estate planning needs</label><textarea rows="4"></textarea></div>
+          <button type="submit" class="btn btn-primary">Submit Enquiry</button>
+        </form>
+      </div>
+    </div>
+    <div class="footer-bottom">© 2026 Forward Legacy · Tura Global LLP, Mapusa, Goa · All rights reserved.</div>
+  </div>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  // ---------- Page navigation ----------
+  var pageMap = {
+    home:'page-home', about:'page-about', services:'page-services',
+    partner:'page-partner', faq:'page-faq', login:'page-login'
+  };
+
+  function goToPage(key){
+    if(key === 'contact'){
+      document.getElementById('page-contact-anchor').scrollIntoView({behavior:'smooth'});
+      closeMobileNav();
+      return;
+    }
+    var targetId = pageMap[key];
+    if(!targetId) return;
+    document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('active'); });
+    document.getElementById(targetId).classList.add('active');
+    document.querySelectorAll('nav.primary-nav a[data-nav]').forEach(function(a){
+      a.classList.toggle('active', a.getAttribute('data-nav') === key);
+    });
+    window.scrollTo({top:0, behavior:'instant' in document.documentElement.style ? 'instant' : 'auto'});
+    closeMobileNav();
+  }
+
+  document.querySelectorAll('[data-nav]').forEach(function(el){
+    el.addEventListener('click', function(){ goToPage(el.getAttribute('data-nav')); });
+  });
+
+  function goFaq(sectionId){
+    goToPage('faq');
+    setTimeout(function(){
+      var el = document.getElementById(sectionId);
+      if(el) el.scrollIntoView({behavior:'smooth', block:'start'});
+    }, 60);
+  }
+
+  // ---------- Mobile drawer ----------
+  var nav = document.getElementById('primaryNav');
+  var toggle = document.getElementById('menuToggle');
+  toggle.addEventListener('click', function(){ nav.classList.toggle('open'); });
+  function closeMobileNav(){ nav.classList.remove('open'); }
+
+  // ---------- FAQ accordion ----------
+  document.querySelectorAll('.faq-item').forEach(function(item){
+    var q = item.querySelector('.faq-q');
+    var a = item.querySelector('.faq-a');
+    q.addEventListener('click', function(){
+      var isOpen = item.classList.contains('open');
+      item.parentElement.querySelectorAll('.faq-item').forEach(function(sib){
+        sib.classList.remove('open');
+        sib.querySelector('.faq-a').style.maxHeight = null;
+      });
+      if(!isOpen){
+        item.classList.add('open');
+        a.style.maxHeight = a.scrollHeight + 'px';
+      }
+    });
+  });
+
+  // ---------- Misc ----------
+  function applyCoupon(){
+    var v = document.getElementById('couponCode').value.trim();
+    showToast(v ? 'Coupon "' + v + '" applied.' : 'Enter a coupon code first.');
+  }
+
+  function handleFormSubmit(e, message){
+    e.preventDefault();
+    showToast(message);
+    e.target.reset();
+    return false;
+  }
+
+  var toastTimer;
+  function showToast(msg){
+    var t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ t.classList.remove('show'); }, 3200);
+  }
+</script>
+
+</body>
+</html>

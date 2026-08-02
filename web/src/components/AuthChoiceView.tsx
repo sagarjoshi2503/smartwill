@@ -45,7 +45,7 @@ export default function AuthChoiceView({onGoogleSuccess,onPhone,onBack}:{
     <div className="fade-in min-h-[calc(100vh-58px)] bg-slate-100 flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="w-14 h-14 bg-[#d09d61]/15 border border-[#d09d61]/20 rounded-3xl flex items-center justify-center mx-auto mb-4"><Scale size={22} className="text-[#d09d61]"/></div>
+          <div className="w-14 h-14 bg-[#2F8132]/15 border border-[#2F8132]/20 rounded-3xl flex items-center justify-center mx-auto mb-4"><Scale size={22} className="text-[#2F8132]"/></div>
           <h2 className="text-3xl font-black text-slate-900 serif">Get Started</h2>
           <p className="text-slate-600 text-sm mt-2">Sign in to start drafting your Will</p>
         </div>
@@ -56,7 +56,7 @@ export default function AuthChoiceView({onGoogleSuccess,onPhone,onBack}:{
           <div className="flex items-center gap-3 text-slate-400 text-[10px] uppercase tracking-widest">
             <div className="flex-1 h-px bg-slate-200"/>or<div className="flex-1 h-px bg-slate-200"/>
           </div>
-          <button onClick={onPhone} className="w-full flex items-center justify-center gap-2 border border-slate-200 hover:border-[#d09d61]/40 rounded-full py-3 text-sm font-semibold text-slate-700 hover:text-slate-900 transition-all">
+          <button onClick={onPhone} className="w-full flex items-center justify-center gap-2 border border-slate-200 hover:border-[#2F8132]/40 rounded-full py-3 text-sm font-semibold text-slate-700 hover:text-slate-900 transition-all">
             <Phone size={14}/>Continue with Phone Number <ArrowRight size={14}/>
           </button>
         </div>

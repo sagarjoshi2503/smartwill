@@ -55,14 +55,14 @@ export default function GoanDeedDocument({will,onBack,onPrint,willDocRef}:{
       <div className="no-print sticky top-0 z-50 bg-white border-b border-slate-200 px-5 py-3 flex items-center justify-between">
         <button onClick={onBack} className="flex items-center gap-2 text-slate-600 hover:text-slate-900 transition-colors text-sm"><ChevronLeft size={16}/>Back</button>
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 bg-[#d09d61] rounded-md flex items-center justify-center"><Scale size={13} className="text-[#020617]"/></div>
+          <div className="w-7 h-7 bg-[#2F8132] rounded-md flex items-center justify-center"><Scale size={13} className="text-[#ffffff]"/></div>
           <span className="text-slate-900 font-bold serif">SmartWill — Deed of Consent</span>
         </div>
         <div className="flex items-center gap-2.5">
           <button onClick={onPrint} className="flex items-center gap-1.5 bg-slate-700 hover:bg-slate-600 text-white rounded-lg px-3.5 py-2 text-sm transition-colors">
             <Printer size={14}/>Print
           </button>
-          <button onClick={onPrint} className="flex items-center gap-1.5 bg-[#d09d61] hover:bg-[#b88442] text-[#020617] rounded-lg px-3.5 py-2 text-sm font-semibold transition-colors">
+          <button onClick={onPrint} className="flex items-center gap-1.5 bg-[#2F8132] hover:bg-[#1E5B22] text-[#ffffff] rounded-lg px-3.5 py-2 text-sm font-semibold transition-colors">
             <Download size={14}/>Download PDF
           </button>
         </div>

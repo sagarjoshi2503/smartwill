@@ -50,7 +50,7 @@ export default function ContactUsView({onBack}:{
     <div className="fade-in min-h-[calc(100vh-58px)] bg-slate-100 px-4 py-12">
       <div className="max-w-2xl mx-auto">
         <div className="text-center mb-8">
-          <div className="w-14 h-14 bg-[#d09d61]/15 border border-[#d09d61]/20 rounded-3xl flex items-center justify-center mx-auto mb-4"><MessageSquare size={22} className="text-[#d09d61]"/></div>
+          <div className="w-14 h-14 bg-[#2F8132]/15 border border-[#2F8132]/20 rounded-3xl flex items-center justify-center mx-auto mb-4"><MessageSquare size={22} className="text-[#2F8132]"/></div>
           <h2 className="text-3xl font-black text-slate-900 serif">Contact Us</h2>
           <p className="text-slate-600 text-sm mt-2">Have a Custom Will requirement or a question? Reach out and we'll get back to you.</p>
         </div>
@@ -58,11 +58,11 @@ export default function ContactUsView({onBack}:{
         {contactInfo && (
           <div className="flex flex-col sm:flex-row gap-3 mb-6">
             <div className="flex-1 apv-card p-4 flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-[#d09d61]/10 text-[#d09d61] flex items-center justify-center shrink-0"><Mail size={15}/></div>
+              <div className="w-9 h-9 rounded-xl bg-[#2F8132]/10 text-[#2F8132] flex items-center justify-center shrink-0"><Mail size={15}/></div>
               <div><div className="text-slate-500 text-[10px] uppercase tracking-widest">Email</div><div className="text-slate-900 text-sm font-medium">{contactInfo.email}</div></div>
             </div>
             <div className="flex-1 apv-card p-4 flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-[#d09d61]/10 text-[#d09d61] flex items-center justify-center shrink-0"><Phone size={15}/></div>
+              <div className="w-9 h-9 rounded-xl bg-[#2F8132]/10 text-[#2F8132] flex items-center justify-center shrink-0"><Phone size={15}/></div>
               <div><div className="text-slate-500 text-[10px] uppercase tracking-widest">Phone</div><div className="text-slate-900 text-sm font-medium">{contactInfo.phone}</div></div>
             </div>
           </div>

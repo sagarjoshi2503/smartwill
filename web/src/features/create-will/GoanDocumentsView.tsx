@@ -44,22 +44,22 @@ export default function GoanDocumentsView({will,onBack,onPrint}:{
         <button onClick={onBack} className="flex items-center gap-2 text-slate-600 hover:text-slate-900 transition-colors text-sm mb-6"><ChevronLeft size={16}/>Back to Wizard</button>
         <div className="bg-white rounded-2xl border border-slate-200 shadow-xl p-8">
           <div className="flex items-center gap-2.5 mb-2">
-            <div className="w-8 h-8 bg-[#d09d61] rounded-lg flex items-center justify-center"><Scale size={15} className="text-[#020617]"/></div>
+            <div className="w-8 h-8 bg-[#2F8132] rounded-lg flex items-center justify-center"><Scale size={15} className="text-[#ffffff]"/></div>
             <h1 className="text-slate-900 font-bold text-lg serif">Your documents are ready</h1>
           </div>
           <p className="text-slate-500 text-sm mb-6">Each opens its own print-ready view, formatted to A4. Choose <strong>Save as PDF</strong> as the print destination and print single-sided.</p>
           <div className="space-y-3">
             {docs.map(d=>(
               <button key={d.key} onClick={()=>setActiveDoc(d.key)}
-                className="w-full flex items-center justify-between gap-3 bg-slate-50 hover:bg-[#d09d61]/10 border border-slate-200 hover:border-[#d09d61]/40 rounded-xl px-4 py-3.5 transition-all text-left">
+                className="w-full flex items-center justify-between gap-3 bg-slate-50 hover:bg-[#2F8132]/10 border border-slate-200 hover:border-[#2F8132]/40 rounded-xl px-4 py-3.5 transition-all text-left">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-[#d09d61]/15 text-[#8a6d3b] flex items-center justify-center shrink-0"><FileText size={15}/></div>
+                  <div className="w-8 h-8 rounded-lg bg-[#2F8132]/15 text-[#1E5B22] flex items-center justify-center shrink-0"><FileText size={15}/></div>
                   <div>
                     <div className="text-slate-900 text-sm font-semibold">{d.label}</div>
                     <div className="text-slate-500 text-xs">{d.sub}</div>
                   </div>
                 </div>
-                <span className="flex items-center gap-1.5 text-[#d09d61] text-xs font-semibold shrink-0"><Download size={13}/>Open</span>
+                <span className="flex items-center gap-1.5 text-[#2F8132] text-xs font-semibold shrink-0"><Download size={13}/>Open</span>
               </button>
             ))}
           </div>
