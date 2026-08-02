@@ -5,6 +5,7 @@ import {
 } from "lucide-react";
 import {
   ID_TYPES, RELATIONS, MONTHS, OCCUPATIONS, ALLINDIA_RELATIONSHIP_OPTIONS,
+  NONGOAN_RELATIONSHIP_OPTIONS, WITNESS_RELATION_OPTIONS,
   GOAN_MARITAL_STATUSES, GOAN_WITNESS_OCCUPATIONS,
 } from "../../data/options";
 import { ASSET_CATALOGUE, COLOR } from "../../data/assetCatalogue";
@@ -597,7 +598,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                       <div><label className={LC}>Relationship</label>
                         <select value={item.relation} onChange={e=>setItem(itemKey,idx,"relation",e.target.value)} className={IC+" appearance-none"}>
                           <option value="">Select...</option>
-                          {ALLINDIA_RELATIONSHIP_OPTIONS.map(r=><option key={r}>{r}</option>)}
+                          {NONGOAN_RELATIONSHIP_OPTIONS.map(r=><option key={r}>{r}</option>)}
                         </select>
                       </div>
                       <div><label className={LC}>{LBL_ID_TYPE}</label>
@@ -621,7 +622,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                 <div className="bg-[#d09d61]/8 border border-[#d09d61]/25 rounded-xl p-4">
                   <span className="inline-block bg-[#d09d61] text-[#020617] text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full mb-2">Included Automatically</span>
                   <p className="text-slate-900 text-sm font-semibold mb-1">A. Financial Assets</p>
-                  <p className="text-slate-600 text-xs leading-relaxed">I bequeath all my financial assets — including Bank Accounts, FDs, RDs, PPF, Life Insurance, Stocks, Mutual Funds, Crypto, Digital Wallets, NPS, Bonds, AIF, SIF, and PMS — entirely to the nominees registered in those financial instruments.</p>
+                  <p className="text-slate-600 text-xs leading-relaxed">I bequeath all my financial assets — including Bank Accounts, Fixed Deposits (FDs), Recurring Deposits (RDs), Public Provident Fund (PPF), Life Insurance, Stocks, Mutual Funds, Cryptocurrency (Crypto), Digital Wallets, National Pension System (NPS), Bonds, Alternative Investment Fund (AIF), Specialized Investment Fund (SIF), and Portfolio Management Services (PMS) — entirely to the nominees registered in those financial instruments.</p>
                   <p className="text-[#8a6d3b] text-xs leading-relaxed mt-2.5 pt-2.5 border-t border-dashed border-[#d09d61]/30"><strong>Why we recommend this:</strong> it's advisable to pass on financial assets by nomination rather than by listing individual accounts — nominations stay current automatically as balances and accounts change, so you don't need to update this Will every time. Just keep your nominations up to date.</p>
                 </div>
                 <FormBlock title="B. Immovable Property">
@@ -916,7 +917,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                       <div><label className={LC}>Relationship</label>
                         <select value={entry.relation} onChange={e=>setEntry("relation",e.target.value)} className={IC+" appearance-none"}>
                           <option value="">Select...</option>
-                          {ALLINDIA_RELATIONSHIP_OPTIONS.map(r=><option key={r}>{r}</option>)}
+                          {NONGOAN_RELATIONSHIP_OPTIONS.map(r=><option key={r}>{r}</option>)}
                         </select>
                       </div>
                     </div>
@@ -1168,6 +1169,17 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                   <div className="mt-2.5"><label className={LC}>Resident of (Address)</label>
                     <input value={w.address} onChange={e=>setW("address",e.target.value)} className={IC}/>
                   </div>
+                  <div className="mt-2.5"><label className={LC}>Relation to Testator</label>
+                    <select value={w.relationToTestator} onChange={e=>setW("relationToTestator",e.target.value)} className={IC+" appearance-none"}>
+                      <option value="">Select...</option>
+                      {WITNESS_RELATION_OPTIONS.map(r=><option key={r}>{r}</option>)}
+                    </select>
+                  </div>
+                  {w.relationToTestator==="Other"&&(
+                    <div className="mt-2.5"><label className={LC}>Please specify relation to testator</label>
+                      <input value={w.relationToTestatorOther} onChange={e=>setW("relationToTestatorOther",e.target.value)} className={IC}/>
+                    </div>
+                  )}
                 </div>
               );
             })}

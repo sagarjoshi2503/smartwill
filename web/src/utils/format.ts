@@ -5,14 +5,12 @@ export const fmt = (n: number): string => "₹" + n.toLocaleString("en-IN");
 const now = new Date();
 export const today = { day: now.getDate(), month: MONTHS[now.getMonth()], year: now.getFullYear() };
 
-const ONES = ["Zero","One","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Eleven","Twelve","Thirteen","Fourteen","Fifteen","Sixteen","Seventeen","Eighteen","Nineteen"];
-const TENS = ["","","Twenty","Thirty","Forty","Fifty","Sixty","Seventy","Eighty","Ninety"];
-
-// Spells out 0-99 in words — used for the "Two Thousand and ___" execution-year
-// phrasing in the All India Will document (matches the PDF template's wording).
-export const numberToWords = (n: number): string => {
-  if(n<0||!Number.isFinite(n)) return "";
-  if(n<20) return ONES[n];
-  const tens=Math.floor(n/10), ones=n%10;
-  return ones===0 ? TENS[tens] : `${TENS[tens]} ${ONES[ones]}`;
+// Renders a day-of-month as its ordinal ("27th", "1st", "22nd") — used for the
+// execution-date phrasing in the All India Will document.
+export const ordinal = (n: string | number): string => {
+  const num = typeof n==="number" ? n : parseInt(n,10);
+  if(!Number.isFinite(num)) return String(n);
+  const suffixes = ["th","st","nd","rd"];
+  const v = num % 100;
+  return num + (suffixes[(v-20)%10] || suffixes[v] || suffixes[0]);
 };

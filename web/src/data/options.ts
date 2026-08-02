@@ -21,6 +21,21 @@ export const OCCUPATIONS = ["Retired","In Service","Business","Profession","Home
 // above). Shared across both since the wording is identical in each PDF.
 export const ALLINDIA_RELATIONSHIP_OPTIONS = ["Spouse","Son","Daughter","Other"];
 
+// Wider relationship list from the latest Non-Goan (All India) Will input
+// form spec — used for allindia asset bequests/residuary beneficiaries only;
+// the Goan Will keeps using the narrower ALLINDIA_RELATIONSHIP_OPTIONS above
+// (its own PDF template wasn't updated) so this is deliberately not shared.
+export const NONGOAN_RELATIONSHIP_OPTIONS = [
+  "Spouse","Son","Daughter","Father","Mother","Brother","Sister",
+  "Grandson","Granddaughter","Nephew","Niece","Friend","Other",
+];
+
+// A witness's relationship to the testator — new field on the Non-Goan Will
+// input form spec, printed in each witness's entry in the generated document.
+export const WITNESS_RELATION_OPTIONS = [
+  "Not a relative","Friend","Neighbour","Colleague","Family member","Executor of the Will","Other",
+];
+
 // Marital status choices exactly as worded in the Goan Will PDF template's
 // "married/unmarried/widowed/divorced (marital status)" blank — wider than
 // the All India Will's married/unmarried-only status.

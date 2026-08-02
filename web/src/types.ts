@@ -73,6 +73,8 @@ export interface Witness {
   occupationOther: string;
   address: string;
   aadhaarNumber: string;
+  relationToTestator: string;
+  relationToTestatorOther: string;
 }
 
 export interface AssetField {

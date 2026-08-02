@@ -1,9 +1,10 @@
 import { Eye } from "lucide-react";
-import { numberToWords } from "../../utils/format";
-import type { AllIndiaAssetItem, WillState } from "../../types";
+import { ordinal } from "../../utils/format";
+import type { AllIndiaAssetItem, Witness, WillState } from "../../types";
 
 const relOf = (it: {relation: string; relationOther: string}) => it.relation==="Other" ? it.relationOther : it.relation;
 const occupationOf = (it: {occupation: string; occupationOther: string}) => it.occupation==="Other" ? it.occupationOther : it.occupation;
+const witnessRelOf = (w: Witness) => w.relationToTestator==="Other" ? w.relationToTestatorOther : w.relationToTestator;
 
 // Mirrors AllIndiaWillDocument.tsx's exact wording/section order (the PDF
 // template) so the live preview matches the final generated document,
@@ -14,9 +15,9 @@ export default function AllIndiaLiveDocPreview({will}:{
   const {testator,allIndiaAssets,allIndiaResidue,witnesses}=will;
   const blank = "_______________________";
 
-  const yearNum = Number(testator.signYear);
-  const yearRemainder = Number.isFinite(yearNum) ? yearNum % 100 : NaN;
-  const yearWords = Number.isFinite(yearRemainder) ? numberToWords(yearRemainder) : testator.signYear || "____";
+  const dateStr = testator.signDay && testator.signMonth && testator.signYear
+    ? <>{ordinal(testator.signDay)} day of {testator.signMonth}, {testator.signYear}</>
+    : "____";
 
   const sonNames = testator.sonNames.filter(Boolean);
   const daughterNames = testator.daughterNames.filter(Boolean);
@@ -27,6 +28,23 @@ export default function AllIndiaLiveDocPreview({will}:{
       <p key={i} className="mb-1">{numbered?`(${i+1}) `:""}{label}: <strong>{item.description||blank}</strong> Bequeathed to: <strong>{item.beneficiary||blank}</strong> Relationship: <strong>{relOf(item)||blank}</strong>, bearing {item.idType||"Aadhaar Card"} Number: <strong>{item.idNumber||blank}</strong>.</p>
     ));
   };
+
+  // Section letters skip categories the testator left blank — mirrors
+  // AllIndiaWillDocument.tsx's dynamic lettering.
+  const filled = (items: AllIndiaAssetItem[]) => items.filter(it=>it.description.trim());
+  const houseFlat = filled(allIndiaAssets.houseFlat), landPlot = filled(allIndiaAssets.landPlot), commercialProperty = filled(allIndiaAssets.commercialProperty);
+  const vehicle = filled(allIndiaAssets.vehicle);
+  const jewellery = filled(allIndiaAssets.jewellery);
+  const socialMediaDigital = filled(allIndiaAssets.socialMediaDigital), intellectualProperty = filled(allIndiaAssets.intellectualProperty);
+  const hasImmovable = houseFlat.length>0||landPlot.length>0||commercialProperty.length>0;
+  const hasVehicle = vehicle.length>0;
+  const hasPersonal = jewellery.length>0;
+  const hasDigitalMisc = socialMediaDigital.length>0||intellectualProperty.length>0;
+  let nextLetter = 66; // 'B' — 'A' is always Financial Assets
+  const letterImmovable = hasImmovable ? String.fromCharCode(nextLetter++) : "";
+  const letterVehicle = hasVehicle ? String.fromCharCode(nextLetter++) : "";
+  const letterPersonal = hasPersonal ? String.fromCharCode(nextLetter++) : "";
+  const letterDigitalMisc = hasDigitalMisc ? String.fromCharCode(nextLetter++) : "";
 
   const SectionSignatureLine = () => (
     <p className="mb-3">Testator's Signature: ___________________ Witness 1: _________ Witness 2: _________</p>
@@ -42,26 +60,12 @@ export default function AllIndiaLiveDocPreview({will}:{
         <h1 className="text-center text-base font-bold tracking-widest uppercase mb-4">WILL</h1>
 
         <p className="text-justify mb-3">
-          I, <strong>{testator.fullName||blank}</strong>, having PAN <strong>{testator.pan||blank}</strong>, Aadhar no <strong>{testator.aadhaarNumber||blank}</strong> {testator.relation} of <strong>{testator.parentSpouseName||blank}</strong>, aged <strong>{testator.age||"___"}</strong>, {testator.maritalStatus}, nationality <strong>{testator.nationality||blank}</strong>, occupation <strong>{occupationOf(testator)||blank}</strong>, resident of <strong>{testator.address||blank}</strong>
+          I, <strong>{testator.fullName||blank}</strong>, having PAN <strong>{testator.pan||blank}</strong>, Aadhaar No. <strong>{testator.aadhaarNumber||blank}</strong>, {testator.relation} of <strong>{testator.parentSpouseName||blank}</strong>, aged <strong>{testator.age||"___"}</strong>, {testator.maritalStatus}, nationality <strong>{testator.nationality||blank}</strong>, occupation <strong>{occupationOf(testator)||blank}</strong>, resident of <strong>{testator.address||blank}</strong>
           {testator.maritalStatus==="married"&&(
-            <>, I am married to <strong>{testator.spouseName||blank}</strong>, bearing Aadhar No. <strong>{testator.spouseAadhaarNumber||blank}</strong> and I have {sonNames.length===1?"one":sonNames.length||"___"} son, namely, <strong>{sonNames.join(", ")||blank}</strong> and {daughterNames.length===1?"one":daughterNames.length||"___"} daughter, namely, <strong>{daughterNames.join(", ")||blank}</strong>
+            <>, I am married to <strong>{testator.spouseName||blank}</strong>, bearing Aadhaar No. <strong>{testator.spouseAadhaarNumber||blank}</strong> and I have {sonNames.length===1?"one":sonNames.length||"___"} son, namely, <strong>{sonNames.join(", ")||blank}</strong> and {daughterNames.length===1?"one":daughterNames.length||"___"} daughter, namely, <strong>{daughterNames.join(", ")||blank}</strong>
             </>
-          )}
+          )}. And on this <strong>{dateStr}</strong>, and in the presence of two witnesses whose details appear at the end of this document, make my last and final WILL.
         </p>
-
-        <p className="text-justify mb-3">
-          And on <strong>{testator.signDay||"___"}</strong> day of <strong>{testator.signMonth||"_______"}</strong> of the year Two Thousand and <strong>{yearWords||"____"}</strong> and in the presence of two following witnesses:
-        </p>
-
-        <div className="mb-3 space-y-2">
-          {witnesses.map((w,i)=>(
-            <p key={i} className="text-justify">
-              {String.fromCharCode(97+i)}) <strong>{w.name||blank}</strong> {w.parentRelation} of <strong>{w.parentName||blank}</strong> aged <strong>{w.age||"___"}</strong>, {w.maritalStatus}, nationality <strong>{w.nationality||blank}</strong>, occupation <strong>{occupationOf(w)||blank}</strong>, resident of <strong>{w.address||blank}</strong> bearing Aadhaar Number <strong>{w.aadhaarNumber||blank}</strong>
-            </p>
-          ))}
-        </div>
-
-        <p className="text-justify mb-3">make my last and final WILL.</p>
 
         <p className="text-justify mb-3">
           I am making this last WILL and testament of mine voluntarily and without any compulsion or pressure from any source or person and in sound health and disposing state of mind. I have not been influenced, cajoled or coerced in any manner to write this WILL. I do hereby revoke all my wills, if any, previously made by me.
@@ -75,28 +79,40 @@ export default function AllIndiaLiveDocPreview({will}:{
 
         <p className="font-bold mb-1">A. Financial Assets:</p>
         <p className="text-justify mb-3">
-          I bequeath all my financial assets including Bank Accounts, FDs, RDs, PPF, Life Insurance, Stocks, Mutual Funds, Crypto, Digital Wallets, NPS, Bonds, AIF, SIF, and PMS entirely to the nominees registered in those financial instruments.
+          I bequeath all my financial assets including Bank Accounts, Fixed Deposits (FDs), Recurring Deposits (RDs), Public Provident Fund (PPF), Life Insurance, Stocks, Mutual Funds, Cryptocurrency (Crypto), Digital Wallets, National Pension System (NPS), Bonds, Alternative Investment Fund (AIF), Specialized Investment Fund (SIF), and Portfolio Management Services (PMS) entirely to the nominees registered in those financial instruments.
         </p>
         <SectionSignatureLine/>
 
-        <p className="font-bold mb-1">B. Immovable Property:</p>
-        {renderAssetList(allIndiaAssets.houseFlat,"House / Flat")}
-        {renderAssetList(allIndiaAssets.landPlot,"Land / Plot")}
-        <div className="mb-3">{renderAssetList(allIndiaAssets.commercialProperty,"Commercial Property")}</div>
+        {hasImmovable&&(
+          <>
+            <p className="font-bold mb-1">{letterImmovable}. Immovable Property:</p>
+            {renderAssetList(houseFlat,"House / Flat")}
+            {renderAssetList(landPlot,"Land / Plot")}
+            <div className="mb-3">{renderAssetList(commercialProperty,"Commercial Property")}</div>
+          </>
+        )}
 
-        <p className="font-bold mb-1">C. Motor Vehicles:</p>
-        <div className="mb-3">{renderAssetList(allIndiaAssets.vehicle,"Vehicle / Car")}</div>
+        {hasVehicle&&(
+          <>
+            <p className="font-bold mb-1">{letterVehicle}. Motor Vehicles:</p>
+            <div className="mb-3">{renderAssetList(vehicle,"Vehicle / Car")}</div>
+          </>
+        )}
 
-        <p className="font-bold mb-1">D. Personal & Valuables:</p>
-        <div className="mb-3">{renderAssetList(allIndiaAssets.jewellery,"Jewellery & Heirlooms")}</div>
+        {hasPersonal&&(
+          <>
+            <p className="font-bold mb-1">{letterPersonal}. Personal &amp; Valuables:</p>
+            <div className="mb-3">{renderAssetList(jewellery,"Jewellery & Heirlooms")}</div>
+          </>
+        )}
 
-        <p className="font-bold mb-1">E. Digital & Miscellaneous Assets:</p>
-        {allIndiaAssets.socialMediaDigital.map((item,i)=>(
-          <p key={i} className="mb-1">{i===0?"(1) ":""}Social Media / Digital: <strong>{item.description||blank}</strong> Bequeathed to: <strong>{item.beneficiary||blank}</strong> Relationship: <strong>{relOf(item)||blank}</strong>, bearing {item.idType||"Aadhaar Card"} Number: <strong>{item.idNumber||blank}</strong>.</p>
-        ))}
-        {allIndiaAssets.intellectualProperty.map((item,i)=>(
-          <p key={i} className="mb-3">{i===0?"(2) ":""}Intellectual Property: <strong>{item.description||blank}</strong> Bequeathed to: <strong>{item.beneficiary||blank}</strong> Relationship: <strong>{relOf(item)||blank}</strong>, bearing {item.idType||"Aadhaar Card"} Number: <strong>{item.idNumber||blank}</strong>.</p>
-        ))}
+        {hasDigitalMisc&&(
+          <>
+            <p className="font-bold mb-1">{letterDigitalMisc}. Digital &amp; Miscellaneous Assets:</p>
+            {renderAssetList(socialMediaDigital,"Social Media / Digital")}
+            <div className="mb-3">{renderAssetList(intellectualProperty,"Intellectual Property")}</div>
+          </>
+        )}
         <SectionSignatureLine/>
 
         <p className="text-justify mb-3">
@@ -107,8 +123,15 @@ export default function AllIndiaLiveDocPreview({will}:{
         </p>
         <SectionSignatureLine/>
 
+        <p className="font-bold mb-1">Witnesses:</p>
+        {witnesses.map((w,i)=>(
+          <p key={i} className="text-justify mb-1">
+            {i+1}) <strong>{w.name||blank}</strong>, {w.parentRelation} of <strong>{w.parentName||blank}</strong>, Age: <strong>{w.age||"___"}</strong>, {w.maritalStatus}, nationality <strong>{w.nationality||blank}</strong>, occupation <strong>{occupationOf(w)||blank}</strong>, resident of <strong>{w.address||blank}</strong>, bearing Aadhaar Number <strong>{w.aadhaarNumber||blank}</strong>, Relation to Testator: <strong>{witnessRelOf(w)||blank}</strong>
+          </p>
+        ))}
+
         <div className="mt-4 pt-3 border-t border-slate-400 text-center">
-          <p className="text-[10px] text-slate-500">Signed at {testator.signPlace||"[Place]"} on the {testator.signDay||"__"}th day of {testator.signMonth}, {testator.signYear}</p>
+          <p className="text-[10px] text-slate-500">Signed at {testator.signPlace||"[Place]"} on the {dateStr}</p>
         </div>
       </div>
     </div>
