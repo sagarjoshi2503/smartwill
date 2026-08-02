@@ -25,10 +25,12 @@ export default function DisclaimerView({dchecks,setDchecks,allChecked,onAgree,on
             </div>
             <div className="space-y-3 mb-6">
               {[
-                {k:"nonMuslim",t:"I confirm I am a Non-Muslim. Muslim testamentary succession is governed by Muslim Personal Law — this tool is not designed for Muslim testators."},
-                {k:"age",t:"I am at least 18 years of age and am of sound and disposing mind at the time of making this Will."},
-                {k:"law",t:"I understand this Will shall be governed exclusively by Indian law — the Indian Succession Act, 1925."},
-                {k:"tool",t:"I understand SmartWill is an online drafting tool and does not substitute for personalised legal advice for complex estates."},
+                {k:"nonMuslim",t:"Non-Muslim Testator Declaration: I confirm that I am a Non-Muslim. (Muslim testamentary succession is governed by Muslim Personal Law; this tool is not designed for Muslim testators.)"},
+                {k:"age",t:"Age & Capacity: I am at least 18 years of age and of sound and disposing mind at the time of making this Will."},
+                {k:"freeWill",t:"Free Will: I am making this Will voluntarily, without coercion, undue influence, fraud, or deceit from any person."},
+                {k:"legalAwareness",t:"Legal Awareness: I understand that a Will made under coercion, undue influence, deceit, or fraud is void under Indian law."},
+                {k:"law",t:"Governing Law: I understand that this Will shall be governed exclusively by Indian law (The Indian Succession Act, 1925)."},
+                {k:"tool",t:"Service Disclaimer: I understand that SmartWill is an online drafting tool and does not substitute for personalized legal advice regarding complex estates."},
               ].map(item=>(
                 <label key={item.k}
                   className={`flex items-start gap-3 p-4 rounded-3xl cursor-pointer border transition-all ${dchecks[item.k as keyof DisclaimerChecks]?"border-[#d09d61]/30 bg-[#fef3c7]/30":"border-slate-200 hover:border-[#d09d61]/20"}`}>

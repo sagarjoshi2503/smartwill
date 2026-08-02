@@ -58,7 +58,7 @@ export default function SmartWill() {
   const [signup, setSignup] = useState<SignupState>({ name:"", phone:"", email:"", state:"", terms:false });
   const [otp, setOtp] = useState<string[]>(Array(OTP_LENGTH).fill(""));
   const [testatorAuthenticated, setTestatorAuthenticated] = useState(false);
-  const [dchecks, setDchecks] = useState<DisclaimerChecks>({ nonMuslim:false, age:false, law:false, tool:false });
+  const [dchecks, setDchecks] = useState<DisclaimerChecks>({ nonMuslim:false, age:false, freeWill:false, legalAwareness:false, law:false, tool:false });
   const [wizardStep, setWizardStep] = useState(1);
   const [will, setWill] = useState<WillState>(DEFAULT_WILL);
   const [willType, setWillType] = useState<WillType>("");
@@ -242,7 +242,7 @@ export default function SmartWill() {
     setTestatorEmailEditable(false);
     setViewOnlyMode(false);
     setActiveAdminComments("");
-    setDchecks({ nonMuslim:false, age:false, law:false, tool:false });
+    setDchecks({ nonMuslim:false, age:false, freeWill:false, legalAwareness:false, law:false, tool:false });
     setWizardStep(2);
     setView("disclaimer");
   };

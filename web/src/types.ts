@@ -304,6 +304,8 @@ export interface SignupState {
 export interface DisclaimerChecks {
   nonMuslim: boolean;
   age: boolean;
+  freeWill: boolean;
+  legalAwareness: boolean;
   law: boolean;
   tool: boolean;
 }
