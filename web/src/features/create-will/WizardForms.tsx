@@ -214,8 +214,9 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
           <StepHeader icon={<FileText size={17}/>} title="Select Will Type" sub="Choose the format that applies to you"/>
           <div className="space-y-3">
             {WILL_TYPE_OPTIONS.map(opt=>(
-              <label key={opt.id} onClick={()=>!viewOnly&&setWillType(opt.id)}
+              <label key={opt.id}
                 className={`flex items-start gap-3 p-4 rounded-2xl border cursor-pointer transition-all ${willType===opt.id?"border-[#d09d61]/60 bg-[#d09d61]/10":"border-slate-200 hover:border-[#d09d61]/30"} ${viewOnly?"cursor-not-allowed opacity-70":""}`}>
+                <input type="radio" name="willType" className="sr-only" checked={willType===opt.id} disabled={viewOnly} onChange={()=>setWillType(opt.id)}/>
                 <div className={`w-4 h-4 mt-0.5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all ${willType===opt.id?"border-[#d09d61] bg-[#d09d61]":"border-slate-300"}`}>
                   {willType===opt.id&&<div className="w-1.5 h-1.5 rounded-full bg-white"/>}
                 </div>
@@ -274,8 +275,9 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
           <FormBlock title="Marital Status">
             <div className="flex gap-3">
               {[{v:"unmarried",l:"Unmarried"},{v:"married",l:"Married"}].map(o=>(
-                <label key={o.v} onClick={()=>set("testator.maritalStatus",o.v)}
+                <label key={o.v}
                   className={`flex-1 flex items-center gap-2 p-3 rounded-xl border cursor-pointer transition-all ${will.testator.maritalStatus===o.v?"border-[#d09d61]/50 bg-[#d09d61]/10":"border-slate-200 hover:border-slate-300"}`}>
+                  <input type="radio" name="maritalStatus" className="sr-only" checked={will.testator.maritalStatus===o.v} onChange={()=>set("testator.maritalStatus",o.v)}/>
                   <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all ${will.testator.maritalStatus===o.v?"border-[#d09d61] bg-[#d09d61]":"border-slate-300"}`}>
                     {will.testator.maritalStatus===o.v&&<div className="w-1.5 h-1.5 rounded-full bg-white"/>}
                   </div>
@@ -467,8 +469,9 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
           <FormBlock title="Administration Type">
             <div className="flex gap-3">
               {[{v:"jointly",l:"Jointly (Must act together)"},{v:"jointly_severally",l:"Jointly & Severally (May act independently)"}].map(o=>(
-                <label key={o.v} onClick={()=>set("executor.adminType",o.v)}
+                <label key={o.v}
                   className={`flex-1 flex items-center gap-2 p-3 rounded-xl border cursor-pointer transition-all ${will.executor.adminType===o.v?"border-[#d09d61]/50 bg-[#d09d61]/10":"border-slate-700 hover:border-slate-600"}`}>
+                  <input type="radio" name="adminType" className="sr-only" checked={will.executor.adminType===o.v} onChange={()=>set("executor.adminType",o.v)}/>
                   <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all ${will.executor.adminType===o.v?"border-[#d09d61] bg-[#d09d61]":"border-slate-600"}`}>
                     {will.executor.adminType===o.v&&<div className="w-1.5 h-1.5 rounded-full bg-white"/>}
                   </div>
@@ -732,8 +735,9 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
           <FormBlock title="Distribution Mode">
             <div className="flex gap-2.5">
               {[{v:"itemized",l:"Itemized (Specific assets to specific people)"},{v:"global",l:"Global (Divide entire estate at once)"}].map(o=>(
-                <label key={o.v} onClick={()=>setWill(p=>({...p,distributionMode:o.v as WillState["distributionMode"]}))}
+                <label key={o.v}
                   className={`flex-1 flex items-start gap-2 p-3 rounded-xl border cursor-pointer transition-all ${will.distributionMode===o.v?"border-[#d09d61]/50 bg-[#d09d61]/10":"border-slate-700 hover:border-slate-600"}`}>
+                  <input type="radio" name="distributionMode" className="sr-only" checked={will.distributionMode===o.v} onChange={()=>setWill(p=>({...p,distributionMode:o.v as WillState["distributionMode"]}))}/>
                   <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center mt-0.5 transition-all ${will.distributionMode===o.v?"border-[#d09d61] bg-[#d09d61]":"border-slate-600"}`}>
                     {will.distributionMode===o.v&&<div className="w-1.5 h-1.5 rounded-full bg-white"/>}
                   </div>
@@ -748,8 +752,9 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
             <FormBlock title="Global Distribution">
               <div className="flex gap-2.5 mb-3">
                 {[{v:"equal",l:"Equal share among all"},{v:"percentage",l:"Specified percentages"}].map(o=>(
-                  <label key={o.v} onClick={()=>setWill(p=>({...p,globalMode:o.v as WillState["globalMode"]}))}
+                  <label key={o.v}
                     className={`flex-1 flex items-center gap-2 p-2.5 rounded-xl border cursor-pointer transition-all ${will.globalMode===o.v?"border-[#d09d61]/50 bg-[#d09d61]/10":"border-slate-700"}`}>
+                    <input type="radio" name="globalMode" className="sr-only" checked={will.globalMode===o.v} onChange={()=>setWill(p=>({...p,globalMode:o.v as WillState["globalMode"]}))}/>
                     <div className={`w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center transition-all ${will.globalMode===o.v?"border-[#d09d61] bg-[#d09d61]":"border-slate-600"}`}>
                       {will.globalMode===o.v&&<div className="w-1 h-1 rounded-full bg-white"/>}
                     </div>
