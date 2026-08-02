@@ -30,8 +30,9 @@ export default function DisclaimerView({dchecks,setDchecks,allChecked,onAgree,on
                 {k:"law",t:"I understand this Will shall be governed exclusively by Indian law — the Indian Succession Act, 1925."},
                 {k:"tool",t:"I understand SmartWill is an online drafting tool and does not substitute for personalised legal advice for complex estates."},
               ].map(item=>(
-                <label key={item.k} onClick={()=>setDchecks(p=>({...p,[item.k]:!p[item.k as keyof DisclaimerChecks]}))}
+                <label key={item.k}
                   className={`flex items-start gap-3 p-4 rounded-3xl cursor-pointer border transition-all ${dchecks[item.k as keyof DisclaimerChecks]?"border-[#d09d61]/30 bg-[#fef3c7]/30":"border-slate-200 hover:border-[#d09d61]/20"}`}>
+                  <input type="checkbox" className="sr-only" checked={dchecks[item.k as keyof DisclaimerChecks]} onChange={()=>setDchecks(p=>({...p,[item.k]:!p[item.k as keyof DisclaimerChecks]}))}/>
                   <div className={`w-5 h-5 rounded-lg border-2 flex items-center justify-center shrink-0 mt-1 transition-all ${dchecks[item.k as keyof DisclaimerChecks]?"bg-[#d09d61] border-[#d09d61]":"border-slate-300"}`}>
                     {dchecks[item.k as keyof DisclaimerChecks]&&<Check size={10} className="text-[#020617]"/>}
                   </div>
