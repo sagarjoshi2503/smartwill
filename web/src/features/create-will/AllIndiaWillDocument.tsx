@@ -68,57 +68,71 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,w
   const letterPersonal = hasPersonal ? String.fromCharCode(nextLetter++) : "";
   const letterDigitalMisc = hasDigitalMisc ? String.fromCharCode(nextLetter++) : "";
 
+  const SigLine = ({className}:{className?: string})=>(
+    <p className={`pdf-sig-line mb-0 ${className||""}`}>Testator's Signature: ___________________ Witness 1: _________ Witness 2: _________</p>
+  );
+
   // Each Will page is laid out as an explicit, fixed-height block (rather
   // than left to the browser's automatic reflow) so page breaks fall in
-  // predictable places and this attestation line — required on every page —
-  // reliably lands as the last line of each one. (A `position:fixed` footer
-  // was tried first, but Firefox and some print/PDF pipelines don't repeat
-  // fixed-position elements across printed pages, so it isn't reliable.)
-  // The `pdf-page` height/flex rules only apply under @media print — on
-  // screen this still reads as one continuous scrollable document.
+  // predictable places and this attestation line — required at the top and
+  // bottom of every page except the last — reliably lands there. (A
+  // `position:fixed` header/footer was tried first, but Firefox and some
+  // print/PDF pipelines don't repeat fixed-position elements across printed
+  // pages, so it isn't reliable.) The last page carries the full execution
+  // block in its own content instead, so it gets neither. The `pdf-page`
+  // height/flex rules only apply under @media print — on screen this still
+  // reads as one continuous scrollable document.
   const Page = ({children,isLast}:{children: ReactNode; isLast?: boolean})=>(
     <section className={`pdf-page${isLast?"":" pdf-page-break"}`}>
+      {!isLast && <SigLine className="mt-0 mb-4"/>}
       <div>{children}</div>
-      <p className="pdf-sig-line mb-0 mt-4">Testator's Signature: ___________________ Witness 1: _________ Witness 2: _________</p>
+      {!isLast && <SigLine className="pdf-sig-line-footer mt-4"/>}
     </section>
   );
 
   return(
     <div className="min-h-screen bg-slate-800 print:bg-white">
       <style>{`
-        @page { size: A4; margin: 15mm; }
+        /* Standard 1" margins on all sides, per the required print spec. */
+        @page { size: A4; margin: 25.4mm; }
+        .will-print-page p { text-align: justify; }
         @media print {
           .no-print{display:none!important}
           body{margin:0;padding:0}
           .will-print-page{box-shadow:none!important;margin:0!important;border-radius:0!important;max-width:100%!important;padding:0!important}
-          /* Leaves headroom below the 267mm printable area (297mm A4 minus
-             15mm top/bottom @page margins) — pinning content to exactly that
-             height left no margin for error, so the flex-pinned signature
-             line (laid out last, after all other content) rounded past the
-             physical page edge and got pushed onto the next page. */
-          .pdf-page{min-height:250mm;display:flex;flex-direction:column;justify-content:space-between}
+          /* Leaves headroom below the 246.2mm printable area (297mm A4 minus
+             25.4mm top/bottom @page margins) — pinning content to exactly
+             that height left no margin for error, so the flex-pinned header/
+             footer signature lines (laid out first/last in each page's flex
+             column) rounded past the physical page edge and got pushed onto
+             the next page. */
+          .pdf-page{min-height:220mm;display:flex;flex-direction:column;justify-content:space-between}
           .pdf-page-break{break-after:page}
           /* Belt-and-braces: even if a page's own content still overflows,
-             never let the signature line get separated from what precedes
-             it — the pair moves to the next page together instead of the
-             line appearing alone. */
-          .pdf-sig-line{break-inside:avoid;break-before:avoid}
+             never let the footer signature line get separated from what
+             precedes it — the pair moves to the next page together instead
+             of the line appearing alone. */
+          .pdf-sig-line{break-inside:avoid}
+          .pdf-sig-line-footer{break-before:avoid}
         }
       `}</style>
       {/* Top bar */}
-      <div className="no-print sticky top-0 z-50 bg-white border-b border-slate-200 px-5 py-3 flex items-center justify-between">
+      <div className="no-print sticky top-0 z-50 bg-white border-b border-slate-200 px-5 py-3 flex items-center justify-between gap-4 flex-wrap">
         <button onClick={onBack} className="flex items-center gap-2 text-slate-600 hover:text-slate-900 transition-colors text-sm"><ChevronLeft size={16}/>Back to Wizard</button>
         <div className="flex items-center gap-2">
           <div className="w-7 h-7 bg-[#d09d61] rounded-md flex items-center justify-center"><Scale size={13} className="text-[#020617]"/></div>
           <span className="text-slate-900 font-bold serif">SmartWill — All India Will Document</span>
         </div>
-        <div className="flex items-center gap-2.5">
-          <button onClick={onPrint} className="flex items-center gap-1.5 bg-slate-700 hover:bg-slate-600 text-white rounded-lg px-3.5 py-2 text-sm transition-colors">
-            <Printer size={14}/>Print
-          </button>
-          <button onClick={onPrint} className="flex items-center gap-1.5 bg-[#d09d61] hover:bg-[#b88442] text-[#020617] rounded-lg px-3.5 py-2 text-sm font-semibold transition-colors">
-            <Download size={14}/>Download PDF
-          </button>
+        <div className="flex items-center gap-3">
+          <span className="text-slate-400 text-[11px] hidden md:inline">In the print dialog, turn off "Headers and footers" so no URL or date is added.</span>
+          <div className="flex items-center gap-2.5">
+            <button onClick={onPrint} className="flex items-center gap-1.5 bg-slate-700 hover:bg-slate-600 text-white rounded-lg px-3.5 py-2 text-sm transition-colors">
+              <Printer size={14}/>Print
+            </button>
+            <button onClick={onPrint} className="flex items-center gap-1.5 bg-[#d09d61] hover:bg-[#b88442] text-[#020617] rounded-lg px-3.5 py-2 text-sm font-semibold transition-colors">
+              <Download size={14}/>Download PDF
+            </button>
+          </div>
         </div>
       </div>
 
