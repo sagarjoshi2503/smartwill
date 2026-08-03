@@ -1,8 +1,23 @@
-import { Sparkles, ArrowRight, CheckCircle, Check } from "lucide-react";
+import { Sparkles, ArrowRight, CheckCircle, Check, ShieldCheck, Lock, ListChecks, Headset } from "lucide-react";
 import { fmt } from "../utils/format";
 import type { Plan, Addon } from "../types";
 
-export default function LandingPage({plans,addons,selectedPlan,setSelectedPlan,addonsState,setAddons,totalPrice,onStart,onContactUs}:{
+const HOME_PLAN_IDS = ["notarized","registered","nri"]; // All India Will, Goan Will, Custom Will
+
+const FEATURES = [
+  { icon:<ShieldCheck size={20}/>, title:"Legally Valid", body:"Drafted per the Indian Succession Act, and Goa's succession framework where it applies" },
+  { icon:<Lock size={20}/>, title:"Secure & Private", body:"Your documents stay confidential" },
+  { icon:<ListChecks size={20}/>, title:"Clear Process", body:"Structured steps, no guesswork" },
+  { icon:<Headset size={20}/>, title:"Expert Support", body:"Real people, we're here to help" },
+];
+
+const STATS = [
+  { title:"Family Legal Disputes — 84.8% Have No Will", body:"84.8% of Indian families have no Will in place. Among them, 30.5% report having faced a bitter inheritance-related dispute — 23.3% minor, 7.2% major legal battles that drain family capital." },
+  { title:"Delayed Asset Transfer — Months to Years", body:"Without a Will, legal heirs must secure a Legal Heir Certificate and then a court-issued Succession Certificate before accessing property or financial assets. This process typically takes several months, stretching into years if any heir contests it, with heavy legal fees accumulating throughout." },
+  { title:"Unclaimed Deposits & Investments — ₹73,241+ Cr", body:"More than ₹73,241 Cr in unclaimed assets sits frozen across Indian banks, insurance, and mutual funds — 83% in bank deposits, 12% in insurance, 5% in mutual funds. This happens simply because nominations were never updated and no Will exists to direct where the money should go." },
+];
+
+export default function LandingPage({plans,addons,selectedPlan,setSelectedPlan,addonsState,setAddons,totalPrice,onStart,onContactUs,onAbout,onServices}:{
   plans: Plan[];
   addons: Addon[];
   selectedPlan: Plan;
@@ -12,44 +27,71 @@ export default function LandingPage({plans,addons,selectedPlan,setSelectedPlan,a
   totalPrice: number;
   onStart: () => void;
   onContactUs: () => void;
+  onAbout: () => void;
+  onServices: () => void;
 }){
+  const homePlans = HOME_PLAN_IDS.map(id=>plans.find(p=>p.id===id)).filter((p): p is Plan => !!p);
+
   return(
     <div className="fade-in">
-      <section className="relative overflow-hidden pt-24 pb-24 apv-hero bg-slate-100">
+      <section className="relative overflow-hidden pt-14 pb-14 apv-hero bg-slate-100">
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute -top-16 -left-20 w-[40rem] h-[40rem] rounded-full bg-[#2F8132]/15 blur-[140px]"/>
           <div className="absolute top-12 right-[-4rem] w-[30rem] h-[30rem] rounded-full bg-[#2F8132]/12 blur-[130px]"/>
-          <div className="absolute bottom-[-5rem] left-1/4 w-[32rem] h-[32rem] rounded-full bg-white/5 blur-[120px]"/>
         </div>
         <div className="relative z-10 max-w-5xl mx-auto px-5 text-center">
-          <div className="apv-pill mb-6 mx-auto">
+          <div className="apv-pill mb-5 mx-auto">
             <Sparkles size={14} className="text-[#2F8132]"/>
             <span>Trusted by 50,000+ Indians · Bar Council Empanelled</span>
           </div>
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-slate-900 serif leading-tight tracking-tight mb-6">
-            Create a Legally Valid Will<br/>
-            <span className="text-[#2F8132]">Online in 20 Minutes</span>
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-slate-900 serif leading-tight tracking-tight mb-5">
+            Plan Today. Protect Tomorrow.<br/>
+            <span className="text-[#2F8132]">Pass on Peace.</span>
           </h1>
-          <p className="max-w-3xl mx-auto text-slate-600 text-lg md:text-xl mb-10">AI-assisted drafting · Lawyer-reviewed · Notarized at doorstep</p>
+          <p className="max-w-3xl mx-auto text-slate-600 text-lg md:text-xl mb-8">Create a legally valid Will for all of India, Goa's unique succession law, or a fully customized estate plan — in a few simple steps.</p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-4">
-            <button onClick={onStart} className="apv-btn apv-btn-lg">Start Creating Your Will Free <ArrowRight size={18}/></button>
-            <button onClick={onContactUs} className="apv-btn-alt">Learn More</button>
+            <button onClick={onStart} className="apv-btn apv-btn-lg">Create Your Will <ArrowRight size={18}/></button>
+            <button onClick={onServices} className="apv-btn-alt">How It Works</button>
           </div>
           <p className="text-slate-600 text-xs">No credit card · SSL encrypted · Lawyer reviewed</p>
         </div>
       </section>
-      <section className="bg-slate-50 py-20 px-5">
+
+      <section className="px-5 py-10">
+        <div className="max-w-6xl mx-auto bg-slate-50 border border-slate-200 rounded-3xl p-6 grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          {FEATURES.map(f=>(
+            <div key={f.title} className="flex items-center gap-3">
+              <div className="w-11 h-11 rounded-full bg-white border border-slate-200 text-[#2F8132] flex items-center justify-center shrink-0">{f.icon}</div>
+              <div><h4 className="text-slate-900 text-sm font-bold">{f.title}</h4><p className="text-slate-500 text-xs">{f.body}</p></div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="px-5 py-12">
+        <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-10 items-center">
+          <div className="aspect-[1/0.85] rounded-3xl bg-[#EDF6EA] border border-slate-200 flex items-center justify-center">
+            <ShieldCheck size={72} className="text-[#2F8132]"/>
+          </div>
+          <div>
+            <p className="text-[#2F8132] tracking-[0.35em] uppercase text-xs mb-3">About Us</p>
+            <h2 className="apv-section-title mb-3">A Simple Way to Secure What Matters</h2>
+            <p className="text-slate-600 text-sm leading-relaxed mb-5">SmartWill is an estate and succession planning practice that helps individuals and families create Wills and Succession Deeds — simply, securely, and correctly, whether under the Indian Succession Act or Goa's unique civil framework.</p>
+            <button onClick={onAbout} className="apv-btn-alt">Learn More</button>
+          </div>
+        </div>
+      </section>
+
+      <section className="bg-slate-50 py-14 px-5">
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12">
+          <div className="text-center mb-10">
             <p className="text-[#2F8132] tracking-[0.35em] uppercase text-xs mb-3">Plan Options</p>
             <h2 className="apv-section-title">Choose Your Plan</h2>
             <p className="text-slate-600 text-sm mt-3">Transparent pricing · No hidden charges</p>
           </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {plans.map(plan=>{
-              const isCustomWill = plan.willType==="customwill";
-              return(
-              <div key={plan.id} onClick={()=>isCustomWill?onContactUs():setSelectedPlan(plan)}
+          <div className="grid md:grid-cols-3 gap-6">
+            {homePlans.map(plan=>(
+              <div key={plan.id} onClick={()=>setSelectedPlan(plan)}
                 className={`apv-card relative overflow-hidden cursor-pointer transition-all ${selectedPlan.id===plan.id?"ring-2 ring-[#2F8132]/20":"hover:border-[#2F8132]/25 border border-slate-200"}`}>
                 {plan.badge&&<div className="absolute top-0 right-0 bg-[#2F8132] text-[#ffffff] text-[9px] font-bold px-3 py-1 rounded-bl-xl">{plan.badge}</div>}
                 <div className={`bg-gradient-to-br ${plan.gradient} p-5`}>
@@ -63,27 +105,27 @@ export default function LandingPage({plans,addons,selectedPlan,setSelectedPlan,a
                   ))}
                 </div>
                 <div className="px-5 pb-5">
-                  <button onClick={e=>{e.stopPropagation();if(isCustomWill){onContactUs();return;}setSelectedPlan(plan);onStart();}}
+                  <button onClick={e=>{e.stopPropagation();setSelectedPlan(plan);onStart();}}
                     className={`w-full py-3 rounded-full text-sm font-semibold transition-all ${selectedPlan.id===plan.id?"bg-[#2F8132] text-[#ffffff]":"bg-slate-900 hover:bg-slate-800 text-white"}`}>
-                    {isCustomWill?"Contact Us":selectedPlan.id===plan.id?"✓ Selected":"Select Plan"}
+                    {selectedPlan.id===plan.id?"✓ Selected":"Select Plan"}
                   </button>
                 </div>
               </div>
-              );
-            })}
+            ))}
           </div>
         </div>
       </section>
-      <section className="bg-slate-50 py-20 px-5">
+
+      <section className="bg-slate-50 py-14 px-5 border-t border-slate-200">
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-10">
+          <div className="text-center mb-8">
             <p className="text-[#2F8132] tracking-[0.35em] uppercase text-xs mb-3">Customize Your Order</p>
             <h2 className="text-3xl md:text-4xl font-bold text-slate-900 serif">Add-ons & summary</h2>
           </div>
           <div className="grid lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-4">
               {addons.map(addon=>(
-                <label key={addon.id} className={`flex items-center justify-between p-4 rounded-[28px] border transition-all ${addonsState[addon.id]?"border-[#2F8132]/30 bg-[#fff7e8]":"border-slate-200 bg-white hover:border-[#2F8132]/30"}`}>
+                <label key={addon.id} className={`flex items-center justify-between p-4 rounded-[28px] border transition-all ${addonsState[addon.id]?"border-[#2F8132]/30 bg-[#EDF6EA]":"border-slate-200 bg-white hover:border-[#2F8132]/30"}`}>
                   <div className="flex items-center gap-3">
                     <div className={`w-11 h-11 rounded-2xl flex items-center justify-center ${addonsState[addon.id]?"bg-[#2F8132]/15 text-[#2F8132]":"bg-slate-100 text-slate-500"}`}>{addon.icon}</div>
                     <span className="text-slate-900 text-sm font-medium">{addon.label}</span>
@@ -114,6 +156,21 @@ export default function LandingPage({plans,addons,selectedPlan,setSelectedPlan,a
               <button onClick={onStart} className="apv-btn w-full justify-center">Proceed <ArrowRight size={14}/></button>
             </div>
           </div>
+        </div>
+      </section>
+
+      <section className="py-14 px-5">
+        <div className="max-w-4xl mx-auto text-center mb-8">
+          <h2 className="apv-section-title">Why Legacy Planning Matters</h2>
+          <p className="text-slate-600 text-sm mt-2">Most families assume succession will sort itself out. The numbers tell a different story.</p>
+        </div>
+        <div className="max-w-6xl mx-auto grid md:grid-cols-3 gap-5">
+          {STATS.map(s=>(
+            <div key={s.title} className="apv-card p-6 border-t-4 border-t-[#2F8132]">
+              <h3 className="text-slate-900 font-bold text-sm mb-2">{s.title}</h3>
+              <p className="text-slate-500 text-sm leading-relaxed">{s.body}</p>
+            </div>
+          ))}
         </div>
       </section>
     </div>

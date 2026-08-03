@@ -5,6 +5,11 @@ import { PLANS, ADDONS } from "./data/plans";
 import { DEFAULT_WILL } from "./data/defaultWill";
 import { WILL_TYPE_LBL_SHORT } from "./data/willTypes";
 import LandingPage from "./components/LandingPage";
+import AboutView from "./components/AboutView";
+import ServicesView from "./components/ServicesView";
+import FaqView from "./components/FaqView";
+import PartnerView from "./components/PartnerView";
+import SiteFooter from "./components/SiteFooter";
 import ContactUsView from "./components/ContactUsView";
 import AuthChoiceView from "./components/AuthChoiceView";
 import SignupView from "./features/user-signin-otp/SignupView";
@@ -46,6 +51,16 @@ const WIZARD_STEPS = [
 ];
 
 const isAdminView = (v: ViewName) => v==="adminLogin" || v==="adminSignup" || v==="admin";
+
+const SITE_NAV: {v: ViewName; label: string}[] = [
+  {v:"landing", label:"Home"},
+  {v:"about", label:"About Us"},
+  {v:"services", label:"Our Services"},
+  {v:"faq", label:"FAQ"},
+  {v:"contactUs", label:"Contact Us"},
+  {v:"partner", label:"Partner with Us"},
+];
+const isSitePage = (v: ViewName) => SITE_NAV.some(item=>item.v===v);
 
 export default function SmartWill() {
   // Deep-linking: loading /admin directly (typed in the address bar, or a
@@ -408,13 +423,23 @@ export default function SmartWill() {
       {/* HEADER */}
       {view!=="wizard" && (
         <header className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-slate-200">
-          <div className="max-w-7xl mx-auto px-5 h-[58px] flex items-center justify-between">
-            <div className="flex items-center gap-2 cursor-pointer" onClick={()=>setView("landing")}>
+          <div className="max-w-7xl mx-auto px-5 h-[58px] flex items-center justify-between gap-4">
+            <div className="flex items-center gap-2 cursor-pointer shrink-0" onClick={()=>setView("landing")}>
               <div className="w-8 h-8 bg-[#2F8132] rounded-lg flex items-center justify-center shadow-lg shadow-[#2F8132]/15"><Scale size={15} className="text-white"/></div>
               <span className="text-slate-900 font-bold text-lg serif">SmartWill</span>
               <span className="text-[9px] font-bold tracking-[0.35em] text-[#1E5B22] bg-[#EDF6EA] border border-[#2F8132] px-1.5 py-0.5 rounded">{LBL_INDIA_BADGE}</span>
             </div>
-            <div className="flex items-center gap-3">
+            {isSitePage(view) && (
+              <nav className="hidden lg:flex items-center gap-6 flex-1 justify-center">
+                {SITE_NAV.map(item=>(
+                  <button key={item.v} onClick={()=>setView(item.v)}
+                    className={`text-sm font-semibold pb-0.5 border-b-2 transition-colors ${view===item.v?"text-[#2F8132] border-[#2F8132]":"text-slate-600 border-transparent hover:text-[#2F8132]"}`}>
+                    {item.label}
+                  </button>
+                ))}
+              </nav>
+            )}
+            <div className="flex items-center gap-3 shrink-0">
               {view==="admin" && adminProfile ? (
                 <>
                   <div className="flex items-center gap-2 bg-slate-100 rounded-lg px-3 py-1.5 text-sm border border-slate-200">
@@ -448,7 +473,11 @@ export default function SmartWill() {
         </header>
       )}
 
-      {view==="landing" && <LandingPage plans={PLANS} addons={ADDONS} selectedPlan={selectedPlan} setSelectedPlan={setSelectedPlan} addonsState={addons} setAddons={setAddons} totalPrice={totalPrice} onStart={()=>setView("authChoice")} onContactUs={()=>setView("contactUs")}/>}
+      {view==="landing" && <LandingPage plans={PLANS} addons={ADDONS} selectedPlan={selectedPlan} setSelectedPlan={setSelectedPlan} addonsState={addons} setAddons={setAddons} totalPrice={totalPrice} onStart={()=>setView("authChoice")} onContactUs={()=>setView("contactUs")} onAbout={()=>setView("about")} onServices={()=>setView("services")}/>}
+      {view==="about" && <AboutView/>}
+      {view==="services" && <ServicesView onStart={()=>setView("authChoice")} onContactUs={()=>setView("contactUs")} onHome={()=>setView("landing")}/>}
+      {view==="faq" && <FaqView/>}
+      {view==="partner" && <PartnerView onContactUs={()=>setView("contactUs")}/>}
       {view==="contactUs" && <ContactUsView onBack={()=>setView("landing")}/>}
       {view==="authChoice" && <AuthChoiceView onGoogleSuccess={handleGoogleSuccess} onPhone={()=>setView("signup")} onBack={()=>setView("landing")}/>}
       {view==="signup" && <SignupView signup={signup} setSignup={setSignup} onNext={()=>{setOtp(Array(OTP_LENGTH).fill("")); setView("otp");}}/>}
@@ -568,6 +597,7 @@ export default function SmartWill() {
           </div>
         </div>
       )}
+      {isSitePage(view) && <SiteFooter onNavigate={setView}/>}
       {chatbotEnabled && (
         <ChatWidget
           // Remounts (wiping all chat state) whenever who's signed in
