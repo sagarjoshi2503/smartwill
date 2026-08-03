@@ -70,7 +70,6 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
 
   const [submitStatus,setSubmitStatus]=useState<"idle"|"saving"|"error"|"done">("idle");
   const [submitError,setSubmitError]=useState("");
-  const [showGenerateInstructions,setShowGenerateInstructions]=useState(false);
 
   // ID number fields (PAN/Aadhaar/Driving Licence/Passport) reformat and
   // validate on blur — see utils/idValidation.ts for the per-type rules.
@@ -1216,31 +1215,11 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                 <Send size={16} className="shrink-0"/>{submitStatus==="saving"?MSG_SAVING:(adminReview||adminComplete)?BTN_COMPLETE_REVIEW:BTN_SUBMIT_REVIEW}
               </button>
             )}
-            <button onClick={()=>setShowGenerateInstructions(true)} className="w-full bg-[#2F8132] hover:bg-[#1E5B22] text-[#ffffff] font-bold py-3.5 rounded-xl text-sm transition-colors flex items-center justify-center gap-2 whitespace-nowrap">
+            <button onClick={onGenerate} className="w-full bg-[#2F8132] hover:bg-[#1E5B22] text-[#ffffff] font-bold py-3.5 rounded-xl text-sm transition-colors flex items-center justify-center gap-2 whitespace-nowrap">
               <FileText size={16} className="shrink-0"/>Generate Complete Will Document <span aria-hidden="true">→</span>
             </button>
           </div>
           {submitStatus==="error"&&<p className="text-red-500 text-xs text-center">{submitError}</p>}
-          {showGenerateInstructions&&(
-            <div className="fixed inset-0 z-50 bg-slate-950/60 flex items-center justify-center p-4">
-              <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full p-6">
-                <h3 className="text-slate-900 font-bold text-lg serif mb-1">Before You Print</h3>
-                <p className="text-slate-500 text-xs mb-4">A few things to keep in mind once your Will document is generated:</p>
-                <ul className="space-y-3 mb-6">
-                  <li className="flex items-start gap-2.5 text-slate-700 text-sm"><span className="shrink-0">📄</span><span><strong>Paper:</strong> Print on standard A4 size paper.</span></li>
-                  <li className="flex items-start gap-2.5 text-slate-700 text-sm"><span className="shrink-0">🖨️</span><span><strong>Printing Rule:</strong> Print on one side of the paper only (single-sided printing).</span></li>
-                  <li className="flex items-start gap-2.5 text-slate-700 text-sm"><span className="shrink-0">✍️</span><span><strong>Signatures:</strong> The Testator and both Witnesses must sign every page at the bottom, with full signatures on the final execution page.</span></li>
-                  <li className="flex items-start gap-2.5 text-slate-700 text-sm"><span className="shrink-0">🔒</span><span><strong>Safe Keeping:</strong> Store the original signed Will in a safe place, and inform trusted family members or your designated Executor of its physical location.</span></li>
-                </ul>
-                <div className="flex flex-col sm:flex-row gap-3">
-                  <button onClick={()=>setShowGenerateInstructions(false)} className="w-full sm:w-auto px-5 py-3 rounded-full border border-slate-200 text-slate-600 hover:text-slate-900 text-sm font-medium transition-all">← Back</button>
-                  <button onClick={()=>{setShowGenerateInstructions(false);onGenerate();}} className="flex-1 bg-[#2F8132] hover:bg-[#1E5B22] text-[#ffffff] font-bold py-3 rounded-full text-sm transition-colors">
-                    Got it — Generate Document
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
           {submitStatus==="done"&&(
             <p className="text-emerald-500 text-xs text-center">
               {(adminReview||adminComplete)?"Review completed.":"Will submitted for review."}

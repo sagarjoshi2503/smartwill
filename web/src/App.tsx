@@ -383,6 +383,14 @@ export default function SmartWill() {
     setShowWillDoc(true);
   };
 
+  // Both places that can trigger Will generation — the wizard bar's
+  // "Generate Will" button and WizardForms' own "Generate Complete Will
+  // Document" button on the final step — go through this "Before You Print"
+  // confirmation first, so the printing/signing instructions always show
+  // regardless of which button was clicked.
+  const [showGenerateInstructions, setShowGenerateInstructions] = useState(false);
+  const requestGenerateWill = () => setShowGenerateInstructions(true);
+
   // Save as draft
   const handleSaveDraft = async () => {
     setDraftStatus("saving"); setDraftError("");
@@ -559,7 +567,7 @@ export default function SmartWill() {
                   )}
                 </div>
               )}
-              <button onClick={handleGenerateWill} className="flex items-center gap-1.5 text-xs text-[#2F8132] hover:text-[#1E5B22] border border-[#2F8132]/30 hover:border-[#2F8132]/60 rounded-lg px-3 py-1.5 transition-all font-semibold">
+              <button onClick={requestGenerateWill} className="flex items-center gap-1.5 text-xs text-[#2F8132] hover:text-[#1E5B22] border border-[#2F8132]/30 hover:border-[#2F8132]/60 rounded-lg px-3 py-1.5 transition-all font-semibold">
                 <Eye size={12}/>{BTN_GENERATE_WILL}
               </button>
             </div>
@@ -585,7 +593,7 @@ export default function SmartWill() {
                 allocTotal={allocTotal} assetAdded={assetAdded}
                 onNext={()=>setWizardStep(s=>Math.min(s+1,7))}
                 onPrev={()=>setWizardStep(s=>Math.max(s-1,skipWillTypeStep?2:1))}
-                onGenerate={handleGenerateWill}
+                onGenerate={requestGenerateWill}
                 willId={editingWillId}
                 adminReview={adminReviewMode}
                 adminComplete={adminCreateMode}
@@ -610,6 +618,26 @@ export default function SmartWill() {
                   <p className="text-slate-500 text-xs leading-relaxed">Your document(s) — the Open Will, and if married, your spouse's Open Will and a shared Deed of Consent — become available to preview and download once you reach the final step and click Generate.</p>
                 </div>
               ) : <LiveDocPreview will={will} residualBene={residualBene}/>}
+            </div>
+          </div>
+        </div>
+      )}
+      {showGenerateInstructions && (
+        <div className="fixed inset-0 z-50 bg-slate-950/60 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full p-6">
+            <h3 className="text-slate-900 font-bold text-lg serif mb-1">Before You Print</h3>
+            <p className="text-slate-500 text-xs mb-4">A few things to keep in mind once your Will document is generated:</p>
+            <ul className="space-y-3 mb-6">
+              <li className="flex items-start gap-2.5 text-slate-700 text-sm"><span className="shrink-0">📄</span><span><strong>Paper:</strong> Print on standard A4 size paper.</span></li>
+              <li className="flex items-start gap-2.5 text-slate-700 text-sm"><span className="shrink-0">🖨️</span><span><strong>Printing Rule:</strong> Print on one side of the paper only (single-sided printing).</span></li>
+              <li className="flex items-start gap-2.5 text-slate-700 text-sm"><span className="shrink-0">✍️</span><span><strong>Signatures:</strong> The Testator and both Witnesses must sign every page at the bottom, with full signatures on the final execution page.</span></li>
+              <li className="flex items-start gap-2.5 text-slate-700 text-sm"><span className="shrink-0">🔒</span><span><strong>Safe Keeping:</strong> Store the original signed Will in a safe place, and inform trusted family members or your designated Executor of its physical location.</span></li>
+            </ul>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <button onClick={()=>setShowGenerateInstructions(false)} className="w-full sm:w-auto px-5 py-3 rounded-full border border-slate-200 text-slate-600 hover:text-slate-900 text-sm font-medium transition-all">← Back</button>
+              <button onClick={()=>{setShowGenerateInstructions(false);handleGenerateWill();}} className="flex-1 bg-[#2F8132] hover:bg-[#1E5B22] text-white font-bold py-3 rounded-full text-sm transition-colors">
+                Got it — Generate Document
+              </button>
             </div>
           </div>
         </div>
