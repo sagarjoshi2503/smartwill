@@ -424,13 +424,21 @@ export default function SmartWill() {
       {view!=="wizard" && (
         <header className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-slate-200">
           <div className="max-w-7xl mx-auto px-5 h-[58px] flex items-center justify-between gap-4">
-            <div className="flex items-center gap-2 cursor-pointer shrink-0" onClick={()=>setView("landing")}>
-              <div className="w-8 h-8 bg-[#2F8132] rounded-lg flex items-center justify-center shadow-lg shadow-[#2F8132]/15"><Scale size={15} className="text-white"/></div>
-              <span className="text-slate-900 font-bold text-lg serif">SmartWill</span>
-              <span className="text-[9px] font-bold tracking-[0.35em] text-[#1E5B22] bg-[#EDF6EA] border border-[#2F8132] px-1.5 py-0.5 rounded">{LBL_INDIA_BADGE}</span>
+            <div className="flex items-center gap-2.5 cursor-pointer shrink-0" onClick={()=>setView("landing")}>
+              <svg width="30" height="30" viewBox="0 0 40 40" aria-hidden="true" className="shrink-0">
+                <polygon points="2,4 22,4 36,20 22,36 2,36 16,20" fill="#8BC34A"/>
+                <polygon points="14,10 30,10 38,20 30,30 14,30 22,20" fill="#1E5B22"/>
+              </svg>
+              <div className="leading-tight">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-slate-900 font-extrabold text-base serif tracking-tight">SmartWill</span>
+                  <span className="text-[8px] font-bold tracking-[0.3em] text-[#1E5B22] bg-[#EDF6EA] border border-[#2F8132] px-1.5 py-0.5 rounded">{LBL_INDIA_BADGE}</span>
+                </div>
+                <div className="text-[9px] font-semibold tracking-[0.14em] text-slate-400 uppercase">Estate &amp; Succession Planning</div>
+              </div>
             </div>
             {isSitePage(view) && (
-              <nav className="hidden lg:flex items-center gap-6 flex-1 justify-center">
+              <nav className="hidden lg:flex items-center gap-7 flex-1 justify-center">
                 {SITE_NAV.map(item=>(
                   <button key={item.v} onClick={()=>setView(item.v)}
                     className={`text-sm font-semibold pb-0.5 border-b-2 transition-colors ${view===item.v?"text-[#2F8132] border-[#2F8132]":"text-slate-600 border-transparent hover:text-[#2F8132]"}`}>
@@ -442,7 +450,7 @@ export default function SmartWill() {
             <div className="flex items-center gap-3 shrink-0">
               {view==="admin" && adminProfile ? (
                 <>
-                  <div className="flex items-center gap-2 bg-slate-100 rounded-lg px-3 py-1.5 text-sm border border-slate-200">
+                  <div className="flex items-center gap-2 bg-slate-100 rounded-full px-3 py-1.5 text-sm border border-slate-200">
                     <div className="w-6 h-6 bg-slate-200 rounded-full flex items-center justify-center text-[9px] font-bold text-slate-900">
                       {adminProfile.name.split(" ").slice(0,2).map(n=>n[0]).join("").toUpperCase()}
                     </div>
@@ -452,7 +460,7 @@ export default function SmartWill() {
                 </>
               ):testatorAuthenticated && !isAdminView(view) ? (
                 <>
-                  <div className="flex items-center gap-2 bg-slate-100 rounded-lg px-3 py-1.5 text-sm border border-slate-200">
+                  <div className="flex items-center gap-2 bg-slate-100 rounded-full px-3 py-1.5 text-sm border border-slate-200">
                     <div className="w-6 h-6 bg-slate-200 rounded-full flex items-center justify-center text-[9px] font-bold text-slate-900">
                       {(signup.name||signup.email).split(" ").slice(0,2).map(n=>n[0]).join("").toUpperCase()}
                     </div>
@@ -463,9 +471,9 @@ export default function SmartWill() {
               ):(
                 <>
                   {showAdminButton && (
-                    <button onClick={()=>setView("adminLogin")} className="flex items-center gap-1.5 text-slate-600 hover:text-slate-900 border border-slate-200 hover:border-slate-300 rounded-lg px-3 py-1.5 text-sm transition-all"><LogIn size={13}/>{BTN_ADMIN_PORTAL}</button>
+                    <button onClick={()=>setView("adminLogin")} className="flex items-center gap-1.5 text-slate-600 hover:text-slate-900 border border-slate-200 hover:border-slate-300 rounded-full px-3.5 py-1.5 text-sm transition-all"><LogIn size={13}/>{BTN_ADMIN_PORTAL}</button>
                   )}
-                  <button onClick={()=>setView("authChoice")} className="flex items-center gap-1.5 bg-[#2F8132] hover:bg-[#1E5B22] text-[#ffffff] rounded-lg px-4 py-2 text-sm font-semibold transition-colors shadow-lg shadow-[#2F8132]/20">{BTN_CREATE_YOUR_WILL} <ArrowRight size={13}/></button>
+                  <button onClick={()=>setView("authChoice")} className="flex items-center gap-1.5 bg-[#2F8132] hover:bg-[#1E5B22] text-[#ffffff] rounded-full px-4 py-2 text-sm font-semibold transition-colors shadow-lg shadow-[#2F8132]/20">{BTN_CREATE_YOUR_WILL} <ArrowRight size={13}/></button>
                 </>
               )}
             </div>
