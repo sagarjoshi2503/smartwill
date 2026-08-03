@@ -107,7 +107,6 @@ export default function SmartWill() {
   const willDocRef = useRef<HTMLDivElement | null>(null);
 
   const totalPrice = selectedPlan.price + ADDONS.reduce((s,a) => addons[a.id] ? s+a.price : s, 0);
-  const allDchecked = Object.values(dchecks).every(Boolean);
 
   // Keep the URL in sync with admin-portal navigation so /admin is
   // shareable/bookmarkable and the browser back/forward buttons work.
@@ -507,7 +506,7 @@ export default function SmartWill() {
       {view==="authChoice" && <AuthChoiceView onGoogleSuccess={handleGoogleSuccess} onPhone={()=>setView("signup")} onBack={()=>setView("landing")}/>}
       {view==="signup" && <SignupView signup={signup} setSignup={setSignup} onNext={()=>{setOtp(Array(OTP_LENGTH).fill("")); setView("otp");}}/>}
       {view==="otp" && <OtpView otp={otp} handleOtp={handleOtp} otpRefs={otpRefs} phone={signup.phone} email={signup.email} onNext={handleOtpVerified}/>}
-      {view==="disclaimer" && <DisclaimerView dchecks={dchecks} setDchecks={setDchecks} allChecked={allDchecked} onAgree={()=>setView("wizard")} onBack={()=>setView("myWills")}/>}
+      {view==="disclaimer" && <DisclaimerView dchecks={dchecks} setDchecks={setDchecks} willType={willType} onAgree={()=>setView("wizard")} onBack={()=>setView("myWills")}/>}
       {view==="myWills" && <TestatorWillsView email={signup.email} onCreateNew={handleCreateNewWill} onEditWill={handleEditWill} onViewWill={handleViewWill}/>}
       {view==="adminLogin" && <AdminLoginView onLogin={(admin)=>{setAdminProfile(admin);setView("admin");}} onBack={()=>setView("landing")} onSignup={()=>setView("adminSignup")} signupEnabled={adminSignupEnabled}/>}
       {view==="adminSignup" && adminSignupEnabled && <AdminSignupView onSignup={(admin)=>{setAdminProfile(admin);setView("admin");}} onBack={()=>setView("adminLogin")} onGoToLogin={()=>setView("adminLogin")}/>}

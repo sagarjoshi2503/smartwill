@@ -1,13 +1,28 @@
 import { AlertTriangle, Lock, Check } from "lucide-react";
-import type { DisclaimerChecks } from "../types";
+import type { DisclaimerChecks, WillType } from "../types";
 
-export default function DisclaimerView({dchecks,setDchecks,allChecked,onAgree,onBack}:{
+export default function DisclaimerView({dchecks,setDchecks,willType,onAgree,onBack}:{
   dchecks: DisclaimerChecks;
   setDchecks: (fn: (p: DisclaimerChecks) => DisclaimerChecks) => void;
-  allChecked: boolean;
+  willType: WillType;
   onAgree: () => void;
   onBack: () => void;
 }){
+  // The Non-Muslim declaration doesn't apply to the Goan Will flow — Goa's
+  // succession framework (the Portuguese Civil Code carried over post-1961)
+  // governs all residents regardless of religion, unlike the rest of India
+  // where Muslim testamentary succession instead falls under Muslim
+  // Personal Law. So this clause is only shown/required outside willType==="goan".
+  const items = [
+    {k:"nonMuslim",t:"Non-Muslim Testator Declaration: I confirm that I am a Non-Muslim. (Muslim testamentary succession is governed by Muslim Personal Law; this tool is not designed for Muslim testators.)"},
+    {k:"age",t:"Age & Capacity: I am at least 18 years of age and of sound and disposing mind at the time of making this Will."},
+    {k:"freeWill",t:"Free Will: I am making this Will voluntarily, without coercion, undue influence, fraud, or deceit from any person."},
+    {k:"legalAwareness",t:"Legal Awareness: I understand that a Will made under coercion, undue influence, deceit, or fraud is void under Indian law."},
+    {k:"law",t:"Governing Law: I understand that this Will shall be governed exclusively by Indian law (The Indian Succession Act, 1925)."},
+    {k:"tool",t:"Service Disclaimer: I understand that Forward Legacy is an online drafting tool and does not substitute for personalized legal advice regarding complex estates."},
+  ].filter(item=>willType!=="goan"||item.k!=="nonMuslim");
+  const allChecked = items.every(item=>dchecks[item.k as keyof DisclaimerChecks]);
+
   return(
     <div className="fade-in fixed inset-0 z-50 bg-slate-100/95 overflow-y-auto">
       <div className="min-h-full flex items-center justify-center px-4 py-8">
@@ -24,14 +39,7 @@ export default function DisclaimerView({dchecks,setDchecks,allChecked,onAgree,on
               </div>
             </div>
             <div className="space-y-3 mb-6">
-              {[
-                {k:"nonMuslim",t:"Non-Muslim Testator Declaration: I confirm that I am a Non-Muslim. (Muslim testamentary succession is governed by Muslim Personal Law; this tool is not designed for Muslim testators.)"},
-                {k:"age",t:"Age & Capacity: I am at least 18 years of age and of sound and disposing mind at the time of making this Will."},
-                {k:"freeWill",t:"Free Will: I am making this Will voluntarily, without coercion, undue influence, fraud, or deceit from any person."},
-                {k:"legalAwareness",t:"Legal Awareness: I understand that a Will made under coercion, undue influence, deceit, or fraud is void under Indian law."},
-                {k:"law",t:"Governing Law: I understand that this Will shall be governed exclusively by Indian law (The Indian Succession Act, 1925)."},
-                {k:"tool",t:"Service Disclaimer: I understand that Forward Legacy is an online drafting tool and does not substitute for personalized legal advice regarding complex estates."},
-              ].map(item=>(
+              {items.map(item=>(
                 <label key={item.k}
                   className={`flex items-start gap-3 p-4 rounded-3xl cursor-pointer border transition-all ${dchecks[item.k as keyof DisclaimerChecks]?"border-[#2F8132]/30 bg-[#EDF6EA]/30":"border-slate-200 hover:border-[#2F8132]/20"}`}>
                   <input type="checkbox" className="sr-only peer" checked={dchecks[item.k as keyof DisclaimerChecks]} onChange={()=>setDchecks(p=>({...p,[item.k]:!p[item.k as keyof DisclaimerChecks]}))}/>
