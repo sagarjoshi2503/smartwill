@@ -246,7 +246,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
           )}
           <div className="bg-slate-100 border border-slate-200 rounded-xl p-3.5 text-xs text-slate-600 flex items-start gap-2"><Info size={13} className="mt-0.5 shrink-0"/>You declare that you are of sound mind and executing this Will voluntarily, free from coercion or undue influence.</div>
           <div>
-            <label className={LC}>Testator Email Address {!testatorEmailEditable&&<span className="text-red-400 normal-case text-[9px]">(Locked)</span>}</label>
+            <label className={LC}>Testator Email Address {!testatorEmailEditable&&<span className="text-[#2F8132] normal-case text-[9px]">(Locked)</span>}</label>
             <div className="relative">
               {!testatorEmailEditable&&<Lock size={11} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-600"/>}
               <input type="email" value={will.testator.email} onChange={e=>set("testator.email",e.target.value)} disabled={!testatorEmailEditable}
@@ -422,7 +422,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
             )}
             <div className="bg-slate-100 border border-slate-200 rounded-xl p-3.5 text-xs text-slate-600 flex items-start gap-2"><Info size={13} className="mt-0.5 shrink-0"/>You declare that you are of sound mind and executing this Will voluntarily, free from coercion or undue influence.</div>
             <div>
-              <label className={LC}>Testator Email Address {!testatorEmailEditable&&<span className="text-red-400 normal-case text-[9px]">(Locked)</span>}</label>
+              <label className={LC}>Testator Email Address {!testatorEmailEditable&&<span className="text-[#2F8132] normal-case text-[9px]">(Locked)</span>}</label>
               <div className="relative">
                 {!testatorEmailEditable&&<Lock size={11} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-600"/>}
                 <input type="email" value={will.testator.email} onChange={e=>set("testator.email",e.target.value)} disabled={!testatorEmailEditable}

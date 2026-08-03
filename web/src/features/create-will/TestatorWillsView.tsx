@@ -114,7 +114,7 @@ export default function TestatorWillsView({email,onCreateNew,onEditWill,onViewWi
             <Plus size={14}/>Create New Will
           </button>
         </div>
-        <div className="bg-amber-50 border border-amber-200 rounded-xl p-3.5 text-xs text-amber-700 flex items-start gap-2 mb-6">
+        <div className="bg-[#EDF6EA] border border-[#2F8132]/25 rounded-xl p-3.5 text-xs text-[#1E5B22] flex items-start gap-2 mb-6">
           <Clock size={13} className="mt-0.5 shrink-0"/>Wills created more than {WILL_VISIBLE_DAYS} days ago will be deleted from the system.
         </div>
         {actionError&&<p className="text-red-500 text-xs mb-4">{actionError}</p>}

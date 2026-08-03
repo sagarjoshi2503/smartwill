@@ -68,7 +68,8 @@ export default function SignupView({signup,setSignup,onNext}:{
             </div>
           </div>
           <label className="flex items-start gap-3 cursor-pointer">
-            <div onClick={()=>setSignup(p=>({...p,terms:!p.terms}))} className={`w-5 h-5 rounded-lg border-2 flex items-center justify-center shrink-0 mt-1 transition-all ${signup.terms?"bg-[#2F8132] border-[#2F8132]":"border-slate-400"}`}>
+            <input type="checkbox" className="sr-only" checked={signup.terms} onChange={()=>setSignup(p=>({...p,terms:!p.terms}))}/>
+            <div className={`w-5 h-5 rounded-lg border-2 flex items-center justify-center shrink-0 mt-1 transition-all ${signup.terms?"bg-[#2F8132] border-[#2F8132]":"border-slate-400"}`}>
               {signup.terms&&<Check size={10} className="text-[#ffffff]"/>}
             </div>
             <span className="text-slate-600 text-sm">{TERMS_AGREE_PREFIX}<span className="text-[#2F8132]">{LBL_TERMS_OF_SERVICE}</span>{TERMS_AGREE_JOINER}<span className="text-[#2F8132]">{LBL_PRIVACY_POLICY}</span></span>

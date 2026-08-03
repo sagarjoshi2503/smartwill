@@ -412,7 +412,7 @@ export default function SmartWill() {
             <div className="flex items-center gap-2 cursor-pointer" onClick={()=>setView("landing")}>
               <div className="w-8 h-8 bg-[#2F8132] rounded-lg flex items-center justify-center shadow-lg shadow-[#2F8132]/15"><Scale size={15} className="text-white"/></div>
               <span className="text-slate-900 font-bold text-lg serif">SmartWill</span>
-              <span className="text-[9px] font-bold tracking-[0.35em] text-[#924d06] bg-[#f8edd1] border border-[#2F8132] px-1.5 py-0.5 rounded">{LBL_INDIA_BADGE}</span>
+              <span className="text-[9px] font-bold tracking-[0.35em] text-[#1E5B22] bg-[#EDF6EA] border border-[#2F8132] px-1.5 py-0.5 rounded">{LBL_INDIA_BADGE}</span>
             </div>
             <div className="flex items-center gap-3">
               {view==="admin" && adminProfile ? (
