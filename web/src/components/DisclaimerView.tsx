@@ -34,8 +34,8 @@ export default function DisclaimerView({dchecks,setDchecks,allChecked,onAgree,on
               ].map(item=>(
                 <label key={item.k}
                   className={`flex items-start gap-3 p-4 rounded-3xl cursor-pointer border transition-all ${dchecks[item.k as keyof DisclaimerChecks]?"border-[#2F8132]/30 bg-[#EDF6EA]/30":"border-slate-200 hover:border-[#2F8132]/20"}`}>
-                  <input type="checkbox" className="sr-only" checked={dchecks[item.k as keyof DisclaimerChecks]} onChange={()=>setDchecks(p=>({...p,[item.k]:!p[item.k as keyof DisclaimerChecks]}))}/>
-                  <div className={`w-5 h-5 rounded-lg border-2 flex items-center justify-center shrink-0 mt-1 transition-all ${dchecks[item.k as keyof DisclaimerChecks]?"bg-[#2F8132] border-[#2F8132]":"border-slate-300"}`}>
+                  <input type="checkbox" className="sr-only peer" checked={dchecks[item.k as keyof DisclaimerChecks]} onChange={()=>setDchecks(p=>({...p,[item.k]:!p[item.k as keyof DisclaimerChecks]}))}/>
+                  <div className={`w-5 h-5 rounded-lg border-2 flex items-center justify-center shrink-0 mt-1 transition-all peer-focus-visible:ring-2 peer-focus-visible:ring-[#2F8132] peer-focus-visible:ring-offset-2 ${dchecks[item.k as keyof DisclaimerChecks]?"bg-[#2F8132] border-[#2F8132]":"border-slate-300"}`}>
                     {dchecks[item.k as keyof DisclaimerChecks]&&<Check size={10} className="text-[#ffffff]"/>}
                   </div>
                   <span className="text-slate-700 text-sm leading-relaxed">{item.t}</span>

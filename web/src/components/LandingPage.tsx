@@ -132,10 +132,10 @@ export default function LandingPage({plans,addons,selectedPlan,setSelectedPlan,a
                   </div>
                   <div className="flex items-center gap-3">
                     <span className="text-[#2F8132] font-semibold text-sm">+{fmt(addon.price)}</span>
-                    <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${addonsState[addon.id]?"bg-[#2F8132] border-[#2F8132]":"border-slate-300"}`}>
+                    <input type="checkbox" className="sr-only peer" checked={!!addonsState[addon.id]} onChange={()=>setAddons(p=>({...p,[addon.id]:!p[addon.id]}))}/>
+                    <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all peer-focus-visible:ring-2 peer-focus-visible:ring-[#2F8132] peer-focus-visible:ring-offset-2 ${addonsState[addon.id]?"bg-[#2F8132] border-[#2F8132]":"border-slate-300"}`}>
                       {addonsState[addon.id]&&<Check size={10} className="text-[#ffffff]"/>}
                     </div>
-                    <input type="checkbox" className="sr-only" checked={!!addonsState[addon.id]} onChange={()=>setAddons(p=>({...p,[addon.id]:!p[addon.id]}))}/>
                   </div>
                 </label>
               ))}
