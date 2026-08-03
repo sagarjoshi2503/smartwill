@@ -1,4 +1,4 @@
-﻿import { useState } from "react";
+﻿import { useState, useEffect } from "react";
 import {
   User, UserCheck, Baby, Users, Briefcase, BookOpen, Lock, Info, Plus, Trash2,
   Check, AlertTriangle, CheckCircle, FileText, Send,
@@ -15,6 +15,7 @@ import FormBlock from "../../components/shared/FormBlock";
 import Toggle from "../../components/shared/Toggle";
 import Nav from "../../components/shared/Nav";
 import { authFetch } from "../../utils/apiBase";
+import { normalizeIdOnBlur } from "../../utils/idValidation";
 import {
   API_WILL_SAVE, API_ADMIN_SAVE, API_PAYMENTS_CREATE_ORDER, API_PAYMENTS_VERIFY, API_PAYMENTS_MARK_FAILED,
   apiPathComplete,
@@ -70,6 +71,22 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
   const [submitStatus,setSubmitStatus]=useState<"idle"|"saving"|"error"|"done">("idle");
   const [submitError,setSubmitError]=useState("");
   const [showGenerateInstructions,setShowGenerateInstructions]=useState(false);
+
+  // ID number fields (PAN/Aadhaar/Driving Licence/Passport) reformat and
+  // validate on blur — see utils/idValidation.ts for the per-type rules.
+  // Any format error surfaces as this auto-dismissing popup rather than an
+  // inline message, since these fields are scattered across every step.
+  const [idPopupError,setIdPopupError]=useState<string|null>(null);
+  useEffect(()=>{
+    if(!idPopupError) return;
+    const t=setTimeout(()=>setIdPopupError(null),4500);
+    return ()=>clearTimeout(t);
+  },[idPopupError]);
+  const handleIdBlur=(idType: string, raw: string, apply: (v: string)=>void)=>{
+    const {value,error}=normalizeIdOnBlur(idType,raw);
+    if(value!==raw) apply(value);
+    setIdPopupError(error);
+  };
 
   // Testator submitting for admin review/approval is a paid action, done via
   // Razorpay Standard Checkout (an in-page modal, no page navigation) —
@@ -270,8 +287,8 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <div><label className={LC}>PAN Number</label><input value={will.testator.pan} onChange={e=>set("testator.pan",e.target.value)} className={IC} placeholder="ABCDE1234F" title={TIP_NO_ID_SAVED}/></div>
-            <div><label className={LC}>Aadhaar Number</label><input value={will.testator.aadhaarNumber} onChange={e=>set("testator.aadhaarNumber",e.target.value)} className={IC} placeholder="XXXX XXXX XXXX" title={TIP_NO_ID_SAVED}/></div>
+            <div><label className={LC}>PAN Number</label><input value={will.testator.pan} onChange={e=>set("testator.pan",e.target.value)} onBlur={e=>handleIdBlur("PAN Card",e.target.value,v=>set("testator.pan",v))} className={IC} placeholder="ABCDE1234F" title={TIP_NO_ID_SAVED}/></div>
+            <div><label className={LC}>Aadhaar Number</label><input value={will.testator.aadhaarNumber} onChange={e=>set("testator.aadhaarNumber",e.target.value)} onBlur={e=>handleIdBlur("Aadhaar Card",e.target.value,v=>set("testator.aadhaarNumber",v))} className={IC} placeholder="XXXX XXXX XXXX" title={TIP_NO_ID_SAVED}/></div>
           </div>
           <div><label className={LC}>Age (Years)</label><input type="number" value={will.testator.age} onChange={e=>set("testator.age",e.target.value)} className={IC+" max-w-[140px]"}/></div>
           <FormBlock title="Marital Status">
@@ -290,7 +307,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
             {will.testator.maritalStatus==="married"&&(
               <div className="grid grid-cols-2 gap-3 mt-3">
                 <div><label className={LC}>Spouse's Name</label><input value={will.testator.spouseName} onChange={e=>set("testator.spouseName",e.target.value)} className={IC}/></div>
-                <div><label className={LC}>Spouse's Aadhaar Number</label><input value={will.testator.spouseAadhaarNumber} onChange={e=>set("testator.spouseAadhaarNumber",e.target.value)} className={IC} title={TIP_NO_ID_SAVED}/></div>
+                <div><label className={LC}>Spouse's Aadhaar Number</label><input value={will.testator.spouseAadhaarNumber} onChange={e=>set("testator.spouseAadhaarNumber",e.target.value)} onBlur={e=>handleIdBlur("Aadhaar Card",e.target.value,v=>set("testator.spouseAadhaarNumber",v))} className={IC} title={TIP_NO_ID_SAVED}/></div>
               </div>
             )}
           </FormBlock>
@@ -402,8 +419,8 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
               <div><label className={LC}>Please specify occupation</label><input value={person.occupationOther} onChange={e=>set(path+".occupationOther",e.target.value)} className={IC}/></div>
             )}
             <div className="grid grid-cols-2 gap-3">
-              <div><label className={LC}>PAN Card No.</label><input value={person.pan} onChange={e=>set(path+".pan",e.target.value)} className={IC} placeholder="ABCDE1234F" title={TIP_NO_ID_SAVED}/></div>
-              <div><label className={LC}>Aadhaar Card No.</label><input value={person.aadhaarNumber} onChange={e=>set(path+".aadhaarNumber",e.target.value)} className={IC} title={TIP_NO_ID_SAVED}/></div>
+              <div><label className={LC}>PAN Card No.</label><input value={person.pan} onChange={e=>set(path+".pan",e.target.value)} onBlur={e=>handleIdBlur("PAN Card",e.target.value,v=>set(path+".pan",v))} className={IC} placeholder="ABCDE1234F" title={TIP_NO_ID_SAVED}/></div>
+              <div><label className={LC}>Aadhaar Card No.</label><input value={person.aadhaarNumber} onChange={e=>set(path+".aadhaarNumber",e.target.value)} onBlur={e=>handleIdBlur("Aadhaar Card",e.target.value,v=>set(path+".aadhaarNumber",v))} className={IC} title={TIP_NO_ID_SAVED}/></div>
             </div>
             <div><label className={LC}>Residential Address</label>
               <textarea value={person.address} onChange={e=>set(path+".address",e.target.value)} rows={2} className={IC+" resize-none"}/>
@@ -459,7 +476,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                   {ID_TYPES.map(t=><option key={t}>{t}</option>)}
                 </select>
               </div>
-              <div><label className={LC}>{LBL_ID_NUMBER}</label><input value={will.executor.idNumber} onChange={e=>set("executor.idNumber",e.target.value)} className={IC} title={TIP_NO_ID_SAVED}/></div>
+              <div><label className={LC}>{LBL_ID_NUMBER}</label><input value={will.executor.idNumber} onChange={e=>set("executor.idNumber",e.target.value)} onBlur={e=>handleIdBlur(will.executor.idType,e.target.value,v=>set("executor.idNumber",v))} className={IC} title={TIP_NO_ID_SAVED}/></div>
             </div>
             <div><label className={LC}>Residential Address</label><textarea value={will.executor.address} onChange={e=>set("executor.address",e.target.value)} rows={2} className={IC+" resize-none"}/></div>
             <div><label className={LC}>Relationship to Testator</label>
@@ -488,7 +505,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
               <div><label className={LC}>{LBL_FULL_NAME}</label><input value={will.executor.jointName} onChange={e=>set("executor.jointName",e.target.value)} className={IC} placeholder="Joint executor name"/></div>
               <div className="grid grid-cols-2 gap-3">
                 <div><label className={LC}>{LBL_ID_TYPE}</label><select value={will.executor.jointIdType} onChange={e=>set("executor.jointIdType",e.target.value)} className={IC+" appearance-none"}>{ID_TYPES.map(t=><option key={t}>{t}</option>)}</select></div>
-                <div><label className={LC}>{LBL_ID_NUMBER}</label><input value={will.executor.jointIdNumber} onChange={e=>set("executor.jointIdNumber",e.target.value)} className={IC} title={TIP_NO_ID_SAVED}/></div>
+                <div><label className={LC}>{LBL_ID_NUMBER}</label><input value={will.executor.jointIdNumber} onChange={e=>set("executor.jointIdNumber",e.target.value)} onBlur={e=>handleIdBlur(will.executor.jointIdType,e.target.value,v=>set("executor.jointIdNumber",v))} className={IC} title={TIP_NO_ID_SAVED}/></div>
               </div>
               <div><label className={LC}>{LBL_ADDRESS}</label><textarea value={will.executor.jointAddress} onChange={e=>set("executor.jointAddress",e.target.value)} rows={2} className={IC+" resize-none"}/></div>
             </FormBlock>
@@ -499,7 +516,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
               <div><label className={LC}>{LBL_FULL_NAME}</label><input value={will.executor.subName} onChange={e=>set("executor.subName",e.target.value)} className={IC} placeholder="Substitute executor name"/></div>
               <div className="grid grid-cols-2 gap-3">
                 <div><label className={LC}>{LBL_ID_TYPE}</label><select value={will.executor.subIdType} onChange={e=>set("executor.subIdType",e.target.value)} className={IC+" appearance-none"}>{ID_TYPES.map(t=><option key={t}>{t}</option>)}</select></div>
-                <div><label className={LC}>{LBL_ID_NUMBER}</label><input value={will.executor.subIdNumber} onChange={e=>set("executor.subIdNumber",e.target.value)} className={IC} title={TIP_NO_ID_SAVED}/></div>
+                <div><label className={LC}>{LBL_ID_NUMBER}</label><input value={will.executor.subIdNumber} onChange={e=>set("executor.subIdNumber",e.target.value)} onBlur={e=>handleIdBlur(will.executor.subIdType,e.target.value,v=>set("executor.subIdNumber",v))} className={IC} title={TIP_NO_ID_SAVED}/></div>
               </div>
               <div><label className={LC}>{LBL_ADDRESS}</label><textarea value={will.executor.subAddress} onChange={e=>set("executor.subAddress",e.target.value)} rows={2} className={IC+" resize-none"}/></div>
             </FormBlock>
@@ -523,7 +540,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                 <div><label className={LC}>{LBL_FULL_NAME}</label><input value={will.guardian.name} onChange={e=>set("guardian.name",e.target.value)} className={IC} placeholder="Guardian's name"/></div>
                 <div className="grid grid-cols-2 gap-3">
                   <div><label className={LC}>{LBL_ID_TYPE}</label><select value={will.guardian.idType} onChange={e=>set("guardian.idType",e.target.value)} className={IC+" appearance-none"}>{ID_TYPES.map(t=><option key={t}>{t}</option>)}</select></div>
-                  <div><label className={LC}>{LBL_ID_NUMBER}</label><input value={will.guardian.idNumber} onChange={e=>set("guardian.idNumber",e.target.value)} className={IC} title={TIP_NO_ID_SAVED}/></div>
+                  <div><label className={LC}>{LBL_ID_NUMBER}</label><input value={will.guardian.idNumber} onChange={e=>set("guardian.idNumber",e.target.value)} onBlur={e=>handleIdBlur(will.guardian.idType,e.target.value,v=>set("guardian.idNumber",v))} className={IC} title={TIP_NO_ID_SAVED}/></div>
                 </div>
                 <div><label className={LC}>{LBL_ADDRESS}</label><textarea value={will.guardian.address} onChange={e=>set("guardian.address",e.target.value)} rows={2} className={IC+" resize-none"}/></div>
               </FormBlock>
@@ -533,7 +550,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                   <div><label className={LC}>{LBL_FULL_NAME}</label><input value={will.guardian.subName} onChange={e=>set("guardian.subName",e.target.value)} className={IC} placeholder="Substitute guardian name"/></div>
                   <div className="grid grid-cols-2 gap-3">
                     <div><label className={LC}>{LBL_ID_TYPE}</label><select value={will.guardian.subIdType} onChange={e=>set("guardian.subIdType",e.target.value)} className={IC+" appearance-none"}>{ID_TYPES.map(t=><option key={t}>{t}</option>)}</select></div>
-                    <div><label className={LC}>{LBL_ID_NUMBER}</label><input value={will.guardian.subIdNumber} onChange={e=>set("guardian.subIdNumber",e.target.value)} className={IC} title={TIP_NO_ID_SAVED}/></div>
+                    <div><label className={LC}>{LBL_ID_NUMBER}</label><input value={will.guardian.subIdNumber} onChange={e=>set("guardian.subIdNumber",e.target.value)} onBlur={e=>handleIdBlur(will.guardian.subIdType,e.target.value,v=>set("guardian.subIdNumber",v))} className={IC} title={TIP_NO_ID_SAVED}/></div>
                   </div>
                   <div><label className={LC}>{LBL_ADDRESS}</label><textarea value={will.guardian.subAddress} onChange={e=>set("guardian.subAddress",e.target.value)} rows={2} className={IC+" resize-none"}/></div>
                 </FormBlock>
@@ -607,7 +624,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                           {ID_TYPES.map(t=><option key={t}>{t}</option>)}
                         </select>
                       </div>
-                      <div><label className={LC}>{LBL_ID_NUMBER}</label><input value={item.idNumber} onChange={e=>setItem(itemKey,idx,"idNumber",e.target.value)} className={IC} placeholder="ID number" title={TIP_NO_ID_SAVED}/></div>
+                      <div><label className={LC}>{LBL_ID_NUMBER}</label><input value={item.idNumber} onChange={e=>setItem(itemKey,idx,"idNumber",e.target.value)} onBlur={e=>handleIdBlur(item.idType,e.target.value,v=>setItem(itemKey,idx,"idNumber",v))} className={IC} placeholder="ID number" title={TIP_NO_ID_SAVED}/></div>
                     </div>
                     {item.relation==="Other"&&(
                       <div className="mt-2.5"><label className={LC}>Please specify relationship</label>
@@ -685,7 +702,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                           {ID_TYPES.map(t=><option key={t}>{t}</option>)}
                         </select>
                       </div>
-                      <div><label className={LC}>{LBL_ID_NUMBER}</label><input value={item.idNumber} onChange={e=>setItem(itemKey,idx,"idNumber",e.target.value)} className={IC} placeholder="ID number" title={TIP_NO_ID_SAVED}/></div>
+                      <div><label className={LC}>{LBL_ID_NUMBER}</label><input value={item.idNumber} onChange={e=>setItem(itemKey,idx,"idNumber",e.target.value)} onBlur={e=>handleIdBlur(item.idType,e.target.value,v=>setItem(itemKey,idx,"idNumber",v))} className={IC} placeholder="ID number" title={TIP_NO_ID_SAVED}/></div>
                     </div>
                     {item.relation==="Other"&&(
                       <div className="mt-2.5"><label className={LC}>Please specify relationship</label>
@@ -945,7 +962,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                           {ID_TYPES.map(t=><option key={t}>{t}</option>)}
                         </select>
                       </div>
-                      <div><label className={LC}>{LBL_ID_NUMBER}</label><input value={entry.idNumber} onChange={e=>setEntry("idNumber",e.target.value)} className={IC} title={TIP_NO_ID_SAVED}/></div>
+                      <div><label className={LC}>{LBL_ID_NUMBER}</label><input value={entry.idNumber} onChange={e=>setEntry("idNumber",e.target.value)} onBlur={e=>handleIdBlur(entry.idType,e.target.value,v=>setEntry("idNumber",v))} className={IC} title={TIP_NO_ID_SAVED}/></div>
                     </div>
                   </div>
                 );
@@ -986,7 +1003,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                           {ID_TYPES.map(t=><option key={t}>{t}</option>)}
                         </select>
                       </div>
-                      <div><label className={LC}>{LBL_ID_NUMBER}</label><input value={entry.idNumber} onChange={e=>setEntry("idNumber",e.target.value)} className={IC} title={TIP_NO_ID_SAVED}/></div>
+                      <div><label className={LC}>{LBL_ID_NUMBER}</label><input value={entry.idNumber} onChange={e=>setEntry("idNumber",e.target.value)} onBlur={e=>handleIdBlur(entry.idType,e.target.value,v=>setEntry("idNumber",v))} className={IC} title={TIP_NO_ID_SAVED}/></div>
                     </div>
                   </div>
                 );
@@ -1008,7 +1025,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                     {ID_TYPES.map(t=><option key={t}>{t}</option>)}
                   </select>
                 </div>
-                <div><label className={LC}>{LBL_ID_NUMBER}</label><input value={will.residualIdNumber} onChange={e=>setWill(p=>({...p,residualIdNumber:e.target.value}))} className={IC} placeholder="ID number" title={TIP_NO_ID_SAVED}/></div>
+                <div><label className={LC}>{LBL_ID_NUMBER}</label><input value={will.residualIdNumber} onChange={e=>setWill(p=>({...p,residualIdNumber:e.target.value}))} onBlur={e=>handleIdBlur(will.residualIdType,e.target.value,v=>setWill(p=>({...p,residualIdNumber:v})))} className={IC} placeholder="ID number" title={TIP_NO_ID_SAVED}/></div>
               </div>
             </FormBlock>
           )}
@@ -1054,8 +1071,8 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                 <div className="mt-2.5"><label className={LC}>Residential Address</label>
                   <textarea value={w.address} onChange={e=>setW("address",e.target.value)} rows={2} className={IC+" resize-none"}/></div>
                 <div className="grid grid-cols-2 gap-2.5 mt-2.5">
-                  <div><label className={LC}>PAN Card No.</label><input value={w.pan} onChange={e=>setW("pan",e.target.value)} className={IC} title={TIP_NO_ID_SAVED}/></div>
-                  <div><label className={LC}>Aadhaar Card No.</label><input value={w.aadhaarNumber} onChange={e=>setW("aadhaarNumber",e.target.value)} className={IC} title={TIP_NO_ID_SAVED}/></div>
+                  <div><label className={LC}>PAN Card No.</label><input value={w.pan} onChange={e=>setW("pan",e.target.value)} onBlur={e=>handleIdBlur("PAN Card",e.target.value,v=>setW("pan",v))} className={IC} title={TIP_NO_ID_SAVED}/></div>
+                  <div><label className={LC}>Aadhaar Card No.</label><input value={w.aadhaarNumber} onChange={e=>setW("aadhaarNumber",e.target.value)} onBlur={e=>handleIdBlur("Aadhaar Card",e.target.value,v=>setW("aadhaarNumber",v))} className={IC} title={TIP_NO_ID_SAVED}/></div>
                 </div>
               </>
             );
@@ -1159,7 +1176,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                       </select>
                     </div>
                     <div><label className={LC}>Aadhaar Number</label>
-                      <input value={w.aadhaarNumber} onChange={e=>setW("aadhaarNumber",e.target.value)} className={IC} title={TIP_NO_ID_SAVED}/>
+                      <input value={w.aadhaarNumber} onChange={e=>setW("aadhaarNumber",e.target.value)} onBlur={e=>handleIdBlur("Aadhaar Card",e.target.value,v=>setW("aadhaarNumber",v))} className={IC} title={TIP_NO_ID_SAVED}/>
                     </div>
                   </div>
                   {w.occupation==="Other"&&(
@@ -1230,6 +1247,15 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
             </p>
           )}
           <button onClick={onPrev} className="w-full text-slate-500 hover:text-white text-sm py-2 transition-colors">← Back</button>
+        </div>
+      )}
+      {idPopupError&&(
+        <div className="fixed top-5 inset-x-0 z-[100] flex justify-center px-4 pointer-events-none">
+          <div className="pointer-events-auto max-w-md w-full bg-white border border-red-200 shadow-xl rounded-2xl p-4 flex items-start gap-2.5">
+            <AlertTriangle size={16} className="text-red-500 shrink-0 mt-0.5"/>
+            <p className="text-slate-800 text-sm flex-1">{idPopupError}</p>
+            <button onClick={()=>setIdPopupError(null)} className="text-slate-400 hover:text-slate-600 text-xs font-semibold shrink-0">Dismiss</button>
+          </div>
         </div>
       )}
     </div>
