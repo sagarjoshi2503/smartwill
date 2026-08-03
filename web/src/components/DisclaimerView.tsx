@@ -30,7 +30,7 @@ export default function DisclaimerView({dchecks,setDchecks,allChecked,onAgree,on
                 {k:"freeWill",t:"Free Will: I am making this Will voluntarily, without coercion, undue influence, fraud, or deceit from any person."},
                 {k:"legalAwareness",t:"Legal Awareness: I understand that a Will made under coercion, undue influence, deceit, or fraud is void under Indian law."},
                 {k:"law",t:"Governing Law: I understand that this Will shall be governed exclusively by Indian law (The Indian Succession Act, 1925)."},
-                {k:"tool",t:"Service Disclaimer: I understand that SmartWill is an online drafting tool and does not substitute for personalized legal advice regarding complex estates."},
+                {k:"tool",t:"Service Disclaimer: I understand that Forward Legacy is an online drafting tool and does not substitute for personalized legal advice regarding complex estates."},
               ].map(item=>(
                 <label key={item.k}
                   className={`flex items-start gap-3 p-4 rounded-3xl cursor-pointer border transition-all ${dchecks[item.k as keyof DisclaimerChecks]?"border-[#2F8132]/30 bg-[#EDF6EA]/30":"border-slate-200 hover:border-[#2F8132]/20"}`}>

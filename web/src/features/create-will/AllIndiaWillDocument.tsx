@@ -121,7 +121,7 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,w
         <button onClick={onBack} className="flex items-center gap-2 text-slate-600 hover:text-slate-900 transition-colors text-sm"><ChevronLeft size={16}/>Back to Wizard</button>
         <div className="flex items-center gap-2">
           <div className="w-7 h-7 bg-[#2F8132] rounded-md flex items-center justify-center"><Scale size={13} className="text-[#ffffff]"/></div>
-          <span className="text-slate-900 font-bold serif">SmartWill — All India Will Document</span>
+          <span className="text-slate-900 font-bold serif">Forward Legacy — All India Will Document</span>
         </div>
         <div className="flex items-center gap-3">
           <span className="text-slate-400 text-[11px] hidden md:inline">In the print dialog, turn off "Headers and footers" so no URL or date is added.</span>

@@ -56,7 +56,7 @@ export default function GoanDeedDocument({will,onBack,onPrint,willDocRef}:{
         <button onClick={onBack} className="flex items-center gap-2 text-slate-600 hover:text-slate-900 transition-colors text-sm"><ChevronLeft size={16}/>Back</button>
         <div className="flex items-center gap-2">
           <div className="w-7 h-7 bg-[#2F8132] rounded-md flex items-center justify-center"><Scale size={13} className="text-[#ffffff]"/></div>
-          <span className="text-slate-900 font-bold serif">SmartWill — Deed of Consent</span>
+          <span className="text-slate-900 font-bold serif">Forward Legacy — Deed of Consent</span>
         </div>
         <div className="flex items-center gap-2.5">
           <button onClick={onPrint} className="flex items-center gap-1.5 bg-slate-700 hover:bg-slate-600 text-white rounded-lg px-3.5 py-2 text-sm transition-colors">

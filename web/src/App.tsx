@@ -159,7 +159,7 @@ export default function SmartWill() {
     return () => { cancelled = true; };
   }, []);
 
-  // SmartWill Assistant chat widget is gated behind the "enable-chat-bot"
+  // Forward Legacy Assistant chat widget is gated behind the "enable-chat-bot"
   // Vercel Flag, same fail-closed pattern as the flags above.
   useEffect(() => {
     let cancelled = false;
@@ -437,12 +437,13 @@ export default function SmartWill() {
           <div className="max-w-7xl mx-auto px-5 h-[58px] flex items-center justify-between gap-4">
             <div className="flex items-center gap-2.5 cursor-pointer shrink-0" onClick={()=>setView("landing")}>
               <svg width="30" height="30" viewBox="0 0 40 40" aria-hidden="true" className="shrink-0">
-                <polygon points="2,4 22,4 36,20 22,36 2,36 16,20" fill="#8BC34A"/>
-                <polygon points="14,10 30,10 38,20 30,30 14,30 22,20" fill="#1E5B22"/>
+                <polygon points="0,4 18,4 32,20 18,36 0,36 12,20" fill="#17441A"/>
+                <polygon points="8,4 24,4 36,20 24,36 8,36 18,20" fill="#2F8132"/>
+                <polygon points="16,4 30,4 38,20 30,36 16,36 24,20" fill="#8BC34A"/>
               </svg>
               <div className="leading-tight">
                 <div className="flex items-center gap-1.5">
-                  <span className="text-slate-900 font-extrabold text-base serif tracking-tight">SmartWill</span>
+                  <span className="text-slate-900 font-extrabold text-base serif tracking-tight whitespace-nowrap">FORWARD LEGACY</span>
                   <span className="text-[8px] font-bold tracking-[0.3em] text-[#1E5B22] bg-[#EDF6EA] border border-[#2F8132] px-1.5 py-0.5 rounded">{LBL_INDIA_BADGE}</span>
                 </div>
                 <div className="text-[9px] font-semibold tracking-[0.14em] text-slate-400 uppercase">Estate &amp; Succession Planning</div>
@@ -515,7 +516,7 @@ export default function SmartWill() {
               <button onClick={()=>setView(adminProfile?"admin":(signup.email?"myWills":"landing"))} className="text-slate-600 hover:text-slate-900 transition-colors"><ChevronLeft size={16}/></button>
               <div className="w-8 h-8 bg-[#2F8132] rounded-2xl flex items-center justify-center shadow-lg shadow-[#2F8132]/15"><Scale size={12} className="text-[#ffffff]"/></div>
               <div>
-                <div className="text-slate-900 font-semibold serif text-sm">SmartWill</div>
+                <div className="text-slate-900 font-semibold serif text-sm">Forward Legacy</div>
                 <div className="text-slate-500 text-[10px]">{LBL_WILL_DRAFTING}{willType&&` - ${WILL_TYPE_LBL_SHORT[willType]}`}</div>
               </div>
             </div>

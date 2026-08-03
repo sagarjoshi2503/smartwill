@@ -76,7 +76,7 @@ export default function LandingPage({plans,addons,selectedPlan,setSelectedPlan,a
           <div>
             <p className="text-[#2F8132] tracking-[0.35em] uppercase text-xs mb-3">About Us</p>
             <h2 className="apv-section-title mb-3">A Simple Way to Secure What Matters</h2>
-            <p className="text-slate-600 text-sm leading-relaxed mb-5">SmartWill is an estate and succession planning practice that helps individuals and families create Wills and Succession Deeds — simply, securely, and correctly, whether under the Indian Succession Act or Goa's unique civil framework.</p>
+            <p className="text-slate-600 text-sm leading-relaxed mb-5">Forward Legacy is an estate and succession planning practice that helps individuals and families create Wills and Succession Deeds — simply, securely, and correctly, whether under the Indian Succession Act or Goa's unique civil framework.</p>
             <button onClick={onAbout} className="apv-btn-alt">Learn More</button>
           </div>
         </div>

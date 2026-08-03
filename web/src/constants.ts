@@ -28,7 +28,7 @@ export const API_FLAGS = "/api/flags?key=enable-admin-button";
 // Vercel Flag gating whether Razorpay Checkout is offered at all when
 // submitting a Will for review — see App.tsx and WizardForms.tsx.
 export const API_RAZORPAY_FLAG = "/api/flags?key=use-razorpay";
-// Vercel Flag gating whether the SmartWill Assistant chat widget is shown at all — see App.tsx.
+// Vercel Flag gating whether the Forward Legacy Assistant chat widget is shown at all — see App.tsx.
 export const API_CHATBOT_FLAG = "/api/flags?key=enable-chat-bot";
 // Vercel Flag gating both the "Sign up" link on the Admin Portal login
 // screen AND the admin signup screen itself (so it's blocked even if
@@ -148,10 +148,10 @@ export const ERR_GENERATE_WILL_MISSING_IDS = "Cannot generate the Will document 
 export const BTN_DISMISS = "Dismiss";
 
 // --- Chat assistant widget ---
-export const LBL_CHAT_ASSISTANT_TITLE = "SmartWill Assistant";
-export const MSG_CHAT_EMPTY_STATE = "Ask me a question about SmartWill, or about your own Wills if you're signed in.";
+export const LBL_CHAT_ASSISTANT_TITLE = "Forward Legacy Assistant";
+export const MSG_CHAT_EMPTY_STATE = "Ask me a question about Forward Legacy, or about your own Wills if you're signed in.";
 export const MSG_CHAT_THINKING = "Thinking…";
-export const MSG_CHAT_UNAVAILABLE = "SmartWill Assistant isn't available right now.";
+export const MSG_CHAT_UNAVAILABLE = "Forward Legacy Assistant isn't available right now.";
 export const BTN_CONTACT_SUPPORT = "Contact Support";
 export const PH_CHAT_QUESTION = "Ask a question…";
 export const ARIA_OPEN_CHAT = "Open chat assistant";

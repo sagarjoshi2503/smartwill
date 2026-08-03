@@ -29,11 +29,11 @@ export default function AboutView(){
       <section className="py-14 px-5">
         <div className="max-w-3xl mx-auto space-y-4 text-slate-600 text-[0.98rem] leading-relaxed">
           <h2 className="text-2xl font-bold text-slate-900 serif mb-2">Why we Exist</h2>
-          <p>SmartWill came from a very simple observation.</p>
+          <p>Forward Legacy came from a very simple observation.</p>
           <p>After handling numerous succession cases, we kept seeing the same thing — families who had spent a lifetime building something, left with nothing to show for it but paperwork, waiting, and in many cases, a dispute that could have been entirely avoided.</p>
           <p>A property stuck in limbo because there was no Will. A spouse unable to access a joint account because the nominee column was blank. Children fighting over an ancestral home because nobody ever sat down and wrote out what should happen to it.</p>
           <p>None of it was inevitable. All of it was preventable.</p>
-          <p>What struck us most was that the problem was rarely ignorance. Most people knew they should make a Will. They just never had someone to make it easy enough — or local enough — to actually get it done. That's what SmartWill is.</p>
+          <p>What struck us most was that the problem was rarely ignorance. Most people knew they should make a Will. They just never had someone to make it easy enough — or local enough — to actually get it done. That's what Forward Legacy is.</p>
         </div>
       </section>
 
@@ -54,7 +54,7 @@ export default function AboutView(){
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-10">
             <p className="text-[#2F8132] tracking-[0.35em] uppercase text-xs mb-3">Team</p>
-            <h2 className="apv-section-title">The People Behind SmartWill</h2>
+            <h2 className="apv-section-title">The People Behind Forward Legacy</h2>
             <p className="text-slate-600 text-sm mt-3">Your legacy is our sole priority.</p>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">

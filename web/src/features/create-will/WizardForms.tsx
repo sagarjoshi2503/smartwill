@@ -138,7 +138,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
       amount: order.amount,
       currency: order.currency,
       order_id: order.orderId,
-      name: "SmartWill",
+      name: "Forward Legacy",
       description: "Will submission for admin review",
       prefill: { name: will.testator.fullName, email: will.testator.email },
       theme: { color: "#2F8132" },
