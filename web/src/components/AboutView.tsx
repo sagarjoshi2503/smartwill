@@ -1,4 +1,4 @@
-import { Scale } from "lucide-react";
+import BrandMark from "./shared/BrandMark";
 
 const WHY_LIST = [
   "We help individuals and families put a proper plan in place — Wills, Succession Deeds, and fully Customized estate documents. Everything your family needs, in one place.",
@@ -72,7 +72,7 @@ export default function AboutView(){
 
       <section className="bg-slate-50 py-12 px-5 border-t border-slate-200">
         <div className="max-w-3xl mx-auto flex items-center gap-3 justify-center text-slate-500 text-xs">
-          <Scale size={14} className="text-[#2F8132]"/>Legally sound Wills, drafted the way your family deserves.
+          <BrandMark size={18}/>Legally sound Wills, drafted the way your family deserves.
         </div>
       </section>
     </div>

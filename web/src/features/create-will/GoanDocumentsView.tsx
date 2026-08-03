@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
-import { ChevronLeft, FileText, Scale, Download } from "lucide-react";
+import { ChevronLeft, FileText, Download } from "lucide-react";
+import BrandMark from "../../components/shared/BrandMark";
 import GoanWillDocument from "./GoanWillDocument";
 import GoanDeedDocument from "./GoanDeedDocument";
 import type { WillState } from "../../types";
@@ -44,7 +45,7 @@ export default function GoanDocumentsView({will,onBack,onPrint}:{
         <button onClick={onBack} className="flex items-center gap-2 text-slate-600 hover:text-slate-900 transition-colors text-sm mb-6"><ChevronLeft size={16}/>Back to Wizard</button>
         <div className="bg-white rounded-2xl border border-slate-200 shadow-xl p-8">
           <div className="flex items-center gap-2.5 mb-2">
-            <div className="w-8 h-8 bg-[#2F8132] rounded-lg flex items-center justify-center"><Scale size={15} className="text-[#ffffff]"/></div>
+            <BrandMark size={30}/>
             <h1 className="text-slate-900 font-bold text-lg serif">Your documents are ready</h1>
           </div>
           <p className="text-slate-500 text-sm mb-6">Each opens its own print-ready view, formatted to A4. Choose <strong>Save as PDF</strong> as the print destination and print single-sided.</p>

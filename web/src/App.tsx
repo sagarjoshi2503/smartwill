@@ -1,9 +1,10 @@
 import { useState, useRef, useCallback, useEffect } from "react";
-import { Scale, ArrowRight, ChevronLeft, Check, LogIn, LogOut, Eye, Save, RotateCcw } from "lucide-react";
+import { ArrowRight, ChevronLeft, Check, LogIn, LogOut, Eye, Save, RotateCcw } from "lucide-react";
 
 import { PLANS, ADDONS } from "./data/plans";
 import { DEFAULT_WILL } from "./data/defaultWill";
 import { WILL_TYPE_LBL_SHORT } from "./data/willTypes";
+import BrandMark from "./components/shared/BrandMark";
 import LandingPage from "./components/LandingPage";
 import AboutView from "./components/AboutView";
 import ServicesView from "./components/ServicesView";
@@ -436,11 +437,7 @@ export default function SmartWill() {
         <header className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-slate-200">
           <div className="max-w-7xl mx-auto px-5 h-[58px] flex items-center justify-between gap-4">
             <div className="flex items-center gap-2.5 cursor-pointer shrink-0" onClick={()=>setView("landing")}>
-              <svg width="30" height="30" viewBox="0 0 40 40" aria-hidden="true" className="shrink-0">
-                <polygon points="0,4 18,4 32,20 18,36 0,36 12,20" fill="#17441A"/>
-                <polygon points="8,4 24,4 36,20 24,36 8,36 18,20" fill="#2F8132"/>
-                <polygon points="16,4 30,4 38,20 30,36 16,36 24,20" fill="#8BC34A"/>
-              </svg>
+              <BrandMark size={30} className="shrink-0"/>
               <div className="leading-tight">
                 <div className="flex items-center gap-1.5">
                   <span className="text-slate-900 font-extrabold text-base serif tracking-tight whitespace-nowrap">FORWARD LEGACY</span>
@@ -514,7 +511,7 @@ export default function SmartWill() {
           <div className="flex-none bg-white/95 border-b border-slate-200 px-4 h-[60px] flex items-center justify-between">
             <div className="flex items-center gap-3">
               <button onClick={()=>setView(adminProfile?"admin":(signup.email?"myWills":"landing"))} className="text-slate-600 hover:text-slate-900 transition-colors"><ChevronLeft size={16}/></button>
-              <div className="w-8 h-8 bg-[#2F8132] rounded-2xl flex items-center justify-center shadow-lg shadow-[#2F8132]/15"><Scale size={12} className="text-[#ffffff]"/></div>
+              <BrandMark size={28}/>
               <div>
                 <div className="text-slate-900 font-semibold serif text-sm">Forward Legacy</div>
                 <div className="text-slate-500 text-[10px]">{LBL_WILL_DRAFTING}{willType&&` - ${WILL_TYPE_LBL_SHORT[willType]}`}</div>
@@ -608,7 +605,7 @@ export default function SmartWill() {
             <div className="hidden lg:flex lg:w-[50%] bg-slate-100 p-5 overflow-y-auto items-start justify-center">
               {willType==="allindia" ? <AllIndiaLiveDocPreview will={will}/> : willType==="goan" ? (
                 <div className="w-full max-w-[420px] bg-white border border-slate-200 rounded-2xl shadow-xl p-6 text-center">
-                  <Scale size={22} className="text-[#2F8132] mx-auto mb-3"/>
+                  <BrandMark size={32} className="mx-auto mb-3"/>
                   <p className="text-slate-900 text-sm font-semibold mb-1.5">Goan Will &amp; Deed of Consent</p>
                   <p className="text-slate-500 text-xs leading-relaxed">Your document(s) — the Open Will, and if married, your spouse's Open Will and a shared Deed of Consent — become available to preview and download once you reach the final step and click Generate.</p>
                 </div>

@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import type { MutableRefObject } from "react";
-import { ChevronLeft, Scale, Printer, Download } from "lucide-react";
+import { ChevronLeft, Printer, Download } from "lucide-react";
+import BrandMark from "../../components/shared/BrandMark";
 import WillSection from "../../components/shared/WillSection";
 import { formatAllocFull } from "../../utils/allocation";
 import { today } from "../../utils/format";
@@ -48,7 +49,7 @@ export default function WillDocument({will,residualBene,onBack,onPrint,willDocRe
       <div className="no-print sticky top-0 z-50 bg-white border-b border-slate-200 px-5 py-3 flex items-center justify-between">
         <button onClick={onBack} className="flex items-center gap-2 text-slate-600 hover:text-slate-900 transition-colors text-sm"><ChevronLeft size={16}/>Back to Wizard</button>
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 bg-[#2F8132] rounded-md flex items-center justify-center"><Scale size={13} className="text-[#ffffff]"/></div>
+          <BrandMark size={26}/>
           <span className="text-slate-900 font-bold serif">Forward Legacy — Generated Will Document</span>
         </div>
         <div className="flex items-center gap-2.5">

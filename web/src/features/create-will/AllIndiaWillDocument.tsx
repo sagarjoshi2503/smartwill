@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import type { MutableRefObject, ReactNode } from "react";
-import { ChevronLeft, Scale, Printer, Download } from "lucide-react";
+import { ChevronLeft, Printer, Download } from "lucide-react";
+import BrandMark from "../../components/shared/BrandMark";
 import { ordinal } from "../../utils/format";
 import type { AllIndiaAssetItem, Beneficiary, Witness, WillState } from "../../types";
 
@@ -120,7 +121,7 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,w
       <div className="no-print sticky top-0 z-50 bg-white border-b border-slate-200 px-5 py-3 flex items-center justify-between gap-4 flex-wrap">
         <button onClick={onBack} className="flex items-center gap-2 text-slate-600 hover:text-slate-900 transition-colors text-sm"><ChevronLeft size={16}/>Back to Wizard</button>
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 bg-[#2F8132] rounded-md flex items-center justify-center"><Scale size={13} className="text-[#ffffff]"/></div>
+          <BrandMark size={26}/>
           <span className="text-slate-900 font-bold serif">Forward Legacy — All India Will Document</span>
         </div>
         <div className="flex items-center gap-3">
