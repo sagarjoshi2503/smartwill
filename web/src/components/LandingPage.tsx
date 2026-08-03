@@ -82,7 +82,7 @@ export default function LandingPage({plans,addons,selectedPlan,setSelectedPlan,a
         </div>
       </section>
 
-      <section className="bg-slate-50 py-14 px-5">
+      <section id="plan-options" className="bg-slate-50 py-14 px-5">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-10">
             <p className="text-[#2F8132] tracking-[0.35em] uppercase text-xs mb-3">Plan Options</p>

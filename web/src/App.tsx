@@ -407,6 +407,17 @@ export default function SmartWill() {
   // Print / Download
   const handlePrint = useCallback(() => window.print(), []);
 
+  // "See Will Pricing Options" (Services page) sends the visitor to the Home
+  // page's Plan Options section specifically, rather than just the top of
+  // the page — the view switch is async, so the scroll waits a tick for the
+  // section to actually be in the DOM.
+  const goToPlanOptions = useCallback(() => {
+    setView("landing");
+    setTimeout(() => {
+      document.getElementById("plan-options")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 50);
+  }, []);
+
   if(showWillDoc) return willType==="allindia" ? (
     <AllIndiaWillDocument will={will} residualBene={residualBene}
       onBack={()=>setShowWillDoc(false)} onPrint={handlePrint} willDocRef={willDocRef} />
@@ -483,7 +494,7 @@ export default function SmartWill() {
 
       {view==="landing" && <LandingPage plans={PLANS} addons={ADDONS} selectedPlan={selectedPlan} setSelectedPlan={setSelectedPlan} addonsState={addons} setAddons={setAddons} totalPrice={totalPrice} onStart={()=>setView("authChoice")} onContactUs={()=>setView("contactUs")} onAbout={()=>setView("about")} onServices={()=>setView("services")}/>}
       {view==="about" && <AboutView/>}
-      {view==="services" && <ServicesView onStart={()=>setView("authChoice")} onContactUs={()=>setView("contactUs")} onHome={()=>setView("landing")}/>}
+      {view==="services" && <ServicesView onStart={()=>setView("authChoice")} onContactUs={()=>setView("contactUs")} onHome={goToPlanOptions}/>}
       {view==="faq" && <FaqView/>}
       {view==="partner" && <PartnerView onContactUs={()=>setView("contactUs")}/>}
       {view==="contactUs" && <ContactUsView onBack={()=>setView("landing")}/>}
