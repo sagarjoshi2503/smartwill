@@ -88,7 +88,11 @@ export default function LandingPage({plans,addons,selectedPlan,setSelectedPlan,a
             <p className="text-[#4F9D33] tracking-[0.35em] uppercase text-xs mb-3">Plan Options</p>
             <h2 className="apv-section-title">Choose Your Plan</h2>
           </div>
-          <div className="overflow-x-auto -mx-5 px-5 pb-2" style={{scrollbarColor:"#4F9D33 #F5F7F3"}}>
+          {/* pt-4 leaves room for the "Most Popular" badge's -top-3 offset —
+              overflow-x-auto implicitly makes the vertical axis clip too
+              (per the CSS spec, one non-"visible" overflow axis forces the
+              other off "visible"), so without this the badge got cut off. */}
+          <div className="overflow-x-auto -mx-5 px-5 pt-4 pb-2" style={{scrollbarColor:"#4F9D33 #F5F7F3"}}>
             <div className="flex flex-nowrap gap-6 w-max">
               {plans.map(plan=>(
                 <div key={plan.id}
