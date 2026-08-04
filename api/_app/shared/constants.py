@@ -137,6 +137,7 @@ GIFT_VOUCHER_QTY_INVALID = "qty must be a positive integer."
 
 # --- Document/request field names ---
 FLD_EMAIL = "email"
+FLD_ADDRESS = "address"
 FLD_PASSWORD = "password"
 FLD_PWD_HASH = "passwordHash"
 FLD_FULL_NAME = "fullName"

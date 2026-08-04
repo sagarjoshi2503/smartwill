@@ -1,9 +1,19 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Building2, Phone, Mail } from "lucide-react";
 import { apiUrl } from "../utils/apiBase";
-import { API_CONTACT_SEND } from "../constants";
+import { API_CONTACT_SEND, API_CONTACT_INFO } from "../constants";
+
+// Fallback shown until GET /api/contact-us/info resolves (and if it ever
+// fails) — kept in sync with the Settings defaults in api/_app/core/config.py
+// so there's no visible flash/mismatch on first paint.
+const FALLBACK_CONTACT_INFO = {
+  address: "Mapusa, Goa, 403507",
+  phone: "+91 7020607957",
+  email: "office@forwardlegacy.co.in / admin@forwardlegacy.co.in / WhatsApp",
+};
 
 export default function SiteFooter(){
+  const [contactInfo,setContactInfo]=useState(FALLBACK_CONTACT_INFO);
   const [firstName,setFirstName]=useState("");
   const [lastName,setLastName]=useState("");
   const [email,setEmail]=useState("");
@@ -14,6 +24,15 @@ export default function SiteFooter(){
 
   const IC = "w-full apv-input rounded-xl px-3.5 py-2.5 text-slate-900 placeholder:text-slate-500 text-sm focus:outline-none transition";
   const LC = "block text-slate-700 text-xs font-semibold mb-1.5";
+
+  useEffect(()=>{
+    let cancelled=false;
+    fetch(apiUrl(API_CONTACT_INFO))
+      .then(res=>res.ok?res.json():null)
+      .then(data=>{ if(!cancelled&&data) setContactInfo({address:data.address,phone:data.phone,email:data.email}); })
+      .catch(()=>{});
+    return ()=>{ cancelled=true; };
+  },[]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,21 +64,21 @@ export default function SiteFooter(){
             <div className="w-11 h-11 rounded-full bg-white border border-[#E5E8E3] text-[#4F9D33] flex items-center justify-center shrink-0"><Building2 size={18}/></div>
             <div>
               <div className="text-[#4F9D33] text-[10px] uppercase tracking-widest font-bold">Office</div>
-              <div className="text-slate-900 text-sm">Mapusa, Goa, 403507</div>
+              <div className="text-slate-900 text-sm">{contactInfo.address}</div>
             </div>
           </div>
           <div className="flex items-center gap-4 mb-5">
             <div className="w-11 h-11 rounded-full bg-white border border-[#E5E8E3] text-[#4F9D33] flex items-center justify-center shrink-0"><Phone size={18}/></div>
             <div>
               <div className="text-[#4F9D33] text-[10px] uppercase tracking-widest font-bold">Phone</div>
-              <div className="text-slate-900 text-sm">+91 7020607957</div>
+              <div className="text-slate-900 text-sm">{contactInfo.phone}</div>
             </div>
           </div>
           <div className="flex items-center gap-4">
             <div className="w-11 h-11 rounded-full bg-white border border-[#E5E8E3] text-[#4F9D33] flex items-center justify-center shrink-0"><Mail size={18}/></div>
             <div>
               <div className="text-[#4F9D33] text-[10px] uppercase tracking-widest font-bold">Email</div>
-              <div className="text-slate-900 text-sm">office@forwardlegacy.co.in / admin@forwardlegacy.co.in / WhatsApp</div>
+              <div className="text-slate-900 text-sm">{contactInfo.email}</div>
             </div>
           </div>
 

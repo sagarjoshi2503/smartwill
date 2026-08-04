@@ -42,6 +42,18 @@ class Settings(BaseSettings):
     # Recipient notified whenever a testator submits their Will for review.
     admin_review_email: str = DEFAULT_ADMIN_EMAIL
 
+    # Office contact details shown on the site (footer "Office & Contact"
+    # card) via GET /api/contact-us/info — previously hardcoded in the React
+    # frontend (and, before that, the API reused admin_review_email/
+    # twilio_from_number as stand-ins, which was never actually the office's
+    # own contact info). Defaulted to the real current values so existing
+    # deployments keep showing the same info with no env var required, but
+    # every environment can override independently if the office details
+    # ever change without a frontend redeploy.
+    office_address: str = "Mapusa, Goa, 403507"
+    office_phone: str = "+91 7020607957"
+    office_email: str = "office@forwardlegacy.co.in / admin@forwardlegacy.co.in / WhatsApp"
+
     # Resend (https://resend.com) transactional email API, used to send that
     # notification. Both must be set for email to actually go out. Which
     # provider (Resend vs SendGrid, below) actually gets used is decided by

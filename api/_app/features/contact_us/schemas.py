@@ -4,6 +4,7 @@ from pydantic import BaseModel
 class ContactInfoResponse(BaseModel):
     email: str
     phone: str
+    address: str
 
 
 class ContactUsResponse(BaseModel):

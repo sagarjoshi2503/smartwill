@@ -14,10 +14,14 @@ VALID_PAYLOAD = {
 
 # --- GET /api/contact-us/info ---
 
-def test_get_contact_info_returns_admin_email_and_twilio_number(client, configured_settings):
+def test_get_contact_info_returns_configured_office_details(client, configured_settings):
     res = client.get(INFO_URL)
     assert res.status_code == 200
-    assert res.json() == {"email": configured_settings.admin_review_email, "phone": configured_settings.twilio_from_number}
+    assert res.json() == {
+        "email": configured_settings.office_email,
+        "phone": configured_settings.office_phone,
+        "address": configured_settings.office_address,
+    }
 
 
 # --- POST /api/contact-us/send ---

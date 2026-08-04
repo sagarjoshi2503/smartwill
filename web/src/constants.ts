@@ -47,6 +47,7 @@ export const API_MY_WILLS = "/api/will/my-wills";
 export const API_OTP_REQUEST = "/api/auth/otp/request";
 export const API_OTP_VERIFY = "/api/auth/otp/verify";
 export const API_CONTACT_SEND = "/api/contact-us/send";
+export const API_CONTACT_INFO = "/api/contact-us/info";
 export const apiPathWill = (willId: string): string => `/api/will/${willId}`;
 
 // --- Gift a Will voucher feature ---

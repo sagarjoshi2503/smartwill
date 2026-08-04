@@ -3,13 +3,14 @@ from _app.core.exceptions import AppError
 from _app.shared import email
 from _app.shared.constants import (
     CONTACT_EMAIL_INVALID, CONTACT_MESSAGE_REQUIRED, CONTACT_NAME_REQUIRED, CONTACT_SUBJECT_REQUIRED,
-    CONTACT_SUBJECT_TMPL, FLD_EMAIL, FLD_MESSAGE, FLD_NAME, FLD_PHONE, FLD_SENT, FLD_SUBJECT, HTTP_BAD_REQUEST,
+    CONTACT_SUBJECT_TMPL, FLD_ADDRESS, FLD_EMAIL, FLD_MESSAGE, FLD_NAME, FLD_PHONE, FLD_SENT, FLD_SUBJECT,
+    HTTP_BAD_REQUEST,
 )
 from _app.shared.validators import escape_html, is_valid_email, normalize_email
 
 
 def get_contact_info(settings: Settings) -> dict:
-    return {FLD_EMAIL: settings.admin_review_email, FLD_PHONE: settings.twilio_from_number}
+    return {FLD_EMAIL: settings.office_email, FLD_PHONE: settings.office_phone, FLD_ADDRESS: settings.office_address}
 
 
 def send_contact_message(body: dict, settings: Settings) -> dict:
