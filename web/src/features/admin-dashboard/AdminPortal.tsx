@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Users, Plus, Edit3, Trash2, Clock, CheckCircle2 } from "lucide-react";
+import { Users, Plus, Edit3, Trash2, Clock, CheckCircle2, Gift } from "lucide-react";
 import { authFetch } from "../../utils/apiBase";
 import { fmt } from "../../utils/format";
 import {
@@ -8,11 +8,12 @@ import {
   STATUS_LBL, ROLE_ADMIN,
 } from "../../constants";
 import { WILL_TYPE_LBL_SHORT } from "../../data/willTypes";
+import GiftVoucherAdminTab from "./GiftVoucherAdminTab";
 import type { AdminClient, AdminProfile, WillState, WillType } from "../../types";
 
 const STATUS_STYLE: Record<AdminClient["status"], string> = {
   Draft: "bg-slate-100 text-slate-600 border-slate-200",
-  PendingReview: "bg-[#2F8132]/10 text-[#1E5B22] border-[#2F8132]/30",
+  PendingReview: "bg-[#4F9D33]/10 text-[#2D6B1F] border-[#4F9D33]/30",
   Completed: "bg-emerald-50 text-emerald-600 border-emerald-200",
 };
 
@@ -41,6 +42,7 @@ export default function AdminPortal({admin,onCreateWill,onReviewWill}:{
   const [reviewingId,setReviewingId]=useState<string|null>(null);
   const [reviewError,setReviewError]=useState("");
   const [statusFilter,setStatusFilter]=useState<"All"|AdminClient["status"]>("All");
+  const [mainTab,setMainTab]=useState<"wills"|"vouchers">("wills");
 
   const pendingReviewCount = clients.filter(c=>c.status===STATUS_PENDING_REVIEW).length;
   const completedCount = clients.filter(c=>c.status===STATUS_COMPLETED).length;
@@ -107,10 +109,26 @@ export default function AdminPortal({admin,onCreateWill,onReviewWill}:{
             <h2 className="text-xl font-bold text-slate-900 serif">Admin Dashboard</h2>
             <p className="text-slate-600 text-sm">{admin.name} · {admin.email}</p>
           </div>
-          <button onClick={onCreateWill} className="apv-btn flex items-center gap-2 py-2 px-4 rounded-xl text-sm font-semibold">
-            <Plus size={14}/>Create Will for Client
-          </button>
+          {mainTab==="wills" && (
+            <button onClick={onCreateWill} className="apv-btn flex items-center gap-2 py-2 px-4 rounded-xl text-sm font-semibold">
+              <Plus size={14}/>Create Will for Client
+            </button>
+          )}
         </div>
+
+        <div className="flex gap-2 mb-6">
+          {([
+            {v:"wills", label:"Client Wills", icon:<Users size={13}/>},
+            {v:"vouchers", label:"Gift Vouchers", icon:<Gift size={13}/>},
+          ] as const).map(t=>(
+            <button key={t.v} onClick={()=>setMainTab(t.v)}
+              className={`flex items-center gap-1.5 text-sm font-semibold px-4 py-2 rounded-full border transition-colors ${mainTab===t.v?"bg-[#4F9D33] text-white border-[#4F9D33]":"bg-white text-slate-600 border-slate-200 hover:border-slate-300"}`}>
+              {t.icon}{t.label}
+            </button>
+          ))}
+        </div>
+
+        {mainTab==="vouchers" ? <GiftVoucherAdminTab/> : (<>
         <div className="flex flex-wrap gap-4 mb-6">
           <div className="bg-white border border-slate-200 rounded-xl p-4 w-fit">
             <div className="text-slate-600 mb-2"><Users size={17}/></div>
@@ -118,7 +136,7 @@ export default function AdminPortal({admin,onCreateWill,onReviewWill}:{
             <div className="text-slate-600 text-xs">Total Clients</div>
           </div>
           <div className="bg-white border border-slate-200 rounded-xl p-4 w-fit">
-            <div className="text-[#1E5B22] mb-2"><Clock size={17}/></div>
+            <div className="text-[#2D6B1F] mb-2"><Clock size={17}/></div>
             <div className="text-2xl font-bold text-slate-900 serif">{status==="ready"?pendingReviewCount:"—"}</div>
             <div className="text-slate-600 text-xs">Pending Review</div>
           </div>
@@ -142,7 +160,7 @@ export default function AdminPortal({admin,onCreateWill,onReviewWill}:{
                   {v:STATUS_COMPLETED,label:STATUS_LBL[STATUS_COMPLETED],count:completedCount},
                 ] as const).map(f=>(
                   <button key={f.v} onClick={()=>setStatusFilter(f.v)}
-                    className={`text-[10px] font-bold px-2.5 py-1 rounded-full border transition-colors ${statusFilter===f.v?"bg-[#2F8132] text-[#ffffff] border-[#2F8132] hover:bg-[#2F8132] hover:text-[#ffffff]":"bg-white text-slate-600 border-slate-200 hover:border-slate-300"}`}>
+                    className={`text-[10px] font-bold px-2.5 py-1 rounded-full border transition-colors ${statusFilter===f.v?"bg-[#4F9D33] text-[#ffffff] border-[#4F9D33] hover:bg-[#4F9D33] hover:text-[#ffffff]":"bg-white text-slate-600 border-slate-200 hover:border-slate-300"}`}>
                     {f.label} <span className="opacity-70">{f.count}</span>
                   </button>
                 ))}
@@ -190,7 +208,7 @@ export default function AdminPortal({admin,onCreateWill,onReviewWill}:{
                       <div className="flex items-center gap-3">
                         <button onClick={()=>handleReview(c.willId)}
                           disabled={(c.status===STATUS_DRAFT&&c.createdBy!==c.contact)||reviewingId===c.willId}
-                          className="flex items-center gap-1.5 text-[#2F8132] hover:text-[#1E5B22] text-xs font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                          className="flex items-center gap-1.5 text-[#4F9D33] hover:text-[#2D6B1F] text-xs font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                           <Edit3 size={11}/>{reviewingId===c.willId?"Opening…":"Review"}
                         </button>
                         <button onClick={()=>handleDelete(c.willId)} disabled={deletingId===c.willId}
@@ -205,6 +223,7 @@ export default function AdminPortal({admin,onCreateWill,onReviewWill}:{
             </table>
           )}
         </div>
+        </>)}
       </div>
     </div>
   );

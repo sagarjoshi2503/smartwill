@@ -9,11 +9,27 @@
   font-family: 'Inter', sans-serif;
   color: #14181B;
   background-color: #FFFFFF;
-  --color-primary: #2F8132;
-  --color-primary-hover: #1E5B22;
-  --surface: #ffffff;
-  --surface-muted: #F5F7F3;
-  --border: rgba(20, 24, 27, 0.1);
+
+  /* Theme tokens (api/Data/Entire Site theme.html palette) */
+  --ink: #14181B;
+  --ink-soft: #5C6570;
+  --ink-faint: #8A9096;
+  --green: #4F9D33;
+  --green-dark: #2D6B1F;
+  --green-light: #C7D94A;
+  --green-tint: #F3F7E7;
+  --bg: #FFFFFF;
+  --bg-soft: #F5F7F3;
+  --radius-sm: 10px;
+  --radius: 16px;
+  --radius-lg: 24px;
+
+  /* Aliases kept for anything still reading the old var names */
+  --color-primary: var(--green);
+  --color-primary-hover: var(--green-dark);
+  --surface: var(--bg);
+  --surface-muted: var(--bg-soft);
+  --border: #E5E8E3;
 }
 
 html, body, #root {
@@ -22,7 +38,7 @@ html, body, #root {
 
 body {
   margin: 0;
-  background: radial-gradient(circle at top left, rgba(47, 129, 50, 0.06), transparent 14%),
+  background: radial-gradient(circle at top left, rgba(79, 157, 51, 0.06), transparent 14%),
     linear-gradient(180deg, #ffffff 0%, #f5f7f3 100%);
   color: #14181B;
   text-rendering: optimizeLegibility;
@@ -73,7 +89,7 @@ button:hover, .theme-button:hover {
   font-weight: 700;
   letter-spacing: 0.01em;
   transition: transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
-  box-shadow: 0 22px 50px rgba(47, 129, 50, 0.24);
+  box-shadow: 0 22px 50px rgba(79, 157, 51, 0.24);
 }
 
 .apv-btn:hover {
@@ -91,7 +107,7 @@ button:hover, .theme-button:hover {
   align-items: center;
   justify-content: center;
   gap: 0.75rem;
-  border: 1px solid rgba(47, 129, 50, 0.35);
+  border: 1px solid rgba(79, 157, 51, 0.35);
   background: rgba(255, 255, 255, 0.9);
   color: #0f172a;
   border-radius: 9999px;
@@ -100,8 +116,8 @@ button:hover, .theme-button:hover {
 }
 
 .apv-btn-alt:hover {
-  border-color: rgba(47, 129, 50, 0.6);
-  background: rgba(47, 129, 50, 0.12);
+  border-color: rgba(79, 157, 51, 0.6);
+  background: rgba(79, 157, 51, 0.12);
 }
 
 .apv-card {
@@ -117,9 +133,9 @@ button:hover, .theme-button:hover {
   gap: 0.55rem;
   padding: 0.78rem 1.2rem;
   border-radius: 9999px;
-  border: 1px solid rgba(47, 129, 50, 0.18);
-  background: rgba(47, 129, 50, 0.08);
-  color: #2F8132;
+  border: 1px solid rgba(79, 157, 51, 0.18);
+  background: rgba(79, 157, 51, 0.08);
+  color: #4F9D33;
   font-size: 0.75rem;
   letter-spacing: 0.18em;
   text-transform: uppercase;
@@ -139,8 +155,8 @@ button:hover, .theme-button:hover {
 .apv-input:focus,
 .apv-input:focus-visible {
   outline: none;
-  border-color: rgba(47, 129, 50, 0.8);
-  box-shadow: 0 0 0 4px rgba(47, 129, 50, 0.14);
+  border-color: rgba(79, 157, 51, 0.8);
+  box-shadow: 0 0 0 4px rgba(79, 157, 51, 0.14);
 }
 
 .apv-label {
@@ -165,7 +181,7 @@ button:hover, .theme-button:hover {
 }
 
 ::selection {
-  background: rgba(47, 129, 50, 0.25);
+  background: rgba(79, 157, 51, 0.25);
 }
 
 ::placeholder {

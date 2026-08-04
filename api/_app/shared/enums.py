@@ -12,3 +12,9 @@ class WillType(str, Enum):
     GOAN = "goan"
     SUCCESSION_DEED = "successiondeed"
     CUSTOM_WILL = "customwill"
+
+
+class VoucherStatus(str, Enum):
+    ACTIVE = "Active"
+    REDEEMED = "Redeemed"
+    EXPIRED = "Expired"

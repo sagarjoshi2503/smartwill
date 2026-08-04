@@ -46,9 +46,16 @@ export const API_ADMIN_WILLS = "/api/will/admin-wills";
 export const API_MY_WILLS = "/api/will/my-wills";
 export const API_OTP_REQUEST = "/api/auth/otp/request";
 export const API_OTP_VERIFY = "/api/auth/otp/verify";
-export const API_CONTACT_INFO = "/api/contact-us/info";
 export const API_CONTACT_SEND = "/api/contact-us/send";
 export const apiPathWill = (willId: string): string => `/api/will/${willId}`;
+
+// --- Gift a Will voucher feature ---
+export const API_GIFT_VOUCHER_ORDER = "/api/gift-voucher/order";
+export const API_GIFT_VOUCHER_PURCHASE = "/api/gift-voucher/purchase";
+export const API_GIFT_VOUCHER_VERIFY = "/api/gift-voucher/verify";
+export const API_GIFT_VOUCHER_REDEEM = "/api/gift-voucher/redeem";
+export const API_GIFT_VOUCHER_ADMIN_GENERATE = "/api/gift-voucher/admin/generate";
+export const API_GIFT_VOUCHER_ADMIN_LIST = "/api/gift-voucher/admin/list";
 
 // --- Chatbot (pass to utils/chatbotBase's chatbotUrl(), a separate service — see chatbot/.env.example) ---
 export const CHATBOT_CHAT = "/chat";
@@ -130,10 +137,9 @@ export const errSendBackTmpl = (status: number): string => `Could not send this 
 export const ERR_SEND_BACK = "Could not send this Will back.";
 export const errSaveDraftTmpl = (status: number): string => `Could not save the draft (server returned ${status}).`;
 export const ERR_SAVE_DRAFT = "Could not save the draft.";
-export const LBL_INDIA_BADGE = "INDIA";
 export const BTN_LOGOUT = "Logout";
 export const BTN_ADMIN_PORTAL = "Admin Portal";
-export const BTN_CREATE_YOUR_WILL = "Create Your Will";
+export const BTN_CREATE_YOUR_WILL = "Client Login";
 export const LBL_WILL_DRAFTING = "Will Drafting";
 export const MSG_DRAFT_SAVED = "Saved";
 export const MSG_DRAFT_FAILED = "Failed";

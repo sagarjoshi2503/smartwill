@@ -310,7 +310,7 @@ export interface DisclaimerChecks {
   tool: boolean;
 }
 
-export type ViewName = "landing" | "about" | "services" | "faq" | "partner" | "authChoice" | "signup" | "otp" | "disclaimer" | "adminLogin" | "adminSignup" | "admin" | "wizard" | "myWills" | "contactUs";
+export type ViewName = "landing" | "about" | "services" | "faq" | "partner" | "authChoice" | "signup" | "otp" | "disclaimer" | "adminLogin" | "adminSignup" | "admin" | "wizard" | "myWills";
 
 export type WillStatus = "Draft" | "PendingReview" | "Completed";
 

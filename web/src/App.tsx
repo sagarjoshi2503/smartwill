@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from "react";
-import { ArrowRight, ChevronLeft, Check, LogIn, LogOut, Eye, Save, RotateCcw } from "lucide-react";
+import { ArrowRight, ChevronLeft, Check, LogIn, LogOut, Eye, Save, RotateCcw, Menu, X } from "lucide-react";
 
 import { PLANS, ADDONS } from "./data/plans";
 import { DEFAULT_WILL } from "./data/defaultWill";
@@ -11,7 +11,6 @@ import ServicesView from "./components/ServicesView";
 import FaqView from "./components/FaqView";
 import PartnerView from "./components/PartnerView";
 import SiteFooter from "./components/SiteFooter";
-import ContactUsView from "./components/ContactUsView";
 import AuthChoiceView from "./components/AuthChoiceView";
 import SignupView from "./features/user-signin-otp/SignupView";
 import OtpView from "./features/user-signin-otp/OtpView";
@@ -37,7 +36,7 @@ import {
   OTP_LENGTH, STATUS_DRAFT, STATUS_PENDING_REVIEW, STATUS_COMPLETED,
   SEND_BACK_REDIRECT_MS, DRAFT_RESET_MS, WIZARD_REDIRECT_MS,
   MSG_VIEW_ONLY, MSG_SAVING, BTN_SAVE_AS_DRAFT, ROLE_ADMIN, ROLE_TESTATOR,
-  errSendBackTmpl, ERR_SEND_BACK, errSaveDraftTmpl, ERR_SAVE_DRAFT, LBL_INDIA_BADGE, BTN_LOGOUT,
+  errSendBackTmpl, ERR_SEND_BACK, errSaveDraftTmpl, ERR_SAVE_DRAFT, BTN_LOGOUT,
   BTN_ADMIN_PORTAL, BTN_CREATE_YOUR_WILL, LBL_WILL_DRAFTING, MSG_DRAFT_SAVED, MSG_DRAFT_FAILED,
   BTN_SEND_BACK_TO_TESTATOR, LBL_SEND_BACK_FOR_CHANGES, PH_SEND_BACK_COMMENTS, MSG_SENDING,
   BTN_SEND_BACK, BTN_CANCEL, BTN_GENERATE_WILL, ERR_GENERATE_WILL_MISSING_IDS, BTN_DISMISS,
@@ -53,7 +52,10 @@ const WIZARD_STEPS = [
 
 const isAdminView = (v: ViewName) => v==="adminLogin" || v==="adminSignup" || v==="admin";
 
-const SITE_NAV: {v: ViewName; label: string}[] = [
+// "contactUs" isn't a real ViewName — it's not a page, it's a nav entry that
+// scrolls to SiteFooter's enquiry form (see goToContact below) instead of
+// switching views.
+const SITE_NAV: {v: ViewName | "contactUs"; label: string}[] = [
   {v:"landing", label:"Home"},
   {v:"about", label:"About Us"},
   {v:"services", label:"Our Services"},
@@ -103,6 +105,24 @@ export default function SmartWill() {
   const [razorpayEnabled, setRazorpayEnabled] = useState(false);
   const [chatbotEnabled, setChatbotEnabled] = useState(false);
   const [adminSignupEnabled, setAdminSignupEnabled] = useState(false);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  // ServicesView's "Got a query?" buttons deep-link into a specific FaqView
+  // accordion section — mirrors how onHome/onServices already thread view
+  // changes today, just with an extra bit of state for which section to open.
+  const [faqSection, setFaqSection] = useState<string | null>(null);
+  const goFaq = useCallback((section: string) => {
+    setFaqSection(section);
+    setView("faq");
+  }, []);
+  // "Contact Us" is no longer its own page — it scrolls to SiteFooter's
+  // enquiry form, which already renders on every site page. Only switches
+  // view when the current page (e.g. the wizard) has no footer to scroll to.
+  const goToContact = useCallback(() => {
+    if(!isSitePage(view)) setView("landing");
+    setTimeout(() => {
+      document.getElementById("enquiry-form")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 50);
+  }, [view]);
   const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
   const willDocRef = useRef<HTMLDivElement | null>(null);
 
@@ -120,6 +140,12 @@ export default function SmartWill() {
   // has no router/URL-per-screen, so `view` is the closest thing to a route.
   useEffect(() => {
     trackPageview(`/${view}`, view);
+  }, [view]);
+
+  // Close the mobile nav slide-in panel whenever the view changes (link tap,
+  // browser back/forward, or a programmatic navigation elsewhere in the app).
+  useEffect(() => {
+    setMobileNavOpen(false);
   }, [view]);
 
   useEffect(() => {
@@ -441,36 +467,39 @@ export default function SmartWill() {
 
       {/* HEADER */}
       {view!=="wizard" && (
-        <header className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-slate-200">
+        <header className="sticky top-0 z-50 bg-white border-b border-slate-200">
           <div className="max-w-7xl mx-auto px-5 h-[58px] flex items-center justify-between gap-4">
             <div className="flex items-center gap-2.5 cursor-pointer shrink-0" onClick={()=>setView("landing")}>
               <BrandMark size={30} className="shrink-0"/>
               <div className="leading-tight">
-                <div className="flex items-center gap-1.5">
-                  <span className="text-slate-900 font-extrabold text-base serif tracking-tight whitespace-nowrap">FORWARD LEGACY</span>
-                  <span className="text-[8px] font-bold tracking-[0.3em] text-[#1E5B22] bg-[#EDF6EA] border border-[#2F8132] px-1.5 py-0.5 rounded">{LBL_INDIA_BADGE}</span>
-                </div>
+                <span className="text-slate-900 font-extrabold text-base serif tracking-tight whitespace-nowrap">FORWARD LEGACY</span>
                 <div className="text-[9px] font-semibold tracking-[0.14em] text-slate-400 uppercase">Estate &amp; Succession Planning</div>
               </div>
             </div>
             {isSitePage(view) && (
               <nav className="hidden lg:flex items-center gap-7 flex-1 justify-center">
                 {SITE_NAV.map(item=>(
-                  <button key={item.v} onClick={()=>setView(item.v)}
-                    className={`text-sm font-semibold pb-0.5 border-b-2 transition-colors ${view===item.v?"text-[#2F8132] border-[#2F8132]":"text-slate-600 border-transparent hover:text-[#2F8132]"}`}>
+                  <button key={item.v} onClick={()=>item.v==="contactUs"?goToContact():setView(item.v)}
+                    className={`text-sm font-semibold pb-0.5 border-b-2 transition-colors ${view===item.v?"text-[#4F9D33] border-[#4F9D33]":"text-slate-600 border-transparent hover:text-[#4F9D33]"}`}>
                     {item.label}
                   </button>
                 ))}
               </nav>
             )}
-            <div className="flex items-center gap-3 shrink-0">
+            {isSitePage(view) && (
+              <button aria-label="Toggle navigation" onClick={()=>setMobileNavOpen(o=>!o)}
+                className="lg:hidden text-slate-700 p-1.5 shrink-0">
+                {mobileNavOpen ? <X size={22}/> : <Menu size={22}/>}
+              </button>
+            )}
+            <div className={`${isSitePage(view)?"hidden lg:flex":"flex"} items-center gap-3 shrink-0`}>
               {view==="admin" && adminProfile ? (
                 <>
                   <div className="flex items-center gap-2 bg-slate-100 rounded-full px-3 py-1.5 text-sm border border-slate-200">
                     <div className="w-6 h-6 bg-slate-200 rounded-full flex items-center justify-center text-[9px] font-bold text-slate-900">
                       {adminProfile.name.split(" ").slice(0,2).map(n=>n[0]).join("").toUpperCase()}
                     </div>
-                    <span className="text-[#2F8132] text-sm">{adminProfile.name}</span>
+                    <span className="text-[#4F9D33] text-sm">{adminProfile.name}</span>
                   </div>
                   <button onClick={()=>{clearAuthToken(ROLE_ADMIN);setAdminProfile(null);setView("landing");}} className="flex items-center gap-1.5 text-slate-600 hover:text-slate-900 text-sm transition-colors"><LogOut size={13}/>{BTN_LOGOUT}</button>
                 </>
@@ -480,7 +509,7 @@ export default function SmartWill() {
                     <div className="w-6 h-6 bg-slate-200 rounded-full flex items-center justify-center text-[9px] font-bold text-slate-900">
                       {(signup.name||signup.email).split(" ").slice(0,2).map(n=>n[0]).join("").toUpperCase()}
                     </div>
-                    <span className="text-[#2F8132] text-sm">{signup.name||signup.email}</span>
+                    <span className="text-[#4F9D33] text-sm">{signup.name||signup.email}</span>
                   </div>
                   <button onClick={handleTestatorLogout} className="flex items-center gap-1.5 text-slate-600 hover:text-slate-900 text-sm transition-colors"><LogOut size={13}/>{BTN_LOGOUT}</button>
                 </>
@@ -489,20 +518,47 @@ export default function SmartWill() {
                   {showAdminButton && (
                     <button onClick={()=>setView("adminLogin")} className="flex items-center gap-1.5 text-slate-600 hover:text-slate-900 border border-slate-200 hover:border-slate-300 rounded-full px-3.5 py-1.5 text-sm transition-all"><LogIn size={13}/>{BTN_ADMIN_PORTAL}</button>
                   )}
-                  <button onClick={()=>setView("authChoice")} className="flex items-center gap-1.5 bg-[#2F8132] hover:bg-[#1E5B22] text-[#ffffff] rounded-full px-4 py-2 text-sm font-semibold transition-colors shadow-lg shadow-[#2F8132]/20">{BTN_CREATE_YOUR_WILL} <ArrowRight size={13}/></button>
+                  <button onClick={()=>setView("authChoice")} className="flex items-center gap-1.5 bg-[#4F9D33] hover:bg-[#2D6B1F] text-[#ffffff] rounded-full px-4 py-2 text-sm font-semibold transition-colors shadow-lg shadow-[#4F9D33]/20">{BTN_CREATE_YOUR_WILL} <ArrowRight size={13}/></button>
                 </>
               )}
             </div>
           </div>
+          {isSitePage(view) && mobileNavOpen && (
+            <nav className="lg:hidden border-t border-slate-200 bg-white px-5 py-3 flex flex-col fade-in">
+              {SITE_NAV.map(item=>(
+                <button key={item.v} onClick={()=>item.v==="contactUs"?goToContact():setView(item.v)}
+                  className={`text-left text-sm font-semibold py-2.5 border-b border-slate-100 transition-colors ${view===item.v?"text-[#4F9D33]":"text-slate-700"}`}>
+                  {item.label}
+                </button>
+              ))}
+              {view==="admin" && adminProfile ? (
+                <button onClick={()=>{clearAuthToken(ROLE_ADMIN);setAdminProfile(null);setView("landing");}}
+                  className="flex items-center gap-1.5 justify-center text-slate-600 text-sm mt-3 py-2"><LogOut size={13}/>{BTN_LOGOUT}</button>
+              ) : testatorAuthenticated ? (
+                <button onClick={handleTestatorLogout}
+                  className="flex items-center gap-1.5 justify-center text-slate-600 text-sm mt-3 py-2"><LogOut size={13}/>{BTN_LOGOUT}</button>
+              ) : (
+                <>
+                  <button onClick={()=>setView("authChoice")}
+                    className="bg-[#4F9D33] hover:bg-[#2D6B1F] text-white rounded-full px-4 py-2.5 text-sm font-semibold transition-colors mt-3 text-center">
+                    Client Login
+                  </button>
+                  {showAdminButton && (
+                    <button onClick={()=>setView("adminLogin")}
+                      className="flex items-center gap-1.5 justify-center text-slate-600 border border-slate-200 rounded-full px-3.5 py-2 text-sm mt-2"><LogIn size={13}/>{BTN_ADMIN_PORTAL}</button>
+                  )}
+                </>
+              )}
+            </nav>
+          )}
         </header>
       )}
 
-      {view==="landing" && <LandingPage plans={PLANS} addons={ADDONS} selectedPlan={selectedPlan} setSelectedPlan={setSelectedPlan} addonsState={addons} setAddons={setAddons} totalPrice={totalPrice} onStart={()=>setView("authChoice")} onContactUs={()=>setView("contactUs")} onAbout={()=>setView("about")} onServices={()=>setView("services")}/>}
+      {view==="landing" && <LandingPage plans={PLANS} addons={ADDONS} selectedPlan={selectedPlan} setSelectedPlan={setSelectedPlan} addonsState={addons} setAddons={setAddons} totalPrice={totalPrice} onStart={()=>setView("authChoice")} onContactUs={goToContact} onAbout={()=>setView("about")} onServices={()=>setView("services")}/>}
       {view==="about" && <AboutView/>}
-      {view==="services" && <ServicesView onStart={()=>setView("authChoice")} onContactUs={()=>setView("contactUs")} onHome={goToPlanOptions}/>}
-      {view==="faq" && <FaqView/>}
-      {view==="partner" && <PartnerView onContactUs={()=>setView("contactUs")}/>}
-      {view==="contactUs" && <ContactUsView onBack={()=>setView("landing")}/>}
+      {view==="services" && <ServicesView onStart={()=>setView("authChoice")} onContactUs={goToContact} onHome={goToPlanOptions} onFaqSection={goFaq}/>}
+      {view==="faq" && <FaqView initialOpenSection={faqSection}/>}
+      {view==="partner" && <PartnerView onContactUs={goToContact}/>}
       {view==="authChoice" && <AuthChoiceView onGoogleSuccess={handleGoogleSuccess} onPhone={()=>setView("signup")} onBack={()=>setView("landing")}/>}
       {view==="signup" && <SignupView signup={signup} setSignup={setSignup} onNext={()=>{setOtp(Array(OTP_LENGTH).fill("")); setView("otp");}}/>}
       {view==="otp" && <OtpView otp={otp} handleOtp={handleOtp} otpRefs={otpRefs} phone={signup.phone} email={signup.email} onNext={handleOtpVerified}/>}
@@ -527,7 +583,7 @@ export default function SmartWill() {
             <div className="flex items-center gap-1">
               {WIZARD_STEPS.filter(s=>!(skipWillTypeStep&&s.n===1)).map(s=>(
                 <button key={s.n} onClick={()=>setWizardStep(s.n)}
-                    className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-[10px] font-semibold transition-all ${wizardStep===s.n?"bg-[#2F8132] text-[#ffffff]":"border border-slate-200 text-slate-600 hover:bg-slate-100 hover:text-slate-900"}`}>
+                    className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-[10px] font-semibold transition-all ${wizardStep===s.n?"bg-[#4F9D33] text-[#ffffff]":"border border-slate-200 text-slate-600 hover:bg-slate-100 hover:text-slate-900"}`}>
                   {wizardStep>s.n?<Check size={9}/>:<span>{s.n}</span>}
                   <span className="hidden md:inline">{s.label}</span>
                 </button>
@@ -566,7 +622,7 @@ export default function SmartWill() {
                   )}
                 </div>
               )}
-              <button onClick={requestGenerateWill} className="flex items-center gap-1.5 text-xs text-[#2F8132] hover:text-[#1E5B22] border border-[#2F8132]/30 hover:border-[#2F8132]/60 rounded-lg px-3 py-1.5 transition-all font-semibold">
+              <button onClick={requestGenerateWill} className="flex items-center gap-1.5 text-xs text-[#4F9D33] hover:text-[#2D6B1F] border border-[#4F9D33]/30 hover:border-[#4F9D33]/60 rounded-lg px-3 py-1.5 transition-all font-semibold">
                 <Eye size={12}/>{BTN_GENERATE_WILL}
               </button>
             </div>
@@ -634,14 +690,14 @@ export default function SmartWill() {
             </ul>
             <div className="flex flex-col sm:flex-row gap-3">
               <button onClick={()=>setShowGenerateInstructions(false)} className="w-full sm:w-auto px-5 py-3 rounded-full border border-slate-200 text-slate-600 hover:text-slate-900 text-sm font-medium transition-all">← Back</button>
-              <button onClick={()=>{setShowGenerateInstructions(false);handleGenerateWill();}} className="flex-1 bg-[#2F8132] hover:bg-[#1E5B22] text-white font-bold py-3 rounded-full text-sm transition-colors">
+              <button onClick={()=>{setShowGenerateInstructions(false);handleGenerateWill();}} className="flex-1 bg-[#4F9D33] hover:bg-[#2D6B1F] text-white font-bold py-3 rounded-full text-sm transition-colors">
                 Got it — Generate Document
               </button>
             </div>
           </div>
         </div>
       )}
-      {isSitePage(view) && <SiteFooter onNavigate={setView}/>}
+      {isSitePage(view) && <SiteFooter/>}
       {chatbotEnabled && (
         <ChatWidget
           // Remounts (wiping all chat state) whenever who's signed in
@@ -649,7 +705,7 @@ export default function SmartWill() {
           // so no Will data from a previous session's answers can linger
           // in the transcript after that identity is no longer present.
           key={adminProfile ? `admin:${adminProfile.email}` : testatorAuthenticated ? `testator:${signup.email}` : "anon"}
-          onContactSupport={() => setView("contactUs")}
+          onContactSupport={goToContact}
         />
       )}
     </div>

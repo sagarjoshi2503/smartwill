@@ -20,6 +20,7 @@ DB_NAME = "smartwill"
 LOGIN_COLLECTION_NAME = "login"
 WILL_COLLECTION_NAME = "will"
 ADMINWILL_COLLECTION_NAME = "adminwill"
+GIFTVOUCHER_COLLECTION_NAME = "giftvoucher"
 
 # --- Will status values ---
 STATUS_DRAFT = "Draft"
@@ -61,6 +62,13 @@ RAZORPAY_ORDERS_URL = "https://api.razorpay.com/v1/orders"
 RAZORPAY_TIMEOUT_SEC = 10
 RAZORPAY_MIN_AMOUNT_PAISE = 100
 RAZORPAY_DEFAULT_CURRENCY = "INR"
+
+# --- Gift Vouchers ("Gift a Will") ---
+GIFT_VOUCHER_CODE_PREFIX = "FL-GIFT-"
+GIFT_VOUCHER_CODE_RANDOM_LENGTH = 6
+GIFT_VOUCHER_CODE_GENERATION_ATTEMPTS = 5
+GIFT_VOUCHER_VALIDITY_MONTHS = 12
+GIFT_VOUCHER_SUBJECT_TMPL = "You've been gifted a Will — here's your code"
 
 # --- Validation ---
 EMAIL_REGEX_PATTERN = r"^\S+@\S+\.\S+$"
@@ -115,6 +123,17 @@ CONTACT_NAME_REQUIRED = "Name is required."
 CONTACT_EMAIL_INVALID = "Enter a valid email address."
 CONTACT_SUBJECT_REQUIRED = "Subject is required."
 CONTACT_MESSAGE_REQUIRED = "Message is required."
+
+GIFT_VOUCHER_INVALID_AMOUNT = f"Amount must be at least {RAZORPAY_MIN_AMOUNT_PAISE} paise."
+GIFT_VOUCHER_PLAN_LABEL_REQUIRED = "planLabel is required."
+GIFT_VOUCHER_RECIPIENT_NAME_REQUIRED = "Recipient name is required."
+GIFT_VOUCHER_RECIPIENT_EMAIL_INVALID = "Enter a valid recipient email address."
+GIFT_VOUCHER_CODE_REQUIRED = "code is required."
+GIFT_VOUCHER_CODE_GENERATION_FAILED = "Could not generate a unique voucher code. Please try again."
+GIFT_VOUCHER_NOT_ACTIVE = "This gift voucher has already been used or is no longer valid."
+GIFT_VOUCHER_EXPIRED = "This gift voucher has expired."
+GIFT_VOUCHER_WILL_ID_REQUIRED = "willId is required."
+GIFT_VOUCHER_QTY_INVALID = "qty must be a positive integer."
 
 # --- Document/request field names ---
 FLD_EMAIL = "email"
@@ -172,6 +191,26 @@ FLD_SENT_BACK_AT = "sentBackAt"
 FLD_VERIFIED = "verified"
 FLD_EXPIRES_IN_SECONDS = "expiresInSeconds"
 FLD_SENT = "sent"
+
+# --- Gift Vouchers ---
+FLD_PLAN_LABEL = "planLabel"
+FLD_BUYER_NAME = "buyerName"
+FLD_BUYER_EMAIL = "buyerEmail"
+FLD_RECIPIENT_NAME = "recipientName"
+FLD_RECIPIENT_EMAIL = "recipientEmail"
+FLD_EXPIRES_AT = "expiresAt"
+FLD_REDEEMED_BY_WILL_ID = "redeemedByWillId"
+FLD_REDEEMED_BY_TESTATOR_EMAIL = "redeemedByTestatorEmail"
+FLD_REDEEMED_AT = "redeemedAt"
+FLD_QTY = "qty"
+FLD_VALIDITY_MONTHS = "validityMonths"
+FLD_FOUND = "found"
+FLD_CODES = "codes"
+FLD_VOUCHERS = "vouchers"
+FLD_SEARCH = "search"
+FLD_RAZORPAY_ORDER_ID_CAMEL = "razorpayOrderId"
+FLD_PAYMENT_ID = "paymentId"
+FLD_SIGNATURE = "signature"
 
 # --- HTTP headers ---
 HEADER_AUTHORIZATION = "Authorization"

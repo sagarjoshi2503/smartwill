@@ -42,7 +42,7 @@ export default function OtpView({otp,handleOtp,otpRefs,phone,email,onNext}:{
   return(
     <div className="fade-in min-h-[calc(100vh-58px)] bg-slate-100 flex items-center justify-center px-4">
       <div className="w-full max-w-xs apv-card p-8 text-center">
-        <div className="w-14 h-14 bg-[#2F8132]/15 border border-[#2F8132]/20 rounded-3xl flex items-center justify-center mx-auto mb-4"><Phone size={22} className="text-[#2F8132]"/></div>
+        <div className="w-14 h-14 bg-[#4F9D33]/15 border border-[#4F9D33]/20 rounded-3xl flex items-center justify-center mx-auto mb-4"><Phone size={22} className="text-[#4F9D33]"/></div>
         <h2 className="text-2xl font-black text-slate-900 serif mb-2">Verify Mobile</h2>
         <p className="text-slate-600 text-sm mb-6">OTP sent to {COUNTRY_CODE_PREFIX}{phone.slice(0,PHONE_MASK_DIGITS)}XXXXX</p>
         <div className="flex justify-center gap-3 mb-5">

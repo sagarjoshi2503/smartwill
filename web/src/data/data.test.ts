@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { STATES, RELATIONS, ID_TYPES, MONTHS } from "./options";
-import { PLANS, ADDONS } from "./plans";
+import { PLANS, ADDONS, PLAN_EXTRA_BOXES } from "./plans";
 import { ASSET_CATALOGUE, COLOR } from "./assetCatalogue";
 import { DEFAULT_WILL } from "./defaultWill";
 
@@ -20,6 +20,28 @@ describe("plans", () => {
     for (const plan of PLANS) {
       expect(plan.price).toBeGreaterThan(0);
       expect(plan.features.length).toBeGreaterThan(0);
+    }
+  });
+
+  it("matches the theme's 4 Plan Options (price/willType), with product-requested display names", () => {
+    expect(PLANS).toHaveLength(4);
+    const byId = Object.fromEntries(PLANS.map(p => [p.id, p]));
+    expect(byId.notarized).toMatchObject({ name: "All-Indian Will", price: 4999, willType: "allindia" });
+    expect(byId.registered).toMatchObject({ name: "Goan Will", price: 6999, willType: "goan", badge: "Most Popular" });
+    expect(byId.nri).toMatchObject({ name: "CUSTOMIZED WILL", price: 24999, willType: "customwill" });
+    expect(byId.premium).toMatchObject({ name: "SUCCESSION DEED", price: 9999, willType: "successiondeed" });
+  });
+
+  it("keeps the willType linkage other code (App.tsx, TestatorWillsView, AdminPortal) relies on", () => {
+    const willTypes = PLANS.map(p => p.willType).sort();
+    expect(willTypes).toEqual(["allindia", "customwill", "goan", "successiondeed"]);
+  });
+
+  it("exposes the Registration Services / free Living Will info boxes", () => {
+    expect(PLAN_EXTRA_BOXES.length).toBe(2);
+    for (const box of PLAN_EXTRA_BOXES) {
+      expect(box.title.length).toBeGreaterThan(0);
+      expect(box.body.length).toBeGreaterThan(0);
     }
   });
 });
