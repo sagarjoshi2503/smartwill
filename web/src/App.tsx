@@ -11,6 +11,7 @@ import ServicesView from "./components/ServicesView";
 import FaqView from "./components/FaqView";
 import PartnerView from "./components/PartnerView";
 import SiteFooter from "./components/SiteFooter";
+import ContactUsView from "./components/ContactUsView";
 import AuthChoiceView from "./components/AuthChoiceView";
 import SignupView from "./features/user-signin-otp/SignupView";
 import OtpView from "./features/user-signin-otp/OtpView";
@@ -52,10 +53,7 @@ const WIZARD_STEPS = [
 
 const isAdminView = (v: ViewName) => v==="adminLogin" || v==="adminSignup" || v==="admin";
 
-// "contactUs" isn't a real ViewName — it's not a page, it's a nav entry that
-// scrolls to SiteFooter's enquiry form (see goToContact below) instead of
-// switching views.
-const SITE_NAV: {v: ViewName | "contactUs"; label: string}[] = [
+const SITE_NAV: {v: ViewName; label: string}[] = [
   {v:"landing", label:"Home"},
   {v:"about", label:"About Us"},
   {v:"services", label:"Our Services"},
@@ -114,15 +112,6 @@ export default function SmartWill() {
     setFaqSection(section);
     setView("faq");
   }, []);
-  // "Contact Us" is no longer its own page — it scrolls to SiteFooter's
-  // enquiry form, which already renders on every site page. Only switches
-  // view when the current page (e.g. the wizard) has no footer to scroll to.
-  const goToContact = useCallback(() => {
-    if(!isSitePage(view)) setView("landing");
-    setTimeout(() => {
-      document.getElementById("enquiry-form")?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 50);
-  }, [view]);
   const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
   const willDocRef = useRef<HTMLDivElement | null>(null);
 
@@ -479,7 +468,7 @@ export default function SmartWill() {
             {isSitePage(view) && (
               <nav className="hidden lg:flex items-center gap-7 flex-1 justify-center">
                 {SITE_NAV.map(item=>(
-                  <button key={item.v} onClick={()=>item.v==="contactUs"?goToContact():setView(item.v)}
+                  <button key={item.v} onClick={()=>setView(item.v)}
                     className={`text-sm font-semibold pb-0.5 border-b-2 transition-colors ${view===item.v?"text-[#4F9D33] border-[#4F9D33]":"text-slate-600 border-transparent hover:text-[#4F9D33]"}`}>
                     {item.label}
                   </button>
@@ -526,7 +515,7 @@ export default function SmartWill() {
           {isSitePage(view) && mobileNavOpen && (
             <nav className="lg:hidden border-t border-slate-200 bg-white px-5 py-3 flex flex-col fade-in">
               {SITE_NAV.map(item=>(
-                <button key={item.v} onClick={()=>item.v==="contactUs"?goToContact():setView(item.v)}
+                <button key={item.v} onClick={()=>setView(item.v)}
                   className={`text-left text-sm font-semibold py-2.5 border-b border-slate-100 transition-colors ${view===item.v?"text-[#4F9D33]":"text-slate-700"}`}>
                   {item.label}
                 </button>
@@ -554,11 +543,12 @@ export default function SmartWill() {
         </header>
       )}
 
-      {view==="landing" && <LandingPage plans={PLANS} addons={ADDONS} selectedPlan={selectedPlan} setSelectedPlan={setSelectedPlan} addonsState={addons} setAddons={setAddons} totalPrice={totalPrice} onStart={()=>setView("authChoice")} onContactUs={goToContact} onAbout={()=>setView("about")} onServices={()=>setView("services")}/>}
+      {view==="landing" && <LandingPage plans={PLANS} addons={ADDONS} selectedPlan={selectedPlan} setSelectedPlan={setSelectedPlan} addonsState={addons} setAddons={setAddons} totalPrice={totalPrice} onStart={()=>setView("authChoice")} onContactUs={()=>setView("contactUs")} onAbout={()=>setView("about")} onServices={()=>setView("services")}/>}
       {view==="about" && <AboutView/>}
-      {view==="services" && <ServicesView onStart={()=>setView("authChoice")} onContactUs={goToContact} onHome={goToPlanOptions} onFaqSection={goFaq}/>}
+      {view==="services" && <ServicesView onStart={()=>setView("authChoice")} onContactUs={()=>setView("contactUs")} onHome={goToPlanOptions} onFaqSection={goFaq}/>}
       {view==="faq" && <FaqView initialOpenSection={faqSection}/>}
-      {view==="partner" && <PartnerView onContactUs={goToContact}/>}
+      {view==="partner" && <PartnerView onContactUs={()=>setView("contactUs")}/>}
+      {view==="contactUs" && <ContactUsView onBack={()=>setView("landing")}/>}
       {view==="authChoice" && <AuthChoiceView onGoogleSuccess={handleGoogleSuccess} onPhone={()=>setView("signup")} onBack={()=>setView("landing")}/>}
       {view==="signup" && <SignupView signup={signup} setSignup={setSignup} onNext={()=>{setOtp(Array(OTP_LENGTH).fill("")); setView("otp");}}/>}
       {view==="otp" && <OtpView otp={otp} handleOtp={handleOtp} otpRefs={otpRefs} phone={signup.phone} email={signup.email} onNext={handleOtpVerified}/>}
@@ -705,7 +695,7 @@ export default function SmartWill() {
           // so no Will data from a previous session's answers can linger
           // in the transcript after that identity is no longer present.
           key={adminProfile ? `admin:${adminProfile.email}` : testatorAuthenticated ? `testator:${signup.email}` : "anon"}
-          onContactSupport={goToContact}
+          onContactSupport={()=>setView("contactUs")}
         />
       )}
     </div>

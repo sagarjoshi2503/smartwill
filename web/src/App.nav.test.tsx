@@ -18,4 +18,14 @@ describe("site nav", () => {
 
     await waitFor(() => expect(screen.getByText(/All your legacy planning needs/i)).toBeInTheDocument());
   });
+
+  it("Contact Us is a standalone page like Home/About Us, not a footer-scroll", async () => {
+    render(<App/>);
+
+    // The header nav's "Contact Us" button renders before any page content
+    // in the DOM (Home's plan cards also have a same-labelled "Contact Us"
+    // button for the consultation-only plans), so it's the first match.
+    fireEvent.click(screen.getAllByRole("button", { name: "Contact Us" })[0]);
+    await waitFor(() => expect(screen.getByRole("heading", { name: "Contact Us" })).toBeInTheDocument());
+  });
 });

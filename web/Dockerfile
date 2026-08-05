@@ -13,11 +13,17 @@ ARG VITE_API_BASE_URL
 ARG VITE_RAZORPAY_KEY_ID
 ARG VITE_GA_MEASUREMENT_ID
 ARG VITE_CHATBOT_BASE_URL
+# Deliberately left unset for this Dockerfile's builds (AKS/local Docker) —
+# it must stay "true" only for the actual Vercel deployment (which builds via
+# `npm run build` directly, not this Dockerfile, so it never even reaches
+# here). See web/.env.example / src/main.tsx.
+ARG VITE_ENABLE_VERCEL_ANALYTICS
 ENV VITE_GOOGLE_CLIENT_ID=$VITE_GOOGLE_CLIENT_ID \
     VITE_API_BASE_URL=$VITE_API_BASE_URL \
     VITE_RAZORPAY_KEY_ID=$VITE_RAZORPAY_KEY_ID \
     VITE_GA_MEASUREMENT_ID=$VITE_GA_MEASUREMENT_ID \
-    VITE_CHATBOT_BASE_URL=$VITE_CHATBOT_BASE_URL
+    VITE_CHATBOT_BASE_URL=$VITE_CHATBOT_BASE_URL \
+    VITE_ENABLE_VERCEL_ANALYTICS=$VITE_ENABLE_VERCEL_ANALYTICS
 
 RUN npm run build
 
