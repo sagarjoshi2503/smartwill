@@ -137,6 +137,14 @@ export default function SmartWill() {
     setMobileNavOpen(false);
   }, [view]);
 
+  // Jump back to the top of the new page on every view change — otherwise a
+  // nav click made while scrolled down on the current page lands on the next
+  // page already scrolled down. Deep-link scrolls (goToPlanOptions, goFaq)
+  // run afterwards on their own setTimeout and take over from here.
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [view]);
+
   useEffect(() => {
     const onPopState = () => {
       const onAdminPath = window.location.pathname===ADMIN_PATH;
@@ -548,7 +556,7 @@ export default function SmartWill() {
       {view==="services" && <ServicesView onStart={()=>setView("authChoice")} onContactUs={()=>setView("contactUs")} onHome={goToPlanOptions} onFaqSection={goFaq}/>}
       {view==="faq" && <FaqView initialOpenSection={faqSection}/>}
       {view==="partner" && <PartnerView onContactUs={()=>setView("contactUs")}/>}
-      {view==="contactUs" && <ContactUsView onBack={()=>setView("landing")}/>}
+      {view==="contactUs" && <ContactUsView/>}
       {view==="authChoice" && <AuthChoiceView onGoogleSuccess={handleGoogleSuccess} onPhone={()=>setView("signup")} onBack={()=>setView("landing")}/>}
       {view==="signup" && <SignupView signup={signup} setSignup={setSignup} onNext={()=>{setOtp(Array(OTP_LENGTH).fill("")); setView("otp");}}/>}
       {view==="otp" && <OtpView otp={otp} handleOtp={handleOtp} otpRefs={otpRefs} phone={signup.phone} email={signup.email} onNext={handleOtpVerified}/>}

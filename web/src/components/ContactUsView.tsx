@@ -12,9 +12,7 @@ const FALLBACK_CONTACT_INFO = {
   email: "office@forwardlegacy.co.in / admin@forwardlegacy.co.in / WhatsApp",
 };
 
-export default function ContactUsView({onBack}:{
-  onBack: () => void;
-}){
+export default function ContactUsView(){
   const [contactInfo,setContactInfo]=useState(FALLBACK_CONTACT_INFO);
   const [firstName,setFirstName]=useState("");
   const [lastName,setLastName]=useState("");
@@ -59,7 +57,6 @@ export default function ContactUsView({onBack}:{
   return(
     <div className="fade-in min-h-[calc(100vh-58px)] bg-[#f7f6f2] px-5 py-14">
       <div className="max-w-6xl mx-auto">
-        <button onClick={onBack} className="text-slate-500 hover:text-slate-900 text-sm mb-6 transition-colors">← Back</button>
         <div className="text-center mb-12">
           <div className="w-14 h-14 bg-[#4F9D33]/15 border border-[#4F9D33]/20 rounded-3xl flex items-center justify-center mx-auto mb-4"><MessageSquare size={22} className="text-[#4F9D33]"/></div>
           <h2 className="text-3xl font-extrabold text-slate-900 serif">Contact Us</h2>
@@ -93,7 +90,6 @@ export default function ContactUsView({onBack}:{
           </div>
 
           <div>
-            <h2 className="text-slate-900 font-extrabold serif text-3xl mb-6">Submit Enquiry</h2>
             <form onSubmit={handleSubmit} className="space-y-3.5">
               <div className="grid sm:grid-cols-2 gap-3.5">
                 <div><label className={LC}>First Name</label><input value={firstName} onChange={e=>setFirstName(e.target.value)} required className={IC}/></div>
