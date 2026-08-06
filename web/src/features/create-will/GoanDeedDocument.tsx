@@ -65,7 +65,7 @@ export default function GoanDeedDocument({will,onBack,onPrint,willDocRef}:{
           <button onClick={onPrint} className="flex items-center gap-1.5 bg-slate-700 hover:bg-slate-600 text-white rounded-lg px-3.5 py-2 text-sm transition-colors">
             <Printer size={14}/>Print
           </button>
-          <button onClick={onPrint} className="flex items-center gap-1.5 bg-[#4F9D33] hover:bg-[#2D6B1F] text-[#ffffff] rounded-lg px-3.5 py-2 text-sm font-semibold transition-colors">
+          <button onClick={onPrint} className="flex items-center gap-1.5 bg-[#2F8132] hover:bg-[#1E5B22] text-[#ffffff] rounded-lg px-3.5 py-2 text-sm font-semibold transition-colors">
             <Download size={14}/>Download PDF
           </button>
         </div>

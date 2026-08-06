@@ -48,7 +48,7 @@ export default function AdminLoginView({onLogin,onBack,onSignup,signupEnabled}:{
     <div className="fade-in min-h-[calc(100vh-58px)] bg-slate-100 flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="w-14 h-14 bg-[#4F9D33]/15 border border-[#4F9D33]/20 rounded-3xl flex items-center justify-center mx-auto mb-4"><BrandMark size={26}/></div>
+          <div className="w-14 h-14 bg-[#2F8132]/15 border border-[#2F8132]/20 rounded-3xl flex items-center justify-center mx-auto mb-4"><BrandMark size={26}/></div>
           <h2 className="text-3xl font-black text-slate-900 serif">Admin Portal Login</h2>
           <p className="text-slate-600 text-sm mt-2">Sign in to manage your clients' Wills</p>
         </div>
@@ -73,7 +73,7 @@ export default function AdminLoginView({onLogin,onBack,onSignup,signupEnabled}:{
         </form>
         {signupEnabled&&(
           <p className="text-center text-slate-600 text-sm mt-5">
-            New to Forward Legacy? <button type="button" onClick={onSignup} className="text-[#4F9D33] font-semibold hover:text-[#2D6B1F] transition-colors">Sign up</button>
+            New to Forward Legacy? <button type="button" onClick={onSignup} className="text-[#2F8132] font-semibold hover:text-[#1E5B22] transition-colors">Sign up</button>
           </p>
         )}
       </div>

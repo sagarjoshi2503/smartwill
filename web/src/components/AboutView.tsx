@@ -22,7 +22,7 @@ export default function AboutView(){
     <div className="fade-in">
       <section className="bg-slate-50 py-14 px-5 border-b border-slate-200">
         <div className="max-w-4xl mx-auto">
-          <p className="text-[#4F9D33] tracking-[0.35em] uppercase text-xs mb-3">About Us</p>
+          <p className="text-[#2F8132] tracking-[0.35em] uppercase text-xs mb-3">About Us</p>
           <h1 className="text-3xl md:text-4xl font-extrabold text-slate-900 serif leading-tight max-w-2xl">A legacy practice built the way we'd want our own family's estate handled.</h1>
         </div>
       </section>
@@ -44,7 +44,7 @@ export default function AboutView(){
           <h2 className="text-2xl font-bold text-slate-900 serif mb-6">Why Choose Us?</h2>
           <div className="space-y-4">
             {WHY_LIST.map((item,i)=>(
-              <div key={i} className="apv-card p-5 border-l-4 border-l-[#4F9D33]">
+              <div key={i} className="apv-card p-5 border-l-4 border-l-[#2F8132]">
                 <p className="text-slate-700 text-sm leading-relaxed">{item}</p>
               </div>
             ))}
@@ -55,16 +55,16 @@ export default function AboutView(){
       <section className="py-14 px-5">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-10">
-            <p className="text-[#4F9D33] tracking-[0.35em] uppercase text-xs mb-3">Team</p>
+            <p className="text-[#2F8132] tracking-[0.35em] uppercase text-xs mb-3">Team</p>
             <h2 className="apv-section-title">The People Behind Forward Legacy</h2>
             <p className="text-slate-600 text-sm mt-3">Your legacy is our sole priority.</p>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {TEAM.map(person=>(
               <div key={person.initials} className="apv-card p-6 text-center">
-                <div className="w-16 h-16 rounded-full bg-[#F3F7E7] text-[#4F9D33] flex items-center justify-center mx-auto mb-4 font-bold serif text-lg">{person.initials}</div>
+                <div className="w-16 h-16 rounded-full bg-[#EDF6EA] text-[#2F8132] flex items-center justify-center mx-auto mb-4 font-bold serif text-lg">{person.initials}</div>
                 <h3 className="text-slate-900 font-bold text-sm mb-1">{person.name}</h3>
-                <span className="block text-[#4F9D33] text-[10px] font-bold uppercase tracking-wider mb-2">{person.role}</span>
+                <span className="block text-[#2F8132] text-[10px] font-bold uppercase tracking-wider mb-2">{person.role}</span>
                 <p className="text-slate-500 text-xs leading-relaxed">{person.blurb}</p>
               </div>
             ))}

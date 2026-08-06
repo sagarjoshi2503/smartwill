@@ -56,7 +56,7 @@ export default function WillDocument({will,residualBene,onBack,onPrint,willDocRe
           <button onClick={onPrint} className="flex items-center gap-1.5 bg-slate-700 hover:bg-slate-600 text-white rounded-lg px-3.5 py-2 text-sm transition-colors">
             <Printer size={14}/>Print
           </button>
-          <button onClick={onPrint} className="flex items-center gap-1.5 bg-[#4F9D33] hover:bg-[#2D6B1F] text-[#ffffff] rounded-lg px-3.5 py-2 text-sm font-semibold transition-colors">
+          <button onClick={onPrint} className="flex items-center gap-1.5 bg-[#2F8132] hover:bg-[#1E5B22] text-[#ffffff] rounded-lg px-3.5 py-2 text-sm font-semibold transition-colors">
             <Download size={14}/>Download PDF
           </button>
         </div>
@@ -65,12 +65,12 @@ export default function WillDocument({will,residualBene,onBack,onPrint,willDocRe
       {/* Document */}
       <div className="py-10 px-5 flex justify-center" ref={willDocRef}>
         <div className="will-print-page bg-white shadow-2xl rounded-lg max-w-[780px] w-full p-14 print:p-10"
-          style={{fontFamily:"'EB Garamond','Times New Roman',Georgia,serif",fontSize:"14px",lineHeight:"1.85",color:"#1a1a1a"}}>
+          style={{fontFamily:"'Source Serif 4','Times New Roman',Georgia,serif",fontSize:"14px",lineHeight:"1.85",color:"#1a1a1a"}}>
 
           {/* Header */}
           <div className="text-center mb-8 pb-6 border-b-2 border-slate-800">
             <p className="text-xs tracking-[0.35em] uppercase text-slate-500 mb-2">Republic of India · Indian Succession Act, 1925</p>
-            <h1 className="text-3xl font-bold tracking-widest uppercase mb-1" style={{fontFamily:"'EB Garamond',serif"}}>Last Will and Testament</h1>
+            <h1 className="text-3xl font-bold tracking-widest uppercase mb-1" style={{fontFamily:"'Source Serif 4',serif"}}>Last Will and Testament</h1>
             <div className="flex items-center justify-center gap-3 mt-2"><div className="h-0.5 w-32 bg-slate-800"/></div>
           </div>
 

@@ -16,6 +16,7 @@ import AuthChoiceView from "./components/AuthChoiceView";
 import SignupView from "./features/user-signin-otp/SignupView";
 import OtpView from "./features/user-signin-otp/OtpView";
 import DisclaimerView from "./components/DisclaimerView";
+import WillInstructionsView from "./components/WillInstructionsView";
 import AdminLoginView from "./features/admin-signin/AdminLoginView";
 import AdminSignupView from "./features/admin-signup/AdminSignupView";
 import AdminPortal from "./features/admin-dashboard/AdminPortal";
@@ -318,7 +319,7 @@ export default function SmartWill() {
     setSkipWillTypeStep(true);
     setDchecks({ nonMuslim:false, age:false, freeWill:false, legalAwareness:false, law:false, tool:false });
     setWizardStep(2);
-    setView("disclaimer");
+    setView("willInstructions");
   };
   const handleEditWill = (willId: string, fetchedWill: WillState, fetchedWillType: WillType, status: TestatorWill["status"], adminComments?: string) => {
     setWill(mergeWithDefaults(fetchedWill));
@@ -532,7 +533,7 @@ export default function SmartWill() {
               <nav className="hidden lg:flex items-center gap-7 flex-1 justify-center">
                 {SITE_NAV.map(item=>(
                   <button key={item.v} onClick={()=>setView(item.v)}
-                    className={`text-sm font-semibold pb-0.5 border-b-2 transition-colors ${view===item.v?"text-[#4F9D33] border-[#4F9D33]":"text-slate-600 border-transparent hover:text-[#4F9D33]"}`}>
+                    className={`text-sm font-semibold pb-0.5 border-b-2 transition-colors ${view===item.v?"text-[#2F8132] border-[#2F8132]":"text-slate-600 border-transparent hover:text-[#2F8132]"}`}>
                     {item.label}
                   </button>
                 ))}
@@ -551,7 +552,7 @@ export default function SmartWill() {
                     <div className="w-6 h-6 bg-slate-200 rounded-full flex items-center justify-center text-[9px] font-bold text-slate-900">
                       {adminProfile.name.split(" ").slice(0,2).map(n=>n[0]).join("").toUpperCase()}
                     </div>
-                    <span className="text-[#4F9D33] text-sm">{adminProfile.name}</span>
+                    <span className="text-[#2F8132] text-sm">{adminProfile.name}</span>
                   </div>
                   <button onClick={()=>{clearAuthToken(ROLE_ADMIN);setAdminProfile(null);setView("landing");}} className="flex items-center gap-1.5 text-slate-600 hover:text-slate-900 text-sm transition-colors"><LogOut size={13}/>{BTN_LOGOUT}</button>
                 </>
@@ -561,7 +562,7 @@ export default function SmartWill() {
                     <div className="w-6 h-6 bg-slate-200 rounded-full flex items-center justify-center text-[9px] font-bold text-slate-900">
                       {(signup.name||signup.email).split(" ").slice(0,2).map(n=>n[0]).join("").toUpperCase()}
                     </div>
-                    <span className="text-[#4F9D33] text-sm">{signup.name||signup.email}</span>
+                    <span className="text-[#2F8132] text-sm">{signup.name||signup.email}</span>
                   </div>
                   <button onClick={handleTestatorLogout} className="flex items-center gap-1.5 text-slate-600 hover:text-slate-900 text-sm transition-colors"><LogOut size={13}/>{BTN_LOGOUT}</button>
                 </>
@@ -570,7 +571,7 @@ export default function SmartWill() {
                   {showAdminButton && (
                     <button onClick={()=>setView("adminLogin")} className="flex items-center gap-1.5 text-slate-600 hover:text-slate-900 border border-slate-200 hover:border-slate-300 rounded-full px-3.5 py-1.5 text-sm transition-all"><LogIn size={13}/>{BTN_ADMIN_PORTAL}</button>
                   )}
-                  <button onClick={()=>setView("authChoice")} className="flex items-center gap-1.5 bg-[#4F9D33] hover:bg-[#2D6B1F] text-[#ffffff] rounded-full px-4 py-2 text-sm font-semibold transition-colors shadow-lg shadow-[#4F9D33]/20">{BTN_CREATE_YOUR_WILL} <ArrowRight size={13}/></button>
+                  <button onClick={()=>setView("authChoice")} className="flex items-center gap-1.5 bg-[#2F8132] hover:bg-[#1E5B22] text-[#ffffff] rounded-full px-4 py-2 text-sm font-semibold transition-colors shadow-lg shadow-[#2F8132]/20">{BTN_CREATE_YOUR_WILL} <ArrowRight size={13}/></button>
                 </>
               )}
             </div>
@@ -579,7 +580,7 @@ export default function SmartWill() {
             <nav className="lg:hidden border-t border-slate-200 bg-white px-5 py-3 flex flex-col fade-in">
               {SITE_NAV.map(item=>(
                 <button key={item.v} onClick={()=>setView(item.v)}
-                  className={`text-left text-sm font-semibold py-2.5 border-b border-slate-100 transition-colors ${view===item.v?"text-[#4F9D33]":"text-slate-700"}`}>
+                  className={`text-left text-sm font-semibold py-2.5 border-b border-slate-100 transition-colors ${view===item.v?"text-[#2F8132]":"text-slate-700"}`}>
                   {item.label}
                 </button>
               ))}
@@ -592,7 +593,7 @@ export default function SmartWill() {
               ) : (
                 <>
                   <button onClick={()=>setView("authChoice")}
-                    className="bg-[#4F9D33] hover:bg-[#2D6B1F] text-white rounded-full px-4 py-2.5 text-sm font-semibold transition-colors mt-3 text-center">
+                    className="bg-[#2F8132] hover:bg-[#1E5B22] text-white rounded-full px-4 py-2.5 text-sm font-semibold transition-colors mt-3 text-center">
                     Client Login
                   </button>
                   {showAdminButton && (
@@ -616,7 +617,8 @@ export default function SmartWill() {
       {view==="signup" && <SignupView signup={signup} setSignup={setSignup} onNext={()=>{setOtp(Array(OTP_LENGTH).fill("")); setView("otp");}}/>}
       {view==="otp" && <OtpView otp={otp} handleOtp={handleOtp} otpRefs={otpRefs} phone={signup.phone} email={signup.email} onNext={handleOtpVerified}/>}
       {view==="willTypeSelect" && <WillTypeSelectView onSelect={handleWillTypeChosen} onBack={()=>setView("myWills")}/>}
-      {view==="disclaimer" && <DisclaimerView dchecks={dchecks} setDchecks={setDchecks} willType={willType} onAgree={()=>setView("wizard")} onBack={()=>setView("willTypeSelect")}/>}
+      {view==="willInstructions" && <WillInstructionsView onContinue={()=>setView("disclaimer")} onBack={()=>setView("willTypeSelect")}/>}
+      {view==="disclaimer" && <DisclaimerView dchecks={dchecks} setDchecks={setDchecks} willType={willType} onAgree={()=>setView("wizard")} onBack={()=>setView("willInstructions")}/>}
       {view==="myWills" && <TestatorWillsView email={signup.email} onCreateNew={handleCreateNewWill} onEditWill={handleEditWill} onViewWill={handleViewWill} onDownloadAnnex={()=>setView("annexBuilder")}/>}
       {view==="adminLogin" && <AdminLoginView onLogin={(admin)=>{setAdminProfile(admin);setView("admin");}} onBack={()=>setView("landing")} onSignup={()=>setView("adminSignup")} signupEnabled={adminSignupEnabled}/>}
       {view==="adminSignup" && adminSignupEnabled && <AdminSignupView onSignup={(admin)=>{setAdminProfile(admin);setView("admin");}} onBack={()=>setView("adminLogin")} onGoToLogin={()=>setView("adminLogin")}/>}
@@ -637,7 +639,7 @@ export default function SmartWill() {
             <div className="flex items-center gap-1">
               {WIZARD_STEPS.filter(s=>!(skipWillTypeStep&&s.n===1)).map(s=>(
                 <button key={s.n} onClick={()=>setWizardStep(s.n)}
-                    className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-[10px] font-semibold transition-all ${wizardStep===s.n?"bg-[#4F9D33] text-[#ffffff]":"border border-slate-200 text-slate-600 hover:bg-slate-100 hover:text-slate-900"}`}>
+                    className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-[10px] font-semibold transition-all ${wizardStep===s.n?"bg-[#2F8132] text-[#ffffff]":"border border-slate-200 text-slate-600 hover:bg-slate-100 hover:text-slate-900"}`}>
                   {wizardStep>s.n?<Check size={9}/>:<span>{s.n}</span>}
                   <span className="hidden md:inline">{s.label}</span>
                 </button>
@@ -676,7 +678,7 @@ export default function SmartWill() {
                   )}
                 </div>
               )}
-              <button onClick={requestGenerateWill} className="flex items-center gap-1.5 text-xs text-[#4F9D33] hover:text-[#2D6B1F] border border-[#4F9D33]/30 hover:border-[#4F9D33]/60 rounded-lg px-3 py-1.5 transition-all font-semibold">
+              <button onClick={requestGenerateWill} className="flex items-center gap-1.5 text-xs text-[#2F8132] hover:text-[#1E5B22] border border-[#2F8132]/30 hover:border-[#2F8132]/60 rounded-lg px-3 py-1.5 transition-all font-semibold">
                 <Eye size={12}/>{BTN_GENERATE_WILL}
               </button>
             </div>
@@ -746,7 +748,7 @@ export default function SmartWill() {
             </ul>
             <div className="flex flex-col sm:flex-row gap-3">
               <button onClick={()=>setShowGenerateInstructions(false)} className="w-full sm:w-auto px-5 py-3 rounded-full border border-slate-200 text-slate-600 hover:text-slate-900 text-sm font-medium transition-all">← Back</button>
-              <button onClick={()=>{setShowGenerateInstructions(false);handleGenerateWill();}} className="flex-1 bg-[#4F9D33] hover:bg-[#2D6B1F] text-white font-bold py-3 rounded-full text-sm transition-colors">
+              <button onClick={()=>{setShowGenerateInstructions(false);handleGenerateWill();}} className="flex-1 bg-[#2F8132] hover:bg-[#1E5B22] text-white font-bold py-3 rounded-full text-sm transition-colors">
                 Got it — Generate Document
               </button>
             </div>

@@ -4,7 +4,7 @@ export default {
     extend: {
       fontFamily: {
         sans: ['Inter', 'sans-serif'],
-        serif: ['Plus Jakarta Sans', 'sans-serif'],
+        serif: ['Source Serif 4', 'Georgia', 'serif'],
       },
       colors: {
         brand: {

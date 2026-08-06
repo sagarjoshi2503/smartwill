@@ -26,7 +26,7 @@ const GEN_PLANS = [
 ];
 
 const BADGE_STYLE: Record<string, string> = {
-  ACTIVE: "bg-[#F3F7E7] text-[#2D6B1F]",
+  ACTIVE: "bg-[#EDF6EA] text-[#1E5B22]",
   REDEEMED: "bg-amber-50 text-amber-700",
   EXPIRED: "bg-red-50 text-red-600",
 };
@@ -132,7 +132,7 @@ export default function GiftVoucherAdminTab(){
         ] as const).map(t=>(
           <button key={t.v}
             onClick={()=>{ setSubTab(t.v); if(t.v==="codes") loadCodes(search); }}
-            className={`flex-1 py-3 text-sm font-semibold transition-colors ${subTab===t.v?"text-[#4F9D33] border-b-2 border-[#4F9D33] bg-[#F3F7E7]":"text-slate-500 border-b-2 border-transparent hover:text-slate-800"}`}>
+            className={`flex-1 py-3 text-sm font-semibold transition-colors ${subTab===t.v?"text-[#2F8132] border-b-2 border-[#2F8132] bg-[#EDF6EA]":"text-slate-500 border-b-2 border-transparent hover:text-slate-800"}`}>
             {t.label}
           </button>
         ))}
@@ -169,11 +169,11 @@ export default function GiftVoucherAdminTab(){
               <Sparkles size={14}/>{genStatus==="saving"?"Generating…":"Generate Voucher Code(s)"}
             </button>
             {genCodes && genCodes.length>0 && (
-              <div className="mt-4 p-4 bg-[#F3F7E7] border border-slate-200 rounded-xl">
+              <div className="mt-4 p-4 bg-[#EDF6EA] border border-slate-200 rounded-xl">
                 <div className="text-xs text-slate-500 mb-1">{genCodes.length} code(s) generated</div>
                 <ul className="space-y-1">
                   {genCodes.map(c=>(
-                    <li key={c} className="font-mono font-bold text-[#2D6B1F] text-sm tracking-wide">{c}</li>
+                    <li key={c} className="font-mono font-bold text-[#1E5B22] text-sm tracking-wide">{c}</li>
                   ))}
                 </ul>
               </div>
@@ -202,7 +202,7 @@ export default function GiftVoucherAdminTab(){
                   <tbody>
                     {codes.map(v=>(
                       <tr key={v.code} className="border-b border-slate-100 hover:bg-slate-50">
-                        <td className="px-2 py-2 font-mono font-bold text-[#2D6B1F] whitespace-nowrap">{v.code}</td>
+                        <td className="px-2 py-2 font-mono font-bold text-[#1E5B22] whitespace-nowrap">{v.code}</td>
                         <td className="px-2 py-2 text-slate-600"><div>{v.recipientName}</div><div className="text-slate-400">{v.recipientEmail}</div></td>
                         <td className="px-2 py-2 text-slate-600 whitespace-nowrap">{v.planLabel}</td>
                         <td className="px-2 py-2 text-slate-600 whitespace-nowrap">₹{v.amount?.toLocaleString("en-IN")}</td>
@@ -227,7 +227,7 @@ export default function GiftVoucherAdminTab(){
             </div>
             {verifyStatus==="error" && <p className="text-red-500 text-xs mb-3">{verifyError}</p>}
             {verifyResult && (
-              <div className="bg-[#F3F7E7] border border-slate-200 rounded-xl p-4 text-sm">
+              <div className="bg-[#EDF6EA] border border-slate-200 rounded-xl p-4 text-sm">
                 {Object.entries(verifyResult).filter(([k])=>k!=="found").map(([k,v])=>(
                   <div key={k} className="flex justify-between py-1 border-b border-black/5 last:border-0">
                     <span className="text-slate-500">{k}</span>

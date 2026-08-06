@@ -11,7 +11,7 @@ import type { TestatorWill, WillState, WillType } from "../../types";
 
 const STATUS_STYLE: Record<TestatorWill["status"], string> = {
   Draft: "bg-slate-100 text-slate-600 border-slate-200",
-  PendingReview: "bg-[#4F9D33]/10 text-[#2D6B1F] border-[#4F9D33]/30",
+  PendingReview: "bg-[#2F8132]/10 text-[#1E5B22] border-[#2F8132]/30",
   Completed: "bg-emerald-50 text-emerald-600 border-emerald-200",
 };
 
@@ -118,7 +118,7 @@ export default function TestatorWillsView({email,onCreateNew,onEditWill,onViewWi
             <Plus size={14}/>Create New Will
           </button>
         </div>
-        <div className="bg-[#F3F7E7] border border-[#4F9D33]/25 rounded-xl p-3.5 text-xs text-[#2D6B1F] flex items-start gap-2 mb-6">
+        <div className="bg-[#EDF6EA] border border-[#2F8132]/25 rounded-xl p-3.5 text-xs text-[#1E5B22] flex items-start gap-2 mb-6">
           <Clock size={13} className="mt-0.5 shrink-0"/>Wills created more than {WILL_VISIBLE_DAYS} days ago will be deleted from the system.
         </div>
         {actionError&&<p className="text-red-500 text-xs mb-4">{actionError}</p>}
@@ -134,7 +134,7 @@ export default function TestatorWillsView({email,onCreateNew,onEditWill,onViewWi
                   {v:STATUS_COMPLETED,label:STATUS_LBL[STATUS_COMPLETED],count:completedCount},
                 ] as const).map(f=>(
                   <button key={f.v} onClick={()=>setStatusFilter(f.v)}
-                    className={`text-[10px] font-bold px-2.5 py-1 rounded-full border transition-colors ${statusFilter===f.v?"bg-[#4F9D33] text-[#ffffff] border-[#4F9D33] hover:bg-[#4F9D33] hover:text-[#ffffff]":"bg-white text-slate-600 border-slate-200 hover:border-slate-300"}`}>
+                    className={`text-[10px] font-bold px-2.5 py-1 rounded-full border transition-colors ${statusFilter===f.v?"bg-[#2F8132] text-[#ffffff] border-[#2F8132] hover:bg-[#2F8132] hover:text-[#ffffff]":"bg-white text-slate-600 border-slate-200 hover:border-slate-300"}`}>
                     {f.label} <span className="opacity-70">{f.count}</span>
                   </button>
                 ))}
@@ -178,7 +178,7 @@ export default function TestatorWillsView({email,onCreateNew,onEditWill,onViewWi
                         </button>
                         {w.status===STATUS_DRAFT ? (
                           <button onClick={()=>handleEdit(w.willId)} disabled={busyId===w.willId}
-                            className="flex items-center gap-1.5 text-[#4F9D33] hover:text-[#2D6B1F] text-xs font-semibold transition-colors disabled:opacity-50">
+                            className="flex items-center gap-1.5 text-[#2F8132] hover:text-[#1E5B22] text-xs font-semibold transition-colors disabled:opacity-50">
                             <Edit3 size={11}/>Edit
                           </button>
                         ) : (
@@ -186,7 +186,7 @@ export default function TestatorWillsView({email,onCreateNew,onEditWill,onViewWi
                         )}
                         {w.status===STATUS_COMPLETED && (
                           <button onClick={onDownloadAnnex}
-                            className="flex items-center gap-1.5 text-[#4F9D33] hover:text-[#2D6B1F] text-xs font-semibold transition-colors">
+                            className="flex items-center gap-1.5 text-[#2F8132] hover:text-[#1E5B22] text-xs font-semibold transition-colors">
                             <FileStack size={11}/>Download Annex
                           </button>
                         )}
