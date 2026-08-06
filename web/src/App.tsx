@@ -20,6 +20,7 @@ import AdminLoginView from "./features/admin-signin/AdminLoginView";
 import AdminSignupView from "./features/admin-signup/AdminSignupView";
 import AdminPortal from "./features/admin-dashboard/AdminPortal";
 import TestatorWillsView from "./features/create-will/TestatorWillsView";
+import WillTypeSelectView from "./features/create-will/WillTypeSelectView";
 import WizardForms from "./features/create-will/WizardForms";
 import LiveDocPreview from "./features/create-will/LiveDocPreview";
 import AllIndiaLiveDocPreview from "./features/create-will/AllIndiaLiveDocPreview";
@@ -33,7 +34,7 @@ import { clearAuthToken } from "./utils/auth";
 import { getMissingIdFields } from "./utils/willValidation";
 import { trackPageview } from "./utils/analytics";
 import {
-  ADMIN_PATH, API_FLAGS, API_RAZORPAY_FLAG, API_CHATBOT_FLAG, API_ADMIN_SIGNUP_FLAG, API_WILL_SAVE, apiPathSendBack,
+  ADMIN_PATH, API_FLAGS, API_RAZORPAY_FLAG, API_CHATBOT_FLAG, API_ADMIN_SIGNUP_FLAG, API_LIVE_PREVIEW_FLAG, API_WILL_SAVE, apiPathSendBack,
   OTP_LENGTH, STATUS_DRAFT, STATUS_PENDING_REVIEW, STATUS_COMPLETED,
   SEND_BACK_REDIRECT_MS, DRAFT_RESET_MS, WIZARD_REDIRECT_MS,
   MSG_VIEW_ONLY, MSG_SAVING, BTN_SAVE_AS_DRAFT, ROLE_ADMIN, ROLE_TESTATOR,
@@ -47,8 +48,8 @@ import type {
 } from "./types";
 
 const WIZARD_STEPS = [
-  {n:1,label:"Will Type"},{n:2,label:"Testator"},{n:3,label:"Executor"},{n:4,label:"Guardians"},
-  {n:5,label:"Beneficiaries"},{n:6,label:"Assets"},{n:7,label:"Residual & Instructions"},
+  {n:1,label:"Will Type"},{n:2,label:"Testator"},{n:3,label:"Beneficiary"},{n:4,label:"Asset"},
+  {n:5,label:"Executor"},{n:6,label:"Guardian"},{n:7,label:"Residual Clause"},{n:8,label:"Witness"},
 ];
 
 const isAdminView = (v: ViewName) => v==="adminLogin" || v==="adminSignup" || v==="admin";
@@ -103,6 +104,7 @@ export default function SmartWill() {
   const [razorpayEnabled, setRazorpayEnabled] = useState(false);
   const [chatbotEnabled, setChatbotEnabled] = useState(false);
   const [adminSignupEnabled, setAdminSignupEnabled] = useState(false);
+  const [livePreviewEnabled, setLivePreviewEnabled] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   // ServicesView's "Got a query?" buttons deep-link into a specific FaqView
   // accordion section — mirrors how onHome/onServices already thread view
@@ -207,6 +209,17 @@ export default function SmartWill() {
     return () => { cancelled = true; };
   }, []);
 
+  // Wizard's Live Preview pane is gated behind the "enable-live-preview"
+  // Vercel Flag, same fail-closed pattern as the flags above.
+  useEffect(() => {
+    let cancelled = false;
+    fetch(API_LIVE_PREVIEW_FLAG)
+      .then(res => res.ok ? res.json() : { enabled: false })
+      .then(data => { if(!cancelled) setLivePreviewEnabled(!!data?.enabled); })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, []);
+
   // Defense in depth: if `view` ever becomes "adminSignup" while the flag is
   // off (there's no way to do this through the UI once the "Sign up" link
   // itself is hidden below, but this guards against any other path — e.g. a
@@ -267,12 +280,11 @@ export default function SmartWill() {
 
   const handleCreateNewWill = () => {
     setWill({...DEFAULT_WILL, testator: {...DEFAULT_WILL.testator, fullName: signup.name, email: signup.email}});
-    // The testator already chose a Will type by picking a plan on the
-    // landing page — carry that through and skip the redundant Will Type
-    // step in the wizard. (Admin-created Wills bypass the landing page
-    // entirely, so they still go through that step — see handleAdminCreateWill.)
-    setWillType(selectedPlan.willType);
-    setSkipWillTypeStep(true);
+    // Testators are re-prompted for the Will type on every new Will (rather
+    // than silently carrying over whichever plan they picked on the landing
+    // page) — see handleWillTypeChosen, which is what actually moves on to
+    // the (type-aware) disclaimer once they've picked one here.
+    setWillType("");
     setEditingWillId(null);
     setAdminReviewMode(false);
     setAdminReviewStatus(null);
@@ -280,6 +292,13 @@ export default function SmartWill() {
     setTestatorEmailEditable(false);
     setViewOnlyMode(false);
     setActiveAdminComments("");
+    setView("willTypeSelect");
+  };
+  const handleWillTypeChosen = (type: WillType) => {
+    setWillType(type);
+    // The wizard's own Step 1 ("Select Will Type") is skipped since the
+    // choice was already made on the dedicated screen above.
+    setSkipWillTypeStep(true);
     setDchecks({ nonMuslim:false, age:false, freeWill:false, legalAwareness:false, law:false, tool:false });
     setWizardStep(2);
     setView("disclaimer");
@@ -391,27 +410,31 @@ export default function SmartWill() {
   const assetAdded = (id: string) => will.assets.some(a=>a.typeId===id);
   const residualBene = will.beneficiaries.find(b=>String(b.id)===String(will.residualBeneId));
 
-  // Generate/preview the Will document — blocked until every in-use ID
-  // Number field (Aadhaar/PAN/Passport/Voter ID/Driving Licence, whichever
-  // type was selected) is filled in, since the printed document renders
-  // these blanks verbatim.
+  // Generate/preview the Will document.
   const handleGenerateWill = () => {
+    setShowWillDoc(true);
+  };
+
+  // Both places that can trigger Will generation — the wizard bar's
+  // "Generate Will" button and WizardForms' own "Generate Complete Will
+  // Document" button on the final step — go through this validation first.
+  // Blocked until every in-use ID Number field (Aadhaar/PAN/Passport/Voter
+  // ID/Driving Licence, whichever type was selected) is filled in, since the
+  // printed document renders these blanks verbatim — any missing fields
+  // surface in the red ribbon at the top and the "Before You Print"
+  // confirmation never opens. Only once validation passes does that
+  // confirmation show, so the printing/signing instructions always appear
+  // before the document is actually generated.
+  const [showGenerateInstructions, setShowGenerateInstructions] = useState(false);
+  const requestGenerateWill = () => {
     const missing = getMissingIdFields(will, willType);
     if (missing.length > 0) {
       setGenWillErrors(missing);
       return;
     }
     setGenWillErrors([]);
-    setShowWillDoc(true);
+    setShowGenerateInstructions(true);
   };
-
-  // Both places that can trigger Will generation — the wizard bar's
-  // "Generate Will" button and WizardForms' own "Generate Complete Will
-  // Document" button on the final step — go through this "Before You Print"
-  // confirmation first, so the printing/signing instructions always show
-  // regardless of which button was clicked.
-  const [showGenerateInstructions, setShowGenerateInstructions] = useState(false);
-  const requestGenerateWill = () => setShowGenerateInstructions(true);
 
   // Save as draft
   const handleSaveDraft = async () => {
@@ -560,7 +583,8 @@ export default function SmartWill() {
       {view==="authChoice" && <AuthChoiceView onGoogleSuccess={handleGoogleSuccess} onPhone={()=>setView("signup")} onBack={()=>setView("landing")}/>}
       {view==="signup" && <SignupView signup={signup} setSignup={setSignup} onNext={()=>{setOtp(Array(OTP_LENGTH).fill("")); setView("otp");}}/>}
       {view==="otp" && <OtpView otp={otp} handleOtp={handleOtp} otpRefs={otpRefs} phone={signup.phone} email={signup.email} onNext={handleOtpVerified}/>}
-      {view==="disclaimer" && <DisclaimerView dchecks={dchecks} setDchecks={setDchecks} willType={willType} onAgree={()=>setView("wizard")} onBack={()=>setView("myWills")}/>}
+      {view==="willTypeSelect" && <WillTypeSelectView onSelect={handleWillTypeChosen} onBack={()=>setView("myWills")}/>}
+      {view==="disclaimer" && <DisclaimerView dchecks={dchecks} setDchecks={setDchecks} willType={willType} onAgree={()=>setView("wizard")} onBack={()=>setView("willTypeSelect")}/>}
       {view==="myWills" && <TestatorWillsView email={signup.email} onCreateNew={handleCreateNewWill} onEditWill={handleEditWill} onViewWill={handleViewWill}/>}
       {view==="adminLogin" && <AdminLoginView onLogin={(admin)=>{setAdminProfile(admin);setView("admin");}} onBack={()=>setView("landing")} onSignup={()=>setView("adminSignup")} signupEnabled={adminSignupEnabled}/>}
       {view==="adminSignup" && adminSignupEnabled && <AdminSignupView onSignup={(admin)=>{setAdminProfile(admin);setView("admin");}} onBack={()=>setView("adminLogin")} onGoToLogin={()=>setView("adminLogin")}/>}
@@ -636,7 +660,7 @@ export default function SmartWill() {
           )}
           {/* Split pane */}
           <div className="flex flex-1 overflow-hidden">
-            <div className="w-full lg:w-[50%] overflow-y-auto p-5 bg-slate-50">
+            <div className={`w-full ${livePreviewEnabled?"lg:w-[50%]":""} overflow-y-auto p-5 bg-slate-50`}>
               <WizardForms
                 step={wizardStep} will={will} setWill={setWill}
                 willType={willType} setWillType={setWillType} hideWillTypeStep={skipWillTypeStep}
@@ -644,7 +668,7 @@ export default function SmartWill() {
                 addAsset={addAsset} removeAsset={removeAsset}
                 updateAssetData={updateAssetData} updateAssetAlloc={updateAssetAlloc}
                 allocTotal={allocTotal} assetAdded={assetAdded}
-                onNext={()=>setWizardStep(s=>Math.min(s+1,7))}
+                onNext={()=>setWizardStep(s=>Math.min(s+1,8))}
                 onPrev={()=>setWizardStep(s=>Math.max(s-1,skipWillTypeStep?2:1))}
                 onGenerate={requestGenerateWill}
                 willId={editingWillId}
@@ -663,15 +687,17 @@ export default function SmartWill() {
                 }}
               />
             </div>
-            <div className="hidden lg:flex lg:w-[50%] bg-slate-100 p-5 overflow-y-auto items-start justify-center">
-              {willType==="allindia" ? <AllIndiaLiveDocPreview will={will}/> : willType==="goan" ? (
-                <div className="w-full max-w-[420px] bg-white border border-slate-200 rounded-2xl shadow-xl p-6 text-center">
-                  <BrandMark size={32} className="mx-auto mb-3"/>
-                  <p className="text-slate-900 text-sm font-semibold mb-1.5">Goan Will &amp; Deed of Consent</p>
-                  <p className="text-slate-500 text-xs leading-relaxed">Your document(s) — the Open Will, and if married, your spouse's Open Will and a shared Deed of Consent — become available to preview and download once you reach the final step and click Generate.</p>
-                </div>
-              ) : <LiveDocPreview will={will} residualBene={residualBene}/>}
-            </div>
+            {livePreviewEnabled && (
+              <div className="hidden lg:flex lg:w-[50%] bg-slate-100 p-5 overflow-y-auto items-start justify-center">
+                {willType==="allindia" ? <AllIndiaLiveDocPreview will={will}/> : willType==="goan" ? (
+                  <div className="w-full max-w-[420px] bg-white border border-slate-200 rounded-2xl shadow-xl p-6 text-center">
+                    <BrandMark size={32} className="mx-auto mb-3"/>
+                    <p className="text-slate-900 text-sm font-semibold mb-1.5">Goan Will &amp; Deed of Consent</p>
+                    <p className="text-slate-500 text-xs leading-relaxed">Your document(s) — the Open Will, and if married, your spouse's Open Will and a shared Deed of Consent — become available to preview and download once you reach the final step and click Generate.</p>
+                  </div>
+                ) : <LiveDocPreview will={will} residualBene={residualBene}/>}
+              </div>
+            )}
           </div>
         </div>
       )}

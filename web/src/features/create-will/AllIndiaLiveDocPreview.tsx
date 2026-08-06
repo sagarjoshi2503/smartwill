@@ -51,16 +51,15 @@ export default function AllIndiaLiveDocPreview({will}:{
   );
 
   return(
-    <div className="w-full max-w-[520px] rounded-xl shadow-2xl overflow-hidden border border-amber-900/20">
-      <div className="bg-slate-700 px-4 py-2 flex items-center gap-2">
-        <div className="w-2.5 h-2.5 rounded-full bg-red-400/80"/><div className="w-2.5 h-2.5 rounded-full bg-amber-400/80"/><div className="w-2.5 h-2.5 rounded-full bg-[#4F9D33]/80"/>
-        <span className="text-slate-400 text-xs ml-2 flex items-center gap-1.5"><Eye size={10}/>Live Preview — All India Will</span>
+    <div className="w-full max-w-[520px] rounded-xl shadow-2xl overflow-hidden border border-[#4F9D33]/20">
+      <div className="bg-white border-b border-slate-200 px-4 py-2.5 flex items-center gap-2">
+        <span className="text-[#4F9D33] text-xs font-semibold flex items-center gap-1.5"><Eye size={12}/>Live Preview — All India Will</span>
       </div>
-      <div className="bg-[#fefcf3] p-7 text-[12.5px]" style={{fontFamily:"'Times New Roman',Times,serif",lineHeight:"1.15",color:"#2d2a1e"}}>
+      <div className="bg-white p-7 text-[12.5px]" style={{fontFamily:"'Times New Roman',Times,serif",lineHeight:"1.15",color:"#14181B"}}>
         <h1 className="text-center text-base font-bold tracking-widest uppercase mb-4">WILL</h1>
 
         <p className="text-justify mb-3">
-          I, <strong>{testator.fullName||blank}</strong>, having PAN <strong>{testator.pan||blank}</strong>, Aadhaar No. <strong>{testator.aadhaarNumber||blank}</strong>, {testator.relation} of <strong>{testator.parentSpouseName||blank}</strong>, aged <strong>{testator.age||"___"}</strong>, {testator.maritalStatus}, nationality <strong>{testator.nationality||blank}</strong>, occupation <strong>{occupationOf(testator)||blank}</strong>, resident of <strong>{testator.address||blank}</strong>
+          I, <strong>{testator.fullName||blank}</strong>, having PAN <strong>{testator.pan||blank}</strong>, Aadhaar No. <strong>{testator.aadhaarNumber||blank}</strong>, {testator.relation} of <strong>{testator.parentSpouseName||blank}</strong>, aged <strong>{testator.age||"___"}</strong>, {testator.maritalStatus}, nationality <strong>{testator.nationality?`${testator.nationality} National`:blank}</strong>, occupation <strong>{occupationOf(testator)||blank}</strong>, resident of <strong>{testator.address||blank}</strong>
           {testator.maritalStatus==="married"&&(
             <>, I am married to <strong>{testator.spouseName||blank}</strong>, bearing Aadhaar No. <strong>{testator.spouseAadhaarNumber||blank}</strong> and I have {sonNames.length===1?"one":sonNames.length||"___"} son, namely, <strong>{sonNames.join(", ")||blank}</strong> and {daughterNames.length===1?"one":daughterNames.length||"___"} daughter, namely, <strong>{daughterNames.join(", ")||blank}</strong>
             </>
@@ -118,7 +117,7 @@ export default function AllIndiaLiveDocPreview({will}:{
         <p className="text-justify mb-3">
           I hereby declare, direct, and devise that all the Rest and Residue of my estate, including any property or assets, both movable and immovable, which I may acquire after the execution of this Will, or which has been inadvertently omitted from this document, shall be given entirely to {allIndiaResidue.length>1&&"the following, in equal shares: "}
           {allIndiaResidue.map((entry,i)=>(
-            <span key={i}><strong>{relOf(entry)||blank}</strong> (Relationship), <strong>{entry.name||blank}</strong>, nationality <strong>{entry.nationality||blank}</strong>, occupation <strong>{occupationOf(entry)||blank}</strong>, bearing {entry.idType||"Aadhaar Card"} Number: <strong>{entry.idNumber||blank}</strong>{i<allIndiaResidue.length-1?"; ":"."}</span>
+            <span key={i}><strong>{relOf(entry)||blank}</strong>, <strong>{entry.name||blank}</strong>, nationality <strong>{entry.nationality?`${entry.nationality} National`:blank}</strong>, occupation <strong>{occupationOf(entry)||blank}</strong>, bearing {entry.idType||"Aadhaar Card"} Number: <strong>{entry.idNumber||blank}</strong>{i<allIndiaResidue.length-1?"; ":"."}</span>
           ))}
         </p>
         <SectionSignatureLine/>
@@ -126,7 +125,7 @@ export default function AllIndiaLiveDocPreview({will}:{
         <p className="font-bold mb-1">Witnesses:</p>
         {witnesses.map((w,i)=>(
           <p key={i} className="text-justify mb-1">
-            {i+1}) <strong>{w.name||blank}</strong>, {w.parentRelation} of <strong>{w.parentName||blank}</strong>, Age: <strong>{w.age||"___"}</strong>, {w.maritalStatus}, nationality <strong>{w.nationality||blank}</strong>, occupation <strong>{occupationOf(w)||blank}</strong>, resident of <strong>{w.address||blank}</strong>, bearing Aadhaar Number <strong>{w.aadhaarNumber||blank}</strong>, Relation to Testator: <strong>{witnessRelOf(w)||blank}</strong>
+            {i+1}) <strong>{w.name||blank}</strong>, {w.parentRelation} of <strong>{w.parentName||blank}</strong>, Age: <strong>{w.age||"___"}</strong>, {w.maritalStatus}, nationality <strong>{w.nationality?`${w.nationality} National`:blank}</strong>, occupation <strong>{occupationOf(w)||blank}</strong>, resident of <strong>{w.address||blank}</strong>, bearing Aadhaar Number <strong>{w.aadhaarNumber||blank}</strong>, Relation to Testator: <strong>{witnessRelOf(w)||blank}</strong>
           </p>
         ))}
 

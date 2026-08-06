@@ -75,17 +75,19 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,w
 
   // Each Will page is laid out as an explicit, fixed-height block (rather
   // than left to the browser's automatic reflow) so page breaks fall in
-  // predictable places and this attestation line — required at the top and
-  // bottom of every page except the last — reliably lands there. (A
-  // `position:fixed` header/footer was tried first, but Firefox and some
-  // print/PDF pipelines don't repeat fixed-position elements across printed
-  // pages, so it isn't reliable.) The last page carries the full execution
-  // block in its own content instead, so it gets neither. The `pdf-page`
-  // height/flex rules only apply under @media print — on screen this still
-  // reads as one continuous scrollable document.
-  const Page = ({children,isLast}:{children: ReactNode; isLast?: boolean})=>(
+  // predictable places and this attestation line — required at the top of
+  // every page except the first and last, and at the bottom of every page
+  // except the last — reliably lands there. (A `position:fixed` header/
+  // footer was tried first, but Firefox and some print/PDF pipelines don't
+  // repeat fixed-position elements across printed pages, so it isn't
+  // reliable.) The first page has nothing to attest yet at its very top,
+  // and the last page carries the full execution block in its own content
+  // instead, so neither gets a header, and the last page gets no footer
+  // either. The `pdf-page` height/flex rules only apply under @media print
+  // — on screen this still reads as one continuous scrollable document.
+  const Page = ({children,isFirst,isLast}:{children: ReactNode; isFirst?: boolean; isLast?: boolean})=>(
     <section className={`pdf-page${isLast?"":" pdf-page-break"}`}>
-      {!isLast && <SigLine className="mt-0 mb-4"/>}
+      {!isFirst && !isLast && <SigLine className="mt-0 mb-4"/>}
       <div>{children}</div>
       {!isLast && <SigLine className="pdf-sig-line-footer mt-4"/>}
     </section>
@@ -142,11 +144,11 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,w
         <div className="will-print-page bg-white shadow-2xl rounded-lg max-w-[780px] w-full p-14 print:p-10"
           style={{fontFamily:"'Times New Roman',Times,Georgia,serif",fontSize:"12pt",lineHeight:"1.15",color:"#1a1a1a"}}>
 
-          <Page>
+          <Page isFirst>
             <h1 className="text-center text-2xl font-bold tracking-widest uppercase mb-6">WILL</h1>
 
             <p className="text-justify mb-5">
-              I, <strong>{testator.fullName||blank}</strong>, having PAN <strong>{testator.pan||blank}</strong>, Aadhaar No. <strong>{testator.aadhaarNumber||blank}</strong>, {testator.relation} of <strong>{testator.parentSpouseName||blank}</strong>, aged <strong>{testator.age||"___"}</strong>, {testator.maritalStatus}, nationality <strong>{testator.nationality||blank}</strong>, occupation <strong>{occupationOf(testator)||blank}</strong>, resident of <strong>{testator.address||blank}</strong>
+              I, <strong>{testator.fullName||blank}</strong>, having PAN <strong>{testator.pan||blank}</strong>, Aadhaar No. <strong>{testator.aadhaarNumber||blank}</strong>, {testator.relation} of <strong>{testator.parentSpouseName||blank}</strong>, aged <strong>{testator.age||"___"}</strong>, {testator.maritalStatus}, nationality <strong>{testator.nationality?`${testator.nationality} National`:blank}</strong>, occupation <strong>{occupationOf(testator)||blank}</strong>, resident of <strong>{testator.address||blank}</strong>
               {testator.maritalStatus==="married"&&(
                 <>, I am married to <strong>{testator.spouseName||blank}</strong>, bearing Aadhaar No. <strong>{testator.spouseAadhaarNumber||blank}</strong> and I have {sonNames.length===1?"one":sonNames.length||"___"} son, namely, <strong>{sonNames.join(", ")||blank}</strong> and {daughterNames.length===1?"one":daughterNames.length||"___"} daughter, namely, <strong>{daughterNames.join(", ")||blank}</strong>
                 </>
@@ -208,7 +210,7 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,w
             <p className="text-justify mb-5">
               I hereby declare, direct, and devise that all the Rest and Residue of my estate, including any property or assets, both movable and immovable, which I may acquire after the execution of this Will, or which has been inadvertently omitted from this document, shall be given entirely to {allIndiaResidue.length>1&&"the following, in equal shares: "}
               {allIndiaResidue.map((entry,i)=>(
-                <span key={i}><strong>{relOf(entry)||blank}</strong> (Relationship), <strong>{entry.name||blank}</strong>, nationality <strong>{entry.nationality||blank}</strong>, occupation <strong>{occupationOf(entry)||blank}</strong>, bearing {entry.idType||"Aadhaar Card"} Number: <strong>{entry.idNumber||blank}</strong>{i<allIndiaResidue.length-1?"; ":"."}</span>
+                <span key={i}><strong>{relOf(entry)||blank}</strong>, <strong>{entry.name||blank}</strong>, nationality <strong>{entry.nationality?`${entry.nationality} National`:blank}</strong>, occupation <strong>{occupationOf(entry)||blank}</strong>, bearing {entry.idType||"Aadhaar Card"} Number: <strong>{entry.idNumber||blank}</strong>{i<allIndiaResidue.length-1?"; ":"."}</span>
               ))}
             </p>
 
@@ -245,7 +247,7 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,w
                 <p className="mb-1">{i+1})</p>
                 <p className="mb-1">Name: <strong>{w.name||blank}</strong></p>
                 <p className="mb-1">{w.parentRelation} of <strong>{w.parentName||blank}</strong>, Age: <strong>{w.age||"___"}</strong>, {w.maritalStatus}</p>
-                <p className="mb-1">Nationality: <strong>{w.nationality||blank}</strong>, Occupation: <strong>{occupationOf(w)||blank}</strong></p>
+                <p className="mb-1">Nationality: <strong>{w.nationality?`${w.nationality} National`:blank}</strong>, Occupation: <strong>{occupationOf(w)||blank}</strong></p>
                 <p className="mb-1">Resident of: <strong>{w.address||blank}</strong></p>
                 <p className="mb-1">Bearing Aadhaar Number: <strong>{w.aadhaarNumber||blank}</strong></p>
                 <p className="mb-8">Relation to Testator: <strong>{witnessRelOf(w)||blank}</strong></p>

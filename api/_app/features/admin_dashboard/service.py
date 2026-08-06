@@ -8,47 +8,21 @@ from _app.core.exceptions import AppError
 from _app.features.admin_dashboard import repository
 from _app.shared import email
 from _app.shared.constants import (
-    COMMENTS_REQUIRED, DEFAULT_GREETING, FLD_AADHAAR_NUMBER, FLD_ADMIN_COMMENTS, FLD_ADMIN_EMAIL,
-    FLD_ASSIGNED_AT, FLD_COMMENTS, FLD_CONTACT, FLD_CREATED_AT, FLD_CREATED_BY, FLD_EXECUTOR, FLD_FULL_NAME,
-    FLD_GUARDIAN, FLD_ID_NUMBER, FLD_JOINT_ID, FLD_NAME, FLD_PAN, FLD_PAYMENT_AMOUNT, FLD_PAYMENT_STATUS,
-    FLD_RESIDUAL_ID, FLD_REVIEWER_EMAIL, FLD_SENT_BACK_AT, FLD_SPOUSE_AADHAAR_NUMBER, FLD_STATUS, FLD_SUB_ID,
-    FLD_TESTATOR, FLD_TESTATOR_EMAIL, FLD_UPDATED_AT, FLD_WILL, FLD_WILL_ID, FLD_WILL_TYPE, FLD_WITNESSES,
+    COMMENTS_REQUIRED, DEFAULT_GREETING, FLD_ADMIN_COMMENTS, FLD_ADMIN_EMAIL,
+    FLD_ASSIGNED_AT, FLD_COMMENTS, FLD_CONTACT, FLD_CREATED_AT, FLD_CREATED_BY, FLD_FULL_NAME,
+    FLD_NAME, FLD_PAYMENT_AMOUNT, FLD_PAYMENT_STATUS,
+    FLD_REVIEWER_EMAIL, FLD_SENT_BACK_AT, FLD_STATUS,
+    FLD_TESTATOR, FLD_TESTATOR_EMAIL, FLD_UPDATED_AT, FLD_WILL, FLD_WILL_ID, FLD_WILL_TYPE,
     HTTP_BAD_REQUEST, HTTP_NOT_FOUND, BAD_TESTATOR_EMAIL, BAD_WILL_STATUS, BAD_WILL_TYPE, STATUS_COMPLETED,
     STATUS_DRAFT, STATUS_PENDING_REVIEW, UNKNOWN_NAME, WILL_REQUIRED, WILL_NOT_FOUND, REVIEW_COMPLETED_SUBJECT,
     SENT_BACK_SUBJECT, SUBMIT_SUBJECT_TMPL,
 )
 from _app.shared.enums import PaymentStatus, WillType
+from _app.shared.redaction import redact_id_numbers
 from _app.shared.validators import escape_html, is_valid_email, normalize_email
 
 ALLOWED_STATUSES = {STATUS_DRAFT, STATUS_PENDING_REVIEW, STATUS_COMPLETED}
 ALLOWED_WILL_TYPES = {t.value for t in WillType}
-
-
-def _redact_id_numbers(will_data: dict) -> dict:
-    """ID numbers (Aadhaar/PAN/etc.) are sensitive and only needed transiently
-    in the browser to render the generated Will document — they must never be
-    persisted to the database."""
-    if not isinstance(will_data, dict):
-        return will_data
-
-    redacted = dict(will_data)
-    if isinstance(redacted.get(FLD_TESTATOR), dict):
-        redacted[FLD_TESTATOR] = {
-            **redacted[FLD_TESTATOR], FLD_PAN: "", FLD_AADHAAR_NUMBER: "", FLD_SPOUSE_AADHAAR_NUMBER: "",
-        }
-    if isinstance(redacted.get(FLD_EXECUTOR), dict):
-        redacted[FLD_EXECUTOR] = {
-            **redacted[FLD_EXECUTOR], FLD_ID_NUMBER: "", FLD_JOINT_ID: "", FLD_SUB_ID: "",
-        }
-    if isinstance(redacted.get(FLD_GUARDIAN), dict):
-        redacted[FLD_GUARDIAN] = {**redacted[FLD_GUARDIAN], FLD_ID_NUMBER: "", FLD_SUB_ID: ""}
-    if FLD_RESIDUAL_ID in redacted:
-        redacted[FLD_RESIDUAL_ID] = ""
-    if isinstance(redacted.get(FLD_WITNESSES), list):
-        redacted[FLD_WITNESSES] = [
-            {**w, FLD_AADHAAR_NUMBER: ""} if isinstance(w, dict) else w for w in redacted[FLD_WITNESSES]
-        ]
-    return redacted
 
 
 def save_will_as_admin(db: Database, body: dict, settings: Settings, admin_email: str) -> dict:
@@ -100,7 +74,7 @@ def save_will_as_admin(db: Database, body: dict, settings: Settings, admin_email
     # never changes across subsequent saves.
     document = {
         **{k: v for k, v in body.items() if k not in (FLD_PAYMENT_STATUS, FLD_PAYMENT_AMOUNT, FLD_WILL_TYPE, FLD_CREATED_BY)},
-        FLD_WILL: _redact_id_numbers(body.get(FLD_WILL) or {}),
+        FLD_WILL: redact_id_numbers(body.get(FLD_WILL) or {}),
         FLD_WILL_ID: will_id,
         FLD_TESTATOR_EMAIL: testator_email,
         FLD_STATUS: status,
@@ -193,7 +167,7 @@ def admin_complete_will(db: Database, will_id: str, body: dict, settings: Settin
     updated_will = body.get(FLD_WILL) if isinstance(body, dict) else None
     document = {
         **document,
-        **({FLD_WILL: _redact_id_numbers(updated_will)} if updated_will is not None else {}),
+        **({FLD_WILL: redact_id_numbers(updated_will)} if updated_will is not None else {}),
         FLD_STATUS: STATUS_COMPLETED,
         FLD_UPDATED_AT: datetime.now(timezone.utc),
         FLD_REVIEWER_EMAIL: admin_email,

@@ -33,7 +33,7 @@ export const NONGOAN_RELATIONSHIP_OPTIONS = [
 // A witness's relationship to the testator — new field on the Non-Goan Will
 // input form spec, printed in each witness's entry in the generated document.
 export const WITNESS_RELATION_OPTIONS = [
-  "Not a relative","Friend","Neighbour","Colleague","Family member","Executor of the Will","Other",
+  "Friend","Neighbour","Colleague","Family member","Executor of the Will","Other",
 ];
 
 // Marital status choices exactly as worded in the Goan Will PDF template's

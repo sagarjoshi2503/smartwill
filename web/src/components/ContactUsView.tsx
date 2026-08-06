@@ -55,25 +55,25 @@ export default function ContactUsView(){
   };
 
   return(
-    <div className="fade-in min-h-[calc(100vh-58px)] bg-[#f7f6f2] px-5 py-14">
+    <div className="fade-in min-h-[calc(100vh-58px)] bg-[#f7f6f2] px-5 py-8">
       <div className="max-w-6xl mx-auto">
-        <div className="text-center mb-12">
-          <div className="w-14 h-14 bg-[#4F9D33]/15 border border-[#4F9D33]/20 rounded-3xl flex items-center justify-center mx-auto mb-4"><MessageSquare size={22} className="text-[#4F9D33]"/></div>
+        <div className="text-center mb-8">
+          <div className="w-11 h-11 bg-[#4F9D33]/15 border border-[#4F9D33]/20 rounded-2xl flex items-center justify-center mx-auto mb-3"><MessageSquare size={18} className="text-[#4F9D33]"/></div>
           <h2 className="text-3xl font-extrabold text-slate-900 serif">Contact Us</h2>
           <p className="text-slate-600 text-sm mt-2">Have a Custom Will requirement or a question? Reach out and we'll get back to you.</p>
         </div>
-        <div className="grid md:grid-cols-[1fr_1.3fr] gap-12">
+        <div className="grid md:grid-cols-[1fr_1.3fr] gap-10">
           <div>
             <p className="text-[#4F9D33] tracking-[0.12em] uppercase text-xs font-bold mb-2">Get in Touch</p>
-            <h2 className="text-slate-900 font-extrabold serif text-3xl mb-6">Office &amp; Contact</h2>
-            <div className="flex items-center gap-4 mb-5">
+            <h2 className="text-slate-900 font-extrabold serif text-3xl mb-5">Office &amp; Contact</h2>
+            <div className="flex items-center gap-4 mb-4">
               <div className="w-11 h-11 rounded-full bg-white border border-[#E5E8E3] text-[#4F9D33] flex items-center justify-center shrink-0"><Building2 size={18}/></div>
               <div>
                 <div className="text-[#4F9D33] text-[10px] uppercase tracking-widest font-bold">Office</div>
                 <div className="text-slate-900 text-sm">{contactInfo.address}</div>
               </div>
             </div>
-            <div className="flex items-center gap-4 mb-5">
+            <div className="flex items-center gap-4 mb-4">
               <div className="w-11 h-11 rounded-full bg-white border border-[#E5E8E3] text-[#4F9D33] flex items-center justify-center shrink-0"><Phone size={18}/></div>
               <div>
                 <div className="text-[#4F9D33] text-[10px] uppercase tracking-widest font-bold">Phone</div>

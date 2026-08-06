@@ -1,7 +1,7 @@
 ﻿import { useState, useEffect } from "react";
 import {
   User, UserCheck, Baby, Users, Briefcase, BookOpen, Lock, Info, Plus, Trash2,
-  Check, AlertTriangle, CheckCircle, FileText, Send,
+  Check, AlertTriangle, CheckCircle, FileText, Send, PenTool,
 } from "lucide-react";
 import {
   ID_TYPES, RELATIONS, MONTHS, OCCUPATIONS, ALLINDIA_RELATIONSHIP_OPTIONS,
@@ -513,8 +513,8 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
         );
       })()}
 
-      {/* ── STEP 3: EXECUTOR ─────────────────────────────────── */}
-      {step===3&&(
+      {/* ── STEP 5: EXECUTOR ─────────────────────────────────── */}
+      {step===5&&(
         <div className="space-y-4">
           <StepHeader icon={<UserCheck size={17}/>} title="Executor Details" sub="Section II — Person who will execute your Will"/>
           <FormBlock title="Primary Executor">
@@ -574,8 +574,8 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
         </div>
       )}
 
-      {/* ── STEP 4: GUARDIANS ────────────────────────────────── */}
-      {step===4&&(
+      {/* ── STEP 6: GUARDIANS ────────────────────────────────── */}
+      {step===6&&(
         <div className="space-y-4">
           <StepHeader icon={<Baby size={17}/>} title="Guardian Details" sub="Section III — For minor beneficiaries (optional)"/>
           <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 text-sm text-slate-700 leading-relaxed">
@@ -610,8 +610,8 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
         </div>
       )}
 
-      {/* ── STEP 5: BENEFICIARIES ────────────────────────────── */}
-      {step===5&&(
+      {/* ── STEP 3: BENEFICIARIES ────────────────────────────── */}
+      {step===3&&(
         <div className="space-y-4">
           <StepHeader icon={<Users size={17}/>} title="Beneficiaries" sub="People named to receive your assets"/>
           <div className="space-y-3">
@@ -639,8 +639,8 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
         </div>
       )}
 
-      {/* ── STEP 6: ASSETS ───────────────────────────────────── */}
-      {step===6&&willType==="allindia"&&(
+      {/* ── STEP 4: ASSETS ───────────────────────────────────── */}
+      {step===4&&willType==="allindia"&&(
         <div className="space-y-5">
           <StepHeader icon={<Briefcase size={17}/>} title="Asset Selection" sub="Sections B–E — Bequests as per the All India Will format"/>
           {(()=>{
@@ -694,21 +694,21 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                 </div>
                 <FormBlock title="B. Immovable Property">
                   <div className="space-y-4">
-                    <Category itemKey="houseFlat" label="House / Flat" placeholder="Address / description"/>
-                    <Category itemKey="landPlot" label="Land / Plot" placeholder="Address / description"/>
-                    <Category itemKey="commercialProperty" label="Commercial Property" placeholder="Address / description"/>
+                    {Category({itemKey:"houseFlat", label:"House / Flat", placeholder:"Address / description"})}
+                    {Category({itemKey:"landPlot", label:"Land / Plot", placeholder:"Address / description"})}
+                    {Category({itemKey:"commercialProperty", label:"Commercial Property", placeholder:"Address / description"})}
                   </div>
                 </FormBlock>
                 <FormBlock title="C. Motor Vehicles">
-                  <Category itemKey="vehicle" label="Vehicle / Car" placeholder="Make, model, registration no."/>
+                  {Category({itemKey:"vehicle", label:"Vehicle / Car", placeholder:"Make, model, registration no."})}
                 </FormBlock>
                 <FormBlock title="D. Personal & Valuables">
-                  <Category itemKey="jewellery" label="Jewellery & Heirlooms" placeholder="Description"/>
+                  {Category({itemKey:"jewellery", label:"Jewellery & Heirlooms", placeholder:"Description"})}
                 </FormBlock>
                 <FormBlock title="E. Digital & Miscellaneous Assets">
                   <div className="space-y-4">
-                    <Category itemKey="socialMediaDigital" label="Social Media / Digital" placeholder="Accounts, digital assets"/>
-                    <Category itemKey="intellectualProperty" label="Intellectual Property" placeholder="Patents, copyrights, etc."/>
+                    {Category({itemKey:"socialMediaDigital", label:"Social Media / Digital", placeholder:"Accounts, digital assets"})}
+                    {Category({itemKey:"intellectualProperty", label:"Intellectual Property", placeholder:"Patents, copyrights, etc."})}
                   </div>
                 </FormBlock>
               </>
@@ -718,7 +718,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
         </div>
       )}
 
-      {step===6&&willType==="goan"&&(
+      {step===4&&willType==="goan"&&(
         <div className="space-y-5">
           <StepHeader icon={<Briefcase size={17}/>} title="Asset Selection" sub="Sections B–E — Bequests as per the Goan Will format"/>
           {(()=>{
@@ -796,7 +796,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
         </div>
       )}
 
-      {step===6&&willType!=="allindia"&&willType!=="goan"&&(
+      {step===4&&willType!=="allindia"&&willType!=="goan"&&(
         <div className="space-y-5">
           <StepHeader icon={<Briefcase size={17}/>} title="Asset Selection" sub="Section IV — Click assets to add them to your Will"/>
           {/* Distribution Mode */}
@@ -963,10 +963,10 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
         </div>
       )}
 
-      {/* ── STEP 7: RESIDUAL + INSTRUCTIONS ─────────────────── */}
+      {/* ── STEP 7: RESIDUAL CLAUSE ──────────────────────────── */}
       {step===7&&(
         <div className="space-y-4">
-          <StepHeader icon={<BookOpen size={17}/>} title="Residual Clause & Instructions" sub="Sections V & VI — The final clauses"/>
+          <StepHeader icon={<BookOpen size={17}/>} title="Residual Clause" sub="Section V — The final bequest clause"/>
           {willType==="allindia"?(
             <FormBlock title="Section V — Rest & Residue Clause">
               <p className="text-slate-500 text-xs mb-3 leading-relaxed">Even with careful planning, it's possible to miss mentioning an asset in this Will, or to acquire something new after signing it. A residuary clause is a safety net for exactly this. Any such asset should go to the following (more than one beneficiary shares equally):</p>
@@ -1084,6 +1084,14 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
               className={IC+" resize-none"}
               placeholder="e.g. My funeral shall be performed according to Hindu rites. I request my family to donate my usable organs..."/>
           </FormBlock>
+          <Nav onNext={onNext} onPrev={onPrev}/>
+        </div>
+      )}
+
+      {/* ── STEP 8: WITNESS ──────────────────────────────────── */}
+      {step===8&&(
+        <div className="space-y-4">
+          <StepHeader icon={<PenTool size={17}/>} title="Witnesses" sub="Section VII — Signing witnesses"/>
           <div className="bg-[#4F9D33]/8 border border-[#4F9D33]/25 rounded-xl p-3.5 text-xs text-[#2D6B1F] leading-relaxed">
             <strong className="text-slate-900">Who can be a witness?</strong> Under the Indian Succession Act, 1925, a Will needs at least two witnesses. Any adult (18+) of sound mind who can sign their own name qualifies — they don't need to know the contents, and don't need to be related to you. Each witness must see you sign (or be told directly that you've signed), then sign it themselves in your presence. Avoid using someone who also inherits under the Will as a witness — for Christians and Parsis this can cancel that person's inheritance. Your executor is allowed to be a witness.
           </div>

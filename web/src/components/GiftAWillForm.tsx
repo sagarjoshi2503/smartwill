@@ -88,7 +88,11 @@ export default function GiftAWillForm(){
       const orderRes = await fetch(apiUrl(API_GIFT_VOUCHER_ORDER), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ amount, planLabel }),
+        // Razorpay's Orders API takes the amount in paise, not rupees — the
+        // `amount` state here is rupees (₹4,999 etc., same as GIFT_PLANS and
+        // the voucher's stored amount below), so it must be converted here,
+        // same as the main Will-payment flow does in WizardForms.tsx.
+        body: JSON.stringify({ amount: Math.round(amount * 100), planLabel }),
       });
       const orderIsJson = orderRes.headers.get("content-type")?.includes("application/json");
       const order = orderIsJson ? await orderRes.json() : null;

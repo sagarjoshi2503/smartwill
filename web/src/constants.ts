@@ -34,6 +34,8 @@ export const API_CHATBOT_FLAG = "/api/flags?key=enable-chat-bot";
 // screen AND the admin signup screen itself (so it's blocked even if
 // reached some way other than clicking that link) — see App.tsx.
 export const API_ADMIN_SIGNUP_FLAG = "/api/flags?key=enable-admin-signup";
+// Vercel Flag gating whether the wizard's Live Preview pane is shown at all — see App.tsx.
+export const API_LIVE_PREVIEW_FLAG = "/api/flags?key=enable-live-preview";
 export const API_PAYMENTS_CREATE_ORDER = "/api/payments/create-order";
 export const API_PAYMENTS_VERIFY = "/api/payments/verify";
 export const API_PAYMENTS_MARK_FAILED = "/api/payments/mark-failed";

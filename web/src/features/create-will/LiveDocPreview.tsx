@@ -9,12 +9,11 @@ export default function LiveDocPreview({will,residualBene}:{
 }){
   const {testator,executor,beneficiaries,assets}=will;
   return(
-    <div className="w-full max-w-[520px] rounded-xl shadow-2xl overflow-hidden border border-amber-900/20">
-      <div className="bg-slate-700 px-4 py-2 flex items-center gap-2">
-        <div className="w-2.5 h-2.5 rounded-full bg-red-400/80"/><div className="w-2.5 h-2.5 rounded-full bg-amber-400/80"/><div className="w-2.5 h-2.5 rounded-full bg-[#4F9D33]/80"/>
-        <span className="text-slate-400 text-xs ml-2 flex items-center gap-1.5"><Eye size={10}/>Live Preview — Will Document</span>
+    <div className="w-full max-w-[520px] rounded-xl shadow-2xl overflow-hidden border border-[#4F9D33]/20">
+      <div className="bg-white border-b border-slate-200 px-4 py-2.5 flex items-center gap-2">
+        <span className="text-[#4F9D33] text-xs font-semibold flex items-center gap-1.5"><Eye size={12}/>Live Preview — Will Document</span>
       </div>
-      <div className="bg-[#fefcf3] p-7 text-[12.5px] leading-relaxed" style={{fontFamily:"'EB Garamond','Times New Roman',serif",color:"#2d2a1e"}}>
+      <div className="bg-white p-7 text-[12.5px] leading-relaxed" style={{fontFamily:"'EB Garamond','Times New Roman',serif",color:"#14181B"}}>
         <div className="text-center mb-4">
           <div className="text-[9px] tracking-[0.3em] uppercase text-slate-500 mb-0.5">Republic of India</div>
           <h1 className="text-base font-bold tracking-widest uppercase mb-0.5">Last Will and Testament</h1>
