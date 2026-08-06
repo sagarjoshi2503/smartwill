@@ -6,6 +6,13 @@ export default defineConfig({
   // (https://<user>.github.io/smartwill/) and at a host's domain root (Vercel).
   base: './',
   plugins: [react()],
+  // Baked in once at `vite build` time (not per-request), so it identifies
+  // which build is actually deployed — same value regardless of deploy
+  // target (Vercel/AKS/Docker/local), since it's the build config itself
+  // computing it rather than relying on a platform-specific env var.
+  define: {
+    __BUILD_TIME__: JSON.stringify(new Date().toISOString()),
+  },
   test: {
     environment: 'jsdom',
     setupFiles: ['./src/setupTests.ts'],

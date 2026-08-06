@@ -36,6 +36,8 @@ export const API_CHATBOT_FLAG = "/api/flags?key=enable-chat-bot";
 export const API_ADMIN_SIGNUP_FLAG = "/api/flags?key=enable-admin-signup";
 // Vercel Flag gating whether the wizard's Live Preview pane is shown at all — see App.tsx.
 export const API_LIVE_PREVIEW_FLAG = "/api/flags?key=enable-live-preview";
+// Vercel Flag gating whether the build number is shown in the site footer — see App.tsx/SiteFooter.tsx.
+export const API_SHOW_BUILD_NR_FLAG = "/api/flags?key=show-build-nr";
 export const API_PAYMENTS_CREATE_ORDER = "/api/payments/create-order";
 export const API_PAYMENTS_VERIFY = "/api/payments/verify";
 export const API_PAYMENTS_MARK_FAILED = "/api/payments/mark-failed";
@@ -118,6 +120,7 @@ export const PHONE_MASK = "XXXXX";
 // --- Tooltip / help text ---
 export const TIP_NO_ID_SAVED = "No ID Number will be saved in database";
 export const MSG_VIEW_ONLY = "Viewing a submitted Will — saving is disabled";
+export const TIP_ID_LOCKED_PENDING_REVIEW = "ID fields are locked while your Will is under admin review. They'll unlock once the review is completed, so you can re-enter them and download your document.";
 
 // --- Button / action labels ---
 export const BTN_SAVE_AS_DRAFT = "Save as Draft";

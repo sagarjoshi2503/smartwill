@@ -34,7 +34,8 @@ import { clearAuthToken } from "./utils/auth";
 import { getMissingIdFields } from "./utils/willValidation";
 import { trackPageview } from "./utils/analytics";
 import {
-  ADMIN_PATH, API_FLAGS, API_RAZORPAY_FLAG, API_CHATBOT_FLAG, API_ADMIN_SIGNUP_FLAG, API_LIVE_PREVIEW_FLAG, API_WILL_SAVE, apiPathSendBack,
+  ADMIN_PATH, API_FLAGS, API_RAZORPAY_FLAG, API_CHATBOT_FLAG, API_ADMIN_SIGNUP_FLAG, API_LIVE_PREVIEW_FLAG,
+  API_SHOW_BUILD_NR_FLAG, API_WILL_SAVE, apiPathSendBack,
   OTP_LENGTH, STATUS_DRAFT, STATUS_PENDING_REVIEW, STATUS_COMPLETED,
   SEND_BACK_REDIRECT_MS, DRAFT_RESET_MS, WIZARD_REDIRECT_MS,
   MSG_VIEW_ONLY, MSG_SAVING, BTN_SAVE_AS_DRAFT, ROLE_ADMIN, ROLE_TESTATOR,
@@ -44,7 +45,7 @@ import {
   BTN_SEND_BACK, BTN_CANCEL, BTN_GENERATE_WILL, ERR_GENERATE_WILL_MISSING_IDS, BTN_DISMISS,
 } from "./constants";
 import type {
-  AdminProfile, AssetCatalogItem, Beneficiary, DisclaimerChecks, GoogleProfile, Plan, SignupState, ViewName, WillState, WillType,
+  AdminProfile, AssetCatalogItem, Beneficiary, DisclaimerChecks, GoogleProfile, Plan, SignupState, TestatorWill, ViewName, WillState, WillType,
 } from "./types";
 
 const WIZARD_STEPS = [
@@ -105,6 +106,7 @@ export default function SmartWill() {
   const [chatbotEnabled, setChatbotEnabled] = useState(false);
   const [adminSignupEnabled, setAdminSignupEnabled] = useState(false);
   const [livePreviewEnabled, setLivePreviewEnabled] = useState(false);
+  const [showBuildNr, setShowBuildNr] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   // ServicesView's "Got a query?" buttons deep-link into a specific FaqView
   // accordion section — mirrors how onHome/onServices already thread view
@@ -220,6 +222,17 @@ export default function SmartWill() {
     return () => { cancelled = true; };
   }, []);
 
+  // Build number in the footer is gated behind the "show-build-nr" Vercel
+  // Flag, same fail-closed pattern as the flags above.
+  useEffect(() => {
+    let cancelled = false;
+    fetch(API_SHOW_BUILD_NR_FLAG)
+      .then(res => res.ok ? res.json() : { enabled: false })
+      .then(data => { if(!cancelled) setShowBuildNr(!!data?.enabled); })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, []);
+
   // Defense in depth: if `view` ever becomes "adminSignup" while the flag is
   // off (there's no way to do this through the UI once the "Sign up" link
   // itself is hidden below, but this guards against any other path — e.g. a
@@ -303,13 +316,17 @@ export default function SmartWill() {
     setWizardStep(2);
     setView("disclaimer");
   };
-  const handleEditWill = (willId: string, fetchedWill: WillState, fetchedWillType: WillType, adminComments?: string) => {
+  const handleEditWill = (willId: string, fetchedWill: WillState, fetchedWillType: WillType, status: TestatorWill["status"], adminComments?: string) => {
     setWill(mergeWithDefaults(fetchedWill));
     setWillType(fetchedWillType);
     setSkipWillTypeStep(true);
     setEditingWillId(willId);
     setAdminReviewMode(false);
-    setAdminReviewStatus(null);
+    // Edit is only ever reachable for a Draft Will (see TestatorWillsView),
+    // but carrying the real fetched status through here — rather than
+    // hardcoding it — keeps this correct if that ever changes, and matches
+    // handleViewWill below.
+    setAdminReviewStatus(status);
     setAdminCreateMode(false);
     setTestatorEmailEditable(false);
     setViewOnlyMode(false);
@@ -317,13 +334,18 @@ export default function SmartWill() {
     setWizardStep(2);
     setView("wizard");
   };
-  const handleViewWill = (willId: string, fetchedWill: WillState, fetchedWillType: WillType) => {
+  const handleViewWill = (willId: string, fetchedWill: WillState, fetchedWillType: WillType, status: TestatorWill["status"]) => {
     setWill(mergeWithDefaults(fetchedWill));
     setWillType(fetchedWillType);
     setSkipWillTypeStep(true);
     setEditingWillId(willId);
     setAdminReviewMode(false);
-    setAdminReviewStatus(null);
+    // Reused as `willStatus` below (see WizardForms) — while viewing their
+    // own submitted Will, this is what gates whether the ID Number fields
+    // are locked (PendingReview) or unlockable again (Completed), since
+    // those values are never persisted to the database and can only ever
+    // be re-entered fresh in the browser.
+    setAdminReviewStatus(status);
     setAdminCreateMode(false);
     setTestatorEmailEditable(false);
     setViewOnlyMode(true);
@@ -721,7 +743,7 @@ export default function SmartWill() {
           </div>
         </div>
       )}
-      {isSitePage(view) && <SiteFooter/>}
+      {isSitePage(view) && <SiteFooter showBuildNr={showBuildNr}/>}
       {chatbotEnabled && (
         <ChatWidget
           // Remounts (wiping all chat state) whenever who's signed in

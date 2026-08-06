@@ -18,8 +18,8 @@ const STATUS_STYLE: Record<TestatorWill["status"], string> = {
 export default function TestatorWillsView({email,onCreateNew,onEditWill,onViewWill}:{
   email: string;
   onCreateNew: () => void;
-  onEditWill: (willId: string, will: WillState, willType: WillType, adminComments?: string) => void;
-  onViewWill: (willId: string, will: WillState, willType: WillType) => void;
+  onEditWill: (willId: string, will: WillState, willType: WillType, status: TestatorWill["status"], adminComments?: string) => void;
+  onViewWill: (willId: string, will: WillState, willType: WillType, status: TestatorWill["status"]) => void;
 }){
   const [wills,setWills]=useState<TestatorWill[]>([]);
   const [status,setStatus]=useState<"loading"|"ready"|"error">("loading");
@@ -33,19 +33,22 @@ export default function TestatorWillsView({email,onCreateNew,onEditWill,onViewWi
   const completedCount = wills.filter(w=>w.status===STATUS_COMPLETED).length;
   const filteredWills = statusFilter==="All" ? wills : wills.filter(w=>w.status===statusFilter);
 
-  const fetchWill = async (willId: string): Promise<{ will: WillState; willType: WillType; adminComments?: string }> => {
+  const fetchWill = async (willId: string): Promise<{ will: WillState; willType: WillType; status: TestatorWill["status"]; adminComments?: string }> => {
     const res = await authFetch(ROLE_TESTATOR, apiPathWill(willId));
     const isJson = res.headers.get("content-type")?.includes("application/json");
     const data = isJson ? await res.json() : null;
     if(!res.ok) throw new Error(data?.error || `Could not load this Will (server returned ${res.status}).`);
-    return { will: data.will as WillState, willType: (data.willType || "") as WillType, adminComments: data.adminComments || undefined };
+    return {
+      will: data.will as WillState, willType: (data.willType || "") as WillType,
+      status: (data.status || STATUS_DRAFT) as TestatorWill["status"], adminComments: data.adminComments || undefined,
+    };
   };
 
   const handleEdit = async (willId: string) => {
     setBusyId(willId); setActionError("");
     try {
-      const { will, willType, adminComments } = await fetchWill(willId);
-      onEditWill(willId, will, willType, adminComments);
+      const { will, willType, status, adminComments } = await fetchWill(willId);
+      onEditWill(willId, will, willType, status, adminComments);
     } catch (err) {
       setActionError(err instanceof Error ? err.message : ERR_LOAD_WILL);
     } finally {
@@ -56,8 +59,8 @@ export default function TestatorWillsView({email,onCreateNew,onEditWill,onViewWi
   const handleView = async (willId: string) => {
     setBusyId(willId); setActionError("");
     try {
-      const { will, willType } = await fetchWill(willId);
-      onViewWill(willId, will, willType);
+      const { will, willType, status } = await fetchWill(willId);
+      onViewWill(willId, will, willType, status);
     } catch (err) {
       setActionError(err instanceof Error ? err.message : ERR_LOAD_WILL);
     } finally {
