@@ -1,0 +1,760 @@
+Content is user-generated and unverified.
+
+
+13
+Learn how to customize
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Schedule of Assets — Annexure Builder</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+<style>
+  :root{
+    --paper:#F6F3EC;
+    --paper-deep:#EFEADF;
+    --ink:#1E2A38;
+    --ink-soft:#4B5A6A;
+    --brass:#8A6A34;
+    --brass-deep:#6E5427;
+    --line:#D8D0BE;
+    --card:#FFFFFE;
+    --danger:#9C3B3B;
+    --radius: 3px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height:1.5;
+    padding:0 0 80px 0;
+  }
+  .wrap{max-width:920px;margin:0 auto;padding:0 24px;}
+
+  header.masthead{
+    border-bottom:2px solid var(--ink);
+    padding:36px 0 20px 0;
+    margin-bottom:8px;
+  }
+  header.masthead .eyebrow{
+    font-size:11px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--brass-deep);
+    font-weight:700;
+    margin-bottom:6px;
+  }
+  header.masthead h1{
+    font-family: Georgia, "Iowan Old Style", "Times New Roman", serif;
+    font-weight:600;
+    font-size:34px;
+    margin:0 0 10px 0;
+    letter-spacing:.01em;
+  }
+  header.masthead p{
+    max-width:640px;
+    color:var(--ink-soft);
+    font-size:15px;
+    margin:0;
+  }
+
+  .privacy-strip{
+    display:flex;
+    gap:14px;
+    align-items:flex-start;
+    background:var(--paper-deep);
+    border:1px solid var(--line);
+    border-left:4px solid var(--brass);
+    padding:14px 18px;
+    margin:22px 0 32px 0;
+    font-size:13.5px;
+    color:var(--ink);
+  }
+  .privacy-strip b{color:var(--brass-deep);}
+
+  .toc{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(150px,1fr));
+    gap:6px 14px;
+    margin:0 0 40px 0;
+    padding:16px 18px;
+    background:var(--card);
+    border:1px solid var(--line);
+    font-size:12.5px;
+  }
+  .toc a{color:var(--ink-soft); text-decoration:none;}
+  .toc a:hover{color:var(--brass-deep); text-decoration:underline;}
+  .toc .filled a{color:var(--ink); font-weight:600;}
+  .toc .filled a::before{content:"● "; color:var(--brass); font-size:9px;}
+  .toc div::before{content:"○ "; color:#c9c1ac; font-size:9px;}
+  .toc div.filled::before{content:"";}
+
+  section.card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    margin-bottom:18px;
+    overflow:hidden;
+  }
+  section.card > .head{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    gap:10px;
+    padding:16px 20px;
+    border-bottom:1px solid var(--line);
+    background:linear-gradient(180deg, #fff, #fbf9f4);
+    cursor:pointer;
+  }
+  section.card > .head .titlegroup{display:flex; align-items:baseline; gap:10px;}
+  section.card > .head .num{
+    font-family: Georgia, serif;
+    font-weight:700;
+    color:var(--brass);
+    font-size:15px;
+    min-width:22px;
+  }
+  section.card > .head h2{
+    font-family: Georgia, serif;
+    font-size:18px;
+    margin:0;
+    font-weight:600;
+  }
+  section.card > .head .count{
+    font-size:12px;
+    color:var(--ink-soft);
+    background:var(--paper-deep);
+    border-radius:20px;
+    padding:2px 10px;
+    white-space:nowrap;
+  }
+  section.card > .head .chev{color:var(--ink-soft); font-size:13px;}
+  section.card > .body{
+    padding:16px 20px 20px 20px;
+    display:none;
+  }
+  section.card.open > .body{display:block;}
+  section.card .note{
+    font-size:12.5px;
+    color:var(--ink-soft);
+    margin:0 0 14px 0;
+    font-style:italic;
+  }
+
+  .row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    align-items:flex-end;
+    padding:12px 12px;
+    background:var(--paper-deep);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    margin-bottom:10px;
+    position:relative;
+  }
+  .field{display:flex; flex-direction:column; gap:4px; min-width:170px; flex:1;}
+  .field label{font-size:11px; text-transform:uppercase; letter-spacing:.04em; color:var(--ink-soft); font-weight:600;}
+  .field select, .field input[type=text]{
+    font-size:14px;
+    padding:8px 9px;
+    border:1px solid #C6BEA9;
+    border-radius:var(--radius);
+    background:#fff;
+    color:var(--ink);
+    font-family:inherit;
+  }
+  .field select:focus, .field input:focus{outline:2px solid var(--brass); outline-offset:1px;}
+  .row .remove{
+    align-self:center;
+    background:none;
+    border:1px solid transparent;
+    color:var(--danger);
+    font-size:18px;
+    line-height:1;
+    cursor:pointer;
+    padding:6px 10px;
+    border-radius:var(--radius);
+  }
+  .row .remove:hover{background:#f3e6e6; border-color:#e2c9c9;}
+  .row .idx{
+    position:absolute; top:-9px; left:10px;
+    background:var(--ink); color:#fff; font-size:10.5px; font-weight:700;
+    padding:1px 7px; border-radius:10px;
+  }
+
+  .addrow{
+    background:none;
+    border:1.5px dashed #b8ac8c;
+    color:var(--brass-deep);
+    padding:9px 16px;
+    border-radius:var(--radius);
+    font-size:13.5px;
+    font-weight:600;
+    cursor:pointer;
+    width:100%;
+    text-align:center;
+  }
+  .addrow:hover{background:#faf3e6; border-color:var(--brass);}
+
+  .kept-for-pdf{
+    margin-top:14px;
+    font-size:12px;
+    color:var(--ink-soft);
+    background:#fbf9f4;
+    border:1px dashed var(--line);
+    padding:8px 12px;
+    border-radius:var(--radius);
+  }
+  .kept-for-pdf b{color:var(--ink);}
+
+  .instructions{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:26px 26px 10px 26px;
+    margin:36px 0 28px 0;
+  }
+  .instructions h2{
+    font-family:Georgia, serif;
+    font-size:20px;
+    margin:0 0 4px 0;
+  }
+  .instructions p.sub{color:var(--ink-soft); font-size:13px; margin:0 0 18px 0;}
+  .instructions ol{padding-left:20px; margin:0;}
+  .instructions li{margin-bottom:14px; font-size:14px;}
+  .instructions li b{color:var(--brass-deep);}
+
+  .generate-bar{
+    position:sticky;
+    bottom:0;
+    background:linear-gradient(0deg, var(--paper) 60%, transparent);
+    padding:22px 0 6px 0;
+    margin-top:10px;
+  }
+  .generate-inner{
+    background:var(--ink);
+    color:#fff;
+    border-radius:6px;
+    padding:20px 24px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    flex-wrap:wrap;
+    box-shadow:0 8px 24px rgba(30,42,56,.25);
+  }
+  .generate-inner .text{font-size:13.5px; color:#D9E0E7; max-width:480px;}
+  .generate-inner .text b{color:#fff;}
+  button.generate{
+    background:var(--brass);
+    color:#1E2A38;
+    border:none;
+    font-weight:700;
+    font-size:14.5px;
+    padding:13px 26px;
+    border-radius:5px;
+    cursor:pointer;
+    white-space:nowrap;
+  }
+  button.generate:hover{background:#9a7a3f;}
+  button.generate:disabled{background:#6b6456; cursor:wait;}
+
+  .status{font-size:12.5px; margin-top:6px; color:#c9d6e0;}
+  .status.ok{color:#9fe0b0;}
+  .status.err{color:#f0a9a9;}
+
+  @media (max-width:640px){
+    header.masthead h1{font-size:26px;}
+    .row{flex-direction:column; align-items:stretch;}
+    .field{min-width:0;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="masthead">
+    <div class="eyebrow">ForwardLegacy · Schedule of Assets</div>
+    <h1>Annexure Builder</h1>
+    <p>Tell us <em>where</em> each asset is held — pick the bank, broker, AMC, insurer or provider from the list, or type it in if it's not there. Once you're done, generate your personal PDF and fill in account numbers, folios and nominee details directly on the PDF, on your own device.</p>
+  </header>
+
+  <div class="privacy-strip">
+    <span style="font-size:18px;">🔒</span>
+    <div><b>Nothing you type on this page is sent to us or stored anywhere.</b> This page only runs in your browser. Account numbers, folio numbers, PRAN, UAN and similar details are never entered here — you'll add those afterwards, directly into the downloaded PDF, on your own computer.</div>
+  </div>
+
+  <div class="toc" id="toc"></div>
+
+  <div id="sections"></div>
+
+  <div class="instructions">
+    <h2>Instructions for the Executor &amp; Beneficiaries</h2>
+    <p class="sub">This note travels with the Annexure. It does not form part of the Will itself — every asset still devolves strictly per the terms of the Will.</p>
+    <ol>
+      <li><b>Keep PAN records handy.</b> Most banks, depositories and AMCs ask for the account holder's or the deceased's PAN before they will process a claim. Keeping an updated PAN record against each entry in this Annexure makes transmission considerably faster.</li>
+      <li><b>Retrieving mutual fund holdings.</b> If a beneficiary doesn't have the full folio details, the PAN can be shared with the relevant AMC, or with a Mutual Fund Distributor / Registered Investment Adviser, who can pull together a consolidated statement across folios.</li>
+      <li><b>Multiple folios, same AMC.</b> It's common to hold more than one folio with a single AMC. If you're filling this in from a consolidated account statement, list that AMC again in a new row for every folio you hold with it — don't combine folios into one row.</li>
+      <li><b>Approaching an AMC or distributor.</b> For holding details, nominee status, or the transmission process for any mutual fund, contact the AMC (or the distributor named against that folio) directly, quoting the PAN and folio number where available.</li>
+      <li><b>Bank accounts.</b> Keep the PAN on record alongside the bank name and branch. Where no nominee is registered, the Executor should be ready to produce probate or succession documentation as the bank's transmission process requires.</li>
+      <li><b>Insurance claims.</b> Some insurers can trace a policy using the deceased's PAN, in addition to the policy number. If the policy number isn't on hand, contact the insurer named here with the PAN and date of birth to start a search.</li>
+      <li><b>Crypto / digital assets.</b> Never record private keys, seed phrases or passwords in this Annexure. Note only <i>where</i> those access instructions are safely kept, so the Executor knows where to look.</li>
+    </ol>
+  </div>
+
+  <div class="generate-bar">
+    <div class="generate-inner">
+      <div class="text"><b>Ready when you are.</b> This builds a personalised PDF with everything you've selected already filled in, and blank fillable boxes for the rest (account numbers, folios, nominee status, signature). Nothing is uploaded — the PDF is created right here in your browser.
+        <div class="status" id="status"></div>
+      </div>
+      <button class="generate" id="genBtn">Generate my PDF ↓</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* ============================================================
+   1. REFERENCE LISTS (India-specific)
+   ============================================================ */
+const BANKS = ["State Bank of India","HDFC Bank","ICICI Bank","Axis Bank","Kotak Mahindra Bank",
+  "Punjab National Bank","Bank of Baroda","Canara Bank","Union Bank of India","Bank of India",
+  "Indian Bank","Central Bank of India","Indian Overseas Bank","UCO Bank","Bank of Maharashtra",
+  "Punjab & Sind Bank","IDBI Bank","Yes Bank","IndusInd Bank","Federal Bank","South Indian Bank",
+  "RBL Bank","Karnataka Bank","City Union Bank","Karur Vysya Bank","Tamilnad Mercantile Bank",
+  "DCB Bank","Bandhan Bank","IDFC FIRST Bank","AU Small Finance Bank","Equitas Small Finance Bank",
+  "Ujjivan Small Finance Bank"];
+const BANKS_WITH_PO = [...BANKS, "Post Office"];
+const BROKERS = ["Zerodha","Groww","Upstox","Angel One","ICICI Direct","HDFC Securities",
+  "Kotak Securities","Motilal Oswal","Sharekhan","5paisa","IIFL Securities","Axis Direct","SBI Securities"];
+const AMCS = ["SBI Mutual Fund","HDFC Mutual Fund","ICICI Prudential Mutual Fund","Nippon India Mutual Fund",
+  "Kotak Mahindra Mutual Fund","Aditya Birla Sun Life Mutual Fund","Axis Mutual Fund","UTI Mutual Fund",
+  "DSP Mutual Fund","Franklin Templeton Mutual Fund","Tata Mutual Fund","Mirae Asset Mutual Fund",
+  "Invesco Mutual Fund","Sundaram Mutual Fund","HSBC Mutual Fund","Canara Robeco Mutual Fund",
+  "PGIM India Mutual Fund","Motilal Oswal Mutual Fund","Edelweiss Mutual Fund","Bandhan Mutual Fund",
+  "Baroda BNP Paribas Mutual Fund","Union Mutual Fund","Quant Mutual Fund","PPFAS (Parag Parikh) Mutual Fund",
+  "WhiteOak Capital Mutual Fund","Navi Mutual Fund","Samco Mutual Fund","Groww Mutual Fund",
+  "Bajaj Finserv Mutual Fund","JM Financial Mutual Fund","Taurus Mutual Fund","Quantum Mutual Fund",
+  "360 ONE Mutual Fund","Helios Mutual Fund"];
+const INSURERS = ["LIC (Life Insurance Corporation of India)","HDFC Life","ICICI Prudential Life","SBI Life",
+  "Max Life","Bajaj Allianz Life","Tata AIA Life","Kotak Life","Aditya Birla Sun Life Insurance",
+  "PNB MetLife","Canara HSBC Life","Star Health Insurance","Care Health Insurance","Niva Bupa Health Insurance",
+  "ICICI Lombard General Insurance","Bajaj Allianz General Insurance","HDFC ERGO General Insurance",
+  "New India Assurance","National Insurance","United India Insurance","Oriental Insurance",
+  "Reliance General Insurance","Tata AIG General Insurance","Go Digit General Insurance"];
+const WALLETS = ["Paytm","PhonePe","Google Pay","Amazon Pay","Mobikwik","Freecharge"];
+const EXCHANGES = ["WazirX","CoinDCX","CoinSwitch","Zebpay","Binance"];
+
+/* ============================================================
+   2. SECTION DEFINITIONS
+   webFields  -> collected on THIS page (institution / category only)
+   remaining  -> left blank as fillable boxes on the generated PDF
+   ============================================================ */
+const SECTIONS = [
+  {id:"bank", num:1, title:"Bank Accounts Held In", note:"Choose the bank, or type it in if not listed.",
+    webFields:[
+      {key:"bank", label:"Bank Name", type:"select", options:BANKS_WITH_PO},
+      {key:"type", label:"Account Type", type:"select", options:["Savings","Current","Cash Credit","Overdraft"]},
+    ],
+    bake:["bank","type"],
+    remaining:["Account No. (last 4 digits)","Nominee Registered? (Yes/No)"]},
+
+  {id:"fd", num:2, title:"Fixed Deposits Held In", note:"One row per fixed deposit, even with the same bank.",
+    webFields:[{key:"bank", label:"Bank / Institution Name", type:"select", options:BANKS_WITH_PO}],
+    bake:["bank"],
+    remaining:["FD Account / Receipt No.","Maturity Date","Nominee? (Yes/No)"]},
+
+  {id:"rd", num:3, title:"Recurring Deposits Held In", note:"One row per recurring deposit.",
+    webFields:[{key:"bank", label:"Bank / Institution Name", type:"select", options:BANKS_WITH_PO}],
+    bake:["bank"],
+    remaining:["RD Account No.","Maturity Date","Nominee? (Yes/No)"]},
+
+  {id:"demat", num:4, title:"Demat Account(s)", note:"Choose the broker / depository participant.",
+    webFields:[{key:"dp", label:"Broker / DP Name", type:"select", options:BROKERS}],
+    bake:["dp"],
+    remaining:["DP ID / Client ID","Nominee? (Yes/No)","Remarks"]},
+
+  {id:"mf", num:5, title:"Mutual Funds", note:"Hold more than one folio with an AMC? Add that AMC again in a new row for each folio.",
+    webFields:[{key:"amc", label:"AMC (Fund House) Name", type:"select", options:AMCS}],
+    bake:["amc"],
+    remaining:["Folio No.","Distributor / RIA (if any)"]},
+
+  {id:"aif", num:6, title:"AIF (Alternative Investment Fund)", note:"Type the full name of the AIF / scheme.",
+    webFields:[{key:"name", label:"AIF / Scheme Name", type:"text"}],
+    bake:["name"],
+    remaining:["Fund Manager / Sponsor","Units / Commitment Amount"]},
+
+  {id:"sif", num:7, title:"SIF (Specified Investment Fund)", note:"Choose the AMC managing the SIF.",
+    webFields:[{key:"amc", label:"AMC Name", type:"select", options:AMCS}],
+    bake:["amc"],
+    remaining:["Scheme / Strategy Name","Folio / Account No."]},
+
+  {id:"pms", num:8, title:"PMS (Portfolio Management Services)", note:"Type the full name of the PMS provider.",
+    webFields:[{key:"name", label:"PMS Provider / Company Name", type:"text"}],
+    bake:["name"],
+    remaining:["Portfolio / Account No.","Relationship Manager"]},
+
+  {id:"bonds", num:9, title:"Bonds", note:"Type the name(s) of the bond issuer / instrument.",
+    webFields:[{key:"name", label:"Bond / Issuer Name", type:"text"}],
+    bake:["name"],
+    remaining:["Holding Mode (Demat / Physical)","Face Value / Units","Maturity Date"]},
+
+  {id:"insurance", num:10, title:"Insurance", note:"Choose the insurer, or type it in if not listed.",
+    webFields:[
+      {key:"insurer", label:"Name of Insurer", type:"select", options:INSURERS},
+      {key:"cat", label:"Category", type:"select", options:["Life","Health","General"]},
+    ],
+    bake:["insurer","cat"],
+    remaining:["Policy No.","Nominee? (Yes/No)"]},
+
+  {id:"ppf", num:11, title:"Public Provident Fund (PPF)", note:"Choose the bank or post office where the account is held.",
+    webFields:[{key:"bank", label:"Bank / Post Office Name", type:"select", options:BANKS_WITH_PO}],
+    bake:["bank"],
+    remaining:["Account No.","Maturity Date"]},
+
+  {id:"epf", num:12, title:"Employees' Provident Fund (EPF)", note:"Type the name of the employer / company.",
+    webFields:[{key:"name", label:"Employer / Company Name", type:"text"}],
+    bake:["name"],
+    remaining:["UAN","PF Account No."]},
+
+  {id:"nps", num:13, title:"National Pension System (NPS)", note:"Choose the bank / POP through which it was opened.",
+    webFields:[{key:"pop", label:"POP / Bank Name", type:"select", options:BANKS_WITH_PO}],
+    bake:["pop"],
+    remaining:["PRAN","Tier (I / II)"]},
+
+  {id:"wallet", num:14, title:"Digital Wallets", note:"Choose the wallet provider, or type it in if not listed.",
+    webFields:[{key:"name", label:"Wallet / Provider Name", type:"select", options:WALLETS}],
+    bake:["name"],
+    remaining:["Registered Mobile / Email","Remarks"]},
+
+  {id:"crypto", num:15, title:"Crypto / Virtual Digital Assets", note:"Never record private keys or seed phrases — only where those instructions are kept.",
+    webFields:[{key:"name", label:"Exchange / Wallet Name", type:"select", options:EXCHANGES}],
+    bake:["name"],
+    remaining:["Asset(s) Held (type only, not value)","Access Instructions Location"]},
+
+  {id:"other", num:16, title:"Any Other Assets Not Listed Above", note:"A short description is enough — no need for reference numbers here.",
+    webFields:[{key:"desc", label:"Description of Asset", type:"text"}],
+    bake:["desc"],
+    remaining:["Institution / Location","Reference No."]},
+];
+
+/* ============================================================
+   3. STATE  (in-memory only — never persisted, never sent anywhere)
+   ============================================================ */
+const state = {};
+SECTIONS.forEach(s => state[s.id] = []);
+
+/* ============================================================
+   4. RENDER
+   ============================================================ */
+const sectionsEl = document.getElementById("sections");
+const tocEl = document.getElementById("toc");
+
+function fieldControl(sec, row, field){
+  const val = row[field.key] || "";
+  if(field.type === "text"){
+    return `<div class="field">
+      <label>${field.label}</label>
+      <input type="text" data-key="${field.key}" value="${escapeAttr(val)}" placeholder="Type here" />
+    </div>`;
+  }
+  // select + other
+  const isOther = row[field.key] === "__other__";
+  const opts = field.options.map(o => `<option value="${escapeAttr(o)}" ${val===o?"selected":""}>${o}</option>`).join("");
+  return `<div class="field">
+      <label>${field.label}</label>
+      <select data-key="${field.key}">
+        <option value="">— Select —</option>
+        ${opts}
+        <option value="__other__" ${isOther?"selected":""}>Other (type in box)</option>
+      </select>
+    </div>
+    <div class="field other-field" style="${isOther?"":"display:none"}">
+      <label>${field.label} (typed)</label>
+      <input type="text" data-key="${field.key}_other" value="${escapeAttr(row[field.key+'_other']||"")}" placeholder="Type the name" />
+    </div>`;
+}
+
+function renderSection(sec){
+  const rows = state[sec.id];
+  const remList = sec.remaining.map(r=>`<b>${r}</b>`).join(", ");
+  let rowsHtml = rows.map((row, i) => `
+    <div class="row" data-idx="${i}">
+      <span class="idx">${i+1}</span>
+      ${sec.webFields.map(f => fieldControl(sec, row, f)).join("")}
+      <button class="remove" title="Remove this row" data-action="remove" data-idx="${i}">×</button>
+    </div>
+  `).join("");
+
+  return `
+    <section class="card ${rows.length ? "open":""}" id="card-${sec.id}" data-id="${sec.id}">
+      <div class="head" data-action="toggle">
+        <div class="titlegroup">
+          <span class="num">${sec.num}.</span>
+          <h2>${sec.title}</h2>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <span class="count">${rows.length} added</span>
+          <span class="chev">${rows.length? "▾":"▸"}</span>
+        </div>
+      </div>
+      <div class="body">
+        <p class="note">${sec.note}</p>
+        ${rowsHtml}
+        <button class="addrow" data-action="add">+ Add ${sec.title.replace(/Held In$/,'').trim()}</button>
+        <div class="kept-for-pdf"><b>Filled later, on the PDF:</b> ${remList}.</div>
+      </div>
+    </section>
+  `;
+}
+
+function renderAll(){
+  sectionsEl.innerHTML = SECTIONS.map(renderSection).join("");
+  tocEl.innerHTML = SECTIONS.map(s => {
+    const has = state[s.id].length>0;
+    return `<div class="${has?'filled':''}"><a href="#card-${s.id}">${s.num}. ${s.title.replace(/Held In$/,'').trim()}</a></div>`;
+  }).join("");
+  attachEvents();
+}
+
+function escapeAttr(s){
+  return String(s).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;");
+}
+
+function attachEvents(){
+  document.querySelectorAll("section.card").forEach(card => {
+    const id = card.dataset.id;
+    const sec = SECTIONS.find(s=>s.id===id);
+
+    card.querySelector(".head").addEventListener("click", () => {
+      card.classList.toggle("open");
+      card.querySelector(".chev").textContent = card.classList.contains("open") ? "▾" : "▸";
+    });
+
+    const addBtn = card.querySelector('[data-action="add"]');
+    addBtn.addEventListener("click", () => {
+      state[id].push({});
+      card.classList.add("open");
+      renderAll();
+      document.getElementById("card-"+id).scrollIntoView({block:"nearest"});
+    });
+
+    card.querySelectorAll('[data-action="remove"]').forEach(btn=>{
+      btn.addEventListener("click", (e)=>{
+        e.stopPropagation();
+        const idx = parseInt(btn.dataset.idx,10);
+        state[id].splice(idx,1);
+        renderAll();
+      });
+    });
+
+    card.querySelectorAll(".row").forEach(rowEl=>{
+      const idx = parseInt(rowEl.dataset.idx,10);
+      rowEl.querySelectorAll("select,input").forEach(inp=>{
+        inp.addEventListener("input", ()=>{
+          const key = inp.dataset.key;
+          state[id][idx][key] = inp.value;
+          if(inp.tagName === "SELECT"){
+            const otherBox = inp.parentElement.nextElementSibling;
+            if(otherBox && otherBox.classList.contains("other-field")){
+              otherBox.style.display = inp.value === "__other__" ? "flex" : "none";
+            }
+            // refresh count / dot badges without full re-render (avoid losing focus)
+          }
+        });
+      });
+    });
+  });
+}
+
+renderAll();
+
+/* ============================================================
+   5. PDF GENERATION  (pdf-lib, entirely client-side)
+   ============================================================ */
+function resolvedValue(row, key){
+  if(row[key] === "__other__") return row[key+"_other"] || "";
+  return row[key] || "";
+}
+
+async function generatePdf(){
+  const { PDFDocument, StandardFonts, rgb } = PDFLib;
+  const pdfDoc = await PDFDocument.create();
+  const form = pdfDoc.getForm();
+  const fontR = await pdfDoc.embedFont(StandardFonts.TimesRoman);
+  const fontB = await pdfDoc.embedFont(StandardFonts.TimesRomanBold);
+
+  const PAGE_W = 595.28, PAGE_H = 841.89;
+  const MARGIN = 50;
+  const CONTENT_W = PAGE_W - MARGIN*2;
+
+  let page = pdfDoc.addPage([PAGE_W, PAGE_H]);
+  let y = PAGE_H - MARGIN;
+  let fieldCounter = 0;
+
+  function newPage(){
+    page = pdfDoc.addPage([PAGE_W, PAGE_H]);
+    y = PAGE_H - MARGIN;
+    drawFooter();
+  }
+  function drawFooter(){
+    page.drawText("ForwardLegacy — Schedule of Assets Annexure — personal record-keeping only", {
+      x: MARGIN, y: 28, size: 7.5, font: fontR, color: rgb(0.45,0.45,0.45)
+    });
+  }
+  function ensure(space){
+    if(y - space < MARGIN + 20){ newPage(); }
+  }
+  function drawText(text, {size=10, font=fontR, color=rgb(0.1,0.1,0.1), gap=14, x=MARGIN} = {}){
+    ensure(gap);
+    page.drawText(text, {x, y: y - size, size, font, color, maxWidth: CONTENT_W});
+    y -= gap;
+  }
+  function drawBlankField(x, w, label, name){
+    const h = 20;
+    page.drawText(label, {x, y: y-9, size: 7, font: fontR, color: rgb(0.4,0.4,0.4)});
+    const tf = form.createTextField(name + "_" + (fieldCounter++));
+    tf.addToPage(page, {
+      x, y: y-9-h-2, width: w, height: h,
+      borderWidth: 1, borderColor: rgb(0.7,0.66,0.55), backgroundColor: rgb(1,1,1)
+    });
+    tf.setFontSize(9);
+  }
+  function drawFieldRow(labels, sectionKey){
+    const gap = 10;
+    const w = (CONTENT_W - gap*(labels.length-1)) / labels.length;
+    ensure(9+20+8);
+    labels.forEach((label, i)=>{
+      drawBlankField(MARGIN + i*(w+gap), w, label, sectionKey);
+    });
+    y -= (9+20+10);
+  }
+
+  // ---- Cover / header ----
+  page.drawText("SCHEDULE OF ASSETS", {x: MARGIN, y: y-26, size: 24, font: fontB});
+  y -= 34;
+  page.drawText("Annexure to the Will — personal record for the Executor and beneficiaries", {x: MARGIN, y: y-14, size: 11, font: fontR, color: rgb(0.35,0.35,0.35)});
+  y -= 34;
+
+  drawFieldRow(["Full Name"], "name");
+  drawFieldRow(["PAN"], "pan");
+  drawFieldRow(["Date Filled"], "datefilled");
+  y -= 6;
+  page.drawLine({start:{x:MARGIN,y}, end:{x:MARGIN+CONTENT_W,y}, thickness:1, color: rgb(0.85,0.82,0.72)});
+  y -= 22;
+
+  // ---- Sections ----
+  SECTIONS.forEach(sec => {
+    const rows = state[sec.id];
+    if(rows.length === 0) return;
+
+    ensure(30);
+    drawText(`${sec.num}. ${sec.title}`, {size:14, font:fontB, gap:20});
+
+    rows.forEach((row, i)=>{
+      const bakedParts = sec.bake.map(k=>{
+        const field = sec.webFields.find(f=>f.key===k);
+        const v = resolvedValue(row, k);
+        return v ? v : `(${field.label} — not specified)`;
+      });
+      ensure(18);
+      drawText(`${i+1})  ${bakedParts.join("  —  ")}`, {size:10.5, font:fontB, gap:16});
+      drawFieldRow(sec.remaining, `${sec.id}_${i}`);
+    });
+    y -= 6;
+  });
+
+  // ---- Instructions page ----
+  newPage();
+  drawText("Instructions for the Executor & Beneficiaries", {size:16, font:fontB, gap:22});
+  const instructions = [
+    "Keep PAN records handy. Most banks, depositories and AMCs will ask for the account holder's or the deceased's PAN before processing a claim. Keeping this on record against each entry above speeds up transmission considerably.",
+    "Retrieving mutual fund holdings. If a beneficiary does not have complete folio details, the PAN may be shared with the relevant AMC, or with a Mutual Fund Distributor / Registered Investment Adviser, who can help retrieve a consolidated statement across folios.",
+    "Multiple folios with the same AMC. It is common to hold more than one folio with a particular AMC — each has been listed as a separate row above rather than combined.",
+    "Approaching an AMC or distributor. For holding details, nominee status, or the transmission procedure for any mutual fund, contact the AMC (or the distributor named against that folio) directly, quoting the PAN and folio number where available.",
+    "Bank accounts. Keep the PAN on record together with the bank name and branch. Where no nominee is registered, the Executor should be ready to produce probate / succession documentation as the bank's process requires.",
+    "Insurance claims. Some insurers can trace an existing policy using the deceased's PAN, in addition to the policy number. Where the policy number is not on hand, contact the insurer named above with the PAN and date of birth to begin a search.",
+    "Crypto / digital assets. Access credentials, private keys or seed phrases should never be written down here — only where such access instructions are safely stored, so the Executor knows where to look.",
+    "General. This Annexure is a ready-reference worksheet only and does not itself constitute a testamentary disposition. All assets listed devolve strictly per the terms of the Will."
+  ];
+  instructions.forEach((line, i)=>{
+    ensure(50);
+    const wrapped = wrapText(line, fontR, 10, CONTENT_W - 18);
+    drawText(`${i+1}.`, {size:10, font:fontB, gap:0, x:MARGIN});
+    wrapped.forEach((wline, wi)=>{
+      drawText(wline, {size:10, font:fontR, gap:14, x:MARGIN+18});
+    });
+    y -= 6;
+  });
+
+  y -= 10;
+  ensure(60);
+  drawFieldRow(["Signature"], "sig");
+  drawFieldRow(["Date"], "sigdate");
+
+  form.updateFieldAppearances(fontR);
+  const bytes = await pdfDoc.save();
+  return bytes;
+}
+
+function wrapText(text, font, size, maxWidth){
+  const words = text.split(" ");
+  const lines = [];
+  let cur = "";
+  words.forEach(w=>{
+    const test = cur ? cur + " " + w : w;
+    if(font.widthOfTextAtSize(test, size) > maxWidth){
+      if(cur) lines.push(cur);
+      cur = w;
+    } else {
+      cur = test;
+    }
+  });
+  if(cur) lines.push(cur);
+  return lines;
+}
+
+/* ============================================================
+   6. WIRE UP THE BUTTON
+   ============================================================ */
+const genBtn = document.getElementById("genBtn");
+const statusEl = document.getElementById("status");
+
+genBtn.addEventListener("click", async () => {
+  const total = SECTIONS.reduce((n,s)=>n + state[s.id].length, 0);
+  if(total === 0){
+    statusEl.textContent = "Add at least one entry in any section above before generating.";
+    statusEl.className = "status err";
+    return;
+  }
+  genBtn.disabled = true;
+  statusEl.textContent = "Building your PDF…";
+  statusEl.className = "status";
+  try{
+    const bytes = await generatePdf();
+    const blob = new Blob([bytes], {type:"application/pdf"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "Schedule-of-Assets-Annexure.pdf";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url), 5000);
+    statusEl.textContent = "Done — check your downloads. Fill in the blank boxes on the PDF and keep it with your Will.";
+    statusEl.className = "status ok";
+  }catch(err){
+    console.error(err);
+    statusEl.textContent = "Something went wrong generating the PDF: " + err.message;
+    statusEl.className = "status err";
+  }finally{
+    genBtn.disabled = false;
+  }
+});
+</script>
+</body>
+</html>

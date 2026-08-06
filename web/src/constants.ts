@@ -120,7 +120,7 @@ export const PHONE_MASK = "XXXXX";
 // --- Tooltip / help text ---
 export const TIP_NO_ID_SAVED = "No ID Number will be saved in database";
 export const MSG_VIEW_ONLY = "Viewing a submitted Will — saving is disabled";
-export const TIP_ID_LOCKED_PENDING_REVIEW = "ID fields are locked while your Will is under admin review. They'll unlock once the review is completed, so you can re-enter them and download your document.";
+export const TIP_ID_LOCKED = "ID fields are locked until your Will's review is completed by the admin. Once completed, you can enter them fresh and download your final document — they are never saved to the database.";
 
 // --- Button / action labels ---
 export const BTN_SAVE_AS_DRAFT = "Save as Draft";

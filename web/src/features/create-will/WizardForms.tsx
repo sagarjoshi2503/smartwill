@@ -21,7 +21,7 @@ import {
   API_GIFT_VOUCHER_VERIFY, API_GIFT_VOUCHER_REDEEM,
   apiPathComplete,
   LBL_LEGAL_NAME, LBL_FULL_NAME, LBL_ID_TYPE, LBL_ID_NUMBER, LBL_ADDRESS,
-  TIP_NO_ID_SAVED, TIP_ID_LOCKED_PENDING_REVIEW, MSG_VIEW_ONLY, MSG_SAVING,
+  TIP_NO_ID_SAVED, TIP_ID_LOCKED, MSG_VIEW_ONLY, MSG_SAVING,
   BTN_COMPLETE_REVIEW, BTN_SUBMIT_REVIEW,
   STATUS_COMPLETED, STATUS_DRAFT, STATUS_PENDING_REVIEW,
   RAZORPAY_KEY_ID, ROLE_ADMIN, ROLE_TESTATOR,
@@ -71,15 +71,17 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
 
   // ID Number fields (Aadhaar/PAN/etc.) are never persisted to the database
   // (see api/_app/shared/redaction.py), so they only ever exist transiently
-  // in the browser. While a testator is viewing their own submitted Will
-  // (viewOnly) and it's still PendingReview, these are locked — no reason
-  // to be retyping sensitive ID numbers while the admin hasn't reviewed it
-  // yet. Once the admin marks it Completed, they unlock again so the
-  // testator can re-enter them fresh and generate/download the final PDF.
-  // Irrelevant outside viewOnly (Draft editing and admin flows never lock).
-  const idFieldsLocked = !!viewOnly && willStatus===STATUS_PENDING_REVIEW;
+  // in the browser. For a plain testator (not an admin flow), these stay
+  // locked through both Draft and PendingReview — the Will's actual content
+  // (names, relations, addresses, assets) gets drafted and reviewed with no
+  // ID numbers in it at all — and only unlock once the admin marks it
+  // Completed, at which point the testator types them in fresh, right
+  // before generating/downloading the final signed document. Admin flows
+  // (adminReview/adminComplete) are never gated by this — an admin filling
+  // in a Will on a client's behalf needs full access regardless of status.
+  const idFieldsLocked = !adminReview && !adminComplete && willStatus!==STATUS_COMPLETED;
   const idInputCls = (base: string) => base + (idFieldsLocked ? " opacity-60 cursor-not-allowed" : "");
-  const idInputTitle = (fallback: string) => idFieldsLocked ? TIP_ID_LOCKED_PENDING_REVIEW : fallback;
+  const idInputTitle = (fallback: string) => idFieldsLocked ? TIP_ID_LOCKED : fallback;
 
   const [submitStatus,setSubmitStatus]=useState<"idle"|"saving"|"error"|"done">("idle");
   const [submitError,setSubmitError]=useState("");
@@ -318,7 +320,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
           <StepHeader icon={<User size={17}/>} title="Testator Details" sub="Section I — Your identity & declaration of fitness"/>
           {idFieldsLocked&&(
             <div className="bg-amber-50 border border-amber-200 rounded-xl p-3.5 text-xs text-amber-700 flex items-start gap-2">
-              <Lock size={13} className="mt-0.5 shrink-0"/>{TIP_ID_LOCKED_PENDING_REVIEW}
+              <Lock size={13} className="mt-0.5 shrink-0"/>{TIP_ID_LOCKED}
             </div>
           )}
           {adminComments&&(
@@ -499,7 +501,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
             <StepHeader icon={<User size={17}/>} title="Testator Details (Goan Will)" sub="Notarial Open Will format — your identity, and your spouse's if married"/>
             {idFieldsLocked&&(
               <div className="bg-amber-50 border border-amber-200 rounded-xl p-3.5 text-xs text-amber-700 flex items-start gap-2">
-                <Lock size={13} className="mt-0.5 shrink-0"/>{TIP_ID_LOCKED_PENDING_REVIEW}
+                <Lock size={13} className="mt-0.5 shrink-0"/>{TIP_ID_LOCKED}
               </div>
             )}
             {adminComments&&(

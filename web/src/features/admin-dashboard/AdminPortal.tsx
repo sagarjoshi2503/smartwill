@@ -203,7 +203,9 @@ export default function AdminPortal({admin,onCreateWill,onReviewWill}:{
                     <td className="px-5 py-3.5 whitespace-nowrap">
                       <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border whitespace-nowrap ${PAYMENT_STYLE[c.paymentStatus]}`}>{PAYMENT_LBL[c.paymentStatus]}</span>
                     </td>
-                    <td className="px-5 py-3.5 text-slate-500 text-sm whitespace-nowrap">{c.paymentAmount!=null?fmt(c.paymentAmount):"—"}</td>
+                    {/* paymentAmount is stored in paise (the exact unit Razorpay charged/returned — see
+                        payments.service.verify_payment), so it's divided by 100 here to display rupees. */}
+                    <td className="px-5 py-3.5 text-slate-500 text-sm whitespace-nowrap">{c.paymentAmount!=null?fmt(c.paymentAmount/100):"—"}</td>
                     <td className="px-5 py-3.5">
                       <div className="flex items-center gap-3">
                         <button onClick={()=>handleReview(c.willId)}

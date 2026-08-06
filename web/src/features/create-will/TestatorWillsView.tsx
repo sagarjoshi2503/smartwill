@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { FileText, Plus, Edit3, Eye, Trash2, Clock } from "lucide-react";
+import { FileText, FileStack, Plus, Edit3, Eye, Trash2, Clock } from "lucide-react";
 import { authFetch } from "../../utils/apiBase";
 import {
   API_MY_WILLS, apiPathWill, CONFIRM_DELETE_WILL, ERR_LOAD_WILL,
@@ -15,11 +15,12 @@ const STATUS_STYLE: Record<TestatorWill["status"], string> = {
   Completed: "bg-emerald-50 text-emerald-600 border-emerald-200",
 };
 
-export default function TestatorWillsView({email,onCreateNew,onEditWill,onViewWill}:{
+export default function TestatorWillsView({email,onCreateNew,onEditWill,onViewWill,onDownloadAnnex}:{
   email: string;
   onCreateNew: () => void;
   onEditWill: (willId: string, will: WillState, willType: WillType, status: TestatorWill["status"], adminComments?: string) => void;
   onViewWill: (willId: string, will: WillState, willType: WillType, status: TestatorWill["status"]) => void;
+  onDownloadAnnex: () => void;
 }){
   const [wills,setWills]=useState<TestatorWill[]>([]);
   const [status,setStatus]=useState<"loading"|"ready"|"error">("loading");
@@ -182,6 +183,12 @@ export default function TestatorWillsView({email,onCreateNew,onEditWill,onViewWi
                           </button>
                         ) : (
                           <span className="text-slate-400 text-xs">Locked</span>
+                        )}
+                        {w.status===STATUS_COMPLETED && (
+                          <button onClick={onDownloadAnnex}
+                            className="flex items-center gap-1.5 text-[#4F9D33] hover:text-[#2D6B1F] text-xs font-semibold transition-colors">
+                            <FileStack size={11}/>Download Annex
+                          </button>
                         )}
                         <button onClick={()=>handleDelete(w.willId)} disabled={busyId===w.willId}
                           className="flex items-center gap-1.5 text-red-500 hover:text-red-600 text-xs font-semibold transition-colors disabled:opacity-50">

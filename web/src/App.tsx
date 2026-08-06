@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useCallback, useEffect, lazy, Suspense } from "react";
 import { ArrowRight, ChevronLeft, Check, LogIn, LogOut, Eye, Save, RotateCcw, Menu, X } from "lucide-react";
 
 import { PLANS, ADDONS } from "./data/plans";
@@ -47,6 +47,10 @@ import {
 import type {
   AdminProfile, AssetCatalogItem, Beneficiary, DisclaimerChecks, GoogleProfile, Plan, SignupState, TestatorWill, ViewName, WillState, WillType,
 } from "./types";
+
+// Lazy-loaded — pulls in pdf-lib (a large dependency only this one screen
+// needs), so it shouldn't bloat the main bundle every visitor downloads.
+const AnnexBuilder = lazy(() => import("./features/annex-builder/AnnexBuilder"));
 
 const WIZARD_STEPS = [
   {n:1,label:"Will Type"},{n:2,label:"Testator"},{n:3,label:"Beneficiary"},{n:4,label:"Asset"},
@@ -494,6 +498,12 @@ export default function SmartWill() {
     }, 50);
   }, []);
 
+  if(view==="annexBuilder") return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-slate-100 text-slate-500 text-sm">Loading…</div>}>
+      <AnnexBuilder onBack={()=>setView("myWills")}/>
+    </Suspense>
+  );
+
   if(showWillDoc) return willType==="allindia" ? (
     <AllIndiaWillDocument will={will} residualBene={residualBene}
       onBack={()=>setShowWillDoc(false)} onPrint={handlePrint} willDocRef={willDocRef} />
@@ -607,7 +617,7 @@ export default function SmartWill() {
       {view==="otp" && <OtpView otp={otp} handleOtp={handleOtp} otpRefs={otpRefs} phone={signup.phone} email={signup.email} onNext={handleOtpVerified}/>}
       {view==="willTypeSelect" && <WillTypeSelectView onSelect={handleWillTypeChosen} onBack={()=>setView("myWills")}/>}
       {view==="disclaimer" && <DisclaimerView dchecks={dchecks} setDchecks={setDchecks} willType={willType} onAgree={()=>setView("wizard")} onBack={()=>setView("willTypeSelect")}/>}
-      {view==="myWills" && <TestatorWillsView email={signup.email} onCreateNew={handleCreateNewWill} onEditWill={handleEditWill} onViewWill={handleViewWill}/>}
+      {view==="myWills" && <TestatorWillsView email={signup.email} onCreateNew={handleCreateNewWill} onEditWill={handleEditWill} onViewWill={handleViewWill} onDownloadAnnex={()=>setView("annexBuilder")}/>}
       {view==="adminLogin" && <AdminLoginView onLogin={(admin)=>{setAdminProfile(admin);setView("admin");}} onBack={()=>setView("landing")} onSignup={()=>setView("adminSignup")} signupEnabled={adminSignupEnabled}/>}
       {view==="adminSignup" && adminSignupEnabled && <AdminSignupView onSignup={(admin)=>{setAdminProfile(admin);setView("admin");}} onBack={()=>setView("adminLogin")} onGoToLogin={()=>setView("adminLogin")}/>}
       {view==="admin" && adminProfile && <AdminPortal admin={adminProfile} onCreateWill={handleAdminCreateWill} onReviewWill={handleAdminReviewWill}/>}
