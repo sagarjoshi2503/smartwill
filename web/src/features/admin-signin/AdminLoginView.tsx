@@ -73,7 +73,7 @@ export default function AdminLoginView({onLogin,onBack,onSignup,signupEnabled}:{
         </form>
         {signupEnabled&&(
           <p className="text-center text-slate-600 text-sm mt-5">
-            New to Forward Legacy? <button type="button" onClick={onSignup} className="text-[#2F8132] font-semibold hover:text-[#1E5B22] transition-colors">Sign up</button>
+            New to Forward Legacy? <button type="button" onClick={onSignup} className="text-brand font-semibold hover:text-brand-dark transition-colors">Sign up</button>
           </p>
         )}
       </div>

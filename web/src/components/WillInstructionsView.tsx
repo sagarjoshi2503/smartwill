@@ -16,7 +16,7 @@ export default function WillInstructionsView({onContinue,onBack}:{
       <div className="min-h-full flex items-center justify-center px-4 py-8">
         <div className="w-full max-w-2xl apv-card shadow-2xl">
           <div className="bg-gradient-to-r from-[#2F8132]/15 to-[#2F8132]/10 border-b border-slate-200 p-5 rounded-t-3xl">
-            <span className="inline-block bg-[#EDF6EA] text-[#1E5B22] text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full mb-2">Guide &amp; Instructions</span>
+            <span className="inline-block bg-[#EDF6EA] text-brand-dark text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full mb-2">Guide &amp; Instructions</span>
             <h3 className="text-slate-900 font-bold text-xl serif">Instructions Before You Prepare Your Will</h3>
             <p className="text-slate-600 text-sm mt-1">Forward Legacy — Estate &amp; Succession Planning</p>
           </div>
@@ -28,18 +28,18 @@ export default function WillInstructionsView({onContinue,onBack}:{
 
             <div className="space-y-3 mb-6">
               <div className="bg-slate-50 border border-slate-200 border-l-4 border-l-[#2F8132] rounded-xl p-4">
-                <div className="flex items-center gap-2 text-slate-900 font-semibold text-sm mb-1.5"><FileText size={16} className="text-[#2F8132]"/>1. Identification Documents &amp; Asset Details</div>
+                <div className="flex items-center gap-2 text-slate-900 font-semibold text-sm mb-1.5"><FileText size={16} className="text-brand"/>1. Identification Documents &amp; Asset Details</div>
                 <p className="text-slate-600 text-xs leading-relaxed">Personal ID numbers, bank details, property survey numbers, and exact legal descriptions — to ensure smooth execution.</p>
               </div>
               <div className="bg-slate-50 border border-slate-200 border-l-4 border-l-[#2F8132] rounded-xl p-4">
-                <div className="flex items-center gap-2 text-slate-900 font-semibold text-sm mb-1.5"><Users size={16} className="text-[#2F8132]"/>2. Details for 2 Witnesses</div>
+                <div className="flex items-center gap-2 text-slate-900 font-semibold text-sm mb-1.5"><Users size={16} className="text-brand"/>2. Details for 2 Witnesses</div>
                 <p className="text-slate-600 text-xs leading-relaxed mb-2">Full Name, Age, Parent's Name, Marital Status, Nationality, Occupation, Address, Identity Number (e.g., Aadhaar/PAN), and Relationship to Testator.</p>
                 <div className="flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 text-xs text-amber-700">
                   <span>⚠️</span><span><strong>Note:</strong> A Witness cannot be a Beneficiary in the Will.</span>
                 </div>
               </div>
               <div className="bg-slate-50 border border-slate-200 border-l-4 border-l-[#2F8132] rounded-xl p-4">
-                <div className="flex items-center gap-2 text-slate-900 font-semibold text-sm mb-1.5"><Baby size={16} className="text-[#2F8132]"/>3. Minor Beneficiaries</div>
+                <div className="flex items-center gap-2 text-slate-900 font-semibold text-sm mb-1.5"><Baby size={16} className="text-brand"/>3. Minor Beneficiaries</div>
                 <p className="text-slate-600 text-xs leading-relaxed">If any beneficiary is under 18 years of age, you will need to name a <strong>Guardian</strong> to manage their inheritance until they attain majority.</p>
               </div>
             </div>
@@ -47,7 +47,7 @@ export default function WillInstructionsView({onContinue,onBack}:{
             <h4 className="text-slate-900 font-bold serif text-base mb-3">Important Note on Name Consistency</h4>
             <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 mb-3">
               <p className="text-slate-600 text-xs leading-relaxed mb-3">Your name in this Will must match exactly as it appears across your government IDs and property records (Aadhaar, PAN, Passport, Property Deeds, Bank Records). Even minor variations can cause legal disputes or administrative delays for your family later.</p>
-              <div className="bg-[#EDF6EA] rounded-lg px-3 py-2.5 text-xs text-[#1E5B22]">
+              <div className="bg-[#EDF6EA] rounded-lg px-3 py-2.5 text-xs text-brand-dark">
                 <strong className="text-slate-900">Action Required:</strong> If your name varies significantly across documents, align your official documents first, or use the name exactly as it appears on your primary legal documents (e.g., Aadhaar/PAN).
               </div>
             </div>
@@ -55,7 +55,7 @@ export default function WillInstructionsView({onContinue,onBack}:{
             <p className="text-[11px] text-slate-400 italic mb-1.5">Example — Name Discrepancy Reference</p>
             <div className="overflow-hidden rounded-xl border border-slate-200 mb-6">
               <table className="w-full text-xs">
-                <thead><tr className="bg-[#2F8132]"><th className="text-left text-white font-semibold px-4 py-2.5">Document</th><th className="text-left text-white font-semibold px-4 py-2.5">Name as it Appears</th></tr></thead>
+                <thead><tr className="bg-brand"><th className="text-left text-white font-semibold px-4 py-2.5">Document</th><th className="text-left text-white font-semibold px-4 py-2.5">Name as it Appears</th></tr></thead>
                 <tbody>
                   {NAME_EXAMPLES.map((r,i)=>(
                     <tr key={r.doc} className={i%2===1?"bg-slate-50":undefined}>
@@ -68,8 +68,8 @@ export default function WillInstructionsView({onContinue,onBack}:{
             </div>
 
             <div className="flex items-start gap-3 bg-[#EDF6EA] rounded-xl p-4 mb-6">
-              <Info size={18} className="text-[#1E5B22] shrink-0 mt-0.5"/>
-              <p className="text-[#1E5B22] text-xs leading-relaxed"><strong>Note:</strong> Keeping these details organized before starting the generator prevents session timeouts and ensures all legal descriptions match your underlying deeds and financial records perfectly.</p>
+              <Info size={18} className="text-brand-dark shrink-0 mt-0.5"/>
+              <p className="text-brand-dark text-xs leading-relaxed"><strong>Note:</strong> Keeping these details organized before starting the generator prevents session timeouts and ensures all legal descriptions match your underlying deeds and financial records perfectly.</p>
             </div>
 
             <div className="flex flex-col sm:flex-row gap-3">

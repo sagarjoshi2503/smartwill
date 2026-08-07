@@ -91,7 +91,7 @@ export default function AdminSignupView({onSignup,onBack,onGoToLogin}:{
             <div>
               <p className="text-red-500 text-xs">{error}</p>
               {alreadySignedUp&&(
-                <button type="button" onClick={onGoToLogin} className="text-[#2F8132] font-semibold hover:text-[#1E5B22] transition-colors text-xs mt-1">
+                <button type="button" onClick={onGoToLogin} className="text-brand font-semibold hover:text-brand-dark transition-colors text-xs mt-1">
                   Go to Login →
                 </button>
               )}

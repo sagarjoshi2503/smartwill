@@ -74,7 +74,7 @@ export default function LandingPage({plans,addons,selectedPlan,setSelectedPlan,a
         <div className="max-w-6xl mx-auto bg-[#F5F7F3] rounded-3xl p-6 grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {FEATURES.map(f=>(
             <div key={f.title} className="flex items-center gap-3">
-              <div className="w-11 h-11 rounded-full bg-white border border-[#E5E8E3] text-[#2F8132] flex items-center justify-center shrink-0">{f.icon}</div>
+              <div className="w-11 h-11 rounded-full bg-white border border-[#E5E8E3] text-brand flex items-center justify-center shrink-0">{f.icon}</div>
               <div><h4 className="text-slate-900 text-sm font-bold">{f.title}</h4><p className="text-slate-500 text-xs">{f.body}</p></div>
             </div>
           ))}
@@ -85,7 +85,7 @@ export default function LandingPage({plans,addons,selectedPlan,setSelectedPlan,a
       <section id="plan-options" className="bg-[#F5F7F3] py-14 px-5">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-10 max-w-xl mx-auto">
-            <p className="text-[#2F8132] tracking-[0.35em] uppercase text-xs mb-3">Plan Options</p>
+            <p className="text-brand tracking-[0.35em] uppercase text-xs mb-3">Plan Options</p>
             <h2 className="apv-section-title">Choose Your Plan</h2>
           </div>
           {/* pt-4 leaves room for the "Most Popular" badge's -top-3 offset —
@@ -96,16 +96,16 @@ export default function LandingPage({plans,addons,selectedPlan,setSelectedPlan,a
             <div className="flex flex-nowrap gap-6 w-max">
               {plans.map(plan=>(
                 <div key={plan.id}
-                  className={`relative flex flex-col bg-white rounded-2xl p-7 w-[280px] shrink-0 transition-all hover:-translate-y-1 hover:shadow-xl ${plan.badge?"border-2 border-[#2F8132] bg-[#EDF6EA]":"border border-[#E5E8E3]"}`}>
-                  {plan.badge && <span className="absolute -top-3 left-6 bg-[#2F8132] text-white text-[10px] font-bold uppercase tracking-wide px-3 py-1 rounded-full">{plan.badge}</span>}
+                  className={`relative flex flex-col bg-white rounded-2xl p-7 w-[280px] shrink-0 transition-all hover:-translate-y-1 hover:shadow-xl ${plan.badge?"border-2 border-brand bg-[#EDF6EA]":"border border-[#E5E8E3]"}`}>
+                  {plan.badge && <span className="absolute -top-3 left-6 bg-brand text-white text-[10px] font-bold uppercase tracking-wide px-3 py-1 rounded-full">{plan.badge}</span>}
                   <h3 className="text-slate-900 font-bold text-base tracking-wide mb-1">{plan.name}</h3>
-                  <div className="text-[#2F8132] font-bold text-xl mb-4">{fmt(plan.price)}{plan.willType==="successiondeed"?"":" per will"}</div>
+                  <div className="text-brand font-bold text-xl mb-4">{fmt(plan.price)}{plan.willType==="successiondeed"?"":" per will"}</div>
                   <ul className="space-y-3 mb-5 flex-1">
                     {plan.features.map((f,i)=>{
                       const [lead, ...rest] = f.split(" — ");
                       return(
                         <li key={i} className="flex items-start gap-2 text-sm text-slate-700 leading-relaxed">
-                          <Check size={14} className="text-[#2F8132] shrink-0 mt-0.5"/>
+                          <Check size={14} className="text-brand shrink-0 mt-0.5"/>
                           <span><strong className="text-slate-900">{lead}</strong>{rest.length>0 && ` — ${rest.join(" — ")}`}</span>
                         </li>
                       );
@@ -120,7 +120,7 @@ export default function LandingPage({plans,addons,selectedPlan,setSelectedPlan,a
                       if(plan.willType==="customwill" || plan.willType==="successiondeed") onContactUs();
                       else { setSelectedPlan(plan); onStart(); }
                     }}
-                    className="w-full py-3 rounded-full text-sm font-semibold bg-[#2F8132] hover:bg-[#1E5B22] text-white transition-colors">
+                    className="w-full py-3 rounded-full text-sm font-semibold bg-brand hover:bg-brand-dark text-white transition-colors">
                     {plan.willType==="customwill" || plan.willType==="successiondeed"
                       ? "Contact Us"
                       : selectedPlan.id===plan.id?"✓ Selected":"Select Plan"}
@@ -146,7 +146,7 @@ export default function LandingPage({plans,addons,selectedPlan,setSelectedPlan,a
       <section className="py-14 px-5 border-t border-[#E5E8E3]">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-8">
-            <p className="text-[#2F8132] tracking-[0.35em] uppercase text-xs mb-3">Customize Your Order</p>
+            <p className="text-brand tracking-[0.35em] uppercase text-xs mb-3">Customize Your Order</p>
             <h2 className="text-3xl md:text-4xl font-bold text-slate-900 serif">Add-ons &amp; Summary</h2>
           </div>
           <div className="grid lg:grid-cols-3 gap-6">
@@ -154,13 +154,13 @@ export default function LandingPage({plans,addons,selectedPlan,setSelectedPlan,a
               {addons.map(addon=>(
                 <label key={addon.id} className={`flex items-center justify-between p-4 rounded-2xl border transition-all cursor-pointer ${addonsState[addon.id]?"border-[#2F8132]/40 bg-[#EDF6EA]":"border-[#E5E8E3] bg-white hover:border-[#2F8132]/30"}`}>
                   <div className="flex items-center gap-3">
-                    <div className={`w-11 h-11 rounded-2xl flex items-center justify-center ${addonsState[addon.id]?"bg-[#2F8132]/15 text-[#2F8132]":"bg-slate-100 text-slate-500"}`}>{addon.icon}</div>
+                    <div className={`w-11 h-11 rounded-2xl flex items-center justify-center ${addonsState[addon.id]?"bg-[#2F8132]/15 text-brand":"bg-slate-100 text-slate-500"}`}>{addon.icon}</div>
                     <span className="text-slate-900 text-sm font-medium">{addon.label}</span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <span className="text-[#2F8132] font-semibold text-sm">+{fmt(addon.price)}</span>
+                    <span className="text-brand font-semibold text-sm">+{fmt(addon.price)}</span>
                     <input type="checkbox" className="sr-only peer" checked={!!addonsState[addon.id]} onChange={()=>setAddons(p=>({...p,[addon.id]:!p[addon.id]}))}/>
-                    <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all peer-focus-visible:ring-2 peer-focus-visible:ring-[#2F8132] peer-focus-visible:ring-offset-2 ${addonsState[addon.id]?"bg-[#2F8132] border-[#2F8132]":"border-slate-300"}`}>
+                    <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all peer-focus-visible:ring-2 peer-focus-visible:ring-[#2F8132] peer-focus-visible:ring-offset-2 ${addonsState[addon.id]?"bg-brand border-brand":"border-slate-300"}`}>
                       {addonsState[addon.id]&&<Check size={10} className="text-white"/>}
                     </div>
                   </div>
@@ -173,11 +173,11 @@ export default function LandingPage({plans,addons,selectedPlan,setSelectedPlan,a
                 <div className="flex justify-between"><span className="text-slate-600">Plan</span><span className="text-slate-800 text-xs text-right max-w-[160px]">{selectedPlan.name}</span></div>
                 <div className="flex justify-between"><span className="text-slate-600">Base</span><span className="text-slate-800">{fmt(selectedPlan.price)}</span></div>
                 {addons.filter(a=>addonsState[a.id]).map(a=>(
-                  <div key={a.id} className="flex justify-between"><span className="text-slate-700">{a.label}</span><span className="text-[#2F8132]">+{fmt(a.price)}</span></div>
+                  <div key={a.id} className="flex justify-between"><span className="text-slate-700">{a.label}</span><span className="text-brand">+{fmt(a.price)}</span></div>
                 ))}
               </div>
               <div className="border-t border-[#E5E8E3] pt-4 mb-5">
-                <div className="flex justify-between items-baseline"><span className="text-slate-700 font-semibold">Total</span><span className="text-2xl font-extrabold text-[#2F8132] serif">{fmt(totalPrice)}</span></div>
+                <div className="flex justify-between items-baseline"><span className="text-slate-700 font-semibold">Total</span><span className="text-2xl font-extrabold text-brand serif">{fmt(totalPrice)}</span></div>
                 <p className="text-slate-600 text-xs mt-2">Inclusive of all taxes</p>
               </div>
               <button onClick={onStart} className="apv-btn w-full justify-center">Proceed <ArrowRight size={14}/></button>
@@ -191,7 +191,7 @@ export default function LandingPage({plans,addons,selectedPlan,setSelectedPlan,a
         <div className="max-w-6xl mx-auto">
           <div className="bg-[#EDF6EA] border border-[#E5E8E3] rounded-3xl p-6 md:p-12 grid md:grid-cols-[1.1fr_1fr] gap-10 items-start">
             <div>
-              <p className="text-[#2F8132] tracking-[0.12em] uppercase text-xs font-bold mb-2">Digital Gift Voucher</p>
+              <p className="text-brand tracking-[0.12em] uppercase text-xs font-bold mb-2">Digital Gift Voucher</p>
               <h2 className="text-3xl font-extrabold text-slate-900 serif mb-5">Gift a Will</h2>
               <ol className="space-y-4 mb-6">
                 {[
@@ -200,7 +200,7 @@ export default function LandingPage({plans,addons,selectedPlan,setSelectedPlan,a
                   {title:"Redemption", body:"The recipient receives a unique code by email to book and make their Will."},
                 ].map((step,i)=>(
                   <li key={step.title} className="flex items-start gap-3">
-                    <span className="w-7 h-7 rounded-full bg-[#2F8132] text-white text-xs font-bold flex items-center justify-center shrink-0">{i+1}</span>
+                    <span className="w-7 h-7 rounded-full bg-brand text-white text-xs font-bold flex items-center justify-center shrink-0">{i+1}</span>
                     <span className="text-sm text-slate-700"><strong className="block text-slate-900 serif font-bold text-[1.02rem]">{step.title}</strong>{step.body}</span>
                   </li>
                 ))}
@@ -212,7 +212,7 @@ export default function LandingPage({plans,addons,selectedPlan,setSelectedPlan,a
                   "Secure, end-to-end encrypted document storage",
                   "Dedicated estate planning advisor included",
                 ].map(item=>(
-                  <div key={item} className="flex items-center gap-2 text-sm text-slate-600"><Check size={14} className="text-[#2F8132] shrink-0"/>{item}</div>
+                  <div key={item} className="flex items-center gap-2 text-sm text-slate-600"><Check size={14} className="text-brand shrink-0"/>{item}</div>
                 ))}
               </div>
             </div>
@@ -235,7 +235,7 @@ export default function LandingPage({plans,addons,selectedPlan,setSelectedPlan,a
                 <button onClick={()=>setOpenWhy(isOpen?null:i)}
                   className="w-full text-left px-6 py-5 flex items-center justify-between gap-4">
                   <h3 className="text-slate-900 font-bold text-[1.02rem] serif">{item.title}</h3>
-                  <span className={`shrink-0 w-8 h-8 rounded-full bg-[#EDF6EA] text-[#2F8132] flex items-center justify-center transition-transform ${isOpen?"rotate-45":""}`}><Plus size={16}/></span>
+                  <span className={`shrink-0 w-8 h-8 rounded-full bg-[#EDF6EA] text-brand flex items-center justify-center transition-transform ${isOpen?"rotate-45":""}`}><Plus size={16}/></span>
                 </button>
                 {isOpen && <div className="px-6 pb-5 text-sm text-slate-600 leading-relaxed">{item.body}</div>}
               </div>

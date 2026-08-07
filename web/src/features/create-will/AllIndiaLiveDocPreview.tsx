@@ -1,5 +1,5 @@
 import { Eye } from "lucide-react";
-import { ordinal } from "../../utils/format";
+import { ordinal, yearInWords } from "../../utils/format";
 import type { AllIndiaAssetItem, Witness, WillState } from "../../types";
 
 const relOf = (it: {relation: string; relationOther: string}) => it.relation==="Other" ? it.relationOther : it.relation;
@@ -18,9 +18,18 @@ export default function AllIndiaLiveDocPreview({will}:{
   const dateStr = testator.signDay && testator.signMonth && testator.signYear
     ? <>{ordinal(testator.signDay)} day of {testator.signMonth}, {testator.signYear}</>
     : "____";
+  const executionDateStr = testator.signDay && testator.signMonth && testator.signYear
+    ? <>{ordinal(testator.signDay)} day of {testator.signMonth} of the year {yearInWords(testator.signYear)}</>
+    : "____________________";
 
   const sonNames = testator.sonNames.filter(Boolean);
   const daughterNames = testator.daughterNames.filter(Boolean);
+
+  const witnessParticulars = witnesses.map((w,i)=>(
+    <span key={i}>
+      {String.fromCharCode(97+i)}) <strong>{w.name||blank}</strong> {w.parentRelation||"son/daughter/wife"} of <strong>{w.parentName||blank}</strong>, aged <strong>{w.age||"___"}</strong>, {w.maritalStatus||"unmarried/married"}, nationality <strong>{w.nationality?`${w.nationality} National`:blank}</strong>, occupation <strong>{occupationOf(w)||blank}</strong>, resident of <strong>{w.address||blank}</strong> bearing Aadhaar Number <strong>{w.aadhaarNumber||blank}</strong>{i<witnesses.length-1?"; ":" "}
+    </span>
+  ));
 
   const renderAssetList = (items: AllIndiaAssetItem[], label: string) => {
     const numbered = items.length>1;
@@ -53,7 +62,7 @@ export default function AllIndiaLiveDocPreview({will}:{
   return(
     <div className="w-full max-w-[520px] rounded-xl shadow-2xl overflow-hidden border border-[#2F8132]/20">
       <div className="bg-white border-b border-slate-200 px-4 py-2.5 flex items-center gap-2">
-        <span className="text-[#2F8132] text-xs font-semibold flex items-center gap-1.5"><Eye size={12}/>Live Preview — All India Will</span>
+        <span className="text-brand text-xs font-semibold flex items-center gap-1.5"><Eye size={12}/>Live Preview — All India Will</span>
       </div>
       <div className="bg-white p-7 text-[12.5px]" style={{fontFamily:"'Times New Roman',Times,serif",lineHeight:"1.15",color:"#14181B"}}>
         <h1 className="text-center text-base font-bold tracking-widest uppercase mb-4">WILL</h1>
@@ -63,7 +72,7 @@ export default function AllIndiaLiveDocPreview({will}:{
           {testator.maritalStatus==="married"&&(
             <>, I am married to <strong>{testator.spouseName||blank}</strong>, bearing Aadhaar No. <strong>{testator.spouseAadhaarNumber||blank}</strong> and I have {sonNames.length===1?"one":sonNames.length||"___"} son, namely, <strong>{sonNames.join(", ")||blank}</strong> and {daughterNames.length===1?"one":daughterNames.length||"___"} daughter, namely, <strong>{daughterNames.join(", ")||blank}</strong>
             </>
-          )}. And on this <strong>{dateStr}</strong>, and in the presence of two witnesses whose details appear at the end of this document, make my last and final WILL.
+          )}. And on the <strong>{executionDateStr}</strong>, and in the presence of two following witnesses: {witnessParticulars}make my last and final WILL.
         </p>
 
         <p className="text-justify mb-3">

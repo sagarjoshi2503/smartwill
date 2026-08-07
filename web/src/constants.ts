@@ -24,20 +24,7 @@ export const ADMIN_PATH = "/admin";
 export const RAZORPAY_KEY_ID = import.meta.env.VITE_RAZORPAY_KEY_ID as string | undefined;
 
 // --- API paths (pass to utils/apiBase's apiUrl()) ---
-export const API_FLAGS = "/api/flags?key=enable-admin-button";
-// Vercel Flag gating whether Razorpay Checkout is offered at all when
-// submitting a Will for review — see App.tsx and WizardForms.tsx.
-export const API_RAZORPAY_FLAG = "/api/flags?key=use-razorpay";
-// Vercel Flag gating whether the Forward Legacy Assistant chat widget is shown at all — see App.tsx.
-export const API_CHATBOT_FLAG = "/api/flags?key=enable-chat-bot";
-// Vercel Flag gating both the "Sign up" link on the Admin Portal login
-// screen AND the admin signup screen itself (so it's blocked even if
-// reached some way other than clicking that link) — see App.tsx.
-export const API_ADMIN_SIGNUP_FLAG = "/api/flags?key=enable-admin-signup";
-// Vercel Flag gating whether the wizard's Live Preview pane is shown at all — see App.tsx.
-export const API_LIVE_PREVIEW_FLAG = "/api/flags?key=enable-live-preview";
-// Vercel Flag gating whether the build number is shown in the site footer — see App.tsx/SiteFooter.tsx.
-export const API_SHOW_BUILD_NR_FLAG = "/api/flags?key=show-build-nr";
+// Feature-flag keys live in flags.ts / hooks/useFlag.ts, not here — see FLAGS.
 export const API_PAYMENTS_CREATE_ORDER = "/api/payments/create-order";
 export const API_PAYMENTS_VERIFY = "/api/payments/verify";
 export const API_PAYMENTS_MARK_FAILED = "/api/payments/mark-failed";
@@ -84,6 +71,8 @@ export const EMAIL_REGEX = /\S+@\S+\.\S+/;
 export const SEND_BACK_REDIRECT_MS = 300;
 export const DRAFT_RESET_MS = 2500;
 export const WIZARD_REDIRECT_MS = 900;
+export const ID_POPUP_ERROR_MS = 4500;
+export const ANNEX_PDF_URL_REVOKE_MS = 5000;
 
 // --- Status labels (display text) ---
 export const STATUS_LBL: Record<string, string> = {

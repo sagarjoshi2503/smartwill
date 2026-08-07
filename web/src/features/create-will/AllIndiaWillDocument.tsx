@@ -2,15 +2,14 @@ import { useEffect } from "react";
 import type { MutableRefObject, ReactNode } from "react";
 import { ChevronLeft, Printer, Download } from "lucide-react";
 import BrandMark from "../../components/shared/BrandMark";
-import { ordinal } from "../../utils/format";
-import type { AllIndiaAssetItem, Beneficiary, Witness, WillState } from "../../types";
+import { ordinal, yearInWords } from "../../utils/format";
+import type { AllIndiaAssetItem, Beneficiary, WillState } from "../../types";
 
 // "Other" relationship/occupation choices carry their free-text value in a
 // sibling *Other field — these resolve to whichever is actually meant to
 // print in the generated document.
 const relOf = (it: {relation: string; relationOther: string}) => it.relation==="Other" ? it.relationOther : it.relation;
 const occupationOf = (it: {occupation: string; occupationOther: string}) => it.occupation==="Other" ? it.occupationOther : it.occupation;
-const witnessRelOf = (w: Witness) => w.relationToTestator==="Other" ? w.relationToTestatorOther : w.relationToTestator;
 
 // Renders the Will exactly per the "WILL NONGOAN FORWARDLEGACY FORMAT.pdf"
 // template — wording, clause order, and asset sections (A-E) match the PDF
@@ -35,12 +34,25 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,w
     return () => { document.title = original; };
   }, []);
 
-  const dateStr = testator.signDay && testator.signMonth && testator.signYear
-    ? <>{ordinal(testator.signDay)} day of {testator.signMonth}, {testator.signYear}</>
+  // Legal-document phrasing spells the year out in words (e.g. "of the year
+  // Two Thousand and Twenty Six") — matches the reference All India Will PDF
+  // template's "...of the year Two Thousand and ____" wording.
+  const executionDateStr = testator.signDay && testator.signMonth && testator.signYear
+    ? <>{ordinal(testator.signDay)} day of {testator.signMonth} of the year {yearInWords(testator.signYear)}</>
     : "____________________";
 
   const sonNames = testator.sonNames.filter(Boolean);
   const daughterNames = testator.daughterNames.filter(Boolean);
+
+  // Both witnesses' full particulars are recited inline in the opening
+  // clause (matching the reference template — see api/Data/NON GOAN-All
+  // India/NON GOAN WILL FINAL DOCUMENT), in addition to the standalone
+  // Witnesses page at the end which carries their signatures.
+  const witnessParticulars = witnesses.map((w,i)=>(
+    <span key={i}>
+      {String.fromCharCode(97+i)}) <strong>{w.name||blank}</strong> {w.parentRelation||"son/daughter/wife"} of <strong>{w.parentName||blank}</strong>, aged <strong>{w.age||"___"}</strong>, {w.maritalStatus||"unmarried/married"}, nationality <strong>{w.nationality?`${w.nationality} National`:blank}</strong>, occupation <strong>{occupationOf(w)||blank}</strong>, resident of <strong>{w.address||blank}</strong> bearing Aadhaar Number <strong>{w.aadhaarNumber||blank}</strong>{i<witnesses.length-1?"; ":" "}
+    </span>
+  ));
 
   const renderAssetList = (items: AllIndiaAssetItem[], label: string) => {
     const numbered = items.length>1;
@@ -73,21 +85,18 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,w
     <p className={`pdf-sig-line mb-0 ${className||""}`}>Testator's Signature: ___________________ Witness 1: _________ Witness 2: _________</p>
   );
 
-  // Each Will page is laid out as an explicit, fixed-height block (rather
-  // than left to the browser's automatic reflow) so page breaks fall in
-  // predictable places and this attestation line — required at the top of
-  // every page except the first and last, and at the bottom of every page
-  // except the last — reliably lands there. (A `position:fixed` header/
-  // footer was tried first, but Firefox and some print/PDF pipelines don't
-  // repeat fixed-position elements across printed pages, so it isn't
-  // reliable.) The first page has nothing to attest yet at its very top,
-  // and the last page carries the full execution block in its own content
-  // instead, so neither gets a header, and the last page gets no footer
-  // either. The `pdf-page` height/flex rules only apply under @media print
-  // — on screen this still reads as one continuous scrollable document.
-  const Page = ({children,isFirst,isLast}:{children: ReactNode; isFirst?: boolean; isLast?: boolean})=>(
+  // Each logical section is its own print page (`break-after:page` on every
+  // page but the last) with this attestation line repeated at the bottom of
+  // every page except the last (nothing follows it there) — never at the
+  // top of a page. Pages are left to size to their actual content instead
+  // of being pinned to a fixed page-height — a fixed-height/space-between
+  // layout was tried, but it forced every section to consume a full
+  // physical page even when its content was much shorter, producing large
+  // trailing blank space and inflating the document by an extra page. The
+  // `pdf-page` rules only apply under @media print — on screen this still
+  // reads as one continuous scrollable document.
+  const Page = ({children,isLast}:{children: ReactNode; isLast?: boolean})=>(
     <section className={`pdf-page${isLast?"":" pdf-page-break"}`}>
-      {!isFirst && !isLast && <SigLine className="mt-0 mb-4"/>}
       <div>{children}</div>
       {!isLast && <SigLine className="pdf-sig-line-footer mt-4"/>}
     </section>
@@ -103,13 +112,6 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,w
           .no-print{display:none!important}
           body{margin:0;padding:0}
           .will-print-page{box-shadow:none!important;margin:0!important;border-radius:0!important;max-width:100%!important;padding:0!important}
-          /* Leaves headroom below the 246.2mm printable area (297mm A4 minus
-             25.4mm top/bottom @page margins) — pinning content to exactly
-             that height left no margin for error, so the flex-pinned header/
-             footer signature lines (laid out first/last in each page's flex
-             column) rounded past the physical page edge and got pushed onto
-             the next page. */
-          .pdf-page{min-height:220mm;display:flex;flex-direction:column;justify-content:space-between}
           .pdf-page-break{break-after:page}
           /* Belt-and-braces: even if a page's own content still overflows,
              never let the footer signature line get separated from what
@@ -132,7 +134,7 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,w
             <button onClick={onPrint} className="flex items-center gap-1.5 bg-slate-700 hover:bg-slate-600 text-white rounded-lg px-3.5 py-2 text-sm transition-colors">
               <Printer size={14}/>Print
             </button>
-            <button onClick={onPrint} className="flex items-center gap-1.5 bg-[#2F8132] hover:bg-[#1E5B22] text-[#ffffff] rounded-lg px-3.5 py-2 text-sm font-semibold transition-colors">
+            <button onClick={onPrint} className="flex items-center gap-1.5 bg-brand hover:bg-brand-dark text-[#ffffff] rounded-lg px-3.5 py-2 text-sm font-semibold transition-colors">
               <Download size={14}/>Download PDF
             </button>
           </div>
@@ -144,7 +146,7 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,w
         <div className="will-print-page bg-white shadow-2xl rounded-lg max-w-[780px] w-full p-14 print:p-10"
           style={{fontFamily:"'Times New Roman',Times,Georgia,serif",fontSize:"12pt",lineHeight:"1.15",color:"#1a1a1a"}}>
 
-          <Page isFirst>
+          <Page>
             <h1 className="text-center text-2xl font-bold tracking-widest uppercase mb-6">WILL</h1>
 
             <p className="text-justify mb-5">
@@ -152,7 +154,7 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,w
               {testator.maritalStatus==="married"&&(
                 <>, I am married to <strong>{testator.spouseName||blank}</strong>, bearing Aadhaar No. <strong>{testator.spouseAadhaarNumber||blank}</strong> and I have {sonNames.length===1?"one":sonNames.length||"___"} son, namely, <strong>{sonNames.join(", ")||blank}</strong> and {daughterNames.length===1?"one":daughterNames.length||"___"} daughter, namely, <strong>{daughterNames.join(", ")||blank}</strong>
                 </>
-              )}. And on this <strong>{dateStr}</strong>, and in the presence of two witnesses whose details appear at the end of this document, make my last and final WILL.
+              )}. And on the <strong>{executionDateStr}</strong>, and in the presence of two following witnesses: {witnessParticulars}make my last and final WILL.
             </p>
 
             <p className="text-justify mb-5">
@@ -206,7 +208,7 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,w
           </Page>
           )}
 
-          <Page>
+          <Page isLast>
             <p className="text-justify mb-5">
               I hereby declare, direct, and devise that all the Rest and Residue of my estate, including any property or assets, both movable and immovable, which I may acquire after the execution of this Will, or which has been inadvertently omitted from this document, shall be given entirely to {allIndiaResidue.length>1&&"the following, in equal shares: "}
               {allIndiaResidue.map((entry,i)=>(
@@ -237,20 +239,13 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,w
             </div>
             <p className="mb-1">Name of Testator/Testatrix: <strong>{testator.fullName||blank}</strong></p>
             <p className="mb-1">Place: <strong>{testator.signPlace||blank}</strong></p>
-            <p className="mb-1">Date: <strong>{dateStr}</strong></p>
-          </Page>
+            <p className="mb-8">Date: <strong>{executionDateStr}</strong></p>
 
-          <Page isLast>
             <h2 className="font-bold text-lg uppercase mb-8">Witnesses</h2>
             {witnesses.map((w,i)=>(
               <div key={i} className="mb-10">
                 <p className="mb-1">{i+1})</p>
-                <p className="mb-1">Name: <strong>{w.name||blank}</strong></p>
-                <p className="mb-1">{w.parentRelation} of <strong>{w.parentName||blank}</strong>, Age: <strong>{w.age||"___"}</strong>, {w.maritalStatus}</p>
-                <p className="mb-1">Nationality: <strong>{w.nationality?`${w.nationality} National`:blank}</strong>, Occupation: <strong>{occupationOf(w)||blank}</strong></p>
-                <p className="mb-1">Resident of: <strong>{w.address||blank}</strong></p>
-                <p className="mb-1">Bearing Aadhaar Number: <strong>{w.aadhaarNumber||blank}</strong></p>
-                <p className="mb-8">Relation to Testator: <strong>{witnessRelOf(w)||blank}</strong></p>
+                <p className="mb-8">Name: <strong>{w.name||blank}</strong></p>
                 <div className="border-b-2 border-slate-800 pt-8 mb-1 max-w-[280px]"/>
                 <p className="text-xs text-slate-500">Signature</p>
               </div>

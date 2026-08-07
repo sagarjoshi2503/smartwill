@@ -3,6 +3,7 @@ import { ChevronLeft, ChevronDown, ChevronRight, Lock, Plus, Trash2, Download } 
 import BrandMark from "../../components/shared/BrandMark";
 import { ANNEX_INSTRUCTIONS, ANNEX_SECTIONS, AnnexRow, AnnexState, emptyAnnexState } from "../../data/annexSections";
 import { generateAnnexPdf } from "./generateAnnexPdf";
+import { ANNEX_PDF_URL_REVOKE_MS } from "../../constants";
 
 const OTHER = "__other__";
 
@@ -49,7 +50,7 @@ export default function AnnexBuilder({ onBack }: { onBack: () => void }) {
       document.body.appendChild(a);
       a.click();
       a.remove();
-      setTimeout(() => URL.revokeObjectURL(url), 5000);
+      setTimeout(() => URL.revokeObjectURL(url), ANNEX_PDF_URL_REVOKE_MS);
       setStatus("done");
     } catch (err) {
       setStatus("error");
@@ -105,8 +106,8 @@ export default function AnnexBuilder({ onBack }: { onBack: () => void }) {
         </div>
 
         <div className="flex items-start gap-3 bg-[#EDF6EA] border border-[#2F8132]/25 rounded-xl p-4 mb-6">
-          <Lock size={16} className="text-[#2F8132] mt-0.5 shrink-0"/>
-          <p className="text-[#1E5B22] text-xs leading-relaxed"><strong>Nothing you type on this page is sent to us or stored anywhere.</strong> This page only runs in your browser. Account numbers, folio numbers, PRAN, UAN and similar details are never entered here — you'll add those afterwards, directly into the downloaded PDF, on your own computer.</p>
+          <Lock size={16} className="text-brand mt-0.5 shrink-0"/>
+          <p className="text-brand-dark text-xs leading-relaxed"><strong>Nothing you type on this page is sent to us or stored anywhere.</strong> This page only runs in your browser. Account numbers, folio numbers, PRAN, UAN and similar details are never entered here — you'll add those afterwards, directly into the downloaded PDF, on your own computer.</p>
         </div>
 
         <div className="space-y-3 mb-6">
@@ -117,7 +118,7 @@ export default function AnnexBuilder({ onBack }: { onBack: () => void }) {
               <div key={sec.id} className="bg-white border border-slate-200 rounded-2xl overflow-hidden">
                 <button onClick={() => toggleSection(sec.id)} className="w-full flex items-center justify-between gap-3 px-4 py-3.5 text-left hover:bg-slate-50 transition-colors">
                   <div className="flex items-baseline gap-2.5 min-w-0">
-                    <span className="text-[#2F8132] font-bold serif text-sm shrink-0">{sec.num}.</span>
+                    <span className="text-brand font-bold serif text-sm shrink-0">{sec.num}.</span>
                     <span className="text-slate-900 font-semibold text-sm truncate">{sec.title}</span>
                   </div>
                   <div className="flex items-center gap-2.5 shrink-0">
@@ -137,7 +138,7 @@ export default function AnnexBuilder({ onBack }: { onBack: () => void }) {
                         <button onClick={() => removeRow(sec.id, idx)} className="mt-2.5 flex items-center gap-1 text-red-500 hover:text-red-600 text-xs font-semibold"><Trash2 size={12}/>Remove</button>
                       </div>
                     ))}
-                    <button onClick={() => addRow(sec.id)} className="w-full border-2 border-dashed border-slate-200 hover:border-[#2F8132] text-slate-500 hover:text-[#2F8132] rounded-xl py-2 flex items-center justify-center gap-1.5 transition-all text-xs font-semibold">
+                    <button onClick={() => addRow(sec.id)} className="w-full border-2 border-dashed border-slate-200 hover:border-brand text-slate-500 hover:text-brand rounded-xl py-2 flex items-center justify-center gap-1.5 transition-all text-xs font-semibold">
                       <Plus size={12}/>Add {sec.title.replace(/Held In$/, "").trim()}
                     </button>
                     <div className="mt-3 text-[11px] text-slate-500 bg-slate-50 border border-dashed border-slate-200 rounded-lg px-3 py-2">
@@ -167,7 +168,7 @@ export default function AnnexBuilder({ onBack }: { onBack: () => void }) {
             {status === "done" && <div className="text-emerald-300 mt-1">Done — check your downloads. Fill in the blank boxes on the PDF and keep it with your Will.</div>}
           </div>
           <button onClick={handleGenerate} disabled={status === "generating"}
-            className="flex items-center gap-2 bg-[#2F8132] hover:bg-[#1E5B22] disabled:opacity-60 disabled:cursor-wait text-white font-bold py-3 px-5 rounded-xl text-sm transition-colors whitespace-nowrap">
+            className="flex items-center gap-2 bg-brand hover:bg-brand-dark disabled:opacity-60 disabled:cursor-wait text-white font-bold py-3 px-5 rounded-xl text-sm transition-colors whitespace-nowrap">
             <Download size={15}/>{status === "generating" ? "Building your PDF…" : "Generate my PDF"}
           </button>
         </div>

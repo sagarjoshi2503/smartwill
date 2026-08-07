@@ -91,7 +91,7 @@ export default function ChatWidget({ onContactSupport }: { onContactSupport: () 
                 <div
                   className={`max-w-[85%] rounded-2xl px-3 py-2 text-xs whitespace-pre-wrap ${
                     m.role === "user"
-                      ? "bg-[#2F8132] text-[#ffffff] font-medium"
+                      ? "bg-brand text-[#ffffff] font-medium"
                       : "bg-white border border-slate-200 text-slate-900"
                   }`}
                 >
@@ -105,7 +105,7 @@ export default function ChatWidget({ onContactSupport }: { onContactSupport: () 
                 <p className="text-red-600 text-xs">{MSG_CHAT_UNAVAILABLE}</p>
                 <button
                   onClick={handleContactSupport}
-                  className="flex items-center gap-1.5 text-xs font-semibold text-[#2F8132] hover:text-[#1E5B22] transition-colors"
+                  className="flex items-center gap-1.5 text-xs font-semibold text-brand hover:text-brand-dark transition-colors"
                 >
                   <LifeBuoy size={13} />{BTN_CONTACT_SUPPORT}
                 </button>
@@ -124,7 +124,7 @@ export default function ChatWidget({ onContactSupport }: { onContactSupport: () 
             <button
               onClick={handleSend}
               disabled={sending || !input.trim()}
-              className="w-8 h-8 shrink-0 rounded-full bg-[#2F8132] hover:bg-[#1E5B22] disabled:opacity-50 disabled:cursor-not-allowed text-[#ffffff] flex items-center justify-center transition-colors"
+              className="w-8 h-8 shrink-0 rounded-full bg-brand hover:bg-brand-dark disabled:opacity-50 disabled:cursor-not-allowed text-[#ffffff] flex items-center justify-center transition-colors"
             >
               <Send size={13} />
             </button>
@@ -134,7 +134,7 @@ export default function ChatWidget({ onContactSupport }: { onContactSupport: () 
 
       <button
         onClick={() => setOpen(o => !o)}
-        className="w-12 h-12 rounded-full bg-[#2F8132] hover:bg-[#1E5B22] text-[#ffffff] shadow-lg shadow-[#2F8132]/30 flex items-center justify-center transition-colors"
+        className="w-12 h-12 rounded-full bg-brand hover:bg-brand-dark text-[#ffffff] shadow-lg shadow-[#2F8132]/30 flex items-center justify-center transition-colors"
         aria-label={ARIA_OPEN_CHAT}
       >
         {open ? <X size={18} /> : <MessageCircle size={18} />}

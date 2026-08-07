@@ -22,7 +22,7 @@ from _app.shared.constants import (
     FLD_QTY,
     FLD_RAZORPAY_ORDER_ID_CAMEL, FLD_RECEIPT, FLD_RECIPIENT_EMAIL, FLD_RECIPIENT_NAME, FLD_REDEEMED_AT,
     FLD_REDEEMED_BY_TESTATOR_EMAIL, FLD_REDEEMED_BY_WILL_ID, FLD_SIGNATURE, FLD_STATUS, FLD_TESTATOR_EMAIL,
-    FLD_VALIDITY_MONTHS, FLD_VOUCHERS, FLD_WILL_ID, GIFT_VOUCHER_CODE_GENERATION_ATTEMPTS,
+    FLD_VALIDITY_MONTHS, FLD_VOUCHERS, FLD_WILL_ID, GIFT_VOUCHER_CODE_GENERATION_ATTEMPTS, GIFT_VOUCHER_DAYS_PER_MONTH,
     GIFT_VOUCHER_CODE_GENERATION_FAILED,
     GIFT_VOUCHER_CODE_PREFIX, GIFT_VOUCHER_CODE_RANDOM_LENGTH, GIFT_VOUCHER_CODE_REQUIRED, GIFT_VOUCHER_EXPIRED,
     GIFT_VOUCHER_INVALID_AMOUNT, GIFT_VOUCHER_NOT_ACTIVE, GIFT_VOUCHER_PLAN_LABEL_REQUIRED,
@@ -111,7 +111,7 @@ def _build_voucher_document(
     recipient_name: str | None, recipient_email: str | None, message: str | None, validity_months: int,
 ) -> dict:
     now = datetime.now(timezone.utc)
-    expires_at = now + timedelta(days=30 * validity_months)
+    expires_at = now + timedelta(days=GIFT_VOUCHER_DAYS_PER_MONTH * validity_months)
     return {
         FLD_CODE: code,
         FLD_STATUS: VoucherStatus.ACTIVE.value,

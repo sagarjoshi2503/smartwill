@@ -34,9 +34,10 @@ import { authFetch } from "./utils/apiBase";
 import { clearAuthToken } from "./utils/auth";
 import { getMissingIdFields } from "./utils/willValidation";
 import { trackPageview } from "./utils/analytics";
+import { FLAGS } from "./flags";
+import useFlag from "./hooks/useFlag";
 import {
-  ADMIN_PATH, API_FLAGS, API_RAZORPAY_FLAG, API_CHATBOT_FLAG, API_ADMIN_SIGNUP_FLAG, API_LIVE_PREVIEW_FLAG,
-  API_SHOW_BUILD_NR_FLAG, API_WILL_SAVE, apiPathSendBack,
+  ADMIN_PATH, API_WILL_SAVE, apiPathSendBack,
   OTP_LENGTH, STATUS_DRAFT, STATUS_PENDING_REVIEW, STATUS_COMPLETED,
   SEND_BACK_REDIRECT_MS, DRAFT_RESET_MS, WIZARD_REDIRECT_MS,
   MSG_VIEW_ONLY, MSG_SAVING, BTN_SAVE_AS_DRAFT, ROLE_ADMIN, ROLE_TESTATOR,
@@ -106,12 +107,26 @@ export default function SmartWill() {
   const [sendBackComments, setSendBackComments] = useState("");
   const [sendBackStatus, setSendBackStatus] = useState<"idle" | "sending" | "error">("idle");
   const [sendBackError, setSendBackError] = useState("");
-  const [showAdminButton, setShowAdminButton] = useState(false);
-  const [razorpayEnabled, setRazorpayEnabled] = useState(false);
-  const [chatbotEnabled, setChatbotEnabled] = useState(false);
-  const [adminSignupEnabled, setAdminSignupEnabled] = useState(false);
-  const [livePreviewEnabled, setLivePreviewEnabled] = useState(false);
-  const [showBuildNr, setShowBuildNr] = useState(false);
+  // Admin Portal button on the header is gated behind the "enable-admin-button"
+  // flag. The /admin deep-link route stays reachable regardless — this only
+  // controls whether the nav button is shown.
+  const showAdminButton = useFlag(FLAGS.adminButton);
+  // Razorpay Checkout on Will submission is gated behind the "use-razorpay"
+  // flag. When disabled (or unreachable — useFlag fails closed), no payment
+  // option is shown at all — submitting for review goes straight to
+  // PendingReview, unpaid.
+  const razorpayEnabled = useFlag(FLAGS.razorpay);
+  // Forward Legacy Assistant chat widget is gated behind "enable-chat-bot".
+  const chatbotEnabled = useFlag(FLAGS.chatbot);
+  // Admin Portal signup is gated behind "enable-admin-signup" — distinct from
+  // "enable-admin-button" (which only gates the header's nav button): this
+  // one gates the "Sign up" link on the login screen AND the signup screen
+  // itself (see the view render below), not just a button's visibility.
+  const adminSignupEnabled = useFlag(FLAGS.adminSignup);
+  // Wizard's Live Preview pane is gated behind "enable-live-preview".
+  const livePreviewEnabled = useFlag(FLAGS.livePreview);
+  // Build number in the footer is gated behind "show-build-nr".
+  const showBuildNr = useFlag(FLAGS.showBuildNr);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   // ServicesView's "Got a query?" buttons deep-link into a specific FaqView
   // accordion section — mirrors how onHome/onServices already thread view
@@ -164,78 +179,6 @@ export default function SmartWill() {
     };
     window.addEventListener("popstate", onPopState);
     return () => window.removeEventListener("popstate", onPopState);
-  }, []);
-
-  // Admin Portal button on the header is gated behind the "enable-admin-button"
-  // Vercel Flag. The /admin deep-link route stays reachable regardless — this
-  // only controls whether the nav button is shown.
-  useEffect(() => {
-    let cancelled = false;
-    fetch(API_FLAGS)
-      .then(res => res.ok ? res.json() : { enabled: false })
-      .then(data => { if(!cancelled) setShowAdminButton(!!data?.enabled); })
-      .catch(() => {});
-    return () => { cancelled = true; };
-  }, []);
-
-  // Razorpay Checkout on Will submission is gated behind the "use-razorpay"
-  // Vercel Flag. When disabled (or unreachable, matching the fail-closed
-  // behavior of the admin-button flag above), no payment option is shown at
-  // all — submitting for review goes straight to PendingReview, unpaid.
-  useEffect(() => {
-    let cancelled = false;
-    fetch(API_RAZORPAY_FLAG)
-      .then(res => res.ok ? res.json() : { enabled: false })
-      .then(data => { if(!cancelled) setRazorpayEnabled(!!data?.enabled); })
-      .catch(() => {});
-    return () => { cancelled = true; };
-  }, []);
-
-  // Forward Legacy Assistant chat widget is gated behind the "enable-chat-bot"
-  // Vercel Flag, same fail-closed pattern as the flags above.
-  useEffect(() => {
-    let cancelled = false;
-    fetch(API_CHATBOT_FLAG)
-      .then(res => res.ok ? res.json() : { enabled: false })
-      .then(data => { if(!cancelled) setChatbotEnabled(!!data?.enabled); })
-      .catch(() => {});
-    return () => { cancelled = true; };
-  }, []);
-
-  // Admin Portal signup is gated behind the "enable-admin-signup" Vercel
-  // Flag — same fail-closed pattern as the flags above. Distinct from
-  // "enable-admin-button" (which only gates the header's nav button):
-  // this one gates the "Sign up" link on the login screen AND the signup
-  // screen itself (see the view render below), not just a button's visibility.
-  useEffect(() => {
-    let cancelled = false;
-    fetch(API_ADMIN_SIGNUP_FLAG)
-      .then(res => res.ok ? res.json() : { enabled: false })
-      .then(data => { if(!cancelled) setAdminSignupEnabled(!!data?.enabled); })
-      .catch(() => {});
-    return () => { cancelled = true; };
-  }, []);
-
-  // Wizard's Live Preview pane is gated behind the "enable-live-preview"
-  // Vercel Flag, same fail-closed pattern as the flags above.
-  useEffect(() => {
-    let cancelled = false;
-    fetch(API_LIVE_PREVIEW_FLAG)
-      .then(res => res.ok ? res.json() : { enabled: false })
-      .then(data => { if(!cancelled) setLivePreviewEnabled(!!data?.enabled); })
-      .catch(() => {});
-    return () => { cancelled = true; };
-  }, []);
-
-  // Build number in the footer is gated behind the "show-build-nr" Vercel
-  // Flag, same fail-closed pattern as the flags above.
-  useEffect(() => {
-    let cancelled = false;
-    fetch(API_SHOW_BUILD_NR_FLAG)
-      .then(res => res.ok ? res.json() : { enabled: false })
-      .then(data => { if(!cancelled) setShowBuildNr(!!data?.enabled); })
-      .catch(() => {});
-    return () => { cancelled = true; };
   }, []);
 
   // Defense in depth: if `view` ever becomes "adminSignup" while the flag is
@@ -533,7 +476,7 @@ export default function SmartWill() {
               <nav className="hidden lg:flex items-center gap-7 flex-1 justify-center">
                 {SITE_NAV.map(item=>(
                   <button key={item.v} onClick={()=>setView(item.v)}
-                    className={`text-sm font-semibold pb-0.5 border-b-2 transition-colors ${view===item.v?"text-[#2F8132] border-[#2F8132]":"text-slate-600 border-transparent hover:text-[#2F8132]"}`}>
+                    className={`text-sm font-semibold pb-0.5 border-b-2 transition-colors ${view===item.v?"text-brand border-brand":"text-slate-600 border-transparent hover:text-brand"}`}>
                     {item.label}
                   </button>
                 ))}
@@ -552,7 +495,7 @@ export default function SmartWill() {
                     <div className="w-6 h-6 bg-slate-200 rounded-full flex items-center justify-center text-[9px] font-bold text-slate-900">
                       {adminProfile.name.split(" ").slice(0,2).map(n=>n[0]).join("").toUpperCase()}
                     </div>
-                    <span className="text-[#2F8132] text-sm">{adminProfile.name}</span>
+                    <span className="text-brand text-sm">{adminProfile.name}</span>
                   </div>
                   <button onClick={()=>{clearAuthToken(ROLE_ADMIN);setAdminProfile(null);setView("landing");}} className="flex items-center gap-1.5 text-slate-600 hover:text-slate-900 text-sm transition-colors"><LogOut size={13}/>{BTN_LOGOUT}</button>
                 </>
@@ -562,7 +505,7 @@ export default function SmartWill() {
                     <div className="w-6 h-6 bg-slate-200 rounded-full flex items-center justify-center text-[9px] font-bold text-slate-900">
                       {(signup.name||signup.email).split(" ").slice(0,2).map(n=>n[0]).join("").toUpperCase()}
                     </div>
-                    <span className="text-[#2F8132] text-sm">{signup.name||signup.email}</span>
+                    <span className="text-brand text-sm">{signup.name||signup.email}</span>
                   </div>
                   <button onClick={handleTestatorLogout} className="flex items-center gap-1.5 text-slate-600 hover:text-slate-900 text-sm transition-colors"><LogOut size={13}/>{BTN_LOGOUT}</button>
                 </>
@@ -571,7 +514,7 @@ export default function SmartWill() {
                   {showAdminButton && (
                     <button onClick={()=>setView("adminLogin")} className="flex items-center gap-1.5 text-slate-600 hover:text-slate-900 border border-slate-200 hover:border-slate-300 rounded-full px-3.5 py-1.5 text-sm transition-all"><LogIn size={13}/>{BTN_ADMIN_PORTAL}</button>
                   )}
-                  <button onClick={()=>setView("authChoice")} className="flex items-center gap-1.5 bg-[#2F8132] hover:bg-[#1E5B22] text-[#ffffff] rounded-full px-4 py-2 text-sm font-semibold transition-colors shadow-lg shadow-[#2F8132]/20">{BTN_CREATE_YOUR_WILL} <ArrowRight size={13}/></button>
+                  <button onClick={()=>setView("authChoice")} className="flex items-center gap-1.5 bg-brand hover:bg-brand-dark text-[#ffffff] rounded-full px-4 py-2 text-sm font-semibold transition-colors shadow-lg shadow-[#2F8132]/20">{BTN_CREATE_YOUR_WILL} <ArrowRight size={13}/></button>
                 </>
               )}
             </div>
@@ -580,7 +523,7 @@ export default function SmartWill() {
             <nav className="lg:hidden border-t border-slate-200 bg-white px-5 py-3 flex flex-col fade-in">
               {SITE_NAV.map(item=>(
                 <button key={item.v} onClick={()=>setView(item.v)}
-                  className={`text-left text-sm font-semibold py-2.5 border-b border-slate-100 transition-colors ${view===item.v?"text-[#2F8132]":"text-slate-700"}`}>
+                  className={`text-left text-sm font-semibold py-2.5 border-b border-slate-100 transition-colors ${view===item.v?"text-brand":"text-slate-700"}`}>
                   {item.label}
                 </button>
               ))}
@@ -593,7 +536,7 @@ export default function SmartWill() {
               ) : (
                 <>
                   <button onClick={()=>setView("authChoice")}
-                    className="bg-[#2F8132] hover:bg-[#1E5B22] text-white rounded-full px-4 py-2.5 text-sm font-semibold transition-colors mt-3 text-center">
+                    className="bg-brand hover:bg-brand-dark text-white rounded-full px-4 py-2.5 text-sm font-semibold transition-colors mt-3 text-center">
                     Client Login
                   </button>
                   {showAdminButton && (
@@ -639,7 +582,7 @@ export default function SmartWill() {
             <div className="flex items-center gap-1">
               {WIZARD_STEPS.filter(s=>!(skipWillTypeStep&&s.n===1)).map(s=>(
                 <button key={s.n} onClick={()=>setWizardStep(s.n)}
-                    className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-[10px] font-semibold transition-all ${wizardStep===s.n?"bg-[#2F8132] text-[#ffffff]":"border border-slate-200 text-slate-600 hover:bg-slate-100 hover:text-slate-900"}`}>
+                    className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-[10px] font-semibold transition-all ${wizardStep===s.n?"bg-brand text-[#ffffff]":"border border-slate-200 text-slate-600 hover:bg-slate-100 hover:text-slate-900"}`}>
                   {wizardStep>s.n?<Check size={9}/>:<span>{s.n}</span>}
                   <span className="hidden md:inline">{s.label}</span>
                 </button>
@@ -678,7 +621,7 @@ export default function SmartWill() {
                   )}
                 </div>
               )}
-              <button onClick={requestGenerateWill} className="flex items-center gap-1.5 text-xs text-[#2F8132] hover:text-[#1E5B22] border border-[#2F8132]/30 hover:border-[#2F8132]/60 rounded-lg px-3 py-1.5 transition-all font-semibold">
+              <button onClick={requestGenerateWill} className="flex items-center gap-1.5 text-xs text-brand hover:text-brand-dark border border-[#2F8132]/30 hover:border-[#2F8132]/60 rounded-lg px-3 py-1.5 transition-all font-semibold">
                 <Eye size={12}/>{BTN_GENERATE_WILL}
               </button>
             </div>
@@ -748,7 +691,7 @@ export default function SmartWill() {
             </ul>
             <div className="flex flex-col sm:flex-row gap-3">
               <button onClick={()=>setShowGenerateInstructions(false)} className="w-full sm:w-auto px-5 py-3 rounded-full border border-slate-200 text-slate-600 hover:text-slate-900 text-sm font-medium transition-all">← Back</button>
-              <button onClick={()=>{setShowGenerateInstructions(false);handleGenerateWill();}} className="flex-1 bg-[#2F8132] hover:bg-[#1E5B22] text-white font-bold py-3 rounded-full text-sm transition-colors">
+              <button onClick={()=>{setShowGenerateInstructions(false);handleGenerateWill();}} className="flex-1 bg-brand hover:bg-brand-dark text-white font-bold py-3 rounded-full text-sm transition-colors">
                 Got it — Generate Document
               </button>
             </div>

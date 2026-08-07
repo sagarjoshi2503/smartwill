@@ -46,7 +46,7 @@ export default function SignupView({signup,setSignup,onNext}:{
     <div className="fade-in min-h-[calc(100vh-58px)] bg-slate-100 flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="w-14 h-14 bg-[#2F8132]/15 border border-[#2F8132]/20 rounded-3xl flex items-center justify-center mx-auto mb-4"><User size={22} className="text-[#2F8132]"/></div>
+          <div className="w-14 h-14 bg-[#2F8132]/15 border border-[#2F8132]/20 rounded-3xl flex items-center justify-center mx-auto mb-4"><User size={22} className="text-brand"/></div>
           <h2 className="text-3xl font-black text-slate-900 serif">{HEADING_SIGNUP}</h2>
           <p className="text-slate-600 text-sm mt-2">{SUB_SIGNUP}</p>
         </div>
@@ -69,10 +69,10 @@ export default function SignupView({signup,setSignup,onNext}:{
           </div>
           <label className="flex items-start gap-3 cursor-pointer">
             <input type="checkbox" className="sr-only peer" checked={signup.terms} onChange={()=>setSignup(p=>({...p,terms:!p.terms}))}/>
-            <div className={`w-5 h-5 rounded-lg border-2 flex items-center justify-center shrink-0 mt-1 transition-all peer-focus-visible:ring-2 peer-focus-visible:ring-[#2F8132] peer-focus-visible:ring-offset-2 ${signup.terms?"bg-[#2F8132] border-[#2F8132]":"border-slate-400"}`}>
+            <div className={`w-5 h-5 rounded-lg border-2 flex items-center justify-center shrink-0 mt-1 transition-all peer-focus-visible:ring-2 peer-focus-visible:ring-[#2F8132] peer-focus-visible:ring-offset-2 ${signup.terms?"bg-brand border-brand":"border-slate-400"}`}>
               {signup.terms&&<Check size={10} className="text-[#ffffff]"/>}
             </div>
-            <span className="text-slate-600 text-sm">{TERMS_AGREE_PREFIX}<span className="text-[#2F8132]">{LBL_TERMS_OF_SERVICE}</span>{TERMS_AGREE_JOINER}<span className="text-[#2F8132]">{LBL_PRIVACY_POLICY}</span></span>
+            <span className="text-slate-600 text-sm">{TERMS_AGREE_PREFIX}<span className="text-brand">{LBL_TERMS_OF_SERVICE}</span>{TERMS_AGREE_JOINER}<span className="text-brand">{LBL_PRIVACY_POLICY}</span></span>
           </label>
           {error&&<p className="text-red-500 text-xs">{error}</p>}
           <button onClick={handleSendOtp} disabled={!canSubmit||sending} className={`w-full py-3 rounded-full font-bold text-sm transition-all ${canSubmit&&!sending?"apv-btn":"bg-slate-200 text-slate-500 cursor-not-allowed"}`}>

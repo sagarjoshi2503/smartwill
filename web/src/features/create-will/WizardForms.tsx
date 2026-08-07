@@ -1,12 +1,12 @@
 ﻿import { useState, useEffect } from "react";
 import {
-  User, UserCheck, Baby, Users, Briefcase, BookOpen, Lock, Info, Plus, Trash2,
+  UserCheck, Baby, Users, Briefcase, BookOpen, Lock, Info, Plus, Trash2,
   Check, AlertTriangle, CheckCircle, FileText, Send, PenTool,
 } from "lucide-react";
 import {
-  ID_TYPES, RELATIONS, MONTHS, OCCUPATIONS, ALLINDIA_RELATIONSHIP_OPTIONS,
+  ID_TYPES, RELATIONS, OCCUPATIONS, ALLINDIA_RELATIONSHIP_OPTIONS,
   NONGOAN_RELATIONSHIP_OPTIONS, WITNESS_RELATION_OPTIONS,
-  GOAN_MARITAL_STATUSES, GOAN_WITNESS_OCCUPATIONS,
+  GOAN_WITNESS_OCCUPATIONS,
 } from "../../data/options";
 import { ASSET_CATALOGUE, COLOR } from "../../data/assetCatalogue";
 import { WILL_TYPE_OPTIONS } from "../../data/willTypes";
@@ -16,15 +16,17 @@ import Toggle from "../../components/shared/Toggle";
 import Nav from "../../components/shared/Nav";
 import { authFetch } from "../../utils/apiBase";
 import { normalizeIdOnBlur } from "../../utils/idValidation";
+import TestatorStep from "./steps/TestatorStep";
+import GoanTestatorStep from "./steps/GoanTestatorStep";
 import {
   API_WILL_SAVE, API_ADMIN_SAVE, API_PAYMENTS_CREATE_ORDER, API_PAYMENTS_VERIFY, API_PAYMENTS_MARK_FAILED,
   API_GIFT_VOUCHER_VERIFY, API_GIFT_VOUCHER_REDEEM,
   apiPathComplete,
-  LBL_LEGAL_NAME, LBL_FULL_NAME, LBL_ID_TYPE, LBL_ID_NUMBER, LBL_ADDRESS,
+  LBL_FULL_NAME, LBL_ID_TYPE, LBL_ID_NUMBER, LBL_ADDRESS,
   TIP_NO_ID_SAVED, TIP_ID_LOCKED, MSG_VIEW_ONLY, MSG_SAVING,
   BTN_COMPLETE_REVIEW, BTN_SUBMIT_REVIEW,
   STATUS_COMPLETED, STATUS_DRAFT, STATUS_PENDING_REVIEW,
-  RAZORPAY_KEY_ID, ROLE_ADMIN, ROLE_TESTATOR,
+  RAZORPAY_KEY_ID, ROLE_ADMIN, ROLE_TESTATOR, ID_POPUP_ERROR_MS,
 } from "../../constants";
 import type { AssetCatalogItem, AssetInstance, Beneficiary, WillState, WillType } from "../../types";
 import type { RazorpaySuccessResponse } from "../../types/razorpay";
@@ -102,7 +104,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
   const [idPopupError,setIdPopupError]=useState<string|null>(null);
   useEffect(()=>{
     if(!idPopupError) return;
-    const t=setTimeout(()=>setIdPopupError(null),4500);
+    const t=setTimeout(()=>setIdPopupError(null),ID_POPUP_ERROR_MS);
     return ()=>clearTimeout(t);
   },[idPopupError]);
   const handleIdBlur=(idType: string, raw: string, apply: (v: string)=>void)=>{
@@ -299,10 +301,10 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
               <label key={opt.id}
                 className={`flex items-start gap-3 p-4 rounded-2xl border cursor-pointer transition-all ${willType===opt.id?"border-[#2F8132]/60 bg-[#2F8132]/10":"border-slate-200 hover:border-[#2F8132]/30"} ${viewOnly?"cursor-not-allowed opacity-70":""}`}>
                 <input type="radio" name="willType" className="sr-only peer" checked={willType===opt.id} disabled={viewOnly} onChange={()=>setWillType(opt.id)}/>
-                <div className={`w-4 h-4 mt-0.5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all peer-focus-visible:ring-2 peer-focus-visible:ring-[#2F8132] peer-focus-visible:ring-offset-2 ${willType===opt.id?"border-[#2F8132] bg-[#2F8132]":"border-slate-300"}`}>
+                <div className={`w-4 h-4 mt-0.5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all peer-focus-visible:ring-2 peer-focus-visible:ring-[#2F8132] peer-focus-visible:ring-offset-2 ${willType===opt.id?"border-brand bg-brand":"border-slate-300"}`}>
                   {willType===opt.id&&<div className="w-1.5 h-1.5 rounded-full bg-white"/>}
                 </div>
-                <div className="text-[#2F8132] mt-0.5">{opt.icon}</div>
+                <div className="text-brand mt-0.5">{opt.icon}</div>
                 <div>
                   <div className="text-slate-900 text-sm font-semibold">{opt.label}</div>
                   <div className="text-slate-500 text-xs mt-0.5">{opt.description}</div>
@@ -316,226 +318,17 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
 
       {/* ── STEP 2: TESTATOR (non-Goan) ──────────────────────── */}
       {step===2&&willType!=="goan"&&(
-        <div className="space-y-4">
-          <StepHeader icon={<User size={17}/>} title="Testator Details" sub="Section I — Your identity & declaration of fitness"/>
-          {idFieldsLocked&&(
-            <div className="bg-amber-50 border border-amber-200 rounded-xl p-3.5 text-xs text-amber-700 flex items-start gap-2">
-              <Lock size={13} className="mt-0.5 shrink-0"/>{TIP_ID_LOCKED}
-            </div>
-          )}
-          {adminComments&&(
-            <div className="bg-amber-50 border border-amber-200 rounded-xl p-3.5 text-xs text-amber-700 flex items-start gap-2">
-              <AlertTriangle size={13} className="mt-0.5 shrink-0"/>
-              <div><span className="font-semibold">Reviewer comments:</span> {adminComments}</div>
-            </div>
-          )}
-          <div className="bg-slate-100 border border-slate-200 rounded-xl p-3.5 text-xs text-slate-600 flex items-start gap-2"><Info size={13} className="mt-0.5 shrink-0"/>You declare that you are of sound mind and executing this Will voluntarily, free from coercion or undue influence.</div>
-          <div>
-            <label className={LC}>Testator Email Address {!testatorEmailEditable&&<span className="text-[#2F8132] normal-case text-[9px]">(Locked)</span>}</label>
-            <div className="relative">
-              {!testatorEmailEditable&&<Lock size={11} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-600"/>}
-              <input type="email" value={will.testator.email} onChange={e=>set("testator.email",e.target.value)} disabled={!testatorEmailEditable}
-                className={IC+(!testatorEmailEditable?" pr-8 cursor-not-allowed text-slate-500":"")} placeholder="you@example.com"/>
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div className="col-span-2"><label className={LC}>{LBL_LEGAL_NAME}</label>
-              <input value={will.testator.fullName} onChange={e=>set("testator.fullName",e.target.value)} className={IC} placeholder="As per Aadhaar / PAN"/></div>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className={LC}>Son / Daughter of</label>
-              <select value={will.testator.relation} onChange={e=>set("testator.relation",e.target.value)} className={IC+" appearance-none"}>
-                <option value="son">Son of</option><option value="daughter">Daughter of</option>
-              </select>
-            </div>
-            <div>
-              <label className={LC}>Parent's Name</label>
-              <input value={will.testator.parentSpouseName} onChange={e=>set("testator.parentSpouseName",e.target.value)} className={IC}/>
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div><label className={LC}>PAN Number</label><input value={will.testator.pan} onChange={e=>set("testator.pan",e.target.value)} onBlur={e=>handleIdBlur("PAN Card",e.target.value,v=>set("testator.pan",v))} disabled={idFieldsLocked} className={idInputCls(IC)} placeholder="ABCDE1234F" title={idInputTitle(TIP_NO_ID_SAVED)}/></div>
-            <div><label className={LC}>Aadhaar Number</label><input value={will.testator.aadhaarNumber} onChange={e=>set("testator.aadhaarNumber",e.target.value)} onBlur={e=>handleIdBlur("Aadhaar Card",e.target.value,v=>set("testator.aadhaarNumber",v))} disabled={idFieldsLocked} className={idInputCls(IC)} placeholder="XXXX XXXX XXXX" title={idInputTitle(TIP_NO_ID_SAVED)}/></div>
-          </div>
-          <div><label className={LC}>Age (Years)</label><input type="number" value={will.testator.age} onChange={e=>set("testator.age",e.target.value)} className={IC+" max-w-[140px]"}/></div>
-          <FormBlock title="Marital Status">
-            <div className="flex gap-3">
-              {[{v:"unmarried",l:"Unmarried"},{v:"married",l:"Married"}].map(o=>(
-                <label key={o.v}
-                  className={`flex-1 flex items-center gap-2 p-3 rounded-xl border cursor-pointer transition-all ${will.testator.maritalStatus===o.v?"border-[#2F8132]/50 bg-[#2F8132]/10":"border-slate-200 hover:border-slate-300"}`}>
-                  <input type="radio" name="maritalStatus" className="sr-only peer" checked={will.testator.maritalStatus===o.v} onChange={()=>set("testator.maritalStatus",o.v)}/>
-                  <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all peer-focus-visible:ring-2 peer-focus-visible:ring-[#2F8132] peer-focus-visible:ring-offset-2 ${will.testator.maritalStatus===o.v?"border-[#2F8132] bg-[#2F8132]":"border-slate-300"}`}>
-                    {will.testator.maritalStatus===o.v&&<div className="w-1.5 h-1.5 rounded-full bg-white"/>}
-                  </div>
-                  <span className="text-slate-700 text-xs">{o.l}</span>
-                </label>
-              ))}
-            </div>
-            {will.testator.maritalStatus==="married"&&(
-              <div className="grid grid-cols-2 gap-3 mt-3">
-                <div><label className={LC}>Spouse's Name</label><input value={will.testator.spouseName} onChange={e=>set("testator.spouseName",e.target.value)} className={IC}/></div>
-                <div><label className={LC}>Spouse's Aadhaar Number</label><input value={will.testator.spouseAadhaarNumber} onChange={e=>set("testator.spouseAadhaarNumber",e.target.value)} onBlur={e=>handleIdBlur("Aadhaar Card",e.target.value,v=>set("testator.spouseAadhaarNumber",v))} disabled={idFieldsLocked} className={idInputCls(IC)} title={idInputTitle(TIP_NO_ID_SAVED)}/></div>
-              </div>
-            )}
-          </FormBlock>
-          <div className="grid grid-cols-2 gap-3">
-            <div><label className={LC}>Nationality</label><input value={will.testator.nationality} onChange={e=>set("testator.nationality",e.target.value)} className={IC} placeholder="e.g. Indian"/></div>
-            <div><label className={LC}>Occupation</label>
-              <select value={will.testator.occupation} onChange={e=>set("testator.occupation",e.target.value)} className={IC+" appearance-none"}>
-                <option value="">Select...</option>
-                {OCCUPATIONS.map(o=><option key={o}>{o}</option>)}
-              </select>
-            </div>
-          </div>
-          {will.testator.occupation==="Other"&&(
-            <div><label className={LC}>Please specify occupation</label>
-              <input value={will.testator.occupationOther} onChange={e=>set("testator.occupationOther",e.target.value)} className={IC}/></div>
-          )}
-          <div><label className={LC}>Permanent Residential Address</label>
-            <textarea value={will.testator.address} onChange={e=>set("testator.address",e.target.value)} rows={2} className={IC+" resize-none"}/></div>
-          {will.testator.maritalStatus==="married"&&(()=>{
-            const updateChild=(field: "sonNames"|"daughterNames", idx: number, value: string)=>
-              setWill(p=>({...p, testator:{...p.testator, [field]: p.testator[field].map((n,j)=>j===idx?value:n)}}));
-            const addChild=(field: "sonNames"|"daughterNames")=>
-              setWill(p=>({...p, testator:{...p.testator, [field]: [...p.testator[field], ""]}}));
-            const removeChild=(field: "sonNames"|"daughterNames", idx: number)=>
-              setWill(p=>({...p, testator:{...p.testator, [field]: p.testator[field].filter((_,j)=>j!==idx)}}));
-            return(
-              <FormBlock title="Children">
-                <label className={LC}>Sons</label>
-                {will.testator.sonNames.map((name,i)=>(
-                  <div key={i} className="flex items-center gap-2 mb-2">
-                    <input value={name} onChange={e=>updateChild("sonNames",i,e.target.value)} className={IC} placeholder="Son's full name"/>
-                    {will.testator.sonNames.length>1&&<button onClick={()=>removeChild("sonNames",i)} className="text-red-400 hover:text-red-500 shrink-0"><Trash2 size={14}/></button>}
-                  </div>
-                ))}
-                <button onClick={()=>addChild("sonNames")} className="text-xs text-[#2F8132] hover:text-[#1E5B22] font-semibold flex items-center gap-1 mb-4"><Plus size={12}/>Add Son</button>
-
-                <label className={LC}>Daughters</label>
-                {will.testator.daughterNames.map((name,i)=>(
-                  <div key={i} className="flex items-center gap-2 mb-2">
-                    <input value={name} onChange={e=>updateChild("daughterNames",i,e.target.value)} className={IC} placeholder="Daughter's full name"/>
-                    {will.testator.daughterNames.length>1&&<button onClick={()=>removeChild("daughterNames",i)} className="text-red-400 hover:text-red-500 shrink-0"><Trash2 size={14}/></button>}
-                  </div>
-                ))}
-                <button onClick={()=>addChild("daughterNames")} className="text-xs text-[#2F8132] hover:text-[#1E5B22] font-semibold flex items-center gap-1"><Plus size={12}/>Add Daughter</button>
-              </FormBlock>
-            );
-          })()}
-          <div className="grid grid-cols-3 gap-2">
-            <div><label className={LC}>Day</label><input value={will.testator.signDay} onChange={e=>set("testator.signDay",e.target.value)} className={IC} placeholder="DD"/></div>
-            <div><label className={LC}>Month</label>
-              <select value={will.testator.signMonth} onChange={e=>set("testator.signMonth",e.target.value)} className={IC+" appearance-none"}>
-                {MONTHS.map(m=><option key={m}>{m}</option>)}
-              </select>
-            </div>
-            <div><label className={LC}>Year</label><input value={will.testator.signYear} onChange={e=>set("testator.signYear",e.target.value)} className={IC}/></div>
-          </div>
-          <div><label className={LC}>Place of Signing</label><input value={will.testator.signPlace} onChange={e=>set("testator.signPlace",e.target.value)} className={IC} placeholder="City"/></div>
-          <Nav onNext={onNext}/>
-        </div>
+        <TestatorStep will={will} set={set} setWill={setWill} idFieldsLocked={idFieldsLocked} idInputCls={idInputCls}
+          idInputTitle={idInputTitle} handleIdBlur={handleIdBlur} testatorEmailEditable={testatorEmailEditable}
+          adminComments={adminComments} onNext={onNext}/>
       )}
 
       {/* ── STEP 2: TESTATOR (Goan — Open Will format) ───────── */}
-      {step===2&&willType==="goan"&&(()=>{
-        const t=will.goanTestator, s=will.goanSpouse;
-        const isMarried=t.maritalStatus==="married";
-        const goaHint=(addr: string)=>addr.trim()&&!addr.toLowerCase().includes("goa");
-        const personFields=(person: typeof t, path: "goanTestator"|"goanSpouse", lockMarital?: boolean)=>(
-          <>
-            <div className="grid grid-cols-3 gap-3">
-              <div className="col-span-1"><label className={LC}>Full Name</label><input value={person.name} onChange={e=>set(path+".name",e.target.value)} className={IC} placeholder="As per PAN / Aadhaar"/></div>
-              <div><label className={LC}>Gender</label>
-                <select value={person.gender} onChange={e=>set(path+".gender",e.target.value)} className={IC+" appearance-none"}>
-                  <option value="">Select</option>
-                  <option value="M">Male (Testator)</option>
-                  <option value="F">Female (Testatrix)</option>
-                </select>
-              </div>
-              <div><label className={LC}>Age</label><input type="number" value={person.age} onChange={e=>set(path+".age",e.target.value)} className={IC}/></div>
-            </div>
-            <div className="grid grid-cols-3 gap-3">
-              <div><label className={LC}>Relation</label>
-                <select value={person.parentRelation} onChange={e=>set(path+".parentRelation",e.target.value)} className={IC+" appearance-none"}>
-                  <option value="son of">Son of</option><option value="daughter of">Daughter of</option>
-                  <option value="wife of">Wife of</option><option value="husband of">Husband of</option>
-                </select>
-              </div>
-              <div className="col-span-2"><label className={LC}>Name of that person</label><input value={person.parentName} onChange={e=>set(path+".parentName",e.target.value)} className={IC}/></div>
-            </div>
-            <div className="grid grid-cols-3 gap-3">
-              <div><label className={LC}>Marital Status</label>
-                {lockMarital?(
-                  <input value="Married" disabled className={IC+" cursor-not-allowed text-slate-500"}/>
-                ):(
-                  <select value={person.maritalStatus} onChange={e=>set(path+".maritalStatus",e.target.value)} className={IC+" appearance-none"}>
-                    <option value="">Select</option>
-                    {GOAN_MARITAL_STATUSES.map(m=><option key={m} value={m}>{m[0].toUpperCase()+m.slice(1)}</option>)}
-                  </select>
-                )}
-              </div>
-              <div><label className={LC}>Occupation</label>
-                <select value={person.occupation} onChange={e=>set(path+".occupation",e.target.value)} className={IC+" appearance-none"}>
-                  <option value="">Select</option>
-                  {OCCUPATIONS.map(o=><option key={o}>{o}</option>)}
-                </select>
-              </div>
-              <div><label className={LC}>Nationality</label><input value={person.nationality} onChange={e=>set(path+".nationality",e.target.value)} className={IC}/></div>
-            </div>
-            {person.occupation==="Other"&&(
-              <div><label className={LC}>Please specify occupation</label><input value={person.occupationOther} onChange={e=>set(path+".occupationOther",e.target.value)} className={IC}/></div>
-            )}
-            <div className="grid grid-cols-2 gap-3">
-              <div><label className={LC}>PAN Card No.</label><input value={person.pan} onChange={e=>set(path+".pan",e.target.value)} onBlur={e=>handleIdBlur("PAN Card",e.target.value,v=>set(path+".pan",v))} disabled={idFieldsLocked} className={idInputCls(IC)} placeholder="ABCDE1234F" title={idInputTitle(TIP_NO_ID_SAVED)}/></div>
-              <div><label className={LC}>Aadhaar Card No.</label><input value={person.aadhaarNumber} onChange={e=>set(path+".aadhaarNumber",e.target.value)} onBlur={e=>handleIdBlur("Aadhaar Card",e.target.value,v=>set(path+".aadhaarNumber",v))} disabled={idFieldsLocked} className={idInputCls(IC)} title={idInputTitle(TIP_NO_ID_SAVED)}/></div>
-            </div>
-            <div><label className={LC}>Residential Address</label>
-              <textarea value={person.address} onChange={e=>set(path+".address",e.target.value)} rows={2} className={IC+" resize-none"}/>
-              {goaHint(person.address)&&<p className="text-[#1E5B22] text-[11px] mt-1">This Will is drafted under the Goa Succession framework — double-check this is a Goa address, matching your ID documents.</p>}
-            </div>
-          </>
-        );
-        return(
-          <div className="space-y-4">
-            <StepHeader icon={<User size={17}/>} title="Testator Details (Goan Will)" sub="Notarial Open Will format — your identity, and your spouse's if married"/>
-            {idFieldsLocked&&(
-              <div className="bg-amber-50 border border-amber-200 rounded-xl p-3.5 text-xs text-amber-700 flex items-start gap-2">
-                <Lock size={13} className="mt-0.5 shrink-0"/>{TIP_ID_LOCKED}
-              </div>
-            )}
-            {adminComments&&(
-              <div className="bg-amber-50 border border-amber-200 rounded-xl p-3.5 text-xs text-amber-700 flex items-start gap-2">
-                <AlertTriangle size={13} className="mt-0.5 shrink-0"/>
-                <div><span className="font-semibold">Reviewer comments:</span> {adminComments}</div>
-              </div>
-            )}
-            <div className="bg-slate-100 border border-slate-200 rounded-xl p-3.5 text-xs text-slate-600 flex items-start gap-2"><Info size={13} className="mt-0.5 shrink-0"/>You declare that you are of sound mind and executing this Will voluntarily, free from coercion or undue influence.</div>
-            <div>
-              <label className={LC}>Testator Email Address {!testatorEmailEditable&&<span className="text-[#2F8132] normal-case text-[9px]">(Locked)</span>}</label>
-              <div className="relative">
-                {!testatorEmailEditable&&<Lock size={11} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-600"/>}
-                <input type="email" value={will.testator.email} onChange={e=>set("testator.email",e.target.value)} disabled={!testatorEmailEditable}
-                  className={IC+(!testatorEmailEditable?" pr-8 cursor-not-allowed text-slate-500":"")} placeholder="you@example.com"/>
-              </div>
-            </div>
-            <FormBlock title="Your Details">
-              {personFields(t,"goanTestator")}
-            </FormBlock>
-            {isMarried&&(
-              <>
-                <div className="bg-[#1E5B22] text-white text-xs font-semibold rounded-xl p-3.5">
-                  Because you selected "Married", we'll also collect your spouse's details below — their own Will is generated at the same time, along with a Deed of Consent that you'll both need to sign.
-                </div>
-                <FormBlock title="Spouse's Details">
-                  {personFields(s,"goanSpouse",true)}
-                </FormBlock>
-              </>
-            )}
-            <Nav onNext={onNext}/>
-          </div>
-        );
-      })()}
+      {step===2&&willType==="goan"&&(
+        <GoanTestatorStep will={will} set={set} idFieldsLocked={idFieldsLocked} idInputCls={idInputCls}
+          idInputTitle={idInputTitle} handleIdBlur={handleIdBlur} testatorEmailEditable={testatorEmailEditable}
+          adminComments={adminComments} onNext={onNext}/>
+      )}
 
       {/* ── STEP 5: EXECUTOR ─────────────────────────────────── */}
       {step===5&&(
@@ -564,7 +357,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                 <label key={o.v}
                   className={`flex-1 flex items-center gap-2 p-3 rounded-xl border cursor-pointer transition-all ${will.executor.adminType===o.v?"border-[#2F8132]/50 bg-[#2F8132]/10":"border-slate-700 hover:border-slate-600"}`}>
                   <input type="radio" name="adminType" className="sr-only peer" checked={will.executor.adminType===o.v} onChange={()=>set("executor.adminType",o.v)}/>
-                  <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all peer-focus-visible:ring-2 peer-focus-visible:ring-[#2F8132] peer-focus-visible:ring-offset-2 ${will.executor.adminType===o.v?"border-[#2F8132] bg-[#2F8132]":"border-slate-600"}`}>
+                  <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all peer-focus-visible:ring-2 peer-focus-visible:ring-[#2F8132] peer-focus-visible:ring-offset-2 ${will.executor.adminType===o.v?"border-brand bg-brand":"border-slate-600"}`}>
                     {will.executor.adminType===o.v&&<div className="w-1.5 h-1.5 rounded-full bg-white"/>}
                   </div>
                   <span className="text-slate-700 text-xs">{o.l}</span>
@@ -656,7 +449,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
               </div>
             ))}
           </div>
-          <button onClick={addBene} className="w-full border-2 border-dashed border-slate-700 hover:border-[#2F8132] text-slate-500 hover:text-[#2F8132] rounded-xl py-2.5 flex items-center justify-center gap-2 transition-all text-sm">
+          <button onClick={addBene} className="w-full border-2 border-dashed border-slate-700 hover:border-brand text-slate-500 hover:text-brand rounded-xl py-2.5 flex items-center justify-center gap-2 transition-all text-sm">
             <Plus size={14}/>Add Beneficiary
           </button>
           <Nav onNext={onNext} onPrev={onPrev}/>
@@ -705,16 +498,16 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                     )}
                   </div>
                 ))}
-                <button onClick={()=>addItem(itemKey)} className="text-xs text-[#2F8132] hover:text-[#1E5B22] font-semibold flex items-center gap-1"><Plus size={12}/>Add another {label}</button>
+                <button onClick={()=>addItem(itemKey)} className="text-xs text-brand hover:text-brand-dark font-semibold flex items-center gap-1"><Plus size={12}/>Add another {label}</button>
               </div>
             );
             return(
               <>
                 <div className="bg-[#2F8132]/8 border border-[#2F8132]/25 rounded-xl p-4">
-                  <span className="inline-block bg-[#2F8132] text-[#ffffff] text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full mb-2">Included Automatically</span>
+                  <span className="inline-block bg-brand text-[#ffffff] text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full mb-2">Included Automatically</span>
                   <p className="text-slate-900 text-sm font-semibold mb-1">A. Financial Assets</p>
                   <p className="text-slate-600 text-xs leading-relaxed">I bequeath all my financial assets — including Bank Accounts, Fixed Deposits (FDs), Recurring Deposits (RDs), Public Provident Fund (PPF), Life Insurance, Stocks, Mutual Funds, Cryptocurrency (Crypto), Digital Wallets, National Pension System (NPS), Bonds, Alternative Investment Fund (AIF), Specialized Investment Fund (SIF), and Portfolio Management Services (PMS) — entirely to the nominees registered in those financial instruments.</p>
-                  <p className="text-[#1E5B22] text-xs leading-relaxed mt-2.5 pt-2.5 border-t border-dashed border-[#2F8132]/30"><strong>Why we recommend this:</strong> it's advisable to pass on financial assets by nomination rather than by listing individual accounts — nominations stay current automatically as balances and accounts change, so you don't need to update this Will every time. Just keep your nominations up to date.</p>
+                  <p className="text-brand-dark text-xs leading-relaxed mt-2.5 pt-2.5 border-t border-dashed border-[#2F8132]/30"><strong>Why we recommend this:</strong> it's advisable to pass on financial assets by nomination rather than by listing individual accounts — nominations stay current automatically as balances and accounts change, so you don't need to update this Will every time. Just keep your nominations up to date.</p>
                 </div>
                 <FormBlock title="B. Immovable Property">
                   <div className="space-y-4">
@@ -783,16 +576,16 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                     )}
                   </div>
                 ))}
-                <button onClick={()=>addItem(itemKey)} className="text-xs text-[#2F8132] hover:text-[#1E5B22] font-semibold flex items-center gap-1"><Plus size={12}/>Add another {label}</button>
+                <button onClick={()=>addItem(itemKey)} className="text-xs text-brand hover:text-brand-dark font-semibold flex items-center gap-1"><Plus size={12}/>Add another {label}</button>
               </div>
             );
             return(
               <>
                 <div className="bg-[#2F8132]/8 border border-[#2F8132]/25 rounded-xl p-4">
-                  <span className="inline-block bg-[#2F8132] text-[#ffffff] text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full mb-2">Included Automatically</span>
+                  <span className="inline-block bg-brand text-[#ffffff] text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full mb-2">Included Automatically</span>
                   <p className="text-slate-900 text-sm font-semibold mb-1">A. Financial Assets</p>
                   <p className="text-slate-600 text-xs leading-relaxed">I bequeath all my financial assets — including Bank Accounts, FDs, RDs, PPF, Life Insurance, Stocks, Mutual Funds, Crypto, Digital Wallets, NPS, Bonds, AIF, SIF, and PMS — entirely to the nominees registered in those financial instruments.</p>
-                  <p className="text-[#1E5B22] text-xs leading-relaxed mt-2.5 pt-2.5 border-t border-dashed border-[#2F8132]/30"><strong>Why we recommend this:</strong> it's advisable to pass on financial assets by nomination rather than by listing individual accounts — nominations stay current automatically as balances and accounts change, so you don't need to update this Will every time. Just keep your nominations up to date.</p>
+                  <p className="text-brand-dark text-xs leading-relaxed mt-2.5 pt-2.5 border-t border-dashed border-[#2F8132]/30"><strong>Why we recommend this:</strong> it's advisable to pass on financial assets by nomination rather than by listing individual accounts — nominations stay current automatically as balances and accounts change, so you don't need to update this Will every time. Just keep your nominations up to date.</p>
                 </div>
                 <FormBlock title="B. Immovable Property">
                   <div className="space-y-4">
@@ -830,7 +623,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                 <label key={o.v}
                   className={`flex-1 flex items-start gap-2 p-3 rounded-xl border cursor-pointer transition-all ${will.distributionMode===o.v?"border-[#2F8132]/50 bg-[#2F8132]/10":"border-slate-700 hover:border-slate-600"}`}>
                   <input type="radio" name="distributionMode" className="sr-only peer" checked={will.distributionMode===o.v} onChange={()=>setWill(p=>({...p,distributionMode:o.v as WillState["distributionMode"]}))}/>
-                  <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center mt-0.5 transition-all peer-focus-visible:ring-2 peer-focus-visible:ring-[#2F8132] peer-focus-visible:ring-offset-2 ${will.distributionMode===o.v?"border-[#2F8132] bg-[#2F8132]":"border-slate-600"}`}>
+                  <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center mt-0.5 transition-all peer-focus-visible:ring-2 peer-focus-visible:ring-[#2F8132] peer-focus-visible:ring-offset-2 ${will.distributionMode===o.v?"border-brand bg-brand":"border-slate-600"}`}>
                     {will.distributionMode===o.v&&<div className="w-1.5 h-1.5 rounded-full bg-white"/>}
                   </div>
                   <span className="text-slate-700 text-xs">{o.l}</span>
@@ -847,7 +640,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                   <label key={o.v}
                     className={`flex-1 flex items-center gap-2 p-2.5 rounded-xl border cursor-pointer transition-all ${will.globalMode===o.v?"border-[#2F8132]/50 bg-[#2F8132]/10":"border-slate-700"}`}>
                     <input type="radio" name="globalMode" className="sr-only peer" checked={will.globalMode===o.v} onChange={()=>setWill(p=>({...p,globalMode:o.v as WillState["globalMode"]}))}/>
-                    <div className={`w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center transition-all peer-focus-visible:ring-2 peer-focus-visible:ring-[#2F8132] peer-focus-visible:ring-offset-2 ${will.globalMode===o.v?"border-[#2F8132] bg-[#2F8132]":"border-slate-600"}`}>
+                    <div className={`w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center transition-all peer-focus-visible:ring-2 peer-focus-visible:ring-[#2F8132] peer-focus-visible:ring-offset-2 ${will.globalMode===o.v?"border-brand bg-brand":"border-slate-600"}`}>
                       {will.globalMode===o.v&&<div className="w-1 h-1 rounded-full bg-white"/>}
                     </div>
                     <span className="text-slate-700 text-xs">{o.l}</span>
@@ -860,7 +653,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                     <div key={b.id}>
                       <div className="flex items-center justify-between mb-1">
                         <span className="text-slate-700 text-xs">{b.name||"Unnamed"} <span className="text-slate-500">({b.relation})</span></span>
-                        <span className="text-[#2F8132] text-xs font-bold">{will.globalPercentages[b.id]||0}%</span>
+                        <span className="text-brand text-xs font-bold">{will.globalPercentages[b.id]||0}%</span>
                       </div>
                       <input type="range" min="0" max="100" value={will.globalPercentages[b.id]||0}
                         onChange={e=>setWill(p=>({...p,globalPercentages:{...p.globalPercentages,[b.id]:e.target.value}}))}
@@ -869,7 +662,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                   ))}
                   <div className="flex justify-between text-xs mt-2 pt-2 border-t border-slate-700">
                     <span className="text-slate-500">Total Allocated</span>
-                    <span className={`font-bold ${will.beneficiaries.reduce((s,b)=>s+(parseFloat(will.globalPercentages[b.id])||0),0)===100?"text-[#2F8132]":"text-amber-400"}`}>
+                    <span className={`font-bold ${will.beneficiaries.reduce((s,b)=>s+(parseFloat(will.globalPercentages[b.id])||0),0)===100?"text-brand":"text-amber-400"}`}>
                       {will.beneficiaries.reduce((s,b)=>s+(parseFloat(will.globalPercentages[b.id])||0),0)}%
                       {will.beneficiaries.reduce((s,b)=>s+(parseFloat(will.globalPercentages[b.id])||0),0)!==100&&
                         <span className="ml-2 text-amber-400 text-[10px] border border-amber-400/30 bg-amber-400/10 px-1.5 py-0.5 rounded-full">Must equal 100%</span>
@@ -954,9 +747,9 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                               <div className="flex items-center justify-between mt-1.5 pt-2 border-t border-slate-800">
                                 <span className="text-slate-500 text-xs">Total</span>
                                 <div className="flex items-center gap-2">
-                                  <span className={`font-bold serif ${valid?"text-[#2F8132]":"text-amber-400"}`}>{total}%</span>
+                                  <span className={`font-bold serif ${valid?"text-brand":"text-amber-400"}`}>{total}%</span>
                                   {!valid&&<span className="flex items-center gap-1 bg-amber-500/10 border border-amber-500/25 text-amber-400 text-[10px] px-2 py-0.5 rounded-full"><AlertTriangle size={9}/>Must equal 100%</span>}
-                                  {valid&&<CheckCircle size={12} className="text-[#2F8132]"/>}
+                                  {valid&&<CheckCircle size={12} className="text-brand"/>}
                                 </div>
                               </div>
                             </div>
@@ -1041,7 +834,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                 );
               })}
               <button onClick={()=>setWill(p=>({...p, allIndiaResidue:[...p.allIndiaResidue,{relation:"",relationOther:"",name:"",nationality:"",occupation:"",occupationOther:"",idType:"Aadhaar Card",idNumber:""}]}))}
-                className="text-xs text-[#2F8132] hover:text-[#1E5B22] font-semibold flex items-center gap-1"><Plus size={12}/>Add another beneficiary</button>
+                className="text-xs text-brand hover:text-brand-dark font-semibold flex items-center gap-1"><Plus size={12}/>Add another beneficiary</button>
             </FormBlock>
           ):willType==="goan"?(
             <FormBlock title="Residuary Clause">
@@ -1082,7 +875,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                 );
               })}
               <button onClick={()=>setWill(p=>({...p, goanResidue:[...p.goanResidue,{name:"",relation:"",relationOther:"",idType:"Aadhaar Card",idNumber:""}]}))}
-                className="text-xs text-[#2F8132] hover:text-[#1E5B22] font-semibold flex items-center gap-1"><Plus size={12}/>Add another residuary beneficiary</button>
+                className="text-xs text-brand hover:text-brand-dark font-semibold flex items-center gap-1"><Plus size={12}/>Add another residuary beneficiary</button>
             </FormBlock>
           ):(
             <FormBlock title="Section V — Rest & Residue Clause">
@@ -1116,7 +909,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
       {step===8&&(
         <div className="space-y-4">
           <StepHeader icon={<PenTool size={17}/>} title="Witnesses" sub="Section VII — Signing witnesses"/>
-          <div className="bg-[#2F8132]/8 border border-[#2F8132]/25 rounded-xl p-3.5 text-xs text-[#1E5B22] leading-relaxed">
+          <div className="bg-[#2F8132]/8 border border-[#2F8132]/25 rounded-xl p-3.5 text-xs text-brand-dark leading-relaxed">
             <strong className="text-slate-900">Who can be a witness?</strong> Under the Indian Succession Act, 1925, a Will needs at least two witnesses. Any adult (18+) of sound mind who can sign their own name qualifies — they don't need to know the contents, and don't need to be related to you. Each witness must see you sign (or be told directly that you've signed), then sign it themselves in your presence. Avoid using someone who also inherits under the Will as a witness — for Christians and Parsis this can cancel that person's inheritance. Your executor is allowed to be a witness.
           </div>
           {willType==="goan"&&(()=>{
@@ -1173,7 +966,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                     );
                   })}
                   <button onClick={()=>setWill(p=>({...p,goanWitnesses:[...p.goanWitnesses,{name:"",parentRelation:"s/o.",parentName:"",age:"",maritalStatus:"",occupation:"",address:"",pan:"",aadhaarNumber:""}]}))}
-                    className="text-xs text-[#2F8132] hover:text-[#1E5B22] font-semibold flex items-center gap-1 mt-3"><Plus size={12}/>Add another witness</button>
+                    className="text-xs text-brand hover:text-brand-dark font-semibold flex items-center gap-1 mt-3"><Plus size={12}/>Add another witness</button>
                 </FormBlock>
 
                 {will.goanTestator.maritalStatus==="married"&&(
@@ -1206,7 +999,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                           );
                         })}
                         <button onClick={()=>setWill(p=>({...p,goanDeedWitnesses:[...p.goanDeedWitnesses,{name:"",parentRelation:"s/o.",parentName:"",age:"",maritalStatus:"",occupation:"",address:"",pan:"",aadhaarNumber:""}]}))}
-                          className="text-xs text-[#2F8132] hover:text-[#1E5B22] font-semibold flex items-center gap-1 mt-3"><Plus size={12}/>Add another witness for the Deed</button>
+                          className="text-xs text-brand hover:text-brand-dark font-semibold flex items-center gap-1 mt-3"><Plus size={12}/>Add another witness for the Deed</button>
                       </>
                     )}
                   </FormBlock>
@@ -1285,7 +1078,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
           </FormBlock>
           )}
           {willType!=="allindia"&&willType!=="goan"&&(
-            <div className="bg-[#2F8132]/8 border border-[#2F8132]/20 rounded-xl p-4 text-xs text-[#1E5B22]">
+            <div className="bg-[#2F8132]/8 border border-[#2F8132]/20 rounded-xl p-4 text-xs text-brand-dark">
               All rest, residue and remainder of my estate shall vest absolutely in <strong>{will.beneficiaries.find(b=>String(b.id)===String(will.residualBeneId))?.name||"Selected Beneficiary"}</strong>.
             </div>
           )}
@@ -1308,7 +1101,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                 <Send size={16} className="shrink-0"/>{submitStatus==="saving"?MSG_SAVING:(adminReview||adminComplete)?BTN_COMPLETE_REVIEW:BTN_SUBMIT_REVIEW}
               </button>
             )}
-            <button onClick={onGenerate} className="w-full bg-[#2F8132] hover:bg-[#1E5B22] text-[#ffffff] font-bold py-3.5 rounded-xl text-sm transition-colors flex items-center justify-center gap-2 whitespace-nowrap">
+            <button onClick={onGenerate} className="w-full bg-brand hover:bg-brand-dark text-[#ffffff] font-bold py-3.5 rounded-xl text-sm transition-colors flex items-center justify-center gap-2 whitespace-nowrap">
               <FileText size={16} className="shrink-0"/>Generate Complete Will Document <span aria-hidden="true">→</span>
             </button>
           </div>

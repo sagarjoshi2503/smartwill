@@ -170,6 +170,18 @@ button:hover, .theme-button:hover {
   line-height: 1.05;
 }
 
+/* Semantic brand-color classes, built on the --green tokens above. Prefer
+   these over a raw `text-[#2F8132]`/`bg-[#2F8132]` arbitrary Tailwind value
+   at full opacity — one place to repoint the brand color from. (Opacity
+   variants like `border-[#2F8132]/30` still need the arbitrary-value form;
+   Tailwind's JIT only detects class names that appear as literal strings in
+   source, so these colors can't be pulled from a JS/TS constant instead.) */
+.text-brand { color: var(--green); }
+.bg-brand { background-color: var(--green); }
+.border-brand { border-color: var(--green); }
+.text-brand-dark { color: var(--green-dark); }
+.bg-brand-dark { background-color: var(--green-dark); }
+
 .fade-in {
   animation: fadeInUp 0.28s ease-out;
 }

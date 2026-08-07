@@ -33,7 +33,7 @@ export default function PartnerView({onContactUs}:{
     <div className="fade-in">
       <section className="bg-slate-50 py-14 px-5 border-b border-slate-200">
         <div className="max-w-4xl mx-auto">
-          <p className="text-[#2F8132] tracking-[0.35em] uppercase text-xs mb-3">Who Is This For?</p>
+          <p className="text-brand tracking-[0.35em] uppercase text-xs mb-3">Who Is This For?</p>
           <h1 className="text-3xl md:text-4xl font-extrabold text-slate-900 serif mb-6">Partner with Us</h1>
           <h3 className="text-slate-900 font-semibold text-sm mb-3">Are you one of these professionals? This is for you:</h3>
           <div className="grid sm:grid-cols-2 gap-2.5 mb-6">
@@ -51,7 +51,7 @@ export default function PartnerView({onContactUs}:{
           <p className="text-slate-500 text-sm mb-6">Tell us a bit about yourself and the services you're interested in.</p>
 
           {submitted ? (
-            <div className="bg-[#EDF6EA] border border-[#2F8132]/25 rounded-xl p-4 text-sm text-[#1E5B22]">
+            <div className="bg-[#EDF6EA] border border-[#2F8132]/25 rounded-xl p-4 text-sm text-brand-dark">
               Thanks, {name || "there"} — your partner application has been recorded. We'll be in touch shortly.
             </div>
           ) : (

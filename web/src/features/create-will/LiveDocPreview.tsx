@@ -11,7 +11,7 @@ export default function LiveDocPreview({will,residualBene}:{
   return(
     <div className="w-full max-w-[520px] rounded-xl shadow-2xl overflow-hidden border border-[#2F8132]/20">
       <div className="bg-white border-b border-slate-200 px-4 py-2.5 flex items-center gap-2">
-        <span className="text-[#2F8132] text-xs font-semibold flex items-center gap-1.5"><Eye size={12}/>Live Preview — Will Document</span>
+        <span className="text-brand text-xs font-semibold flex items-center gap-1.5"><Eye size={12}/>Live Preview — Will Document</span>
       </div>
       <div className="bg-white p-7 text-[12.5px] leading-relaxed" style={{fontFamily:"'Source Serif 4','Times New Roman',serif",color:"#14181B"}}>
         <div className="text-center mb-4">

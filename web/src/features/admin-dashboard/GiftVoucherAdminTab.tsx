@@ -26,9 +26,26 @@ const GEN_PLANS = [
 ];
 
 const BADGE_STYLE: Record<string, string> = {
-  ACTIVE: "bg-[#EDF6EA] text-[#1E5B22]",
+  ACTIVE: "bg-[#EDF6EA] text-brand-dark",
   REDEEMED: "bg-amber-50 text-amber-700",
   EXPIRED: "bg-red-50 text-red-600",
+};
+
+// Human-readable labels for the raw camelCase keys the verify endpoint
+// returns (see api/_app/features/gift_voucher/service.py's verify_voucher) —
+// falls back to the raw key itself for anything not listed here.
+const VERIFY_FIELD_LABELS: Record<string, string> = {
+  code: "Code",
+  status: "Status",
+  planLabel: "WillType",
+  amount: "Amount",
+  expiresAt: "Expires On",
+};
+
+const formatVerifyValue = (key: string, value: unknown): string => {
+  if(key==="amount" && typeof value==="number") return `₹${value.toLocaleString("en-IN")}`;
+  if(key==="expiresAt" && typeof value==="string") return new Date(value).toLocaleDateString();
+  return String(value);
 };
 
 export default function GiftVoucherAdminTab(){
@@ -132,7 +149,7 @@ export default function GiftVoucherAdminTab(){
         ] as const).map(t=>(
           <button key={t.v}
             onClick={()=>{ setSubTab(t.v); if(t.v==="codes") loadCodes(search); }}
-            className={`flex-1 py-3 text-sm font-semibold transition-colors ${subTab===t.v?"text-[#2F8132] border-b-2 border-[#2F8132] bg-[#EDF6EA]":"text-slate-500 border-b-2 border-transparent hover:text-slate-800"}`}>
+            className={`flex-1 py-3 text-sm font-semibold transition-colors ${subTab===t.v?"text-brand border-b-2 border-brand bg-[#EDF6EA]":"text-slate-500 border-b-2 border-transparent hover:text-slate-800"}`}>
             {t.label}
           </button>
         ))}
@@ -173,7 +190,7 @@ export default function GiftVoucherAdminTab(){
                 <div className="text-xs text-slate-500 mb-1">{genCodes.length} code(s) generated</div>
                 <ul className="space-y-1">
                   {genCodes.map(c=>(
-                    <li key={c} className="font-mono font-bold text-[#1E5B22] text-sm tracking-wide">{c}</li>
+                    <li key={c} className="font-mono font-bold text-brand-dark text-sm tracking-wide">{c}</li>
                   ))}
                 </ul>
               </div>
@@ -202,7 +219,7 @@ export default function GiftVoucherAdminTab(){
                   <tbody>
                     {codes.map(v=>(
                       <tr key={v.code} className="border-b border-slate-100 hover:bg-slate-50">
-                        <td className="px-2 py-2 font-mono font-bold text-[#1E5B22] whitespace-nowrap">{v.code}</td>
+                        <td className="px-2 py-2 font-mono font-bold text-brand-dark whitespace-nowrap">{v.code}</td>
                         <td className="px-2 py-2 text-slate-600"><div>{v.recipientName}</div><div className="text-slate-400">{v.recipientEmail}</div></td>
                         <td className="px-2 py-2 text-slate-600 whitespace-nowrap">{v.planLabel}</td>
                         <td className="px-2 py-2 text-slate-600 whitespace-nowrap">₹{v.amount?.toLocaleString("en-IN")}</td>
@@ -230,8 +247,8 @@ export default function GiftVoucherAdminTab(){
               <div className="bg-[#EDF6EA] border border-slate-200 rounded-xl p-4 text-sm">
                 {Object.entries(verifyResult).filter(([k])=>k!=="found").map(([k,v])=>(
                   <div key={k} className="flex justify-between py-1 border-b border-black/5 last:border-0">
-                    <span className="text-slate-500">{k}</span>
-                    <span className="font-semibold text-slate-800">{String(v)}</span>
+                    <span className="text-slate-500">{VERIFY_FIELD_LABELS[k]||k}</span>
+                    <span className="font-semibold text-slate-800">{formatVerifyValue(k,v)}</span>
                   </div>
                 ))}
               </div>

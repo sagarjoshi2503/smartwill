@@ -37,6 +37,9 @@ OTP_COUNTRY_CODE = "+91"
 # Max wrong-code guesses allowed against a single requested OTP before it's
 # invalidated and a fresh one must be requested (mitigates brute force).
 OTP_MAX_ATTEMPTS = 5
+# Approximate days-per-month used to compute a gift voucher's expiry —
+# see gift_voucher/service.py's _build_voucher_document.
+GIFT_VOUCHER_DAYS_PER_MONTH = 30
 
 # --- JWT auth ---
 JWT_ALGORITHM = "HS256"

@@ -78,7 +78,7 @@ def test_save_strips_all_india_asset_and_residue_ids_before_persisting(client, f
                 "houseFlat": [{"description": "Flat 1", "beneficiary": "Bob", "relation": "Son", "idType": "PAN Card", "idNumber": "HHHHH8888H"}],
                 "vehicle": [],
             },
-            "allIndiaResidue": [{"relation": "Brother", "name": "Sam", "aadhaarNumber": "555566667777"}],
+            "allIndiaResidue": [{"relation": "Brother", "name": "Sam", "idNumber": "555566667777"}],
         },
         "testatorEmail": "jane@example.com",
     }
@@ -95,7 +95,7 @@ def test_save_strips_all_india_asset_and_residue_ids_before_persisting(client, f
     assert house["relation"] == "Son"
     assert house["idType"] == "PAN Card"
     assert doc["will"]["allIndiaAssets"]["vehicle"] == []
-    assert doc["will"]["allIndiaResidue"][0]["aadhaarNumber"] == ""
+    assert doc["will"]["allIndiaResidue"][0]["idNumber"] == ""
     assert doc["will"]["allIndiaResidue"][0]["name"] == "Sam"
 
 
