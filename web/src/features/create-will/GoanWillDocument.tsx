@@ -63,7 +63,12 @@ export default function GoanWillDocument({will,person,onBack,onPrint,willDocRef}
           .no-print{display:none!important}
           body{margin:0;padding:0}
           .will-print-page{box-shadow:none!important;margin:0!important;border-radius:0!important;max-width:100%!important;padding:0!important}
-          .pdf-page{min-height:250mm;display:flex;flex-direction:column;justify-content:space-between}
+          /* Must not exceed the printable content height (A4 297mm minus
+             the 3cm top + 3cm bottom margins = 237mm) — a taller min-height
+             forces every page to overflow onto a near-blank continuation
+             page, which is where the extra blank pages in generated PDFs
+             came from. */
+          .pdf-page{min-height:calc(297mm - 3cm - 3cm);display:flex;flex-direction:column;justify-content:space-between}
           .pdf-page-break{break-after:page}
           .pdf-sig-line{break-inside:avoid;break-before:avoid}
         }
@@ -169,7 +174,7 @@ export default function GoanWillDocument({will,person,onBack,onPrint,willDocRef}
             <div className="mb-2">
               <div className="inline-block min-w-[280px]">
                 <div className="border-b-2 border-slate-800 pt-10 mb-1"/>
-                <p className="text-xs text-slate-500">Signature of Testator/Testatrix</p>
+                <p className="mb-1">Signature of Testator/Testatrix</p>
               </div>
             </div>
             <p className="mb-1">Name of Testator/Testatrix: <strong>{person.name||blank}</strong></p>
@@ -180,9 +185,8 @@ export default function GoanWillDocument({will,person,onBack,onPrint,willDocRef}
             {goanWitnesses.map((w,i)=>(
               <div key={i} className="mb-10">
                 <p className="mb-1">{i+1})</p>
-                <p className="mb-8">Name: <strong>{w.name||blank}</strong></p>
-                <div className="border-b-2 border-slate-800 pt-8 mb-1 max-w-[280px]"/>
-                <p className="text-xs text-slate-500">Signature</p>
+                <p className="mb-1">Name: <strong>{w.name||blank}</strong></p>
+                <p>Signature: {blank}</p>
               </div>
             ))}
           </Page>

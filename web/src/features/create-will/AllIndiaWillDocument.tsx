@@ -219,7 +219,7 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,w
             <div className="mb-6">
               <div className="inline-block min-w-[280px]">
                 <div className="border-b-2 border-slate-800 pt-10 mb-1"/>
-                <p className="text-xs text-slate-500">Signature of Testator/Testatrix</p>
+                <p className="mb-1">Signature of Testator/Testatrix</p>
               </div>
             </div>
 
@@ -234,7 +234,7 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,w
             <div className="mb-2">
               <div className="inline-block min-w-[280px]">
                 <div className="border-b-2 border-slate-800 pt-10 mb-1"/>
-                <p className="text-xs text-slate-500">Signature of Testator/Testatrix</p>
+                <p className="mb-1">Signature of Testator/Testatrix</p>
               </div>
             </div>
             <p className="mb-1">Name of Testator/Testatrix: <strong>{testator.fullName||blank}</strong></p>
@@ -245,9 +245,8 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,w
             {witnesses.map((w,i)=>(
               <div key={i} className="mb-10">
                 <p className="mb-1">{i+1})</p>
-                <p className="mb-8">Name: <strong>{w.name||blank}</strong></p>
-                <div className="border-b-2 border-slate-800 pt-8 mb-1 max-w-[280px]"/>
-                <p className="text-xs text-slate-500">Signature</p>
+                <p className="mb-1">Name: <strong>{w.name||blank}</strong></p>
+                <p>Signature: {blank}</p>
               </div>
             ))}
           </Page>

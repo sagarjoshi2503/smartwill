@@ -184,16 +184,16 @@ export default function TestatorWillsView({email,onCreateNew,onEditWill,onViewWi
                         ) : (
                           <span className="text-slate-400 text-xs">Locked</span>
                         )}
-                        {w.status===STATUS_COMPLETED && (
-                          <button onClick={onDownloadAnnex}
-                            className="flex items-center gap-1.5 text-brand hover:text-brand-dark text-xs font-semibold transition-colors">
-                            <FileStack size={11}/>Download Annex
-                          </button>
-                        )}
                         <button onClick={()=>handleDelete(w.willId)} disabled={busyId===w.willId}
                           className="flex items-center gap-1.5 text-red-500 hover:text-red-600 text-xs font-semibold transition-colors disabled:opacity-50">
                           <Trash2 size={11}/>Delete
                         </button>
+                        {w.status===STATUS_COMPLETED && (
+                          <button onClick={onDownloadAnnex} title="Download Annex"
+                            className="flex items-center justify-center w-6 h-6 rounded-md text-brand hover:text-brand-dark hover:bg-brand/10 transition-colors">
+                            <FileStack size={13}/>
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>
