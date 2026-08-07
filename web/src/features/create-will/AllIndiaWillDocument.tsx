@@ -50,7 +50,7 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,w
   // Witnesses page at the end which carries their signatures.
   const witnessParticulars = witnesses.map((w,i)=>(
     <span key={i}>
-      {String.fromCharCode(97+i)}) <strong>{w.name||blank}</strong> {w.parentRelation||"son/daughter/wife"} of <strong>{w.parentName||blank}</strong>, aged <strong>{w.age||"___"}</strong>, {w.maritalStatus||"unmarried/married"}, nationality <strong>{w.nationality?`${w.nationality} National`:blank}</strong>, occupation <strong>{occupationOf(w)||blank}</strong>, resident of <strong>{w.address||blank}</strong> bearing Aadhaar Number <strong>{w.aadhaarNumber||blank}</strong>{i<witnesses.length-1?"; ":" "}
+      {String.fromCharCode(97+i)}) <strong>{w.name||blank}</strong> {w.parentRelation||"son/daughter/wife"} of <strong>{w.parentName||blank}</strong>, aged <strong>{w.age||"___"}</strong>, {w.maritalStatus||"unmarried/married"} nationality <strong>{w.nationality?`${w.nationality} National`:blank}</strong>, occupation <strong>{occupationOf(w)||blank}</strong>, resident of <strong>{w.address||blank}</strong> bearing Aadhaar Number <strong>{w.aadhaarNumber||blank}</strong>{i<witnesses.length-1?"; ":" "}
     </span>
   ));
 
@@ -150,7 +150,7 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,w
             <h1 className="text-center text-2xl font-bold tracking-widest uppercase mb-6">WILL</h1>
 
             <p className="text-justify mb-5">
-              I, <strong>{testator.fullName||blank}</strong>, having PAN <strong>{testator.pan||blank}</strong>, Aadhaar No. <strong>{testator.aadhaarNumber||blank}</strong>, {testator.relation} of <strong>{testator.parentSpouseName||blank}</strong>, aged <strong>{testator.age||"___"}</strong>, {testator.maritalStatus}, nationality <strong>{testator.nationality?`${testator.nationality} National`:blank}</strong>, occupation <strong>{occupationOf(testator)||blank}</strong>, resident of <strong>{testator.address||blank}</strong>
+              I, <strong>{testator.fullName||blank}</strong>, having PAN <strong>{testator.pan||blank}</strong>, Aadhaar No. <strong>{testator.aadhaarNumber||blank}</strong>, {testator.relation} of <strong>{testator.parentSpouseName||blank}</strong>, aged <strong>{testator.age||"___"}</strong>, {testator.maritalStatus} nationality <strong>{testator.nationality?`${testator.nationality} National`:blank}</strong>, occupation <strong>{occupationOf(testator)||blank}</strong>, resident of <strong>{testator.address||blank}</strong>
               {testator.maritalStatus==="married"&&(
                 <>, I am married to <strong>{testator.spouseName||blank}</strong>, bearing Aadhaar No. <strong>{testator.spouseAadhaarNumber||blank}</strong> and I have {sonNames.length===1?"one":sonNames.length||"___"} son, namely, <strong>{sonNames.join(", ")||blank}</strong> and {daughterNames.length===1?"one":daughterNames.length||"___"} daughter, namely, <strong>{daughterNames.join(", ")||blank}</strong>
                 </>

@@ -27,7 +27,7 @@ export default function AllIndiaLiveDocPreview({will}:{
 
   const witnessParticulars = witnesses.map((w,i)=>(
     <span key={i}>
-      {String.fromCharCode(97+i)}) <strong>{w.name||blank}</strong> {w.parentRelation||"son/daughter/wife"} of <strong>{w.parentName||blank}</strong>, aged <strong>{w.age||"___"}</strong>, {w.maritalStatus||"unmarried/married"}, nationality <strong>{w.nationality?`${w.nationality} National`:blank}</strong>, occupation <strong>{occupationOf(w)||blank}</strong>, resident of <strong>{w.address||blank}</strong> bearing Aadhaar Number <strong>{w.aadhaarNumber||blank}</strong>{i<witnesses.length-1?"; ":" "}
+      {String.fromCharCode(97+i)}) <strong>{w.name||blank}</strong> {w.parentRelation||"son/daughter/wife"} of <strong>{w.parentName||blank}</strong>, aged <strong>{w.age||"___"}</strong>, {w.maritalStatus||"unmarried/married"} nationality <strong>{w.nationality?`${w.nationality} National`:blank}</strong>, occupation <strong>{occupationOf(w)||blank}</strong>, resident of <strong>{w.address||blank}</strong> bearing Aadhaar Number <strong>{w.aadhaarNumber||blank}</strong>{i<witnesses.length-1?"; ":" "}
     </span>
   ));
 
