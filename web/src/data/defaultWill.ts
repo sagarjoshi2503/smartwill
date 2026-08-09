@@ -20,7 +20,7 @@ export const DEFAULT_WILL: WillState = {
   // signDay/Month/Year default to today's real date since that's simply correct,
   // not placeholder demo data.
   testator: {
-    email:"", fullName:"", pan:"", aadhaarNumber:"",
+    email:"", fullName:"", gender:"", pan:"", aadhaarNumber:"",
     relation:"son", parentSpouseName:"",
     age:"", maritalStatus:"unmarried", nationality:"", occupation:"", occupationOther:"",
     spouseName:"", spouseAadhaarNumber:"",
@@ -33,9 +33,11 @@ export const DEFAULT_WILL: WillState = {
   // fabricated name/address/ID-number text remains.
   executor: {
     wantsExecutor:true,
+    executorType:"individual", // "individual" | "org"
     name:"", idType:"Aadhaar Card", idNumber:"",
     address:"",
     relation:"Son",
+    orgName:"", orgRepName:"", orgRegNumber:"", orgAddress:"",
     hasJoint:false,
     jointName:"", jointIdType:"PAN Card", jointIdNumber:"", jointAddress:"",
     adminType:"jointly_severally", // "jointly" | "jointly_severally"
@@ -45,7 +47,7 @@ export const DEFAULT_WILL: WillState = {
   // Section III - Guardians
   guardian: {
     hasMinors:false,
-    name:"", idType:"PAN Card", idNumber:"", address:"",
+    name:"", relation:"", idType:"PAN Card", idNumber:"", address:"",
     hasSubstitute:false,
     subName:"", subIdType:"PAN Card", subIdNumber:"", subAddress:"",
   },

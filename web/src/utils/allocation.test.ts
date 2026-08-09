@@ -2,9 +2,10 @@ import { describe, expect, it } from "vitest";
 import { allocTotal, formatAllocCompact, formatAllocFull } from "./allocation";
 import type { AssetInstance, Beneficiary } from "../types";
 
+const blankBeneFields = { age: "", maritalStatus: "", occupation: "", occupationOther: "", address: "", pan: "", aadhaarNumber: "" };
 const BENEFICIARIES: Beneficiary[] = [
-  { id: 1, name: "Priya Mehta", relation: "Daughter" },
-  { id: 2, name: "Rohan Mehta", relation: "Son" },
+  { id: 1, name: "Priya Mehta", relation: "Daughter", ...blankBeneFields },
+  { id: 2, name: "Rohan Mehta", relation: "Son", ...blankBeneFields },
 ];
 
 const DUMMY_CAT_ITEM = {

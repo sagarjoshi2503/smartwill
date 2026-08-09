@@ -47,6 +47,11 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,w
   const sonNames = testator.sonNames.filter(Boolean);
   const daughterNames = testator.daughterNames.filter(Boolean);
 
+  // Prints the correctly gendered term once the testator has picked a
+  // Gender; falls back to the original slash-form so in-progress Wills
+  // started before this field existed still render exactly as before.
+  const title = testator.gender==="male" ? "Testator" : testator.gender==="female" ? "Testatrix" : "Testator/Testatrix";
+
   // Both witnesses' full particulars are recited inline in the opening
   // clause (matching the reference template — see api/Data/NON GOAN-All
   // India/NON GOAN WILL FINAL DOCUMENT), in addition to the standalone
@@ -222,7 +227,7 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,w
             <div className="mb-6">
               <div className="inline-block min-w-[280px]">
                 <div className="border-b-2 border-slate-800 pt-10 mb-1"/>
-                <p className="mb-1">Signature of Testator/Testatrix</p>
+                <p className="mb-1">Signature of {title}</p>
               </div>
             </div>
 
@@ -231,16 +236,16 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,w
             </p>
 
             <p className="text-justify mb-8">
-              Testator/Testatrix understands and approves the contents of document before signing and was not forced to do so by any person.
+              {title} understands and approves the contents of document before signing and was not forced to do so by any person.
             </p>
 
             <div className="mb-2">
               <div className="inline-block min-w-[280px]">
                 <div className="border-b-2 border-slate-800 pt-10 mb-1"/>
-                <p className="mb-1">Signature of Testator/Testatrix</p>
+                <p className="mb-1">Signature of {title}</p>
               </div>
             </div>
-            <p className="mb-1">Name of Testator/Testatrix: <strong>{testator.fullName||blank}</strong></p>
+            <p className="mb-1">Name of {title}: <strong>{testator.fullName||blank}</strong></p>
             <p className="mb-1">Place: <strong>{testator.signPlace||blank}</strong></p>
             <p className="mb-8">Date: <strong>{signDateDDMMYYYY}</strong></p>
 

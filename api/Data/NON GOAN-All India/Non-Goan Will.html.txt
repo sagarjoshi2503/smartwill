@@ -1,0 +1,1410 @@
+Content is user-generated and unverified.
+
+
+9
+Learn how to customize
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Forward Legacy — Will Builder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #14181B;
+    --ink-soft: #5C6570;
+    --ink-faint: #8A9096;
+    --green: #2F8132;
+    --green-dark: #1E5B22;
+    --green-light: #8BC34A;
+    --green-tint: #EDF6EA;
+    --bg: #FFFFFF;
+    --bg-soft: #F5F7F3;
+    --border: #E5E8E3;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background-color: var(--bg-soft);
+    color: var(--ink-soft);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    padding: 20px 16px 80px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .app { max-width: 860px; margin: 0 auto; }
+
+  /* ---------- persistent top tabs ---------- */
+  .tabs-wrap {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    padding: 12px 0;
+    background: var(--bg-soft);
+  }
+  .tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 6px;
+    box-shadow: 0 4px 14px rgba(20,24,27,0.06);
+    max-width: 860px;
+    margin: 0 auto;
+  }
+  .tab {
+    flex: 1 1 auto;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    padding: 10px 6px;
+    border-radius: 7px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+  }
+  .tab:hover { color: var(--green-dark); background: var(--green-tint); }
+  .tab.active { background: var(--green); color: #fff; }
+  .tab.done::after { content: " ✓"; }
+  @media (max-width: 700px) {
+    .tab { font-size: 10.5px; padding: 9px 4px; }
+  }
+
+  .container {
+    background-color: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 48px;
+    box-shadow: 0 4px 20px rgba(20, 24, 27, 0.03);
+    margin-top: 8px;
+  }
+
+  .page { display: none; }
+  .page.active { display: block; animation: fadeIn 0.25s ease; }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px);} to { opacity: 1; transform: translateY(0);} }
+
+  .header { border-bottom: 2px solid var(--green-tint); padding-bottom: 24px; margin-bottom: 32px; }
+
+  .badge {
+    display: inline-block;
+    background-color: var(--green-tint);
+    color: var(--green-dark);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    padding: 6px 12px;
+    border-radius: 20px;
+    margin-bottom: 12px;
+  }
+
+  h1 {
+    font-family: 'Source Serif 4', Georgia, serif;
+    color: var(--ink);
+    font-size: 30px;
+    font-weight: 700;
+    line-height: 1.25;
+    margin-bottom: 8px;
+  }
+
+  h2.section-title {
+    font-family: 'Source Serif 4', Georgia, serif;
+    color: var(--ink);
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .section-sub { color: var(--ink-faint); font-size: 14px; margin-bottom: 20px; }
+  .subtitle { color: var(--ink-faint); font-size: 15px; }
+  .intro-text { margin-bottom: 24px; font-size: 16px; }
+
+  /* ---------- info cards ---------- */
+  .info-card {
+    background-color: var(--bg-soft);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--green);
+    border-radius: 8px;
+    padding: 24px;
+    margin-bottom: 24px;
+  }
+  .info-card h3 {
+    color: var(--ink);
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .info-card h3 svg { fill: var(--green); flex-shrink: 0; }
+
+  ul { list-style: none; margin-top: 8px; }
+  ul li { position: relative; padding-left: 24px; margin-bottom: 12px; color: var(--ink-soft); }
+  ul li:last-child { margin-bottom: 0; }
+  ul li::before { content: "•"; color: var(--green); font-weight: bold; font-size: 18px; position: absolute; left: 8px; top: -2px; }
+  ul li strong { color: var(--ink); }
+
+  .warning-note {
+    display: flex; align-items: flex-start; gap: 8px;
+    background-color: #FBF3E4; border: 1px solid #EFDCB0; border-radius: 6px;
+    padding: 10px 14px; margin-top: 14px; font-size: 14px; color: #7A5A15;
+  }
+
+  .name-note-card { background-color: var(--bg-soft); border: 1px solid var(--border); border-radius: 8px; padding: 24px; margin-bottom: 20px; }
+  .name-note-card p { margin-bottom: 14px; }
+  .name-note-card p:last-child { margin-bottom: 0; }
+  .action-required { background-color: var(--green-tint); border-radius: 6px; padding: 14px 16px; font-size: 14px; color: var(--green-dark); }
+  .action-required strong { color: var(--ink); }
+
+  table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 14px; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  thead th { background-color: var(--green); color: #fff; text-align: left; padding: 12px 16px; font-weight: 600; font-size: 13px; letter-spacing: 0.3px; }
+  tbody td { padding: 12px 16px; border-top: 1px solid var(--border); color: var(--ink-soft); }
+  tbody tr:nth-child(even) { background-color: var(--bg-soft); }
+  tbody td:first-child { color: var(--ink); font-weight: 600; width: 35%; }
+  .table-caption { font-size: 13px; color: var(--ink-faint); margin-bottom: 10px; font-style: italic; }
+
+  .footer-note { background-color: var(--green-tint); border-radius: 8px; padding: 20px; margin-top: 32px; display: flex; align-items: flex-start; gap: 12px; }
+  .footer-note p { font-size: 14px; color: var(--green-dark); margin: 0; }
+
+  /* ---------- form elements ---------- */
+  .field-group { margin-bottom: 18px; }
+  label { display: block; font-size: 13px; font-weight: 600; color: var(--ink); margin-bottom: 6px; }
+  label .req { color: var(--green); }
+  label .opt { color: var(--ink-faint); font-weight: 400; }
+  input[type="text"], input[type="number"], input[type="email"], select, textarea {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: inherit;
+    font-size: 14px;
+    transition: border-color 0.15s ease;
+  }
+  input:focus, select:focus, textarea:focus { outline: none; border-color: var(--green); box-shadow: 0 0 0 3px rgba(139,195,74,0.25); }
+  input[disabled] { background: var(--bg-soft); color: var(--ink-faint); cursor: not-allowed; }
+  textarea { resize: vertical; min-height: 90px; }
+  .field-hint { font-size: 12px; color: var(--ink-faint); margin-top: 4px; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  @media (max-width: 640px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } .container { padding: 24px; } h1 { font-size: 24px; } }
+
+  .radio-row, .checkbox-row { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .radio-row label, .checkbox-row label { margin: 0; font-weight: 500; color: var(--ink-soft); font-size: 14px; }
+  .radio-row input, .checkbox-row input { width: 16px; height: 16px; accent-color: var(--green); cursor: pointer; }
+
+  .declaration-item {
+    display: flex; gap: 12px; align-items: flex-start;
+    padding: 14px; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 10px;
+    background: var(--bg-soft);
+  }
+  .declaration-item input { margin-top: 3px; width: 17px; height: 17px; accent-color: var(--green); cursor: pointer; flex-shrink: 0; }
+  .declaration-item p { font-size: 14px; color: var(--ink-soft); }
+  .declaration-item p strong { color: var(--ink); }
+
+  .locked-banner {
+    background: #FBF3E4; border: 1px solid #EFDCB0; border-radius: 8px; padding: 14px 16px;
+    font-size: 14px; color: #7A5A15; margin-bottom: 24px; display: flex; gap: 10px; align-items: flex-start;
+  }
+
+  /* ---------- repeatable card block ---------- */
+  .repeat-block {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 22px;
+    margin-bottom: 18px;
+    position: relative;
+    background: var(--bg);
+  }
+  .repeat-block-header {
+    display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;
+  }
+  .repeat-block-header h4 { font-size: 15px; font-weight: 700; color: var(--green-dark); }
+  .remove-btn {
+    background: none; border: none; color: var(--ink-faint); font-size: 12px; font-weight: 600;
+    cursor: pointer; text-decoration: underline;
+  }
+  .remove-btn:hover { color: #B3261E; }
+
+  .btn-add {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--green-tint); color: var(--green-dark);
+    border: 1px dashed var(--green-light);
+    border-radius: 8px; padding: 10px 18px; font-size: 14px; font-weight: 600;
+    cursor: pointer; margin-bottom: 8px; font-family: inherit;
+  }
+  .btn-add:hover { background: #E1F0DB; }
+
+  /* ---------- asset category ---------- */
+  .asset-category { margin-bottom: 32px; }
+  .asset-category-title { font-family: 'Source Serif 4', Georgia, serif; font-size: 17px; color: var(--ink); font-weight: 600; margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+  .asset-type-block { margin-bottom: 22px; }
+  .asset-type-label { font-size: 14px; font-weight: 700; color: var(--green-dark); margin-bottom: 10px; }
+
+  /* ---------- toggle switch ---------- */
+  .toggle-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; background: var(--bg-soft); border: 1px solid var(--border); border-radius: 8px; padding: 16px 18px; margin-bottom: 20px; }
+  .toggle-row-text strong { display:block; color: var(--ink); font-size: 14px; margin-bottom: 2px; }
+  .toggle-row-text span { font-size: 13px; color: var(--ink-faint); }
+  .switch { position: relative; width: 44px; height: 24px; flex-shrink: 0; }
+  .switch input { opacity: 0; width: 0; height: 0; }
+  .slider { position: absolute; cursor: pointer; inset: 0; background-color: #D8DED6; border-radius: 24px; transition: 0.2s; }
+  .slider::before { content: ""; position: absolute; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; border-radius: 50%; transition: 0.2s; }
+  input:checked + .slider { background-color: var(--green); }
+  input:checked + .slider::before { transform: translateX(20px); }
+
+  .radio-card-group { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+  .radio-card { flex: 1 1 200px; border: 1.5px solid var(--border); border-radius: 8px; padding: 14px 16px; cursor: pointer; display: flex; align-items: center; gap: 10px; }
+  .radio-card.selected { border-color: var(--green); background: var(--green-tint); }
+  .radio-card input { accent-color: var(--green); width: 16px; height: 16px; }
+  .radio-card span { font-size: 14px; font-weight: 600; color: var(--ink); }
+
+  /* ---------- info trigger + modal ---------- */
+  .info-trigger {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 50%;
+    background: var(--green-tint); color: var(--green-dark);
+    font-size: 13px; font-weight: 700; cursor: pointer; border: none; flex-shrink: 0; margin-left: 6px;
+  }
+  .info-trigger:hover { background: var(--green-light); color: #fff; }
+
+  .modal-overlay {
+    display: none; position: fixed; inset: 0; background: rgba(20,24,27,0.55);
+    align-items: center; justify-content: center; padding: 20px; z-index: 100;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal-box {
+    background: var(--bg); border-radius: 12px; max-width: 520px; width: 100%;
+    max-height: 85vh; overflow-y: auto; padding: 32px; box-shadow: 0 12px 40px rgba(20,24,27,0.25);
+  }
+  .modal-box h3 { font-family: 'Source Serif 4', Georgia, serif; color: var(--ink); font-size: 20px; margin-bottom: 14px; }
+  .modal-box p { font-size: 14px; color: var(--ink-soft); margin-bottom: 12px; }
+  .modal-box ul { margin-bottom: 12px; }
+  .modal-box ul li { font-size: 14px; }
+  .modal-close-btn {
+    margin-top: 12px; background: var(--green); color: #fff; border: none;
+    padding: 11px 24px; border-radius: 7px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit;
+  }
+  .modal-close-btn:hover { background: var(--green-dark); }
+
+  /* ---------- nav buttons ---------- */
+  .nav-row { display: flex; justify-content: space-between; align-items: center; margin-top: 36px; padding-top: 24px; border-top: 1px solid var(--border); gap: 12px; flex-wrap: wrap; }
+  .btn {
+    font-family: inherit; font-size: 14px; font-weight: 600; border-radius: 8px;
+    padding: 12px 26px; cursor: pointer; border: none; transition: all 0.15s ease;
+  }
+  .btn-primary { background: var(--green); color: #fff; }
+  .btn-primary:hover { background: var(--green-dark); }
+  .btn-primary:disabled { background: #C7D3C6; cursor: not-allowed; }
+  .btn-secondary { background: var(--bg); color: var(--ink-soft); border: 1px solid var(--border); }
+  .btn-secondary:hover { background: var(--bg-soft); }
+  .btn-ghost { background: none; color: var(--ink-faint); font-size: 13px; text-decoration: underline; }
+
+  .step-note { font-size: 12px; color: var(--ink-faint); text-align: center; margin-top: 10px; }
+
+  .icon-check { fill: var(--green); }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ============ PERSISTENT TOP TABS ============ -->
+  <div class="tabs-wrap">
+    <div class="tabs" id="tabsBlock"></div>
+  </div>
+
+  <div class="container">
+
+    <!-- ============ STEP 0 — INSTRUCTIONS ============ -->
+    <div class="page active" data-step="0">
+      <div class="header">
+        <span class="badge">Guide & Instructions</span>
+        <h1>Instructions Before You Prepare Your Will</h1>
+        <p class="subtitle">Forward Legacy — Estate & Succession Planning</p>
+      </div>
+
+      <p class="intro-text">Taking a few minutes to organize your essential documents and personal information in advance ensures a smooth, seamless process when drafting your legally valid Will.</p>
+
+      <h2 class="section-title">Key Information to Keep Handy</h2>
+      <p class="intro-text" style="margin-bottom:20px;">Before starting, ensure you have the following details ready:</p>
+
+      <div class="info-card">
+        <h3><svg width="20" height="20" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>1. Identification Documents & Asset Details</h3>
+        <p>Personal ID numbers, bank details, property survey numbers, and exact legal descriptions — to ensure smooth execution.</p>
+      </div>
+
+      <div class="info-card">
+        <h3><svg width="20" height="20" viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>2. Details for 2 Witnesses</h3>
+        <p>Full Name, Age, Parent's Name, Marital Status, Nationality, Occupation, Address, Identity Number (e.g., Aadhaar/PAN), and Relationship to Testator.</p>
+        <div class="warning-note"><span>⚠️</span><span><strong>Note:</strong> A Witness cannot be a Beneficiary in the Will.</span></div>
+      </div>
+
+      <div class="info-card">
+        <h3><svg width="20" height="20" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/></svg>3. Minor Beneficiaries</h3>
+        <p>If any beneficiary is under 18 years of age, you will need to name a <strong>Guardian</strong> to manage their inheritance until they attain majority.</p>
+      </div>
+
+      <h2 class="section-title" style="margin-top:36px;">Important Note on Name Consistency</h2>
+      <div class="name-note-card">
+        <p>Your name in this Will must match exactly as it appears across your government IDs and property records (Aadhaar, PAN, Passport, Property Deeds, Bank Records). Even minor variations can cause legal disputes or administrative delays for your family later.</p>
+        <div class="action-required"><strong>Action Required:</strong> If your name varies significantly across documents, align your official documents first, or use the name exactly as it appears on your primary legal documents (e.g., Aadhaar/PAN).</div>
+      </div>
+
+      <p class="table-caption">Example — Name Discrepancy Reference</p>
+      <table>
+        <thead><tr><th>Document</th><th>Name as it Appears</th></tr></thead>
+        <tbody>
+          <tr><td>Aadhaar</td><td>SURESH AGARWAL</td></tr>
+          <tr><td>PAN</td><td>SURESH M AGARWAL</td></tr>
+          <tr><td>Passport</td><td>SURESH MAHESH AGARWAL</td></tr>
+          <tr><td>Property Deed</td><td>RAMESH ALIAS SURESH MAHESH AGARWAL</td></tr>
+        </tbody>
+      </table>
+
+      <div class="footer-note">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="var(--green-dark)"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+        <p><strong>Note:</strong> Keeping these details organized before starting the generator prevents session timeouts and ensures all legal descriptions match your underlying deeds and financial records perfectly.</p>
+      </div>
+
+      <div class="nav-row" style="justify-content:flex-end;">
+        <button class="btn btn-primary" onclick="goTo(1)">Continue →</button>
+      </div>
+    </div>
+
+    <!-- ============ STEP 1 — BEFORE YOU BEGIN / DECLARATIONS ============ -->
+    <div class="page" data-step="1">
+      <div class="header">
+        <span class="badge">Before You Begin</span>
+        <h1>Privacy & Legal Declarations</h1>
+        <p class="subtitle">Please read and confirm each statement to proceed</p>
+      </div>
+
+      <div class="info-card">
+        <h3><svg width="20" height="20" viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg>To Protect Your Privacy</h3>
+        <ul>
+          <li>Sensitive identification details (such as PAN or Aadhaar numbers) are <strong>never saved</strong> in our database.</li>
+          <li>ID fields remain locked until you reach the final review stage.</li>
+          <li>Once reviewed and confirmed, you can enter your ID details right before downloading.</li>
+        </ul>
+      </div>
+
+      <div class="locked-banner">
+        <span>🔒</span>
+        <span><strong>Locked Fields — Cannot Be Changed Later:</strong> Once you proceed, your Testator's Full Name and Country (India) are permanently set.</span>
+      </div>
+
+      <h2 class="section-title" style="margin-bottom:14px;">Read and Confirm All Statements</h2>
+
+      <div class="declaration-item"><input type="checkbox" class="decl-check" onchange="checkDeclarations()"><p><strong>Non-Muslim Testator Declaration:</strong> I confirm that I am a Non-Muslim. (Muslim testamentary succession is governed by Muslim Personal Law; this tool is not designed for Muslim testators.)</p></div>
+      <div class="declaration-item"><input type="checkbox" class="decl-check" onchange="checkDeclarations()"><p><strong>Age & Capacity:</strong> I am at least 18 years of age and of sound and disposing mind at the time of making this Will.</p></div>
+      <div class="declaration-item"><input type="checkbox" class="decl-check" onchange="checkDeclarations()"><p><strong>Free Will:</strong> I am making this Will voluntarily, without coercion, undue influence, fraud, or deceit from any person.</p></div>
+      <div class="declaration-item"><input type="checkbox" class="decl-check" onchange="checkDeclarations()"><p><strong>Legal Awareness:</strong> I understand that a Will made under coercion, undue influence, deceit, or fraud is void under Indian law.</p></div>
+      <div class="declaration-item"><input type="checkbox" class="decl-check" onchange="checkDeclarations()"><p><strong>Governing Law:</strong> I understand that this Will shall be governed exclusively by Indian law (The Indian Succession Act, 1925).</p></div>
+      <div class="declaration-item"><input type="checkbox" class="decl-check" onchange="checkDeclarations()"><p><strong>Service Disclaimer:</strong> I understand that Forward Legacy is an online drafting tool and does not substitute for personalized legal advice regarding complex estates.</p></div>
+
+      <div class="nav-row">
+        <button class="btn btn-secondary" onclick="goTo(0)">← Back</button>
+        <div style="text-align:right;">
+          <button class="btn btn-primary" id="agreeBtn" disabled onclick="goTo(2)">I Agree — Start My Will →</button>
+          <div class="step-note" id="declNote">Check all boxes to continue</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ STEP 2 — TESTATOR ============ -->
+    <div class="page" data-step="2">
+      <div class="header">
+        <h1>Testator Details <button class="info-trigger" onclick="openModal('modal-testator')">?</button></h1>
+        <p class="subtitle">The testator is the person making this Will — you. This section identifies you and, if applicable, your immediate family.</p>
+      </div>
+
+      <div class="field-group">
+        <label>Testator Email Address <span class="opt">(Locked)</span></label>
+        <input type="email" value="you@example.com" disabled>
+      </div>
+
+      <div class="grid-2">
+        <div class="field-group"><label>Testators Name <span class="req">*</span></label><input type="text" id="testatorName" placeholder="Full legal name"></div>
+        <div class="field-group"><label>Gender</label>
+          <select><option>Select</option><option>Male (Testator)</option><option>Female (Testatrix)</option></select>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="field-group"><label>Age <span class="req">*</span></label><input type="number" id="testatorAge" placeholder="Age"></div>
+        <div class="field-group"><label>You are the*</label>
+          <select id="testatorRelation"><option>Select</option><option>Son of</option><option>Daughter of</option></select>
+        </div>
+      </div>
+
+      <div class="field-group"><label>Father's Name <span class="req">*</span></label><input type="text" id="testatorParentName" placeholder="Father's full name"></div>
+
+      <div class="grid-2">
+        <div class="field-group"><label>PAN Number of Testator <span class="req">*</span></label><input type="text" id="testatorPAN" placeholder="10-character Permanent Account Number"></div>
+        <div class="field-group"><label>Aadhaar Number of Testator <span class="req">*</span></label><input type="text" id="testatorAadhaar" placeholder="12 digit Aadhaar Card number"></div>
+      </div>
+
+      <div class="grid-2">
+        <div class="field-group"><label>Marital Status</label>
+          <select id="maritalStatus" onchange="toggleSpouse()"><option>Select</option><option>Married</option><option>Unmarried</option><option>Widowed</option><option>Divorced</option></select>
+        </div>
+        <div class="field-group"><label>Occupation</label>
+          <select id="testatorOccupation"><option>Select</option><option>Retired</option><option>In Service</option><option>Business</option><option>Profession</option><option>Homemaker</option><option>Other</option></select>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="field-group"><label>Nationality</label><input type="text" id="testatorNationality" placeholder="e.g., Indian"></div>
+        <div class="field-group"><label>Residential Address</label><input type="text" id="testatorAddress" placeholder="Full residential address"></div>
+      </div>
+
+      <div id="spouseSection" style="display:none;">
+        <div class="warning-note" style="background:var(--green-tint); border-color:var(--green-light); color: var(--green-dark);">
+          <span>ℹ️</span><span>Because you selected "Married", we'll also collect your spouse's details below</span>
+        </div>
+        <h2 class="section-title" style="margin-top:24px;">Spouse's Details</h2>
+        <div class="grid-2">
+          <div class="field-group"><label>Full Name</label><input type="text" id="spouseName"></div>
+          <div class="field-group"><label>Gender</label><select><option>Select</option><option>Male (Testator)</option><option>Female (Testatrix)</option></select></div>
+        </div>
+        <div class="grid-2">
+          <div class="field-group"><label>Age</label><input type="number"></div>
+          <div class="field-group"><label>Relation</label><select><option>Son of</option><option>Daughter of</option><option>Wife of</option><option>Husband of</option></select></div>
+        </div>
+        <div class="field-group"><label>Name of that Person</label><input type="text"></div>
+        <div class="grid-2">
+          <div class="field-group"><label>Marital Status</label><input type="text" placeholder="e.g., Married"></div>
+          <div class="field-group"><label>Occupation</label><select><option>Select</option><option>Retired</option><option>In Service</option><option>Business</option><option>Profession</option><option>Homemaker</option><option>Other</option></select></div>
+        </div>
+        <div class="grid-2">
+          <div class="field-group"><label>Nationality</label><input type="text"></div>
+          <div class="field-group"><label>PAN Card No.</label><input type="text"></div>
+        </div>
+        <div class="grid-2">
+          <div class="field-group"><label>Aadhaar Card No.</label><input type="text" id="spouseAadhaar"></div>
+          <div class="field-group"><label>Residential Address</label><input type="text"></div>
+        </div>
+      </div>
+
+      <div class="nav-row">
+        <button class="btn btn-secondary" onclick="goTo(1)">← Back</button>
+        <button class="btn btn-primary" onclick="goTo(3)">Next →</button>
+      </div>
+    </div>
+
+    <!-- ============ STEP 3 — BENEFICIARY ============ -->
+    <div class="page" data-step="3">
+      <div class="header">
+        <h1>Beneficiaries <button class="info-trigger" onclick="openModal('modal-beneficiary')">?</button></h1>
+        <p class="subtitle">People named to receive your assets</p>
+      </div>
+
+      <div id="beneficiaryList"></div>
+      <button class="btn-add" onclick="addBeneficiary()">+ Add Beneficiary</button>
+
+      <div class="nav-row">
+        <button class="btn btn-secondary" onclick="goTo(2)">← Back</button>
+        <button class="btn btn-primary" onclick="goTo(4)">Next →</button>
+      </div>
+    </div>
+
+    <!-- ============ STEP 4 — ASSET ============ -->
+    <div class="page" data-step="4">
+      <div class="header">
+        <h1>Assets</h1>
+        <p class="subtitle">Tell us how your assets should be distributed</p>
+      </div>
+
+      <div class="asset-category">
+        <div class="asset-category-title">A. Financial Assets</div>
+        <div class="info-card" style="border-left-color: var(--green-light);">
+          <h3><svg width="20" height="20" viewBox="0 0 24 24"><path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>Included Automatically</h3>
+          <p style="margin-bottom:12px;">This clause is applied automatically to your Will. It covers all your financial holdings in one place.</p>
+          <p style="margin-bottom:12px;">I bequeath all my financial assets — including Bank Accounts, Fixed Deposits (FDs), Recurring Deposits (RDs), Public Provident Fund (PPF), Life Insurance, Stocks, Mutual Funds, Cryptocurrency, Digital Wallets, National Pension System (NPS), Bonds, Alternative Investment Fund (AIF), Specialized Investment Fund (SIF), and Portfolio Management Services (PMS) — entirely to the nominees registered in those financial instruments.</p>
+          <p style="margin-bottom:12px; font-size:13px; color:var(--ink-faint);"><strong style="color:var(--ink);">Why we recommend this:</strong> it's advisable to pass on financial assets by nomination rather than by listing individual accounts — nominations stay current automatically as balances and accounts change, so you don't need to update this Will every time. Just keep your nominations up to date.</p>
+          <div class="warning-note" style="background:var(--green-tint); border-color:var(--green-light); color:var(--green-dark);"><span>📎</span><span>Upon payment and download, you will receive an editable Annexure to list your specific bank accounts, folios, and details for your own records — we do not collect or store this data.</span></div>
+        </div>
+        <p class="step-note" style="text-align:left;">No further details are needed for this section — continue to your immovable property below.</p>
+      </div>
+
+      <div class="asset-category">
+        <div class="asset-category-title">B. Immovable Property</div>
+
+        <div class="asset-type-block">
+          <div class="asset-type-label">House / Flat</div>
+          <div id="houseFlatList"></div>
+          <button class="btn-add" onclick="addAssetEntry('houseFlatList','houseFlat','House / Flat')">+ Add Another House / Flat</button>
+        </div>
+
+        <div class="asset-type-block">
+          <div class="asset-type-label">Land / Plot</div>
+          <div id="landPlotList"></div>
+          <button class="btn-add" onclick="addAssetEntry('landPlotList','landPlot','Land / Plot')">+ Add Another Land / Plot</button>
+        </div>
+
+        <div class="asset-type-block">
+          <div class="asset-type-label">Commercial Property</div>
+          <div id="commercialPropertyList"></div>
+          <button class="btn-add" onclick="addAssetEntry('commercialPropertyList','commercialProperty','Commercial Property')">+ Add Another Commercial Property</button>
+        </div>
+      </div>
+
+      <div class="asset-category">
+        <div class="asset-category-title">C. Motor Vehicles</div>
+        <div class="asset-type-block">
+          <div class="asset-type-label">Vehicle / Car</div>
+          <div id="vehicleList"></div>
+          <button class="btn-add" onclick="addAssetEntry('vehicleList','vehicle','Vehicle / Car')">+ Add Another Vehicle / Car</button>
+        </div>
+      </div>
+
+      <div class="asset-category">
+        <div class="asset-category-title">D. Personal & Valuables</div>
+        <div class="asset-type-block">
+          <div class="asset-type-label">Jewellery & Heirlooms</div>
+          <div id="jewelleryList"></div>
+          <button class="btn-add" onclick="addAssetEntry('jewelleryList','jewellery','Item')">+ Add Another Item</button>
+        </div>
+      </div>
+
+      <div class="asset-category">
+        <div class="asset-category-title">E. Digital & Miscellaneous Assets</div>
+        <div class="asset-type-block">
+          <div class="asset-type-label">Social Media / Digital</div>
+          <div id="digitalAssetList"></div>
+          <button class="btn-add" onclick="addAssetEntry('digitalAssetList','digitalAsset','Digital Asset')">+ Add Another Digital Asset</button>
+        </div>
+        <div class="asset-type-block">
+          <div class="asset-type-label">Intellectual Property</div>
+          <div id="intellectualPropertyList"></div>
+          <button class="btn-add" onclick="addAssetEntry('intellectualPropertyList','intellectualProperty','Intellectual Property')">+ Add Another Intellectual Property</button>
+        </div>
+      </div>
+
+      <div class="nav-row">
+        <button class="btn btn-secondary" onclick="goTo(3)">← Back</button>
+        <button class="btn btn-primary" onclick="goTo(5)">Next →</button>
+      </div>
+    </div>
+
+    <!-- ============ STEP 5 — EXECUTOR ============ -->
+    <div class="page" data-step="5">
+      <div class="header">
+        <h1>Executor Details <button class="info-trigger" onclick="openModal('modal-executor')">?</button></h1>
+        <p class="subtitle">Person who will execute your Will</p>
+      </div>
+
+      <div class="toggle-row">
+        <div class="toggle-row-text"><strong>I want to appoint an Executor</strong><span>Optional, but recommended to ensure your wishes are carried out smoothly</span></div>
+        <label class="switch"><input type="checkbox" id="executorToggle" onchange="toggleExecutor()"><span class="slider"></span></label>
+      </div>
+
+      <div id="executorFields" style="display:none;">
+        <label style="margin-bottom:10px;">Executor Type</label>
+        <div class="radio-card-group">
+          <label class="radio-card" id="execCardIndividual"><input type="radio" name="execType" value="individual" onchange="selectExecType('individual')"><span>Individual</span></label>
+          <label class="radio-card" id="execCardOrg"><input type="radio" name="execType" value="org" onchange="selectExecType('org')"><span>Organization / Professional Entity</span></label>
+        </div>
+
+        <div id="execIndividualFields" style="display:none;">
+          <div class="field-group"><label>Executor's Full Name <span class="req">*</span></label><input type="text"></div>
+          <div class="grid-2">
+            <div class="field-group"><label>Relationship to You <span class="opt">(Optional)</span></label><input type="text" placeholder="e.g., Spouse, Child, Friend"></div>
+            <div class="field-group"><label>Contact Details / Address <span class="opt">(Optional)</span></label><input type="text"></div>
+          </div>
+          <div class="grid-2">
+            <div class="field-group"><label>ID Type <span class="opt">(Optional)</span></label><select><option>Select...</option><option>PAN Card</option><option>Passport</option><option>Driving Licence</option><option>Voter ID</option><option>Aadhaar</option></select></div>
+            <div class="field-group"><label>ID Number <span class="opt">(Optional)</span></label><input type="text"></div>
+          </div>
+        </div>
+
+        <div id="execOrgFields" style="display:none;">
+          <div class="field-group"><label>Organization / Entity Name <span class="req">*</span></label><input type="text"></div>
+          <div class="field-group"><label>Authorized Representative / Contact Person <span class="opt">(Optional)</span></label><input type="text"></div>
+          <div class="grid-2">
+            <div class="field-group"><label>Registration / Tax ID Number <span class="opt">(Optional)</span></label><input type="text" placeholder="e.g., CIN, Registration No."></div>
+            <div class="field-group"><label>Registered Office Address <span class="opt">(Optional)</span></label><input type="text"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="nav-row">
+        <button class="btn btn-secondary" onclick="goTo(4)">← Back</button>
+        <button class="btn btn-primary" onclick="goTo(6)">Next →</button>
+      </div>
+    </div>
+
+    <!-- ============ STEP 6 — GUARDIAN ============ -->
+    <div class="page" data-step="6">
+      <div class="header">
+        <h1>Guardian Details <button class="info-trigger" onclick="openModal('modal-guardian')">?</button></h1>
+        <p class="subtitle">In case of minor beneficiaries</p>
+      </div>
+
+      <div class="warning-note" style="background:var(--green-tint); border-color:var(--green-light); color:var(--green-dark);">
+        <span>ℹ️</span><span>If any beneficiary is under 18, nominate a guardian to manage their inheritance until they come of age. This section is optional if all beneficiaries are adults.</span>
+      </div>
+
+      <div class="toggle-row" style="margin-top:20px;">
+        <div class="toggle-row-text"><strong>I have minor beneficiaries / want to nominate a Guardian</strong><span>Toggle on to add guardian details</span></div>
+        <label class="switch"><input type="checkbox" id="guardianToggle" onchange="toggleGuardian()"><span class="slider"></span></label>
+      </div>
+
+      <div id="guardianFields" style="display:none;">
+        <h2 class="section-title">Main Guardian</h2>
+        <div class="grid-2">
+          <div class="field-group"><label>Full Name</label><input type="text"></div>
+          <div class="field-group"><label>Relation to Testator</label>
+            <select><option>Select...</option><option>Spouse</option><option>Son</option><option>Daughter</option><option>Father</option><option>Mother</option><option>Brother</option><option>Sister</option><option>Grandson</option><option>Granddaughter</option><option>Nephew</option><option>Niece</option><option>Friend</option><option>Other</option></select>
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="field-group"><label>ID Type</label><select><option>Aadhaar Card</option><option>PAN Card</option><option>Passport</option><option>Driving Licence</option><option>Voter ID</option></select></div>
+          <div class="field-group"><label>ID Number</label><input type="text"></div>
+        </div>
+        <div class="field-group"><label>Address</label><input type="text"></div>
+      </div>
+
+      <div class="nav-row">
+        <button class="btn btn-secondary" onclick="goTo(5)">← Back</button>
+        <button class="btn btn-primary" onclick="goTo(7)">Next →</button>
+      </div>
+    </div>
+
+    <!-- ============ STEP 7 — RESIDUAL CLAUSE ============ -->
+    <div class="page" data-step="7">
+      <div class="header">
+        <h1>Residual Clause & Instructions <button class="info-trigger" onclick="openModal('modal-residual')">?</button></h1>
+        <p class="subtitle">If there is any asset you've missed mentioning in the Will, it should go to the following:</p>
+      </div>
+
+      <div id="residualList"></div>
+      <button class="btn-add" onclick="addResidual()">+ Add Another Beneficiary</button>
+
+      <h2 class="section-title" style="margin-top:32px;">Special Non-Asset Instructions</h2>
+      <div class="field-group">
+        <label>Funeral instructions, organ donation wishes, personal requests, charitable directives, care of pets or dependents, and any other personal directions for your Executor.</label>
+        <textarea placeholder="Enter any special instructions..."></textarea>
+      </div>
+
+      <div class="nav-row">
+        <button class="btn btn-secondary" onclick="goTo(6)">← Back</button>
+        <button class="btn btn-primary" onclick="goTo(8)">Next →</button>
+      </div>
+    </div>
+
+    <!-- ============ STEP 8 — WITNESS ============ -->
+    <div class="page" data-step="8">
+      <div class="header">
+        <h1>Witnesses <button class="info-trigger" onclick="openModal('modal-witness')">?</button></h1>
+        <p class="subtitle">A Will requires at least two witnesses. A witness does not need to be related to you.</p>
+      </div>
+
+      <div id="witnessList"></div>
+      <button class="btn-add" onclick="addWitness()">+ Add Another Witness</button>
+
+      <div class="nav-row">
+        <button class="btn btn-secondary" onclick="goTo(7)">← Back</button>
+        <div>
+          <button class="btn btn-secondary" onclick="alert('Draft saved for review.')">Save & Submit for Review</button>
+          <button class="btn btn-primary" onclick="showWillPreview()">Generate Complete Will Document →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ STEP 11 — WILL DOCUMENT PREVIEW ============ -->
+    <div class="page" data-step="11">
+      <div class="header">
+        <span class="badge">Generated Document</span>
+        <h1>Your Complete Will Document</h1>
+        <p class="subtitle">Compiled from your entries, in the standard Forward Legacy Will format. Review carefully before printing.</p>
+      </div>
+
+      <div class="warning-note">
+        <span>⚠️</span><span>Any line still showing underscores (_____) means that detail wasn't entered in the form — fill it in by hand before signing, or go back and complete that section.</span>
+      </div>
+
+      <div class="field-group" style="margin-top:20px;">
+        <textarea id="willPreviewText" readonly style="min-height:600px; font-family: 'Source Serif 4', Georgia, serif; font-size:14px; line-height:1.7; white-space:pre-wrap;"></textarea>
+      </div>
+
+      <div class="nav-row">
+        <button class="btn btn-secondary" onclick="goTo(8)">← Back to Witnesses</button>
+        <div>
+          <button class="btn btn-secondary" onclick="copyWillText()">Copy Text</button>
+          <button class="btn btn-primary" onclick="goTo(9)">Continue to Annexure →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ STEP 9 — ANNEXURE ============ -->
+    <div class="page" data-step="9">
+      <div class="header">
+        <span class="badge">After Payment</span>
+        <h1>Start Filling Your Annexure</h1>
+        <p class="subtitle">A companion document to keep your account and asset details current</p>
+      </div>
+
+      <div class="info-card">
+        <h3><svg width="20" height="20" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>Format</h3>
+        <p>Outputs an editable PDF or Word document so users can type or update account numbers and folios anytime.</p>
+      </div>
+
+      <div class="info-card">
+        <h3><svg width="20" height="20" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>Easy Updates</h3>
+        <p>Unlike the main Will, this Annexure can be edited whenever accounts change — no re-signing or witnesses required.</p>
+      </div>
+
+      <div class="footer-note">
+        <span style="font-size:20px;">💡</span>
+        <p><strong>Pro Tip:</strong> Review and update this list once a year (e.g., every April) to keep records fresh for your family.</p>
+      </div>
+
+      <div class="nav-row" style="justify-content:flex-end;">
+        <button class="btn btn-primary" onclick="goTo(10)">Continue to Print Instructions →</button>
+      </div>
+    </div>
+
+    <!-- ============ STEP 10 — PRINT INSTRUCTIONS ============ -->
+    <div class="page" data-step="10">
+      <div class="header">
+        <span class="badge">Final Step</span>
+        <h1>Instructions for Printing</h1>
+        <p class="subtitle">Please follow these steps carefully once your Will document is ready</p>
+      </div>
+
+      <div class="info-card"><h3>📄 Paper</h3><p>Print on standard A4 size paper.</p></div>
+      <div class="info-card"><h3>🖨️ Printing Rule</h3><p>Print on one side of the paper only (single-sided printing).</p></div>
+      <div class="info-card"><h3>✍️ Signatures</h3><p>The Testator and both Witnesses must sign every page at the bottom, with full signatures on the final execution page.</p></div>
+      <div class="info-card"><h3>🔒 Safe Keeping</h3><p>Store the original signed Will in a safe place, and inform trusted family members or your designated Executor of its physical location.</p></div>
+
+      <div class="nav-row" style="justify-content:flex-end;">
+        <button class="btn btn-primary" onclick="alert('Thank you — your Will has been finalized!')">Got it</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ============ MODALS ============ -->
+<div class="modal-overlay" id="modal-testator" onclick="closeOnOverlay(event,'modal-testator')">
+  <div class="modal-box">
+    <h3>Who is the Testator?</h3>
+    <p>The testator (or testatrix, if female) is simply the person making the Will — the owner of the assets being bequeathed. To make a valid Will in India, the testator must:</p>
+    <ul>
+      <li>Be a major — 18 years of age or older</li>
+      <li>Be of sound mind and understand what they are signing</li>
+      <li>Sign the Will voluntarily, free from pressure or influence</li>
+      <li>Have the legal right to dispose of the property being bequeathed</li>
+    </ul>
+    <p>You, as the testator, may leave your self-acquired property to whomever you choose.</p>
+    <button class="modal-close-btn" onclick="closeModal('modal-testator')">Got it</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-beneficiary" onclick="closeOnOverlay(event,'modal-beneficiary')">
+  <div class="modal-box">
+    <h3>Who is a Beneficiary?</h3>
+    <p>A beneficiary is anyone you choose to leave your assets to in your Will.</p>
+    <ul>
+      <li><strong>It can be anyone:</strong> Family, friends, or a charity — not just legal heirs.</li>
+      <li><strong>Can be a minor:</strong> But you must name a guardian to manage their share until they turn 18.</li>
+      <li><strong>Should NOT be a witness:</strong> A beneficiary should not sign the Will as a witness, as it can disqualify them from receiving their inheritance.</li>
+    </ul>
+    <button class="modal-close-btn" onclick="closeModal('modal-beneficiary')">Got it</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-executor" onclick="closeOnOverlay(event,'modal-executor')">
+  <div class="modal-box">
+    <h3>What is an Executor?</h3>
+    <p>An Executor is the trusted person responsible for distributing your assets according to your Will after your death. While optional, appointing an Executor ensures your wishes are smoothly carried out.</p>
+    <button class="modal-close-btn" onclick="closeModal('modal-executor')">Got it</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-guardian" onclick="closeOnOverlay(event,'modal-guardian')">
+  <div class="modal-box">
+    <h3>What is a Guardian & Who Needs One?</h3>
+    <p>A Guardian is a trusted adult you appoint in your Will to look after the assets left to any minor beneficiary (a child under 18 years of age).</p>
+    <ul>
+      <li><strong>Who requires a Guardian?</strong> Any beneficiary who is under 18 at the time of your passing.</li>
+      <li><strong>What do they do?</strong> They manage, protect, and hold the child's inheritance in trust until the child reaches 18.</li>
+      <li><strong>Who can you appoint?</strong> Anyone you trust who is over 18 — such as a surviving parent, relative, or close family friend.</li>
+    </ul>
+    <p><em>Note: If all your beneficiaries are adults, you can safely skip this step.</em></p>
+    <button class="modal-close-btn" onclick="closeModal('modal-guardian')">Got it</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-residual" onclick="closeOnOverlay(event,'modal-residual')">
+  <div class="modal-box">
+    <h3>What is a Residuary Clause?</h3>
+    <p>A residuary clause covers anything left over: any asset you own that isn't specifically listed elsewhere in this Will — including property you acquire after signing it, or something you simply forgot to mention. Rather than leaving that property undecided, this clause states clearly who should receive it.</p>
+    <button class="modal-close-btn" onclick="closeModal('modal-residual')">Got it</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-witness" onclick="closeOnOverlay(event,'modal-witness')">
+  <div class="modal-box">
+    <h3>Who can be a Witness?</h3>
+    <p>Under the Indian Succession Act, 1925, any person of sound mind who is a major (18 or older) and capable of signing their own name can act as a witness. At least two witnesses are required, and neither needs to know what the Will actually says.</p>
+    <ul>
+      <li><strong>Signing:</strong> each witness must see the testator sign the Will, or be told directly that the signature is theirs. Both witnesses then sign in the testator's presence.</li>
+      <li><strong>Not a beneficiary:</strong> avoid choosing someone who is also inheriting under the Will, or their spouse — for some communities, being a witness can void that person's own inheritance.</li>
+      <li><strong>An executor can witness:</strong> the person managing your estate may also act as a witness.</li>
+      <li><strong>Family members can witness</strong>, but an independent, impartial person is generally the safer choice to avoid any future dispute.</li>
+    </ul>
+    <button class="modal-close-btn" onclick="closeModal('modal-witness')">Got it</button>
+  </div>
+</div>
+
+<script>
+  const ALL_STEPS = [
+    {n:0, label:"Instructions"},
+    {n:1, label:"Begin"},
+    {n:2, label:"Testator"},
+    {n:3, label:"Beneficiary"},
+    {n:4, label:"Asset"},
+    {n:5, label:"Executor"},
+    {n:6, label:"Guardian"},
+    {n:7, label:"Residual Clause"},
+    {n:8, label:"Witness"},
+    {n:9, label:"Annexure"},
+    {n:10, label:"Print"},
+  ];
+
+  // Only these 7 core sections appear as persistent tabs, always visible & always clickable
+  const TAB_STEPS = [
+    {n:2, label:"Testator"},
+    {n:3, label:"Beneficiary"},
+    {n:4, label:"Asset"},
+    {n:5, label:"Executor"},
+    {n:6, label:"Guardian"},
+    {n:7, label:"Residual Clause"},
+    {n:8, label:"Witness"},
+  ];
+
+  let currentStep = 0;
+
+  function renderTabs(current) {
+    const el = document.getElementById('tabsBlock');
+    el.innerHTML = TAB_STEPS.map(t => {
+      const cls = ['tab'];
+      if (t.n === current) cls.push('active');
+      else if (t.n < current) cls.push('done');
+      return `<div class="${cls.join(' ')}" onclick="goTo(${t.n})">${t.label}</div>`;
+    }).join('');
+  }
+
+  function goTo(step) {
+    currentStep = step;
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll(`.page[data-step="${step}"]`).forEach(p => p.classList.add('active'));
+    renderTabs(step);
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+
+  function checkDeclarations() {
+    const boxes = document.querySelectorAll('.decl-check');
+    const allChecked = Array.from(boxes).every(b => b.checked);
+    document.getElementById('agreeBtn').disabled = !allChecked;
+    document.getElementById('declNote').textContent = allChecked ? 'All statements confirmed' : 'Check all boxes to continue';
+  }
+
+  function toggleSpouse() {
+    const val = document.getElementById('maritalStatus').value;
+    document.getElementById('spouseSection').style.display = val === 'Married' ? 'block' : 'none';
+  }
+
+  function openModal(id) { document.getElementById(id).classList.add('open'); }
+  function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+  function closeOnOverlay(e, id) { if (e.target.id === id) closeModal(id); }
+
+  /* ---------- Beneficiary repeatable blocks ---------- */
+  let beneficiaryCount = 0;
+  function addBeneficiary() {
+    beneficiaryCount++;
+    const idx = beneficiaryCount;
+    const div = document.createElement('div');
+    div.className = 'repeat-block';
+    div.id = 'beneficiary-' + idx;
+    div.innerHTML = `
+      <div class="repeat-block-header">
+        <h4>Beneficiary ${idx}</h4>
+        ${idx > 1 ? `<button class="remove-btn" onclick="removeBlock('beneficiary-${idx}')">Remove</button>` : ''}
+      </div>
+      <div class="grid-2">
+        <div class="field-group"><label>Name</label><input type="text" class="beneficiary-name-input" oninput="refreshBequeathedDropdowns()"></div>
+        <div class="field-group"><label>Age (Years)</label><input type="number"></div>
+      </div>
+      <div class="grid-2">
+        <div class="field-group">
+          <label>Relation</label>
+          <select class="beneficiary-relation-select" onchange="toggleBeneficiaryOtherRelation(this)">
+            <option>Select...</option>
+            <option>Spouse</option>
+            <option>Son</option>
+            <option>Father</option>
+            <option>Mother</option>
+            <option>Daughter</option>
+            <option>Brother</option>
+            <option>Sister</option>
+            <option>Grandson</option>
+            <option>Granddaughter</option>
+            <option>Niece</option>
+            <option>Nephew</option>
+            <option>Friend</option>
+            <option>Colleague</option>
+            <option>Other</option>
+          </select>
+          <input type="text" class="beneficiary-relation-other" placeholder="Enter relation" style="display:none; margin-top:8px;">
+        </div>
+        <div class="field-group"><label>Marital Status</label><select><option>Select...</option><option>Married</option><option>Unmarried</option><option>Widowed</option><option>Divorced</option></select></div>
+      </div>
+      <div class="field-group"><label>Occupation</label><select><option>Select...</option><option>Service</option><option>Business</option><option>Professional</option><option>Retired</option><option>Homemaker</option></select></div>
+      <div class="field-group"><label>Residential Address</label><input type="text"></div>
+      <p class="field-hint" style="margin-bottom:8px;">(either of the 2 below mandatory)</p>
+      <div class="grid-2">
+        <div class="field-group"><label>PAN Card No.</label><input type="text"></div>
+        <div class="field-group"><label>Aadhaar Card No.</label><input type="text"></div>
+      </div>
+    `;
+    document.getElementById('beneficiaryList').appendChild(div);
+  }
+  function toggleBeneficiaryOtherRelation(selectEl) {
+    const otherInput = selectEl.parentElement.querySelector('.beneficiary-relation-other');
+    if (!otherInput) return;
+    otherInput.style.display = selectEl.value === 'Other' ? 'block' : 'none';
+  }
+  function removeBlock(id) {
+    document.getElementById(id).remove();
+    if (id.startsWith('beneficiary-')) refreshBequeathedDropdowns();
+  }
+
+  /* ---------- Beneficiary name sync for Asset "Bequeathed To" dropdowns ---------- */
+  function getBeneficiaryNames() {
+    const names = [];
+    document.querySelectorAll('#beneficiaryList .repeat-block').forEach(block => {
+      const input = block.querySelector('.beneficiary-name-input');
+      if (input && input.value.trim()) names.push(input.value.trim());
+    });
+    return names;
+  }
+
+  function escapeHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function toggleBequeathedOther(selectEl) {
+    const otherInput = selectEl.parentElement.querySelector('.bequeathed-other');
+    if (!otherInput) return;
+    otherInput.style.display = selectEl.value === '__other__' ? 'block' : 'none';
+  }
+
+  function refreshBequeathedDropdowns() {
+    const names = getBeneficiaryNames();
+    document.querySelectorAll('.bequeathed-select').forEach(sel => {
+      const prevValue = sel.value;
+      const otherInput = sel.parentElement.querySelector('.bequeathed-other');
+      const options = ['<option value="">Select recipient...</option>']
+        .concat(names.map(n => `<option value="${escapeHtml(n)}">${escapeHtml(n)}</option>`))
+        .concat(['<option value="__other__">Other / Not listed above</option>']);
+      sel.innerHTML = options.join('');
+      if (prevValue && names.includes(prevValue)) {
+        sel.value = prevValue;
+      } else if (prevValue === '__other__') {
+        sel.value = '__other__';
+      } else if (prevValue) {
+        sel.value = '__other__';
+        if (otherInput && !otherInput.value) otherInput.value = prevValue;
+      }
+      toggleBequeathedOther(sel);
+    });
+  }
+
+  /* ---------- Witness repeatable blocks ---------- */
+  let witnessCount = 0;
+  function addWitness() {
+    witnessCount++;
+    const idx = witnessCount;
+    const div = document.createElement('div');
+    div.className = 'repeat-block';
+    div.id = 'witness-' + idx;
+    div.innerHTML = `
+      <div class="repeat-block-header">
+        <h4>Witness ${idx}</h4>
+        ${idx > 2 ? `<button class="remove-btn" onclick="removeBlock('witness-${idx}')">Remove</button>` : ''}
+      </div>
+      <div class="grid-2">
+        <div class="field-group"><label>Name</label><input type="text" class="witness-name"></div>
+        <div class="field-group"><label>Age (Years)</label><input type="number" class="witness-age"></div>
+      </div>
+      <div class="grid-2">
+        <div class="field-group"><label>Son / Daughter / Wife of</label><select class="witness-relation"><option>Son of</option><option>Daughter of</option><option>Wife of</option></select></div>
+        <div class="field-group"><label>Parent / Husband's Name</label><input type="text" class="witness-parent"></div>
+      </div>
+      <div class="grid-2">
+        <div class="field-group"><label>Marital Status</label><select class="witness-marital"><option>Unmarried</option><option>Married</option></select></div>
+        <div class="field-group"><label>Nationality</label><input type="text" class="witness-nationality"></div>
+      </div>
+      <div class="grid-2">
+        <div class="field-group"><label>Occupation</label><select class="witness-occupation"><option>Select...</option><option>Retired</option><option>In Service</option><option>Business</option><option>Profession</option><option>Homemaker</option><option>Other</option></select></div>
+        <div class="field-group"><label>Aadhaar Number</label><input type="text" class="witness-aadhaar"></div>
+      </div>
+      <div class="field-group"><label>Resident of (Address)</label><input type="text" class="witness-address"></div>
+      <div class="field-group"><label>Relation to Testator</label>
+        <select><option>Select...</option><option>Friend</option><option>Neighbour</option><option>Colleague</option><option>Family member</option><option>Executor of the Will</option><option>Other</option></select>
+      </div>
+    `;
+    document.getElementById('witnessList').appendChild(div);
+  }
+
+  /* ---------- Residual beneficiary repeatable blocks ---------- */
+  let residualCount = 0;
+  function addResidual() {
+    residualCount++;
+    const idx = residualCount;
+    const div = document.createElement('div');
+    div.className = 'repeat-block';
+    div.id = 'residual-' + idx;
+    div.innerHTML = `
+      <div class="repeat-block-header">
+        <h4>Residuary Beneficiary ${idx}</h4>
+        ${idx > 1 ? `<button class="remove-btn" onclick="removeBlock('residual-${idx}')">Remove</button>` : ''}
+      </div>
+      <div class="grid-2">
+        <div class="field-group"><label>Full Name</label><input type="text" class="residual-name"></div>
+        <div class="field-group"><label>Relationship</label>
+          <select class="residual-relationship"><option>Select...</option><option>Spouse</option><option>Son</option><option>Daughter</option><option>Father</option><option>Mother</option><option>Brother</option><option>Sister</option><option>Grandson</option><option>Granddaughter</option><option>Nephew</option><option>Niece</option><option>Friend</option><option>Other</option></select>
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="field-group"><label>Nationality</label><input type="text" class="residual-nationality"></div>
+        <div class="field-group"><label>Occupation</label><select class="residual-occupation"><option>Select...</option><option>Retired</option><option>In Service</option><option>Business</option><option>Profession</option><option>Homemaker</option><option>Other</option></select></div>
+      </div>
+      <div class="grid-2">
+        <div class="field-group"><label>ID Type</label><select class="residual-idtype"><option>Aadhaar Card</option><option>PAN Card</option><option>Passport</option><option>Driving Licence</option><option>Voter ID</option></select></div>
+        <div class="field-group"><label>ID Number</label><input type="text" class="residual-idnumber"></div>
+      </div>
+    `;
+    document.getElementById('residualList').appendChild(div);
+  }
+
+  /* ---------- Asset repeatable entries (B, C, D, E) ---------- */
+  const RELATION_OPTIONS = ['Spouse','Son','Daughter','Father','Mother','Brother','Sister','Grandson','Granddaughter','Nephew','Niece','Friend','Other'];
+  const ID_OPTIONS = ['Aadhaar Card','PAN Card','Passport','Driving Licence','Voter ID'];
+  const assetCounts = {};
+
+  const DESC_FIELD = {
+    houseFlat: { label: 'Address / Description / Survey Number', placeholder: 'Enter address, description, or survey number' },
+    landPlot: { label: 'Address / Description / Survey Number', placeholder: 'Enter address, description, or survey number' },
+    commercialProperty: { label: 'Address / Description / Survey Number', placeholder: 'Enter address, description, or survey number' },
+    vehicle: { label: 'Make, Model & Vehicle Number', placeholder: 'e.g., Honda City, MH12AB1234' },
+    jewellery: { label: 'Description', placeholder: 'Describe the item(s)' },
+    digitalAsset: { label: 'Account / Application', placeholder: 'e.g., Instagram handle, Google account email' },
+    intellectualProperty: { label: 'Patents, Copyrights, etc.', placeholder: 'e.g., Patent No. / Copyright registration details' },
+  };
+
+  function addAssetEntry(containerId, key, label) {
+    if (!assetCounts[key]) assetCounts[key] = 0;
+    assetCounts[key]++;
+    const idx = assetCounts[key];
+    const blockId = key + '-' + idx;
+    const relOpts = RELATION_OPTIONS.map(r => `<option>${r}</option>`).join('');
+    const idOpts = ID_OPTIONS.map(r => `<option>${r}</option>`).join('');
+    const desc = DESC_FIELD[key] || { label: 'Description', placeholder: 'Enter details' };
+    const beneficiaryOptions = getBeneficiaryNames().map(n => `<option value="${escapeHtml(n)}">${escapeHtml(n)}</option>`).join('');
+
+    const div = document.createElement('div');
+    div.className = 'repeat-block';
+    div.id = blockId;
+    div.innerHTML = `
+      <div class="repeat-block-header">
+        <h4>${label}${idx > 1 ? ' ' + idx : ''}</h4>
+        ${idx > 1 ? `<button class="remove-btn" onclick="removeBlock('${blockId}')">Remove</button>` : ''}
+      </div>
+      <div class="field-group"><label>${desc.label}</label><input type="text" class="asset-desc" placeholder="${desc.placeholder}"></div>
+      <div class="field-group">
+        <label>Bequeathed To (Name of Person)</label>
+        <select class="bequeathed-select" onchange="toggleBequeathedOther(this)">
+          <option value="">Select recipient...</option>
+          ${beneficiaryOptions}
+          <option value="__other__">Other / Not listed above</option>
+        </select>
+        <input type="text" class="bequeathed-other" placeholder="Enter recipient's full name" style="display:none; margin-top:8px;">
+      </div>
+      <div class="grid-3">
+        <div class="field-group"><label>Relationship</label><select class="asset-relationship"><option>Select...</option>${relOpts}</select></div>
+        <div class="field-group"><label>ID Type</label><select class="asset-idtype"><option>Select...</option>${idOpts}</select></div>
+        <div class="field-group"><label>ID Number</label><input type="text" class="asset-idnumber"></div>
+      </div>
+    `;
+    document.getElementById(containerId).appendChild(div);
+  }
+
+  function initAssets() {
+    addAssetEntry('houseFlatList', 'houseFlat', 'House / Flat');
+    addAssetEntry('landPlotList', 'landPlot', 'Land / Plot');
+    addAssetEntry('commercialPropertyList', 'commercialProperty', 'Commercial Property');
+    addAssetEntry('vehicleList', 'vehicle', 'Vehicle / Car');
+    addAssetEntry('jewelleryList', 'jewellery', 'Item');
+    addAssetEntry('digitalAssetList', 'digitalAsset', 'Digital Asset');
+    addAssetEntry('intellectualPropertyList', 'intellectualProperty', 'Intellectual Property');
+  }
+
+  /* ---------- Executor toggles ---------- */
+  function toggleExecutor() {
+    const on = document.getElementById('executorToggle').checked;
+    document.getElementById('executorFields').style.display = on ? 'block' : 'none';
+  }
+  function selectExecType(type) {
+    document.getElementById('execCardIndividual').classList.toggle('selected', type === 'individual');
+    document.getElementById('execCardOrg').classList.toggle('selected', type === 'org');
+    document.getElementById('execIndividualFields').style.display = type === 'individual' ? 'block' : 'none';
+    document.getElementById('execOrgFields').style.display = type === 'org' ? 'block' : 'none';
+  }
+
+  /* ---------- Guardian toggle ---------- */
+  function toggleGuardian() {
+    const on = document.getElementById('guardianToggle').checked;
+    document.getElementById('guardianFields').style.display = on ? 'block' : 'none';
+  }
+
+  /* ---------- Will document generator ---------- */
+  function fillOrBlank(value, len) {
+    if (value && String(value).trim()) return String(value).trim();
+    return '_'.repeat(len || 20);
+  }
+
+  function selVal(el) {
+    if (!el) return '';
+    const v = el.value;
+    if (!v || v === 'Select' || v === 'Select...') return '';
+    return v;
+  }
+
+  function idVal(id) {
+    const el = document.getElementById(id);
+    return el ? el.value.trim() : '';
+  }
+
+  function getBequeathedValue(block) {
+    const sel = block.querySelector('.bequeathed-select');
+    if (!sel) return '';
+    if (sel.value === '__other__') {
+      const other = block.querySelector('.bequeathed-other');
+      return other ? other.value.trim() : '';
+    }
+    return sel.value;
+  }
+
+  function getAssetEntries(containerId) {
+    const container = document.getElementById(containerId);
+    if (!container) return [];
+    return Array.from(container.querySelectorAll('.repeat-block')).map(block => ({
+      desc: block.querySelector('.asset-desc') ? block.querySelector('.asset-desc').value.trim() : '',
+      bequeathed: getBequeathedValue(block),
+      relationship: selVal(block.querySelector('.asset-relationship')),
+      idtype: selVal(block.querySelector('.asset-idtype')),
+      idnumber: block.querySelector('.asset-idnumber') ? block.querySelector('.asset-idnumber').value.trim() : '',
+    })).filter(e => e.desc || e.bequeathed || e.idnumber);
+  }
+
+  function formatAssetLine(label, entries) {
+    if (!entries.length) {
+      return `${label}: ${'_'.repeat(30)} Bequeathed to: ${'_'.repeat(25)}. Relationship: Spouse / Son / Daughter / Other: ______, bearing Aadhaar Card /Pan Card/ Passport/ Voter ID/ Driving License Number: ${'_'.repeat(20)}.`;
+    }
+    return entries.map(e => {
+      const relText = e.relationship ? e.relationship : '______';
+      const idText = e.idtype ? `${e.idtype} No.` : 'Aadhaar Card /Pan Card/ Passport/ Voter ID/ Driving License Number';
+      return `${label}: ${fillOrBlank(e.desc,30)} Bequeathed to: ${fillOrBlank(e.bequeathed,25)}. Relationship: Spouse / Son / Daughter / Other: ${relText}, bearing ${idText}: ${fillOrBlank(e.idnumber,20)}.`;
+    }).join('\n');
+  }
+
+  function getWitnessData(index) {
+    const blocks = document.querySelectorAll('#witnessList .repeat-block');
+    const block = blocks[index];
+    if (!block) return null;
+    return {
+      name: block.querySelector('.witness-name') ? block.querySelector('.witness-name').value.trim() : '',
+      age: block.querySelector('.witness-age') ? block.querySelector('.witness-age').value.trim() : '',
+      relation: selVal(block.querySelector('.witness-relation')),
+      parent: block.querySelector('.witness-parent') ? block.querySelector('.witness-parent').value.trim() : '',
+      marital: selVal(block.querySelector('.witness-marital')),
+      nationality: block.querySelector('.witness-nationality') ? block.querySelector('.witness-nationality').value.trim() : '',
+      occupation: selVal(block.querySelector('.witness-occupation')),
+      aadhaar: block.querySelector('.witness-aadhaar') ? block.querySelector('.witness-aadhaar').value.trim() : '',
+      address: block.querySelector('.witness-address') ? block.querySelector('.witness-address').value.trim() : '',
+    };
+  }
+
+  function witnessParagraph(w) {
+    if (!w) w = {};
+    return `${fillOrBlank(w.name,35)} ${w.relation ? w.relation.toLowerCase() : 'son/daughter/wife of'} ${fillOrBlank(w.parent,25)}, aged ${fillOrBlank(w.age,4)}, ${w.marital ? w.marital.toLowerCase() : 'unmarried/married'}, nationality ${fillOrBlank(w.nationality,15)}, occupation (retired/in service/business/profession/homemaker) ${fillOrBlank(w.occupation,20)}, resident of ${fillOrBlank(w.address,25)} bearing Aadhaar Number ${fillOrBlank(w.aadhaar,15)}`;
+  }
+
+  function getResidualData() {
+    const block = document.querySelector('#residualList .repeat-block');
+    if (!block) return null;
+    return {
+      name: block.querySelector('.residual-name') ? block.querySelector('.residual-name').value.trim() : '',
+      relationship: selVal(block.querySelector('.residual-relationship')),
+      nationality: block.querySelector('.residual-nationality') ? block.querySelector('.residual-nationality').value.trim() : '',
+      occupation: selVal(block.querySelector('.residual-occupation')),
+      idtype: selVal(block.querySelector('.residual-idtype')),
+      idnumber: block.querySelector('.residual-idnumber') ? block.querySelector('.residual-idnumber').value.trim() : '',
+    };
+  }
+
+  function generateWillText() {
+    const name = idVal('testatorName');
+    const pan = idVal('testatorPAN');
+    const aadhaar = idVal('testatorAadhaar');
+    const relation = selVal(document.getElementById('testatorRelation'));
+    const parentName = idVal('testatorParentName');
+    const age = idVal('testatorAge');
+    const maritalStatus = selVal(document.getElementById('maritalStatus'));
+    const isMarried = maritalStatus === 'Married';
+    const maritalText = maritalStatus ? maritalStatus.toLowerCase() : 'unmarried/married';
+    const nationality = idVal('testatorNationality');
+    const occupation = selVal(document.getElementById('testatorOccupation'));
+    const address = idVal('testatorAddress');
+    const spouseName = idVal('spouseName');
+    const spouseAadhaar = idVal('spouseAadhaar');
+
+    const w1 = witnessParagraph(getWitnessData(0));
+    const w2 = witnessParagraph(getWitnessData(1));
+
+    const footer = "Testator's Signature: ___________________ Witness 1: _________ Witness 2: _________";
+
+    let spouseLine;
+    if (isMarried) {
+      spouseLine = `I am married to ${fillOrBlank(spouseName,30)}, bearing Aadhar No.${fillOrBlank(spouseAadhaar,15)} and I have (one/two/three etc) son, namely, ${'_'.repeat(30)} and (one/two/three etc) daughter, namely, ${'_'.repeat(30)}`;
+    } else {
+      spouseLine = `I have (one/two/three etc) son, namely, ${'_'.repeat(30)} and (one/two/three etc) daughter, namely, ${'_'.repeat(30)}`;
+    }
+
+    const houseFlat = formatAssetLine('House / Flat', getAssetEntries('houseFlatList'));
+    const landPlot = formatAssetLine('Land / Plot', getAssetEntries('landPlotList'));
+    const commercial = formatAssetLine('Commercial Property', getAssetEntries('commercialPropertyList'));
+    const vehicle = formatAssetLine('Vehicle / Car', getAssetEntries('vehicleList'));
+    const jewellery = formatAssetLine('Jewellery & Heirlooms', getAssetEntries('jewelleryList'));
+    const digital = formatAssetLine('Social Media / Digital', getAssetEntries('digitalAssetList'));
+    const ip = formatAssetLine('Intellectual Property', getAssetEntries('intellectualPropertyList'));
+
+    const residual = getResidualData();
+    const residualText = residual
+      ? `${fillOrBlank(residual.relationship,15)}, ${fillOrBlank(residual.name,30)}, nationality ${fillOrBlank(residual.nationality,15)}, occupation (retired/in service/business/profession/homemaker) ${fillOrBlank(residual.occupation,20)}, bearing ${residual.idtype ? residual.idtype + ' No.' : 'Aadhaar Card/PAN Card/Passport/Voter ID/Driving Licence Number'}: ${fillOrBlank(residual.idnumber,20)}`
+      : `${'_'.repeat(15)} (Relationship), ${'_'.repeat(30)}, nationality ${'_'.repeat(15)}, occupation (retired/in service/business/profession/homemaker) ${'_'.repeat(20)}, bearing Aadhaar Card/PAN Card/Passport/Voter ID/Driving Licence Number: ${'_'.repeat(20)}`;
+
+    const w1Name = (getWitnessData(0) || {}).name;
+    const w2Name = (getWitnessData(1) || {}).name;
+
+    return `${footer}
+
+WILL
+
+I, ${fillOrBlank(name,35)}, having PAN ${fillOrBlank(pan,15)}, Aadhar no ${fillOrBlank(aadhaar,15)} ${relation ? relation.toLowerCase() : 'son/daughter of'} ${fillOrBlank(parentName,30)}, aged ${fillOrBlank(age,4)}, ${maritalText}, nationality ${fillOrBlank(nationality,15)}, occupation (retired/in service/business/profession/homemaker) ${fillOrBlank(occupation,20)}, resident of ${fillOrBlank(address,35)}, ${spouseLine} and in the presence of two following witnesses:
+
+a) ${w1}
+
+b) ${w2}
+
+make my last and final WILL.
+
+I am making this last WILL and testament of mine voluntarily and without any compulsion or pressure from any source or person and in sound health and disposing state of mind. I have not been influenced, cajoled or coerced in any manner to write this WILL. I do hereby revoke all my wills, if any, previously made by me.
+
+I own the following movable and immovable properties which are all self-acquired or built out of my own earning and income and have absolute power of disposal of the same.
+
+I bequeath my specific assets to the designated beneficiaries as outlined below:
+
+A. Financial Assets:
+I bequeath all my financial assets including Bank Accounts, Fixed Deposits (FDs), Recurring Deposits (RDs), Public Provident Fund (PPF), Life Insurance, Stocks, Mutual Funds, Cryptocurrency (Crypto), Digital Wallets, National Pension System (NPS), Bonds, Alternative Investment Fund (AIF), Specialized Investment Fund (SIF), and Portfolio Management Services (PMS) entirely to the nominees registered in those financial instruments.
+
+B. Immovable Property:
+${houseFlat}
+
+${footer}
+
+${landPlot}
+
+${commercial}
+
+C. Motor Vehicles:
+${vehicle}
+
+D. Personal & Valuables:
+${jewellery}
+
+${footer}
+
+E. Digital & Miscellaneous Assets:
+${digital}
+
+${ip}
+
+I hereby declare, direct, and devise that all the Rest and Residue of my estate, including any property or assets, both movable and immovable, which I may acquire after the execution of this Will, or which has been inadvertently omitted from this document, shall be given entirely to ${residualText}.
+
+Signature of Testator/Testatrix______________________________
+
+I have fully understood the contents, significance and implications contained in this WILL which has been executed out of my free will, and choice. There has been no misrepresentation in regard to this WILL, and no one has any right to object and/or to challenge this WILL as this is culmination of my discretion and best for me to safeguard my interest and interest of my family.
+
+Testator/Testatrix understands and approves the contents of document before signing and was not forced to do so by any person.
+
+Signature of Testator/Testatrix:
+Name of Testator/Testatrix: ${fillOrBlank(name,35)}
+Place: ${'_'.repeat(20)}
+Date: ${'_'.repeat(15)}
+
+WITNESSES
+
+1)
+Name: ${fillOrBlank(w1Name,30)}
+Signature: ____________________________
+
+2)
+Name: ${fillOrBlank(w2Name,30)}
+Signature: ____________________________
+`;
+  }
+
+  function showWillPreview() {
+    const text = generateWillText();
+    document.getElementById('willPreviewText').value = text;
+    goTo(11);
+  }
+
+  function copyWillText() {
+    const el = document.getElementById('willPreviewText');
+    el.select();
+    el.setSelectionRange(0, 999999);
+    try { document.execCommand('copy'); } catch (e) {}
+    if (navigator.clipboard) { navigator.clipboard.writeText(el.value).catch(()=>{}); }
+  }
+
+  /* ---------- init ---------- */
+  renderTabs(currentStep);
+  addBeneficiary();
+  addWitness();
+  addWitness();
+  addResidual();
+  initAssets();
+</script>
+
+</body>
+</html>

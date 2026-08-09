@@ -3,12 +3,13 @@ import type { ReactNode } from "react";
 export interface Testator {
   email: string;
   fullName: string;
+  gender: "male" | "female" | "";
   pan: string;
   aadhaarNumber: string;
   relation: "son" | "daughter";
   parentSpouseName: string;
   age: string;
-  maritalStatus: "unmarried" | "married";
+  maritalStatus: "unmarried" | "married" | "widowed" | "divorced" | "";
   nationality: string;
   occupation: string;
   occupationOther: string;
@@ -26,11 +27,16 @@ export interface Testator {
 
 export interface Executor {
   wantsExecutor: boolean;
+  executorType: "individual" | "org";
   name: string;
   idType: string;
   idNumber: string;
   address: string;
   relation: string;
+  orgName: string;
+  orgRepName: string;
+  orgRegNumber: string;
+  orgAddress: string;
   hasJoint: boolean;
   jointName: string;
   jointIdType: string;
@@ -47,6 +53,7 @@ export interface Executor {
 export interface Guardian {
   hasMinors: boolean;
   name: string;
+  relation: string;
   idType: string;
   idNumber: string;
   address: string;
@@ -61,6 +68,13 @@ export interface Beneficiary {
   id: number;
   name: string;
   relation: string;
+  age: string;
+  maritalStatus: string;
+  occupation: string;
+  occupationOther: string;
+  address: string;
+  pan: string;
+  aadhaarNumber: string;
 }
 
 export interface Witness {

@@ -75,7 +75,7 @@ export function getMissingIdFields(will: WillState, willType: WillType): string[
   }
 
   if (executor.wantsExecutor) {
-    if (!executor.idNumber.trim()) missing.push(`Executor ${executor.idType || "ID"} Number`);
+    if (executor.executorType === "individual" && !executor.idNumber.trim()) missing.push(`Executor ${executor.idType || "ID"} Number`);
     if (executor.hasJoint && !executor.jointIdNumber.trim()) {
       missing.push(`Joint Executor ${executor.jointIdType || "ID"} Number`);
     }

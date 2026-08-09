@@ -24,7 +24,11 @@ export default function LiveDocPreview({will,residualBene}:{
         </Clause>
         <Clause title="EXECUTOR">
           {executor.wantsExecutor?(
-            <p className="text-justify">I appoint <strong>{executor.name||"[Executor]"}</strong> ({executor.relation}), ID: {executor.idType} {executor.idNumber||"[No.]"}, residing at {executor.address||"[Address]"}, as Sole Executor. They shall act <em>{executor.adminType==="jointly"?"jointly":"jointly and severally"}</em>.{executor.hasSubstitute&&executor.subName?` Substitute: ${executor.subName}.`:""}</p>
+            executor.executorType==="org"?(
+              <p className="text-justify">I appoint <strong>{executor.orgName||"[Organization]"}</strong>, represented by {executor.orgRepName||"its authorized representative"}, Reg./Tax ID: {executor.orgRegNumber||"[No.]"}, registered office at {executor.orgAddress||"[Address]"}, as Sole Executor. They shall act <em>{executor.adminType==="jointly"?"jointly":"jointly and severally"}</em>.{executor.hasSubstitute&&executor.subName?` Substitute: ${executor.subName}.`:""}</p>
+            ):(
+              <p className="text-justify">I appoint <strong>{executor.name||"[Executor]"}</strong> ({executor.relation}), ID: {executor.idType} {executor.idNumber||"[No.]"}, residing at {executor.address||"[Address]"}, as Sole Executor. They shall act <em>{executor.adminType==="jointly"?"jointly":"jointly and severally"}</em>.{executor.hasSubstitute&&executor.subName?` Substitute: ${executor.subName}.`:""}</p>
+            )
           ):(
             <p className="text-slate-500 italic">Not applicable — no Executor appointed for this Will.</p>
           )}

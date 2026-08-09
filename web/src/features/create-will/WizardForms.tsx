@@ -10,10 +10,12 @@ import {
 } from "../../data/options";
 import { ASSET_CATALOGUE, COLOR } from "../../data/assetCatalogue";
 import { WILL_TYPE_OPTIONS } from "../../data/willTypes";
+import { WIZARD_HELP } from "../../data/wizardHelp";
 import StepHeader from "../../components/shared/StepHeader";
 import FormBlock from "../../components/shared/FormBlock";
 import Toggle from "../../components/shared/Toggle";
 import Nav from "../../components/shared/Nav";
+import InfoTrigger from "../../components/shared/InfoTrigger";
 import { authFetch } from "../../utils/apiBase";
 import { normalizeIdOnBlur } from "../../utils/idValidation";
 import TestatorStep from "./steps/TestatorStep";
@@ -30,6 +32,28 @@ import {
 } from "../../constants";
 import type { AssetCatalogItem, AssetInstance, Beneficiary, WillState, WillType } from "../../types";
 import type { RazorpaySuccessResponse } from "../../types/razorpay";
+
+// "Bequeathed to" select for asset entries — offers the beneficiaries
+// entered in the Beneficiary step by name, plus a free-text fallback for a
+// recipient not listed there. Declared as a stable top-level component
+// (not an inline closure) so it keeps its own "other mode" state across
+// re-renders instead of remounting and losing focus on every keystroke.
+function BeneficiarySelect({value,beneficiaryNames,onChange,className}:{value: string; beneficiaryNames: string[]; onChange: (v: string)=>void; className: string}){
+  const [otherMode,setOtherMode]=useState(()=>!!value && !beneficiaryNames.includes(value));
+  return(
+    <>
+      <select value={otherMode?"__other__":value} onChange={e=>{
+        if(e.target.value==="__other__"){ setOtherMode(true); onChange(""); }
+        else { setOtherMode(false); onChange(e.target.value); }
+      }} className={className}>
+        <option value="">Bequeathed to — Select...</option>
+        {beneficiaryNames.map(n=><option key={n} value={n}>{n}</option>)}
+        <option value="__other__">Other / Not listed above</option>
+      </select>
+      {otherMode&&<input value={value} onChange={e=>onChange(e.target.value)} className={className+" mt-2"} placeholder="Enter recipient's full name"/>}
+    </>
+  );
+}
 
 interface WizardFormsProps {
   step: number;
@@ -333,7 +357,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
       {/* ── STEP 5: EXECUTOR ─────────────────────────────────── */}
       {step===5&&(
         <div className="space-y-4">
-          <StepHeader icon={<UserCheck size={17}/>} title="Executor Details" sub="Section II — Person who will execute your Will"/>
+          <StepHeader icon={<UserCheck size={17}/>} title="Executor Details" sub="Section II — Person who will execute your Will" info={<InfoTrigger title={WIZARD_HELP.executor.title}>{WIZARD_HELP.executor.body}</InfoTrigger>}/>
           <label className={`flex items-center justify-between p-3.5 rounded-xl border cursor-pointer transition-all ${will.executor.wantsExecutor?"border-[#2F8132]/40 bg-[#2F8132]/10":"border-slate-200 hover:border-slate-300"}`}>
             <div>
               <div className="text-slate-900 text-sm font-semibold">I want to appoint an Executor</div>
@@ -345,8 +369,32 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
           </label>
           {will.executor.wantsExecutor&&(
           <>
+          <div>
+            <label className={LC}>Executor Type</label>
+            <div className="flex gap-3">
+              {[{v:"individual",l:"Individual"},{v:"org",l:"Organization / Professional Entity"}].map(o=>(
+                <label key={o.v}
+                  className={`flex-1 flex items-center gap-2 p-3 rounded-xl border cursor-pointer transition-all ${will.executor.executorType===o.v?"border-[#2F8132]/50 bg-[#2F8132]/10":"border-slate-200 hover:border-slate-300"}`}>
+                  <input type="radio" name="executorType" className="sr-only peer" checked={will.executor.executorType===o.v} onChange={()=>set("executor.executorType",o.v)}/>
+                  <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all peer-focus-visible:ring-2 peer-focus-visible:ring-[#2F8132] peer-focus-visible:ring-offset-2 ${will.executor.executorType===o.v?"border-brand bg-brand":"border-slate-300"}`}>
+                    {will.executor.executorType===o.v&&<div className="w-1.5 h-1.5 rounded-full bg-white"/>}
+                  </div>
+                  <span className="text-slate-700 text-xs font-semibold">{o.l}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+          {will.executor.executorType==="individual"?(
           <FormBlock title="Primary Executor">
             <div><label className={LC}>Executor's Full Name</label><input value={will.executor.name} onChange={e=>set("executor.name",e.target.value)} className={IC}/></div>
+            <div className="grid grid-cols-2 gap-3">
+              <div><label className={LC}>Relationship to You</label>
+                <input value={will.executor.relation} onChange={e=>set("executor.relation",e.target.value)} className={IC} placeholder="e.g., Spouse, Child, Friend"/>
+              </div>
+              <div><label className={LC}>Contact Details / Address</label>
+                <input value={will.executor.address} onChange={e=>set("executor.address",e.target.value)} className={IC}/>
+              </div>
+            </div>
             <div className="grid grid-cols-2 gap-3">
               <div><label className={LC}>{LBL_ID_TYPE}</label>
                 <select value={will.executor.idType} onChange={e=>set("executor.idType",e.target.value)} className={IC+" appearance-none"}>
@@ -355,13 +403,17 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
               </div>
               <div><label className={LC}>{LBL_ID_NUMBER}</label><input value={will.executor.idNumber} onChange={e=>set("executor.idNumber",e.target.value)} onBlur={e=>handleIdBlur(will.executor.idType,e.target.value,v=>set("executor.idNumber",v))} disabled={idFieldsLocked} className={idInputCls(IC)} title={idInputTitle(TIP_NO_ID_SAVED)}/></div>
             </div>
-            <div><label className={LC}>Residential Address</label><textarea value={will.executor.address} onChange={e=>set("executor.address",e.target.value)} rows={2} className={IC+" resize-none"}/></div>
-            <div><label className={LC}>Relationship to Testator</label>
-              <select value={will.executor.relation} onChange={e=>set("executor.relation",e.target.value)} className={IC+" appearance-none"}>
-                {RELATIONS.map(r=><option key={r}>{r}</option>)}
-              </select>
+          </FormBlock>
+          ):(
+          <FormBlock title="Organization Executor">
+            <div><label className={LC}>Organization / Entity Name</label><input value={will.executor.orgName} onChange={e=>set("executor.orgName",e.target.value)} className={IC} placeholder="e.g. ABC Trustees Pvt. Ltd."/></div>
+            <div><label className={LC}>Authorized Representative / Contact Person <span className="text-slate-400 normal-case font-normal">(Optional)</span></label><input value={will.executor.orgRepName} onChange={e=>set("executor.orgRepName",e.target.value)} className={IC}/></div>
+            <div className="grid grid-cols-2 gap-3">
+              <div><label className={LC}>Registration / Tax ID Number <span className="text-slate-400 normal-case font-normal">(Optional)</span></label><input value={will.executor.orgRegNumber} onChange={e=>set("executor.orgRegNumber",e.target.value)} className={IC} placeholder="e.g. CIN, Registration No."/></div>
+              <div><label className={LC}>Registered Office Address <span className="text-slate-400 normal-case font-normal">(Optional)</span></label><input value={will.executor.orgAddress} onChange={e=>set("executor.orgAddress",e.target.value)} className={IC}/></div>
             </div>
           </FormBlock>
+          )}
           <FormBlock title="Administration Type">
             <div className="flex gap-3">
               {[{v:"jointly",l:"Jointly (Must act together)"},{v:"jointly_severally",l:"Jointly & Severally (May act independently)"}].map(o=>(
@@ -407,7 +459,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
       {/* ── STEP 6: GUARDIANS ────────────────────────────────── */}
       {step===6&&(
         <div className="space-y-4">
-          <StepHeader icon={<Baby size={17}/>} title="Guardian Details" sub="Section III — For minor beneficiaries (optional)"/>
+          <StepHeader icon={<Baby size={17}/>} title="Guardian Details" sub="Section III — For minor beneficiaries (optional)" info={<InfoTrigger title={WIZARD_HELP.guardian.title}>{WIZARD_HELP.guardian.body}</InfoTrigger>}/>
           <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 text-sm text-slate-700 leading-relaxed">
             <p className="font-semibold text-slate-900 mb-1">Do you have minor beneficiaries?</p>
             <p className="text-slate-600 text-sm">If any beneficiary is under 18, nominate a guardian to manage their inheritance until they come of age. This section is optional if all beneficiaries are adults.</p>
@@ -416,12 +468,20 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
           {will.guardian.hasMinors&&(
             <>
               <FormBlock title="Main Guardian">
-                <div><label className={LC}>{LBL_FULL_NAME}</label><input value={will.guardian.name} onChange={e=>set("guardian.name",e.target.value)} className={IC} placeholder="Guardian's name"/></div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div><label className={LC}>{LBL_FULL_NAME}</label><input value={will.guardian.name} onChange={e=>set("guardian.name",e.target.value)} className={IC} placeholder="Guardian's name"/></div>
+                  <div><label className={LC}>Relation to Testator</label>
+                    <select value={will.guardian.relation} onChange={e=>set("guardian.relation",e.target.value)} className={IC+" appearance-none"}>
+                      <option value="">Select...</option>
+                      {RELATIONS.map(r=><option key={r}>{r}</option>)}
+                    </select>
+                  </div>
+                </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div><label className={LC}>{LBL_ID_TYPE}</label><select value={will.guardian.idType} onChange={e=>set("guardian.idType",e.target.value)} className={IC+" appearance-none"}>{ID_TYPES.map(t=><option key={t}>{t}</option>)}</select></div>
                   <div><label className={LC}>{LBL_ID_NUMBER}</label><input value={will.guardian.idNumber} onChange={e=>set("guardian.idNumber",e.target.value)} onBlur={e=>handleIdBlur(will.guardian.idType,e.target.value,v=>set("guardian.idNumber",v))} disabled={idFieldsLocked} className={idInputCls(IC)} title={idInputTitle(TIP_NO_ID_SAVED)}/></div>
                 </div>
-                <div><label className={LC}>{LBL_ADDRESS}</label><textarea value={will.guardian.address} onChange={e=>set("guardian.address",e.target.value)} rows={2} className={IC+" resize-none"}/></div>
+                <div><label className={LC}>{LBL_ADDRESS}</label><input value={will.guardian.address} onChange={e=>set("guardian.address",e.target.value)} className={IC}/></div>
               </FormBlock>
               <Toggle label="Add Substitute Guardian" checked={will.guardian.hasSubstitute} onChange={v=>set("guardian.hasSubstitute",v)}/>
               {will.guardian.hasSubstitute&&(
@@ -443,7 +503,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
       {/* ── STEP 3: BENEFICIARIES ────────────────────────────── */}
       {step===3&&(
         <div className="space-y-4">
-          <StepHeader icon={<Users size={17}/>} title="Beneficiaries" sub="People named to receive your assets"/>
+          <StepHeader icon={<Users size={17}/>} title="Beneficiaries" sub="People named to receive your assets" info={<InfoTrigger title={WIZARD_HELP.beneficiary.title}>{WIZARD_HELP.beneficiary.body}</InfoTrigger>}/>
           <div className="space-y-3">
             {will.beneficiaries.map((b,idx)=>(
               <div key={b.id} className="bg-slate-50 border border-slate-200 rounded-xl p-4">
@@ -451,13 +511,38 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                   <span className="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Beneficiary {idx+1}</span>
                   {will.beneficiaries.length>1&&<button onClick={()=>removeBene(b.id)} className="text-red-500 hover:text-red-600"><Trash2 size={13}/></button>}
                 </div>
-                <div className="grid grid-cols-2 gap-2.5">
+                <div className="grid grid-cols-2 gap-2.5 mb-2.5">
                   <div><label className={LC}>{LBL_FULL_NAME}</label><input value={b.name} onChange={e=>updateBene(b.id,"name",e.target.value)} className={IC} placeholder="Full name"/></div>
+                  <div><label className={LC}>Age (Years)</label><input type="number" value={b.age||""} onChange={e=>updateBene(b.id,"age",e.target.value)} className={IC}/></div>
+                </div>
+                <div className="grid grid-cols-2 gap-2.5 mb-2.5">
                   <div><label className={LC}>Relation</label>
                     <select value={b.relation} onChange={e=>updateBene(b.id,"relation",e.target.value)} className={IC+" appearance-none"}>
                       {RELATIONS.map(r=><option key={r}>{r}</option>)}
                     </select>
                   </div>
+                  <div><label className={LC}>Marital Status</label>
+                    <select value={b.maritalStatus||""} onChange={e=>updateBene(b.id,"maritalStatus",e.target.value)} className={IC+" appearance-none"}>
+                      <option value="">Select...</option>
+                      <option>Married</option><option>Unmarried</option><option>Widowed</option><option>Divorced</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="mb-2.5"><label className={LC}>Occupation</label>
+                  <select value={b.occupation||""} onChange={e=>updateBene(b.id,"occupation",e.target.value)} className={IC+" appearance-none"}>
+                    <option value="">Select...</option>
+                    {OCCUPATIONS.map(o=><option key={o}>{o}</option>)}
+                  </select>
+                </div>
+                {b.occupation==="Other"&&(
+                  <div className="mb-2.5"><label className={LC}>Please specify occupation</label>
+                    <input value={b.occupationOther||""} onChange={e=>updateBene(b.id,"occupationOther",e.target.value)} className={IC}/></div>
+                )}
+                <div className="mb-2.5"><label className={LC}>Residential Address</label>
+                  <input value={b.address||""} onChange={e=>updateBene(b.id,"address",e.target.value)} className={IC}/></div>
+                <div className="grid grid-cols-2 gap-2.5">
+                  <div><label className={LC}>PAN Card No.</label><input value={b.pan||""} onChange={e=>updateBene(b.id,"pan",e.target.value)} onBlur={e=>handleIdBlur("PAN Card",e.target.value,v=>updateBene(b.id,"pan",v))} disabled={idFieldsLocked} className={idInputCls(IC)} title={idInputTitle(TIP_NO_ID_SAVED)}/></div>
+                  <div><label className={LC}>Aadhaar Card No.</label><input value={b.aadhaarNumber||""} onChange={e=>updateBene(b.id,"aadhaarNumber",e.target.value)} onBlur={e=>handleIdBlur("Aadhaar Card",e.target.value,v=>updateBene(b.id,"aadhaarNumber",v))} disabled={idFieldsLocked} className={idInputCls(IC)} title={idInputTitle(TIP_NO_ID_SAVED)}/></div>
                 </div>
               </div>
             ))}
@@ -479,20 +564,22 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
             const removeItem=(key: AllIndiaKey, idx: number)=>setWill(p=>({...p, allIndiaAssets:{...p.allIndiaAssets, [key]:p.allIndiaAssets[key].filter((_,j)=>j!==idx)}}));
             const setItem=(key: AllIndiaKey, idx: number, field: "description"|"beneficiary"|"relation"|"relationOther"|"idType"|"idNumber", value: string)=>
               setWill(p=>({...p, allIndiaAssets:{...p.allIndiaAssets, [key]:p.allIndiaAssets[key].map((item,j)=>j===idx?{...item,[field]:value}:item)}}));
-            const Category=({itemKey,label,placeholder}:{itemKey: AllIndiaKey; label: string; placeholder: string})=>(
+            const Category=({itemKey,label,descLabel,placeholder}:{itemKey: AllIndiaKey; label: string; descLabel: string; placeholder: string})=>(
               <div>
                 <p className="text-slate-900 text-sm font-semibold mb-2">{label}</p>
                 {will.allIndiaAssets[itemKey].map((item,idx)=>(
                   <div key={idx} className="bg-slate-50 border border-slate-200 rounded-xl p-3 mb-2.5">
-                    <div className="grid grid-cols-2 gap-2.5 mb-2.5">
-                      <input value={item.description} onChange={e=>setItem(itemKey,idx,"description",e.target.value)} className={IC} placeholder={placeholder}/>
-                      <div className="flex gap-2">
-                        <select value={item.beneficiary} onChange={e=>setItem(itemKey,idx,"beneficiary",e.target.value)} className={IC+" appearance-none"}>
-                          <option value="">Bequeathed to — Select...</option>
-                          {will.beneficiaries.filter(b=>b.name.trim()).map(b=><option key={b.id} value={b.name}>{b.name}</option>)}
-                        </select>
-                        {will.allIndiaAssets[itemKey].length>1&&<button onClick={()=>removeItem(itemKey,idx)} className="text-red-400 hover:text-red-500 shrink-0"><Trash2 size={14}/></button>}
+                    <div className="flex justify-between items-start gap-2">
+                      <div className="flex-1">
+                        <label className={LC}>{descLabel}</label>
+                        <input value={item.description} onChange={e=>setItem(itemKey,idx,"description",e.target.value)} className={IC} placeholder={placeholder}/>
                       </div>
+                      {will.allIndiaAssets[itemKey].length>1&&<button onClick={()=>removeItem(itemKey,idx)} className="text-red-400 hover:text-red-500 shrink-0 mt-6"><Trash2 size={14}/></button>}
+                    </div>
+                    <div className="mt-2.5 mb-2.5">
+                      <label className={LC}>Bequeathed To (Name of Person)</label>
+                      <BeneficiarySelect value={item.beneficiary} beneficiaryNames={will.beneficiaries.filter(b=>b.name.trim()).map(b=>b.name)}
+                        onChange={v=>setItem(itemKey,idx,"beneficiary",v)} className={IC+" appearance-none"}/>
                     </div>
                     <div className="grid grid-cols-3 gap-2.5">
                       <div><label className={LC}>Relationship</label>
@@ -527,21 +614,21 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                 </div>
                 <FormBlock title="B. Immovable Property">
                   <div className="space-y-4">
-                    {Category({itemKey:"houseFlat", label:"House / Flat", placeholder:"Address / description"})}
-                    {Category({itemKey:"landPlot", label:"Land / Plot", placeholder:"Address / description"})}
-                    {Category({itemKey:"commercialProperty", label:"Commercial Property", placeholder:"Address / description"})}
+                    {Category({itemKey:"houseFlat", label:"House / Flat", descLabel:"Address / Description / Survey Number", placeholder:"Enter address, description, or survey number"})}
+                    {Category({itemKey:"landPlot", label:"Land / Plot", descLabel:"Address / Description / Survey Number", placeholder:"Enter address, description, or survey number"})}
+                    {Category({itemKey:"commercialProperty", label:"Commercial Property", descLabel:"Address / Description / Survey Number", placeholder:"Enter address, description, or survey number"})}
                   </div>
                 </FormBlock>
                 <FormBlock title="C. Motor Vehicles">
-                  {Category({itemKey:"vehicle", label:"Vehicle / Car", placeholder:"Make, model, registration no."})}
+                  {Category({itemKey:"vehicle", label:"Vehicle / Car", descLabel:"Make, Model & Vehicle Number", placeholder:"e.g., Honda City, MH12AB1234"})}
                 </FormBlock>
                 <FormBlock title="D. Personal & Valuables">
-                  {Category({itemKey:"jewellery", label:"Jewellery & Heirlooms", placeholder:"Description"})}
+                  {Category({itemKey:"jewellery", label:"Jewellery & Heirlooms", descLabel:"Description", placeholder:"Describe the item(s)"})}
                 </FormBlock>
                 <FormBlock title="E. Digital & Miscellaneous Assets">
                   <div className="space-y-4">
-                    {Category({itemKey:"socialMediaDigital", label:"Social Media / Digital", placeholder:"Accounts, digital assets"})}
-                    {Category({itemKey:"intellectualProperty", label:"Intellectual Property", placeholder:"Patents, copyrights, etc."})}
+                    {Category({itemKey:"socialMediaDigital", label:"Social Media / Digital", descLabel:"Account / Application", placeholder:"e.g., Instagram handle, Google account email"})}
+                    {Category({itemKey:"intellectualProperty", label:"Intellectual Property", descLabel:"Patents, Copyrights, etc.", placeholder:"e.g., Patent No. / Copyright registration details"})}
                   </div>
                 </FormBlock>
               </>
@@ -567,12 +654,12 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                   <div key={idx} className="bg-slate-50 border border-slate-200 rounded-xl p-3 mb-2.5">
                     <div className="grid grid-cols-2 gap-2.5 mb-2.5">
                       <input value={item.description} onChange={e=>setItem(itemKey,idx,"description",e.target.value)} className={IC} placeholder={placeholder}/>
-                      <div className="flex gap-2">
-                        <select value={item.beneficiary} onChange={e=>setItem(itemKey,idx,"beneficiary",e.target.value)} className={IC+" appearance-none"}>
-                          <option value="">Bequeathed to — Select...</option>
-                          {will.beneficiaries.filter(b=>b.name.trim()).map(b=><option key={b.id} value={b.name}>{b.name}</option>)}
-                        </select>
-                        {will.goanAssets[itemKey].length>1&&<button onClick={()=>removeItem(itemKey,idx)} className="text-red-400 hover:text-red-500 shrink-0"><Trash2 size={14}/></button>}
+                      <div className="flex items-start gap-2">
+                        <div className="flex-1">
+                          <BeneficiarySelect value={item.beneficiary} beneficiaryNames={will.beneficiaries.filter(b=>b.name.trim()).map(b=>b.name)}
+                            onChange={v=>setItem(itemKey,idx,"beneficiary",v)} className={IC+" appearance-none"}/>
+                        </div>
+                        {will.goanAssets[itemKey].length>1&&<button onClick={()=>removeItem(itemKey,idx)} className="text-red-400 hover:text-red-500 shrink-0 mt-2.5"><Trash2 size={14}/></button>}
                       </div>
                     </div>
                     <div className="grid grid-cols-3 gap-2.5">
@@ -802,7 +889,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
       {/* ── STEP 7: RESIDUAL CLAUSE ──────────────────────────── */}
       {step===7&&(
         <div className="space-y-4">
-          <StepHeader icon={<BookOpen size={17}/>} title="Residual Clause" sub="Section V — The final bequest clause"/>
+          <StepHeader icon={<BookOpen size={17}/>} title="Residual Clause" sub="Section V — The final bequest clause" info={<InfoTrigger title={WIZARD_HELP.residual.title}>{WIZARD_HELP.residual.body}</InfoTrigger>}/>
           {willType==="allindia"?(
             <FormBlock title="Section V — Rest & Residue Clause">
               <p className="text-slate-500 text-xs mb-3 leading-relaxed">Even with careful planning, it's possible to miss mentioning an asset in this Will, or to acquire something new after signing it. A residuary clause is a safety net for exactly this. Any such asset should go to the following (more than one beneficiary shares equally):</p>
@@ -914,12 +1001,13 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
               </div>
             </FormBlock>
           )}
-          <FormBlock title="Section VI — Special Non-Asset Instructions">
-            <p className="text-slate-400 text-xs mb-2 leading-relaxed">Funeral instructions, organ donation wishes, personal requests, charitable directives, care of pets or dependents, and any other personal directions for your Executor.</p>
+          <div>
+            <h2 className="text-slate-900 font-bold serif text-xl mb-1.5">Special Non-Asset Instructions</h2>
+            <p className="text-slate-700 text-xs font-semibold mb-2 leading-relaxed">Funeral instructions, organ donation wishes, personal requests, charitable directives, care of pets or dependents, and any other personal directions for your Executor.</p>
             <textarea value={will.specialInstructions} onChange={e=>setWill(p=>({...p,specialInstructions:e.target.value}))} rows={5}
-              className={IC+" resize-none"}
-              placeholder="e.g. My funeral shall be performed according to Hindu rites. I request my family to donate my usable organs..."/>
-          </FormBlock>
+              className={IC}
+              placeholder="Enter any special instructions..."/>
+          </div>
           <Nav onNext={onNext} onPrev={onPrev}/>
         </div>
       )}
@@ -927,7 +1015,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
       {/* ── STEP 8: WITNESS ──────────────────────────────────── */}
       {step===8&&(
         <div className="space-y-4">
-          <StepHeader icon={<PenTool size={17}/>} title="Witnesses" sub="Section VII — Signing witnesses"/>
+          <StepHeader icon={<PenTool size={17}/>} title="Witnesses" sub="Section VII — Signing witnesses" info={<InfoTrigger title={WIZARD_HELP.witness.title}>{WIZARD_HELP.witness.body}</InfoTrigger>}/>
           <div className="bg-[#2F8132]/8 border border-[#2F8132]/25 rounded-xl p-3.5 text-xs text-brand-dark leading-relaxed">
             <strong className="text-slate-900">Who can be a witness?</strong> Under the Indian Succession Act, 1925, a Will needs at least two witnesses. Any adult (18+) of sound mind who can sign their own name qualifies — they don't need to know the contents, and don't need to be related to you. Each witness must see you sign (or be told directly that you've signed), then sign it themselves in your presence. Avoid using someone who also inherits under the Will as a witness — for Christians and Parsis this can cancel that person's inheritance. Your executor is allowed to be a witness.
           </div>

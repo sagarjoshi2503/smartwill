@@ -94,7 +94,11 @@ export default function WillDocument({will,residualBene,onBack,onPrint,willDocRe
           <WillSection num="II" title="APPOINTMENT OF EXECUTORS">
             {executor.wantsExecutor?(
               <>
-                <p className="text-justify mb-3">I hereby nominate, constitute, and appoint <strong>{executor.name||"_______________________"}</strong>, holding {executor.idType}: <strong>{executor.idNumber||"_______________________"}</strong>, residing at <strong>{executor.address||"_______________________"}</strong>, to be the <strong>Sole Executor</strong> of this my Last Will and Testament.</p>
+                {executor.executorType==="org"?(
+                  <p className="text-justify mb-3">I hereby nominate, constitute, and appoint <strong>{executor.orgName||"_______________________"}</strong>, represented by <strong>{executor.orgRepName||"its authorized representative"}</strong>, holding Registration/Tax ID No. <strong>{executor.orgRegNumber||"_______________________"}</strong>, having its registered office at <strong>{executor.orgAddress||"_______________________"}</strong>, to be the <strong>Sole Executor</strong> of this my Last Will and Testament.</p>
+                ):(
+                  <p className="text-justify mb-3">I hereby nominate, constitute, and appoint <strong>{executor.name||"_______________________"}</strong>, holding {executor.idType}: <strong>{executor.idNumber||"_______________________"}</strong>, residing at <strong>{executor.address||"_______________________"}</strong>, to be the <strong>Sole Executor</strong> of this my Last Will and Testament.</p>
+                )}
                 {executor.hasJoint&&executor.jointName&&(
                   <p className="text-justify mb-3"><em>(Joint Executor)</em> I also nominate <strong>{executor.jointName}</strong>, holding {executor.jointIdType}: <strong>{executor.jointIdNumber||"_______________________"}</strong>, residing at <strong>{executor.jointAddress||"_______________________"}</strong>, as my Joint Executor.</p>
                 )}
