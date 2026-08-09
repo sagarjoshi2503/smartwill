@@ -32,7 +32,7 @@ export const DEFAULT_WILL: WillState = {
   // first/structural choice (they're <select>s with no blank option), but no
   // fabricated name/address/ID-number text remains.
   executor: {
-    wantsExecutor:true,
+    wantsExecutor:false,
     executorType:"individual", // "individual" | "org"
     name:"", idType:"Aadhaar Card", idNumber:"",
     address:"",
