@@ -1,5 +1,16 @@
 import { MONTHS } from "../data/options";
 
+// DD/MM/YYYY, e.g. day=3, month="August", year=2026 -> "03/08/2026" — used
+// for the Date field next to the testator's signature (as opposed to
+// executionDateStr's spelled-out legal phrasing used in the opening clause).
+export const dateDDMMYYYY = (day: string | number, month: string, year: string | number): string => {
+  const d = typeof day==="number" ? day : parseInt(day,10);
+  const y = typeof year==="number" ? year : parseInt(year,10);
+  const mIdx = MONTHS.indexOf(month);
+  if(!Number.isFinite(d) || mIdx<0 || !Number.isFinite(y)) return "";
+  return `${String(d).padStart(2,"0")}/${String(mIdx+1).padStart(2,"0")}/${y}`;
+};
+
 export const fmt = (n: number): string => "₹" + n.toLocaleString("en-IN");
 
 const now = new Date();

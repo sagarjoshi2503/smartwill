@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import type { MutableRefObject, ReactNode } from "react";
 import { ChevronLeft, Printer, Download } from "lucide-react";
 import BrandMark from "../../components/shared/BrandMark";
-import { ordinal, yearInWords } from "../../utils/format";
+import { ordinal, yearInWords, dateDDMMYYYY } from "../../utils/format";
 import type { AllIndiaAssetItem, Beneficiary, WillState } from "../../types";
 
 // "Other" relationship/occupation choices carry their free-text value in a
@@ -39,6 +39,9 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,w
   // template's "...of the year Two Thousand and ____" wording.
   const executionDateStr = testator.signDay && testator.signMonth && testator.signYear
     ? <>{ordinal(testator.signDay)} day of {testator.signMonth} of the year {yearInWords(testator.signYear)}</>
+    : "____________________";
+  const signDateDDMMYYYY = testator.signDay && testator.signMonth && testator.signYear
+    ? dateDDMMYYYY(testator.signDay, testator.signMonth, testator.signYear)
     : "____________________";
 
   const sonNames = testator.sonNames.filter(Boolean);
@@ -239,7 +242,7 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,w
             </div>
             <p className="mb-1">Name of Testator/Testatrix: <strong>{testator.fullName||blank}</strong></p>
             <p className="mb-1">Place: <strong>{testator.signPlace||blank}</strong></p>
-            <p className="mb-8">Date: <strong>{executionDateStr}</strong></p>
+            <p className="mb-8">Date: <strong>{signDateDDMMYYYY}</strong></p>
 
             <h2 className="font-bold text-lg uppercase mb-8">Witnesses</h2>
             {witnesses.map((w,i)=>(

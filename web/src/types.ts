@@ -25,6 +25,7 @@ export interface Testator {
 }
 
 export interface Executor {
+  wantsExecutor: boolean;
   name: string;
   idType: string;
   idNumber: string;

@@ -74,12 +74,14 @@ export function getMissingIdFields(will: WillState, willType: WillType): string[
     missing.push("Spouse's Aadhaar Number");
   }
 
-  if (!executor.idNumber.trim()) missing.push(`Executor ${executor.idType || "ID"} Number`);
-  if (executor.hasJoint && !executor.jointIdNumber.trim()) {
-    missing.push(`Joint Executor ${executor.jointIdType || "ID"} Number`);
-  }
-  if (executor.hasSubstitute && !executor.subIdNumber.trim()) {
-    missing.push(`Substitute Executor ${executor.subIdType || "ID"} Number`);
+  if (executor.wantsExecutor) {
+    if (!executor.idNumber.trim()) missing.push(`Executor ${executor.idType || "ID"} Number`);
+    if (executor.hasJoint && !executor.jointIdNumber.trim()) {
+      missing.push(`Joint Executor ${executor.jointIdType || "ID"} Number`);
+    }
+    if (executor.hasSubstitute && !executor.subIdNumber.trim()) {
+      missing.push(`Substitute Executor ${executor.subIdType || "ID"} Number`);
+    }
   }
 
   if (guardian.hasMinors) {

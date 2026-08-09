@@ -23,7 +23,11 @@ export default function LiveDocPreview({will,residualBene}:{
           <p className="text-justify">I, <strong>{testator.fullName||"[Name]"}</strong>, having PAN <strong>{testator.pan||"[PAN]"}</strong>, Aadhaar No. <strong>{testator.aadhaarNumber||"[Aadhaar]"}</strong>, {testator.relation} of <strong>{testator.parentSpouseName||"[Parent]"}</strong>, aged <strong>{testator.age||"__"}</strong>, {testator.maritalStatus}, residing at <strong>{testator.address||"[Address]"}</strong>, India{testator.maritalStatus==="married"?<>, married to <strong>{testator.spouseName||"[Spouse]"}</strong></>:""}, hereby declare this to be my Last Will and Testament, revoking all prior Wills.</p>
         </Clause>
         <Clause title="EXECUTOR">
-          <p className="text-justify">I appoint <strong>{executor.name||"[Executor]"}</strong> ({executor.relation}), ID: {executor.idType} {executor.idNumber||"[No.]"}, residing at {executor.address||"[Address]"}, as Sole Executor. They shall act <em>{executor.adminType==="jointly"?"jointly":"jointly and severally"}</em>.{executor.hasSubstitute&&executor.subName?` Substitute: ${executor.subName}.`:""}</p>
+          {executor.wantsExecutor?(
+            <p className="text-justify">I appoint <strong>{executor.name||"[Executor]"}</strong> ({executor.relation}), ID: {executor.idType} {executor.idNumber||"[No.]"}, residing at {executor.address||"[Address]"}, as Sole Executor. They shall act <em>{executor.adminType==="jointly"?"jointly":"jointly and severally"}</em>.{executor.hasSubstitute&&executor.subName?` Substitute: ${executor.subName}.`:""}</p>
+          ):(
+            <p className="text-slate-500 italic">Not applicable — no Executor appointed for this Will.</p>
+          )}
         </Clause>
         {will.guardian.hasMinors&&will.guardian.name&&(
           <Clause title="GUARDIAN">

@@ -92,13 +92,19 @@ export default function WillDocument({will,residualBene,onBack,onPrint,willDocRe
 
           {/* SECTION II */}
           <WillSection num="II" title="APPOINTMENT OF EXECUTORS">
-            <p className="text-justify mb-3">I hereby nominate, constitute, and appoint <strong>{executor.name||"_______________________"}</strong>, holding {executor.idType}: <strong>{executor.idNumber||"_______________________"}</strong>, residing at <strong>{executor.address||"_______________________"}</strong>, to be the <strong>Sole Executor</strong> of this my Last Will and Testament.</p>
-            {executor.hasJoint&&executor.jointName&&(
-              <p className="text-justify mb-3"><em>(Joint Executor)</em> I also nominate <strong>{executor.jointName}</strong>, holding {executor.jointIdType}: <strong>{executor.jointIdNumber||"_______________________"}</strong>, residing at <strong>{executor.jointAddress||"_______________________"}</strong>, as my Joint Executor.</p>
-            )}
-            <p className="mb-3"><strong>Administration Type:</strong> The appointed Executor(s) shall act <strong>{executor.adminType==="jointly"?"Jointly (must act together)":"Jointly and Severally (may act independently with mutual consent)"}</strong>.</p>
-            {executor.hasSubstitute&&executor.subName&&(
-              <p className="text-justify"><strong>Substitute Executor:</strong> In the event that my primary Executor(s) should predecease me, or is/are unable, unwilling, or incapacitated to act, I hereby nominate and appoint <strong>{executor.subName}</strong>, holding {executor.subIdType}: <strong>{executor.subIdNumber||"_______________________"}</strong>, residing at <strong>{executor.subAddress||"_______________________"}</strong>, as my Substitute Executor with identical powers and duties.</p>
+            {executor.wantsExecutor?(
+              <>
+                <p className="text-justify mb-3">I hereby nominate, constitute, and appoint <strong>{executor.name||"_______________________"}</strong>, holding {executor.idType}: <strong>{executor.idNumber||"_______________________"}</strong>, residing at <strong>{executor.address||"_______________________"}</strong>, to be the <strong>Sole Executor</strong> of this my Last Will and Testament.</p>
+                {executor.hasJoint&&executor.jointName&&(
+                  <p className="text-justify mb-3"><em>(Joint Executor)</em> I also nominate <strong>{executor.jointName}</strong>, holding {executor.jointIdType}: <strong>{executor.jointIdNumber||"_______________________"}</strong>, residing at <strong>{executor.jointAddress||"_______________________"}</strong>, as my Joint Executor.</p>
+                )}
+                <p className="mb-3"><strong>Administration Type:</strong> The appointed Executor(s) shall act <strong>{executor.adminType==="jointly"?"Jointly (must act together)":"Jointly and Severally (may act independently with mutual consent)"}</strong>.</p>
+                {executor.hasSubstitute&&executor.subName&&(
+                  <p className="text-justify"><strong>Substitute Executor:</strong> In the event that my primary Executor(s) should predecease me, or is/are unable, unwilling, or incapacitated to act, I hereby nominate and appoint <strong>{executor.subName}</strong>, holding {executor.subIdType}: <strong>{executor.subIdNumber||"_______________________"}</strong>, residing at <strong>{executor.subAddress||"_______________________"}</strong>, as my Substitute Executor with identical powers and duties.</p>
+                )}
+              </>
+            ):(
+              <p className="text-slate-500 italic">Not applicable — no Executor appointed for this Will.</p>
             )}
           </WillSection>
 

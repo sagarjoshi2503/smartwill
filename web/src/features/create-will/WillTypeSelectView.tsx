@@ -8,6 +8,9 @@ export default function WillTypeSelectView({onSelect,onBack}:{
   onBack: () => void;
 }){
   const [selected,setSelected]=useState<WillType>("");
+  // Custom Will is an admin-only format (still offered in the in-wizard
+  // picker for admin-created Wills) — not offered to client testators here.
+  const clientWillTypeOptions = WILL_TYPE_OPTIONS.filter(opt=>opt.id!=="customwill");
 
   return(
     <div className="fade-in fixed inset-0 z-50 bg-slate-100/95 overflow-y-auto">
@@ -19,7 +22,7 @@ export default function WillTypeSelectView({onSelect,onBack}:{
           </div>
           <div className="p-6">
             <div className="space-y-3 mb-6">
-              {WILL_TYPE_OPTIONS.map(opt=>(
+              {clientWillTypeOptions.map(opt=>(
                 <label key={opt.id}
                   className={`flex items-start gap-3 p-4 rounded-2xl border cursor-pointer transition-all ${selected===opt.id?"border-[#2F8132]/60 bg-[#2F8132]/10":"border-slate-200 hover:border-[#2F8132]/30"}`}>
                   <input type="radio" name="willType" className="sr-only peer" checked={selected===opt.id} onChange={()=>setSelected(opt.id)}/>

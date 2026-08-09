@@ -334,6 +334,17 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
       {step===5&&(
         <div className="space-y-4">
           <StepHeader icon={<UserCheck size={17}/>} title="Executor Details" sub="Section II — Person who will execute your Will"/>
+          <label className={`flex items-center justify-between p-3.5 rounded-xl border cursor-pointer transition-all ${will.executor.wantsExecutor?"border-[#2F8132]/40 bg-[#2F8132]/10":"border-slate-200 hover:border-slate-300"}`}>
+            <div>
+              <div className="text-slate-900 text-sm font-semibold">I want to appoint an Executor</div>
+              <div className="text-slate-500 text-xs mt-0.5">Optional, but recommended to ensure your wishes are carried out smoothly</div>
+            </div>
+            <div onClick={()=>set("executor.wantsExecutor",!will.executor.wantsExecutor)} className={`w-10 h-5 rounded-full relative transition-all shrink-0 ml-3 ${will.executor.wantsExecutor?"bg-brand":"bg-slate-300"}`}>
+              <div className="absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-all" style={{left:will.executor.wantsExecutor?"22px":"2px"}}/>
+            </div>
+          </label>
+          {will.executor.wantsExecutor&&(
+          <>
           <FormBlock title="Primary Executor">
             <div><label className={LC}>Executor's Full Name</label><input value={will.executor.name} onChange={e=>set("executor.name",e.target.value)} className={IC}/></div>
             <div className="grid grid-cols-2 gap-3">
@@ -386,6 +397,8 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
               </div>
               <div><label className={LC}>{LBL_ADDRESS}</label><textarea value={will.executor.subAddress} onChange={e=>set("executor.subAddress",e.target.value)} rows={2} className={IC+" resize-none"}/></div>
             </FormBlock>
+          )}
+          </>
           )}
           <Nav onNext={onNext} onPrev={onPrev}/>
         </div>
@@ -474,7 +487,10 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                     <div className="grid grid-cols-2 gap-2.5 mb-2.5">
                       <input value={item.description} onChange={e=>setItem(itemKey,idx,"description",e.target.value)} className={IC} placeholder={placeholder}/>
                       <div className="flex gap-2">
-                        <input value={item.beneficiary} onChange={e=>setItem(itemKey,idx,"beneficiary",e.target.value)} className={IC} placeholder="Bequeathed to"/>
+                        <select value={item.beneficiary} onChange={e=>setItem(itemKey,idx,"beneficiary",e.target.value)} className={IC+" appearance-none"}>
+                          <option value="">Bequeathed to — Select...</option>
+                          {will.beneficiaries.filter(b=>b.name.trim()).map(b=><option key={b.id} value={b.name}>{b.name}</option>)}
+                        </select>
                         {will.allIndiaAssets[itemKey].length>1&&<button onClick={()=>removeItem(itemKey,idx)} className="text-red-400 hover:text-red-500 shrink-0"><Trash2 size={14}/></button>}
                       </div>
                     </div>
@@ -552,7 +568,10 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                     <div className="grid grid-cols-2 gap-2.5 mb-2.5">
                       <input value={item.description} onChange={e=>setItem(itemKey,idx,"description",e.target.value)} className={IC} placeholder={placeholder}/>
                       <div className="flex gap-2">
-                        <input value={item.beneficiary} onChange={e=>setItem(itemKey,idx,"beneficiary",e.target.value)} className={IC} placeholder="Bequeathed to"/>
+                        <select value={item.beneficiary} onChange={e=>setItem(itemKey,idx,"beneficiary",e.target.value)} className={IC+" appearance-none"}>
+                          <option value="">Bequeathed to — Select...</option>
+                          {will.beneficiaries.filter(b=>b.name.trim()).map(b=><option key={b.id} value={b.name}>{b.name}</option>)}
+                        </select>
                         {will.goanAssets[itemKey].length>1&&<button onClick={()=>removeItem(itemKey,idx)} className="text-red-400 hover:text-red-500 shrink-0"><Trash2 size={14}/></button>}
                       </div>
                     </div>

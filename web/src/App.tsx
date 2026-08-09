@@ -568,7 +568,7 @@ export default function SmartWill() {
       {view==="admin" && adminProfile && <AdminPortal admin={adminProfile} onCreateWill={handleAdminCreateWill} onReviewWill={handleAdminReviewWill}/>}
 
       {view==="wizard" && (
-        <div className="flex flex-col h-screen bg-slate-100 fade-in">
+        <div className={`flex flex-col ${livePreviewEnabled?"lg:h-screen":""} bg-slate-100 fade-in`}>
           {/* Wizard bar */}
           <div className="flex-none bg-white/95 border-b border-slate-200 px-4 h-[60px] flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -636,8 +636,8 @@ export default function SmartWill() {
             </div>
           )}
           {/* Split pane */}
-          <div className="flex flex-1 overflow-hidden">
-            <div className={`w-full ${livePreviewEnabled?"lg:w-[50%]":""} overflow-y-auto p-5 bg-slate-50`}>
+          <div className={`flex flex-1 ${livePreviewEnabled?"lg:overflow-hidden":""}`}>
+            <div className={`w-full ${livePreviewEnabled?"lg:w-[50%] lg:overflow-y-auto":""} p-5 bg-slate-50`}>
               <WizardForms
                 step={wizardStep} will={will} setWill={setWill}
                 willType={willType} setWillType={setWillType} hideWillTypeStep={skipWillTypeStep}
