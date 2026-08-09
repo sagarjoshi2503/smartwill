@@ -134,7 +134,7 @@ export default function ChatWidget({ onContactSupport }: { onContactSupport: () 
 
       <button
         onClick={() => setOpen(o => !o)}
-        className="w-12 h-12 rounded-full bg-brand hover:bg-brand-dark text-[#ffffff] shadow-lg shadow-[#2F8132]/30 flex items-center justify-center transition-colors"
+        className="w-12 h-12 rounded-full bg-brand hover:bg-brand-dark text-[#ffffff] shadow-lg shadow-[#4F9D33]/30 flex items-center justify-center transition-colors"
         aria-label={ARIA_OPEN_CHAT}
       >
         {open ? <X size={18} /> : <MessageCircle size={18} />}

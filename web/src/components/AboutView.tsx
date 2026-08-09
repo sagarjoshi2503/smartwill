@@ -44,7 +44,7 @@ export default function AboutView(){
           <h2 className="text-2xl font-bold text-slate-900 serif mb-6">Why Choose Us?</h2>
           <div className="space-y-4">
             {WHY_LIST.map((item,i)=>(
-              <div key={i} className="apv-card p-5 border-l-4 border-l-[#2F8132]">
+              <div key={i} className="apv-card p-5 border-l-4 border-l-[#4F9D33]">
                 <p className="text-slate-700 text-sm leading-relaxed">{item}</p>
               </div>
             ))}
@@ -62,7 +62,7 @@ export default function AboutView(){
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {TEAM.map(person=>(
               <div key={person.initials} className="apv-card p-6 text-center">
-                <div className="w-16 h-16 rounded-full bg-[#EDF6EA] text-brand flex items-center justify-center mx-auto mb-4 font-bold serif text-lg">{person.initials}</div>
+                <div className="w-16 h-16 rounded-full bg-[#F3F7E7] text-brand flex items-center justify-center mx-auto mb-4 font-bold serif text-lg">{person.initials}</div>
                 <h3 className="text-slate-900 font-bold text-sm mb-1">{person.name}</h3>
                 <span className="block text-brand text-[10px] font-bold uppercase tracking-wider mb-2">{person.role}</span>
                 <p className="text-slate-500 text-xs leading-relaxed">{person.blurb}</p>

@@ -9,7 +9,7 @@ export default function LiveDocPreview({will,residualBene}:{
 }){
   const {testator,executor,beneficiaries,assets}=will;
   return(
-    <div className="w-full max-w-[520px] rounded-xl shadow-2xl overflow-hidden border border-[#2F8132]/20">
+    <div className="w-full max-w-[520px] rounded-xl shadow-2xl overflow-hidden border border-[#4F9D33]/20">
       <div className="bg-white border-b border-slate-200 px-4 py-2.5 flex items-center gap-2">
         <span className="text-brand text-xs font-semibold flex items-center gap-1.5"><Eye size={12}/>Live Preview — Will Document</span>
       </div>

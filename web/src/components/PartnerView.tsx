@@ -38,7 +38,7 @@ export default function PartnerView({onContactUs}:{
           <h3 className="text-slate-900 font-semibold text-sm mb-3">Are you one of these professionals? This is for you:</h3>
           <div className="grid sm:grid-cols-2 gap-2.5 mb-6">
             {WHO_FOR.map(w=>(
-              <div key={w} className="text-slate-700 text-sm bg-white border-l-[3px] border-l-[#2F8132] border border-slate-200 rounded-lg px-3.5 py-2.5">✔ {w}</div>
+              <div key={w} className="text-slate-700 text-sm bg-white border-l-[3px] border-l-[#4F9D33] border border-slate-200 rounded-lg px-3.5 py-2.5">✔ {w}</div>
             ))}
           </div>
           <button onClick={onContactUs} className="apv-btn-alt">We would love to collaborate with you — contact us</button>
@@ -51,7 +51,7 @@ export default function PartnerView({onContactUs}:{
           <p className="text-slate-500 text-sm mb-6">Tell us a bit about yourself and the services you're interested in.</p>
 
           {submitted ? (
-            <div className="bg-[#EDF6EA] border border-[#2F8132]/25 rounded-xl p-4 text-sm text-brand-dark">
+            <div className="bg-[#F3F7E7] border border-[#4F9D33]/25 rounded-xl p-4 text-sm text-brand-dark">
               Thanks, {name || "there"} — your partner application has been recorded. We'll be in touch shortly.
             </div>
           ) : (
@@ -61,7 +61,7 @@ export default function PartnerView({onContactUs}:{
                 <div className="grid sm:grid-cols-2 gap-2">
                   {SERVICE_OPTIONS.map(s=>(
                     <label key={s} className="flex items-center gap-2 text-sm text-slate-700 cursor-pointer">
-                      <input type="checkbox" className="accent-[#2F8132]" checked={services.includes(s)} onChange={()=>toggleService(s)}/>
+                      <input type="checkbox" className="accent-[#4F9D33]" checked={services.includes(s)} onChange={()=>toggleService(s)}/>
                       {s}
                     </label>
                   ))}
@@ -74,7 +74,7 @@ export default function PartnerView({onContactUs}:{
                 <div><label className={LC}>State of Residence</label><input value={state} onChange={e=>setState(e.target.value)} required className={IC} placeholder="e.g. Goa"/></div>
               </div>
               <label className="flex items-start gap-2.5 text-xs text-slate-600">
-                <input type="checkbox" className="mt-0.5 accent-[#2F8132]" checked={consent} onChange={e=>setConsent(e.target.checked)} required/>
+                <input type="checkbox" className="mt-0.5 accent-[#4F9D33]" checked={consent} onChange={e=>setConsent(e.target.checked)} required/>
                 I am an adult &amp; have read the Disclaimer, Terms of Use and Privacy Policy
               </label>
               <button type="submit" disabled={!canSubmit} className="apv-btn w-full justify-center disabled:opacity-60 disabled:cursor-not-allowed">

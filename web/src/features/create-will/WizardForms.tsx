@@ -207,7 +207,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
       name: "Forward Legacy",
       description: "Will submission for admin review",
       prefill: { name: will.testator.fullName, email: will.testator.email },
-      theme: { color: "#2F8132" },
+      theme: { color: "#4F9D33" },
       handler: (response) => { handlePaymentSuccess(savedWillId, order.amount, response); },
       modal: {
         ondismiss: () => {
@@ -323,9 +323,9 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
           <div className="space-y-3">
             {WILL_TYPE_OPTIONS.map(opt=>(
               <label key={opt.id}
-                className={`flex items-start gap-3 p-4 rounded-2xl border cursor-pointer transition-all ${willType===opt.id?"border-[#2F8132]/60 bg-[#2F8132]/10":"border-slate-200 hover:border-[#2F8132]/30"} ${viewOnly?"cursor-not-allowed opacity-70":""}`}>
+                className={`flex items-start gap-3 p-4 rounded-2xl border cursor-pointer transition-all ${willType===opt.id?"border-[#4F9D33]/60 bg-[#4F9D33]/10":"border-slate-200 hover:border-[#4F9D33]/30"} ${viewOnly?"cursor-not-allowed opacity-70":""}`}>
                 <input type="radio" name="willType" className="sr-only peer" checked={willType===opt.id} disabled={viewOnly} onChange={()=>setWillType(opt.id)}/>
-                <div className={`w-4 h-4 mt-0.5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all peer-focus-visible:ring-2 peer-focus-visible:ring-[#2F8132] peer-focus-visible:ring-offset-2 ${willType===opt.id?"border-brand bg-brand":"border-slate-300"}`}>
+                <div className={`w-4 h-4 mt-0.5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all peer-focus-visible:ring-2 peer-focus-visible:ring-[#4F9D33] peer-focus-visible:ring-offset-2 ${willType===opt.id?"border-brand bg-brand":"border-slate-300"}`}>
                   {willType===opt.id&&<div className="w-1.5 h-1.5 rounded-full bg-white"/>}
                 </div>
                 <div className="text-brand mt-0.5">{opt.icon}</div>
@@ -358,7 +358,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
       {step===5&&(
         <div className="space-y-4">
           <StepHeader icon={<UserCheck size={17}/>} title="Executor Details" sub="Section II — Person who will execute your Will" info={<InfoTrigger title={WIZARD_HELP.executor.title}>{WIZARD_HELP.executor.body}</InfoTrigger>}/>
-          <label className={`flex items-center justify-between p-3.5 rounded-xl border cursor-pointer transition-all ${will.executor.wantsExecutor?"border-[#2F8132]/40 bg-[#2F8132]/10":"border-slate-200 hover:border-slate-300"}`}>
+          <label className={`flex items-center justify-between p-3.5 rounded-xl border cursor-pointer transition-all ${will.executor.wantsExecutor?"border-[#4F9D33]/40 bg-[#4F9D33]/10":"border-slate-200 hover:border-slate-300"}`}>
             <div>
               <div className="text-slate-900 text-sm font-semibold">I want to appoint an Executor</div>
               <div className="text-slate-500 text-xs mt-0.5">Optional, but recommended to ensure your wishes are carried out smoothly</div>
@@ -374,9 +374,9 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
             <div className="flex gap-3">
               {[{v:"individual",l:"Individual"},{v:"org",l:"Organization / Professional Entity"}].map(o=>(
                 <label key={o.v}
-                  className={`flex-1 flex items-center gap-2 p-3 rounded-xl border cursor-pointer transition-all ${will.executor.executorType===o.v?"border-[#2F8132]/50 bg-[#2F8132]/10":"border-slate-200 hover:border-slate-300"}`}>
+                  className={`flex-1 flex items-center gap-2 p-3 rounded-xl border cursor-pointer transition-all ${will.executor.executorType===o.v?"border-[#4F9D33]/50 bg-[#4F9D33]/10":"border-slate-200 hover:border-slate-300"}`}>
                   <input type="radio" name="executorType" className="sr-only peer" checked={will.executor.executorType===o.v} onChange={()=>set("executor.executorType",o.v)}/>
-                  <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all peer-focus-visible:ring-2 peer-focus-visible:ring-[#2F8132] peer-focus-visible:ring-offset-2 ${will.executor.executorType===o.v?"border-brand bg-brand":"border-slate-300"}`}>
+                  <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all peer-focus-visible:ring-2 peer-focus-visible:ring-[#4F9D33] peer-focus-visible:ring-offset-2 ${will.executor.executorType===o.v?"border-brand bg-brand":"border-slate-300"}`}>
                     {will.executor.executorType===o.v&&<div className="w-1.5 h-1.5 rounded-full bg-white"/>}
                   </div>
                   <span className="text-slate-700 text-xs font-semibold">{o.l}</span>
@@ -559,11 +559,11 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
             );
             return(
               <>
-                <div className="bg-[#2F8132]/8 border border-[#2F8132]/25 rounded-xl p-4">
+                <div className="bg-[#4F9D33]/8 border border-[#4F9D33]/25 rounded-xl p-4">
                   <span className="inline-block bg-brand text-[#ffffff] text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full mb-2">Included Automatically</span>
                   <p className="text-slate-900 text-sm font-semibold mb-1">A. Financial Assets</p>
                   <p className="text-slate-600 text-xs leading-relaxed">I bequeath all my financial assets — including Bank Accounts, Fixed Deposits (FDs), Recurring Deposits (RDs), Public Provident Fund (PPF), Life Insurance, Stocks, Mutual Funds, Cryptocurrency (Crypto), Digital Wallets, National Pension System (NPS), Bonds, Alternative Investment Fund (AIF), Specialized Investment Fund (SIF), and Portfolio Management Services (PMS) — entirely to the nominees registered in those financial instruments.</p>
-                  <p className="text-brand-dark text-xs leading-relaxed mt-2.5 pt-2.5 border-t border-dashed border-[#2F8132]/30"><strong>Why we recommend this:</strong> it's advisable to pass on financial assets by nomination rather than by listing individual accounts — nominations stay current automatically as balances and accounts change, so you don't need to update this Will every time. Just keep your nominations up to date.</p>
+                  <p className="text-brand-dark text-xs leading-relaxed mt-2.5 pt-2.5 border-t border-dashed border-[#4F9D33]/30"><strong>Why we recommend this:</strong> it's advisable to pass on financial assets by nomination rather than by listing individual accounts — nominations stay current automatically as balances and accounts change, so you don't need to update this Will every time. Just keep your nominations up to date.</p>
                 </div>
                 <FormBlock title="B. Immovable Property">
                   <div className="space-y-4">
@@ -640,11 +640,11 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
             );
             return(
               <>
-                <div className="bg-[#2F8132]/8 border border-[#2F8132]/25 rounded-xl p-4">
+                <div className="bg-[#4F9D33]/8 border border-[#4F9D33]/25 rounded-xl p-4">
                   <span className="inline-block bg-brand text-[#ffffff] text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full mb-2">Included Automatically</span>
                   <p className="text-slate-900 text-sm font-semibold mb-1">A. Financial Assets</p>
                   <p className="text-slate-600 text-xs leading-relaxed">I bequeath all my financial assets — including Bank Accounts, FDs, RDs, PPF, Life Insurance, Stocks, Mutual Funds, Crypto, Digital Wallets, NPS, Bonds, AIF, SIF, and PMS — entirely to the nominees registered in those financial instruments.</p>
-                  <p className="text-brand-dark text-xs leading-relaxed mt-2.5 pt-2.5 border-t border-dashed border-[#2F8132]/30"><strong>Why we recommend this:</strong> it's advisable to pass on financial assets by nomination rather than by listing individual accounts — nominations stay current automatically as balances and accounts change, so you don't need to update this Will every time. Just keep your nominations up to date.</p>
+                  <p className="text-brand-dark text-xs leading-relaxed mt-2.5 pt-2.5 border-t border-dashed border-[#4F9D33]/30"><strong>Why we recommend this:</strong> it's advisable to pass on financial assets by nomination rather than by listing individual accounts — nominations stay current automatically as balances and accounts change, so you don't need to update this Will every time. Just keep your nominations up to date.</p>
                 </div>
                 <FormBlock title="B. Immovable Property">
                   <div className="space-y-4">
@@ -680,9 +680,9 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
             <div className="flex gap-2.5">
               {[{v:"itemized",l:"Itemized (Specific assets to specific people)"},{v:"global",l:"Global (Divide entire estate at once)"}].map(o=>(
                 <label key={o.v}
-                  className={`flex-1 flex items-start gap-2 p-3 rounded-xl border cursor-pointer transition-all ${will.distributionMode===o.v?"border-[#2F8132]/50 bg-[#2F8132]/10":"border-slate-700 hover:border-slate-600"}`}>
+                  className={`flex-1 flex items-start gap-2 p-3 rounded-xl border cursor-pointer transition-all ${will.distributionMode===o.v?"border-[#4F9D33]/50 bg-[#4F9D33]/10":"border-slate-700 hover:border-slate-600"}`}>
                   <input type="radio" name="distributionMode" className="sr-only peer" checked={will.distributionMode===o.v} onChange={()=>setWill(p=>({...p,distributionMode:o.v as WillState["distributionMode"]}))}/>
-                  <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center mt-0.5 transition-all peer-focus-visible:ring-2 peer-focus-visible:ring-[#2F8132] peer-focus-visible:ring-offset-2 ${will.distributionMode===o.v?"border-brand bg-brand":"border-slate-600"}`}>
+                  <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center mt-0.5 transition-all peer-focus-visible:ring-2 peer-focus-visible:ring-[#4F9D33] peer-focus-visible:ring-offset-2 ${will.distributionMode===o.v?"border-brand bg-brand":"border-slate-600"}`}>
                     {will.distributionMode===o.v&&<div className="w-1.5 h-1.5 rounded-full bg-white"/>}
                   </div>
                   <span className="text-slate-700 text-xs">{o.l}</span>
@@ -697,9 +697,9 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
               <div className="flex gap-2.5 mb-3">
                 {[{v:"equal",l:"Equal share among all"},{v:"percentage",l:"Specified percentages"}].map(o=>(
                   <label key={o.v}
-                    className={`flex-1 flex items-center gap-2 p-2.5 rounded-xl border cursor-pointer transition-all ${will.globalMode===o.v?"border-[#2F8132]/50 bg-[#2F8132]/10":"border-slate-700"}`}>
+                    className={`flex-1 flex items-center gap-2 p-2.5 rounded-xl border cursor-pointer transition-all ${will.globalMode===o.v?"border-[#4F9D33]/50 bg-[#4F9D33]/10":"border-slate-700"}`}>
                     <input type="radio" name="globalMode" className="sr-only peer" checked={will.globalMode===o.v} onChange={()=>setWill(p=>({...p,globalMode:o.v as WillState["globalMode"]}))}/>
-                    <div className={`w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center transition-all peer-focus-visible:ring-2 peer-focus-visible:ring-[#2F8132] peer-focus-visible:ring-offset-2 ${will.globalMode===o.v?"border-brand bg-brand":"border-slate-600"}`}>
+                    <div className={`w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center transition-all peer-focus-visible:ring-2 peer-focus-visible:ring-[#4F9D33] peer-focus-visible:ring-offset-2 ${will.globalMode===o.v?"border-brand bg-brand":"border-slate-600"}`}>
                       {will.globalMode===o.v&&<div className="w-1 h-1 rounded-full bg-white"/>}
                     </div>
                     <span className="text-slate-700 text-xs">{o.l}</span>
@@ -969,7 +969,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
       {step===8&&(
         <div className="space-y-4">
           <StepHeader icon={<PenTool size={17}/>} title="Witnesses" sub="Section VII — Signing witnesses" info={<InfoTrigger title={WIZARD_HELP.witness.title}>{WIZARD_HELP.witness.body}</InfoTrigger>}/>
-          <div className="bg-[#2F8132]/8 border border-[#2F8132]/25 rounded-xl p-3.5 text-xs text-brand-dark leading-relaxed">
+          <div className="bg-[#4F9D33]/8 border border-[#4F9D33]/25 rounded-xl p-3.5 text-xs text-brand-dark leading-relaxed">
             <strong className="text-slate-900">Who can be a witness?</strong> Under the Indian Succession Act, 1925, a Will needs at least two witnesses. Any adult (18+) of sound mind who can sign their own name qualifies — they don't need to know the contents, and don't need to be related to you. Each witness must see you sign (or be told directly that you've signed), then sign it themselves in your presence. Avoid using someone who also inherits under the Will as a witness — for Christians and Parsis this can cancel that person's inheritance. Your executor is allowed to be a witness.
           </div>
           {willType==="goan"&&(()=>{
@@ -1138,12 +1138,12 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
           </FormBlock>
           )}
           {willType!=="allindia"&&willType!=="goan"&&(
-            <div className="bg-[#2F8132]/8 border border-[#2F8132]/20 rounded-xl p-4 text-xs text-brand-dark">
+            <div className="bg-[#4F9D33]/8 border border-[#4F9D33]/20 rounded-xl p-4 text-xs text-brand-dark">
               All rest, residue and remainder of my estate shall vest absolutely in <strong>{will.beneficiaries.find(b=>String(b.id)===String(will.residualBeneId))?.name||"Selected Beneficiary"}</strong>.
             </div>
           )}
           {gateBehindPayment&&willStatus!==STATUS_COMPLETED&&!viewOnly&&(
-            <div className="bg-[#EDF6EA] border border-[#E5E8E3] rounded-xl p-3.5">
+            <div className="bg-[#F3F7E7] border border-[#E5E8E3] rounded-xl p-3.5">
               <label className={LC}>Have a gift/coupon code?</label>
               <div className="flex items-center gap-2 mt-1">
                 <input value={giftCode} onChange={e=>setGiftCode(e.target.value.toUpperCase())}

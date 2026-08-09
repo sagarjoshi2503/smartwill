@@ -52,9 +52,9 @@ export default function GoanDocumentsView({will,onBack,onPrint}:{
           <div className="space-y-3">
             {docs.map(d=>(
               <button key={d.key} onClick={()=>setActiveDoc(d.key)}
-                className="w-full flex items-center justify-between gap-3 bg-slate-50 hover:bg-[#2F8132]/10 border border-slate-200 hover:border-[#2F8132]/40 rounded-xl px-4 py-3.5 transition-all text-left">
+                className="w-full flex items-center justify-between gap-3 bg-slate-50 hover:bg-[#4F9D33]/10 border border-slate-200 hover:border-[#4F9D33]/40 rounded-xl px-4 py-3.5 transition-all text-left">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-[#2F8132]/15 text-brand-dark flex items-center justify-center shrink-0"><FileText size={15}/></div>
+                  <div className="w-8 h-8 rounded-lg bg-[#4F9D33]/15 text-brand-dark flex items-center justify-center shrink-0"><FileText size={15}/></div>
                   <div>
                     <div className="text-slate-900 text-sm font-semibold">{d.label}</div>
                     <div className="text-slate-500 text-xs">{d.sub}</div>

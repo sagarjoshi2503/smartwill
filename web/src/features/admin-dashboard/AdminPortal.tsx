@@ -13,7 +13,7 @@ import type { AdminClient, AdminProfile, WillState, WillType } from "../../types
 
 const STATUS_STYLE: Record<AdminClient["status"], string> = {
   Draft: "bg-slate-100 text-slate-600 border-slate-200",
-  PendingReview: "bg-[#2F8132]/10 text-brand-dark border-[#2F8132]/30",
+  PendingReview: "bg-[#4F9D33]/10 text-brand-dark border-[#4F9D33]/30",
   Completed: "bg-emerald-50 text-emerald-600 border-emerald-200",
 };
 

@@ -23,7 +23,7 @@ export const PLANS: Plan[] = [
   },
   {
     id: "registered", name: "Goan Will", price: 6999,
-    gradient: "from-[#2F8132] to-[#1E5B22]", icon: <Landmark size={18} />, badge: "Most Popular",
+    gradient: "from-[#4F9D33] to-[#2D6B1F]", icon: <Landmark size={18} />, badge: "Most Popular",
     features: [
       "Tailored for Goan Personal Law — Drafted strictly under the Goa Succession Act, 2016, for those governed by Goan civil law",
       "Expert Lawyer Review — Verified by advocates specialized in Goan estate law",
@@ -48,7 +48,7 @@ export const PLANS: Plan[] = [
   },
   {
     id: "premium", name: "SUCCESSION DEED", price: 9999,
-    gradient: "from-slate-700 to-[#2F8132]", icon: <Star size={18} />, badge: null,
+    gradient: "from-slate-700 to-[#4F9D33]", icon: <Star size={18} />, badge: null,
     features: [
       "Goa-Specific Legal Process — Drafted per Special Notaries and Inventory Proceeding rules",
       "Official Proof of Heirship — Establishes legal succession without full inventory proceedings",

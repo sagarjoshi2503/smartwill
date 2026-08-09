@@ -99,7 +99,7 @@ export default function TestatorStep({will,set,setWill,idFieldsLocked,idInputCls
         <div><label className={LC}>Residential Address</label><input value={will.testator.address} onChange={e=>set("testator.address",e.target.value)} className={IC} placeholder="Full residential address"/></div>
       </div>
       {will.testator.maritalStatus==="married"&&(
-        <div className="bg-[#EDF6EA] border border-brand/20 rounded-xl p-3.5 text-xs text-brand-dark flex items-start gap-2">
+        <div className="bg-[#F3F7E7] border border-brand/20 rounded-xl p-3.5 text-xs text-brand-dark flex items-start gap-2">
           <Info size={13} className="mt-0.5 shrink-0"/>Because you selected "Married", we'll also collect your spouse's details below
         </div>
       )}

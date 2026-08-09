@@ -11,7 +11,7 @@ import type { TestatorWill, WillState, WillType } from "../../types";
 
 const STATUS_STYLE: Record<TestatorWill["status"], string> = {
   Draft: "bg-slate-100 text-slate-600 border-slate-200",
-  PendingReview: "bg-[#2F8132]/10 text-brand-dark border-[#2F8132]/30",
+  PendingReview: "bg-[#4F9D33]/10 text-brand-dark border-[#4F9D33]/30",
   Completed: "bg-emerald-50 text-emerald-600 border-emerald-200",
 };
 
@@ -118,7 +118,7 @@ export default function TestatorWillsView({email,onCreateNew,onEditWill,onViewWi
             <Plus size={14}/>Create New Will
           </button>
         </div>
-        <div className="bg-[#EDF6EA] border border-[#2F8132]/25 rounded-xl p-3.5 text-xs text-brand-dark flex items-start gap-2 mb-6">
+        <div className="bg-[#F3F7E7] border border-[#4F9D33]/25 rounded-xl p-3.5 text-xs text-brand-dark flex items-start gap-2 mb-6">
           <Clock size={13} className="mt-0.5 shrink-0"/>Wills created more than {WILL_VISIBLE_DAYS} days ago will be deleted from the system.
         </div>
         {actionError&&<p className="text-red-500 text-xs mb-4">{actionError}</p>}

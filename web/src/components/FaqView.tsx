@@ -35,7 +35,7 @@ export default function FaqView({initialOpenSection}:{
         <div className="max-w-4xl mx-auto">
           <p className="text-brand tracking-[0.35em] uppercase text-xs mb-3">Support</p>
           <h1 className="text-3xl md:text-4xl font-extrabold text-slate-900 serif mb-5">FAQ</h1>
-          <div className="bg-[#EDF6EA] border border-[#2F8132]/25 rounded-xl p-3.5 text-xs text-brand-dark leading-relaxed">
+          <div className="bg-[#F3F7E7] border border-[#4F9D33]/25 rounded-xl p-3.5 text-xs text-brand-dark leading-relaxed">
             This FAQ page is built to hold finalized, verbatim questions and answers as they're approved — the structure and section grouping below are ready for that copy to drop straight in.
           </div>
         </div>

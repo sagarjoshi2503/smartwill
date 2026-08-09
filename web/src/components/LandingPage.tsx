@@ -92,11 +92,11 @@ export default function LandingPage({plans,addons,selectedPlan,setSelectedPlan,a
               overflow-x-auto implicitly makes the vertical axis clip too
               (per the CSS spec, one non-"visible" overflow axis forces the
               other off "visible"), so without this the badge got cut off. */}
-          <div className="overflow-x-auto -mx-5 px-5 pt-4 pb-2" style={{scrollbarColor:"#2F8132 #F5F7F3"}}>
+          <div className="overflow-x-auto -mx-5 px-5 pt-4 pb-2" style={{scrollbarColor:"#4F9D33 #F5F7F3"}}>
             <div className="flex flex-nowrap gap-6 w-max">
               {plans.map(plan=>(
                 <div key={plan.id}
-                  className={`relative flex flex-col bg-white rounded-2xl p-7 w-[280px] shrink-0 transition-all hover:-translate-y-1 hover:shadow-xl ${plan.badge?"border-2 border-brand bg-[#EDF6EA]":"border border-[#E5E8E3]"}`}>
+                  className={`relative flex flex-col bg-white rounded-2xl p-7 w-[280px] shrink-0 transition-all hover:-translate-y-1 hover:shadow-xl ${plan.badge?"border-2 border-brand bg-[#F3F7E7]":"border border-[#E5E8E3]"}`}>
                   {plan.badge && <span className="absolute -top-3 left-6 bg-brand text-white text-[10px] font-bold uppercase tracking-wide px-3 py-1 rounded-full">{plan.badge}</span>}
                   <h3 className="text-slate-900 font-bold text-base tracking-wide mb-1">{plan.name}</h3>
                   <div className="text-brand font-bold text-xl mb-4">{fmt(plan.price)}{plan.willType==="successiondeed"?"":" per will"}</div>
@@ -131,7 +131,7 @@ export default function LandingPage({plans,addons,selectedPlan,setSelectedPlan,a
           </div>
           <div className="grid md:grid-cols-2 gap-5 mt-8">
             {PLAN_EXTRA_BOXES.map(box=>(
-              <div key={box.title} className="bg-white border border-[#E5E8E3] border-l-4 border-l-[#2F8132] rounded-2xl p-5">
+              <div key={box.title} className="bg-white border border-[#E5E8E3] border-l-4 border-l-[#4F9D33] rounded-2xl p-5">
                 <strong className="block text-slate-900 font-bold serif mb-1">{box.title}</strong>
                 <span className="text-slate-600 text-sm">{box.body}</span>
               </div>
@@ -152,15 +152,15 @@ export default function LandingPage({plans,addons,selectedPlan,setSelectedPlan,a
           <div className="grid lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-4">
               {addons.map(addon=>(
-                <label key={addon.id} className={`flex items-center justify-between p-4 rounded-2xl border transition-all cursor-pointer ${addonsState[addon.id]?"border-[#2F8132]/40 bg-[#EDF6EA]":"border-[#E5E8E3] bg-white hover:border-[#2F8132]/30"}`}>
+                <label key={addon.id} className={`flex items-center justify-between p-4 rounded-2xl border transition-all cursor-pointer ${addonsState[addon.id]?"border-[#4F9D33]/40 bg-[#F3F7E7]":"border-[#E5E8E3] bg-white hover:border-[#4F9D33]/30"}`}>
                   <div className="flex items-center gap-3">
-                    <div className={`w-11 h-11 rounded-2xl flex items-center justify-center ${addonsState[addon.id]?"bg-[#2F8132]/15 text-brand":"bg-slate-100 text-slate-500"}`}>{addon.icon}</div>
+                    <div className={`w-11 h-11 rounded-2xl flex items-center justify-center ${addonsState[addon.id]?"bg-[#4F9D33]/15 text-brand":"bg-slate-100 text-slate-500"}`}>{addon.icon}</div>
                     <span className="text-slate-900 text-sm font-medium">{addon.label}</span>
                   </div>
                   <div className="flex items-center gap-3">
                     <span className="text-brand font-semibold text-sm">+{fmt(addon.price)}</span>
                     <input type="checkbox" className="sr-only peer" checked={!!addonsState[addon.id]} onChange={()=>setAddons(p=>({...p,[addon.id]:!p[addon.id]}))}/>
-                    <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all peer-focus-visible:ring-2 peer-focus-visible:ring-[#2F8132] peer-focus-visible:ring-offset-2 ${addonsState[addon.id]?"bg-brand border-brand":"border-slate-300"}`}>
+                    <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all peer-focus-visible:ring-2 peer-focus-visible:ring-[#4F9D33] peer-focus-visible:ring-offset-2 ${addonsState[addon.id]?"bg-brand border-brand":"border-slate-300"}`}>
                       {addonsState[addon.id]&&<Check size={10} className="text-white"/>}
                     </div>
                   </div>
@@ -189,7 +189,7 @@ export default function LandingPage({plans,addons,selectedPlan,setSelectedPlan,a
       {/* GIFT A WILL — digital voucher */}
       <section className="py-14 px-5">
         <div className="max-w-6xl mx-auto">
-          <div className="bg-[#EDF6EA] border border-[#E5E8E3] rounded-3xl p-6 md:p-12 grid md:grid-cols-[1.1fr_1fr] gap-10 items-start">
+          <div className="bg-[#F3F7E7] border border-[#E5E8E3] rounded-3xl p-6 md:p-12 grid md:grid-cols-[1.1fr_1fr] gap-10 items-start">
             <div>
               <p className="text-brand tracking-[0.12em] uppercase text-xs font-bold mb-2">Digital Gift Voucher</p>
               <h2 className="text-3xl font-extrabold text-slate-900 serif mb-5">Gift a Will</h2>
@@ -231,11 +231,11 @@ export default function LandingPage({plans,addons,selectedPlan,setSelectedPlan,a
           {WHY_ITEMS.map((item,i)=>{
             const isOpen = openWhy===i;
             return(
-              <div key={item.title} className="bg-white border border-[#E5E8E3] border-t-[3px] border-t-[#2F8132] rounded-2xl overflow-hidden">
+              <div key={item.title} className="bg-white border border-[#E5E8E3] border-t-[3px] border-t-[#4F9D33] rounded-2xl overflow-hidden">
                 <button onClick={()=>setOpenWhy(isOpen?null:i)}
                   className="w-full text-left px-6 py-5 flex items-center justify-between gap-4">
                   <h3 className="text-slate-900 font-bold text-[1.02rem] serif">{item.title}</h3>
-                  <span className={`shrink-0 w-8 h-8 rounded-full bg-[#EDF6EA] text-brand flex items-center justify-center transition-transform ${isOpen?"rotate-45":""}`}><Plus size={16}/></span>
+                  <span className={`shrink-0 w-8 h-8 rounded-full bg-[#F3F7E7] text-brand flex items-center justify-center transition-transform ${isOpen?"rotate-45":""}`}><Plus size={16}/></span>
                 </button>
                 {isOpen && <div className="px-6 pb-5 text-sm text-slate-600 leading-relaxed">{item.body}</div>}
               </div>

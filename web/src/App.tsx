@@ -517,7 +517,7 @@ export default function SmartWill() {
                   {showAdminButton && (
                     <button onClick={()=>setView("adminLogin")} className="flex items-center gap-1.5 text-slate-600 hover:text-slate-900 border border-slate-200 hover:border-slate-300 rounded-full px-3.5 py-1.5 text-sm transition-all"><LogIn size={13}/>{BTN_ADMIN_PORTAL}</button>
                   )}
-                  <button onClick={()=>setView("authChoice")} className="flex items-center gap-1.5 bg-brand hover:bg-brand-dark text-[#ffffff] rounded-full px-4 py-2 text-sm font-semibold transition-colors shadow-lg shadow-[#2F8132]/20">{BTN_CREATE_YOUR_WILL} <ArrowRight size={13}/></button>
+                  <button onClick={()=>setView("authChoice")} className="flex items-center gap-1.5 bg-brand hover:bg-brand-dark text-[#ffffff] rounded-full px-4 py-2 text-sm font-semibold transition-colors shadow-lg shadow-[#4F9D33]/20">{BTN_CREATE_YOUR_WILL} <ArrowRight size={13}/></button>
                 </>
               )}
             </div>
@@ -624,7 +624,7 @@ export default function SmartWill() {
                   )}
                 </div>
               )}
-              <button onClick={requestGenerateWill} className="flex items-center gap-1.5 text-xs text-brand hover:text-brand-dark border border-[#2F8132]/30 hover:border-[#2F8132]/60 rounded-lg px-3 py-1.5 transition-all font-semibold">
+              <button onClick={requestGenerateWill} className="flex items-center gap-1.5 text-xs text-brand hover:text-brand-dark border border-[#4F9D33]/30 hover:border-[#4F9D33]/60 rounded-lg px-3 py-1.5 transition-all font-semibold">
                 <Eye size={12}/>{BTN_GENERATE_WILL}
               </button>
             </div>

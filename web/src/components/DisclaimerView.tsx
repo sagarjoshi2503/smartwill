@@ -27,12 +27,12 @@ export default function DisclaimerView({dchecks,setDchecks,willType,onAgree,onBa
     <div className="fade-in fixed inset-0 z-50 bg-slate-100/95 overflow-y-auto">
       <div className="min-h-full flex items-center justify-center px-4 py-8">
         <div className="w-full max-w-lg apv-card shadow-2xl">
-          <div className="bg-gradient-to-r from-[#2F8132]/15 to-[#2F8132]/10 border-b border-slate-200 p-5 rounded-t-3xl flex gap-4">
+          <div className="bg-gradient-to-r from-[#4F9D33]/15 to-[#4F9D33]/10 border-b border-slate-200 p-5 rounded-t-3xl flex gap-4">
             <AlertTriangle size={22} className="text-brand shrink-0 mt-0.5"/>
             <div><h3 className="text-slate-900 font-bold text-lg serif">Before You Begin</h3><p className="text-slate-600 text-sm">Read and confirm all statements</p></div>
           </div>
           <div className="p-6">
-            <div className="bg-slate-50 border border-slate-200 border-l-4 border-l-[#2F8132] rounded-xl p-4 mb-4">
+            <div className="bg-slate-50 border border-slate-200 border-l-4 border-l-[#4F9D33] rounded-xl p-4 mb-4">
               <div className="flex items-center gap-2 text-slate-900 font-semibold text-sm mb-2"><ShieldCheck size={16} className="text-brand"/>To Protect Your Privacy</div>
               <ul className="space-y-1.5">
                 <li className="text-slate-600 text-xs leading-relaxed pl-4 relative before:content-['•'] before:text-brand before:absolute before:left-0 before:font-bold">Sensitive identification details (such as PAN or Aadhaar numbers) are <strong className="text-slate-900">never saved</strong> in our database.</li>
@@ -40,7 +40,7 @@ export default function DisclaimerView({dchecks,setDchecks,willType,onAgree,onBa
                 <li className="text-slate-600 text-xs leading-relaxed pl-4 relative before:content-['•'] before:text-brand before:absolute before:left-0 before:font-bold">Once reviewed and confirmed, you can enter your ID details right before downloading.</li>
               </ul>
             </div>
-            <div className="flex items-start gap-3 bg-[#EDF6EA]/20 border border-[#f59e0b]/20 rounded-3xl p-4 mb-6">
+            <div className="flex items-start gap-3 bg-[#F3F7E7]/20 border border-[#f59e0b]/20 rounded-3xl p-4 mb-6">
               <Lock size={18} className="text-brand mt-0.5 shrink-0"/>
               <div><p className="text-slate-900 font-semibold text-sm">Locked Fields — Cannot Be Changed Later</p>
                 <p className="text-slate-500 text-xs mt-1">Once you proceed, your <strong>Testator's Full Name</strong> and <strong>Country (India)</strong> are permanently set.</p>
@@ -49,9 +49,9 @@ export default function DisclaimerView({dchecks,setDchecks,willType,onAgree,onBa
             <div className="space-y-3 mb-6">
               {items.map(item=>(
                 <label key={item.k}
-                  className={`flex items-start gap-3 p-4 rounded-3xl cursor-pointer border transition-all ${dchecks[item.k as keyof DisclaimerChecks]?"border-[#2F8132]/30 bg-[#EDF6EA]/30":"border-slate-200 hover:border-[#2F8132]/20"}`}>
+                  className={`flex items-start gap-3 p-4 rounded-3xl cursor-pointer border transition-all ${dchecks[item.k as keyof DisclaimerChecks]?"border-[#4F9D33]/30 bg-[#F3F7E7]/30":"border-slate-200 hover:border-[#4F9D33]/20"}`}>
                   <input type="checkbox" className="sr-only peer" checked={dchecks[item.k as keyof DisclaimerChecks]} onChange={()=>setDchecks(p=>({...p,[item.k]:!p[item.k as keyof DisclaimerChecks]}))}/>
-                  <div className={`w-5 h-5 rounded-lg border-2 flex items-center justify-center shrink-0 mt-1 transition-all peer-focus-visible:ring-2 peer-focus-visible:ring-[#2F8132] peer-focus-visible:ring-offset-2 ${dchecks[item.k as keyof DisclaimerChecks]?"bg-brand border-brand":"border-slate-300"}`}>
+                  <div className={`w-5 h-5 rounded-lg border-2 flex items-center justify-center shrink-0 mt-1 transition-all peer-focus-visible:ring-2 peer-focus-visible:ring-[#4F9D33] peer-focus-visible:ring-offset-2 ${dchecks[item.k as keyof DisclaimerChecks]?"bg-brand border-brand":"border-slate-300"}`}>
                     {dchecks[item.k as keyof DisclaimerChecks]&&<Check size={10} className="text-[#ffffff]"/>}
                   </div>
                   <span className="text-slate-700 text-sm leading-relaxed">{item.t}</span>

@@ -78,7 +78,7 @@ export default function ServicesView({onStart,onContactUs,onHome,onFaqSection}:{
                   {svc.actions.map(a=>(
                     <button key={a.label} onClick={()=>runAction(a.kind, "faqSection" in a ? a.faqSection : undefined)}
                       className={a.kind==="contact"||a.kind==="faq"
-                        ? "text-xs font-semibold px-4 py-2 rounded-full border border-slate-200 text-slate-700 hover:border-[#2F8132]/40 hover:text-brand transition-all"
+                        ? "text-xs font-semibold px-4 py-2 rounded-full border border-slate-200 text-slate-700 hover:border-[#4F9D33]/40 hover:text-brand transition-all"
                         : "text-xs font-semibold px-4 py-2 rounded-full bg-brand hover:bg-brand-dark text-white transition-colors"}>
                       {a.label}
                     </button>

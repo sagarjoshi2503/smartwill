@@ -109,7 +109,7 @@ export default function GiftAWillForm(){
         name: "Forward Legacy — Gift a Will",
         description: `Gift voucher: ${planLabel} ₹${amount.toLocaleString("en-IN")}`,
         prefill: { name: recipientName, email: recipientEmail },
-        theme: { color: "#2F8132" },
+        theme: { color: "#4F9D33" },
         handler: (response) => { finishPurchase(order, response); },
         modal: {
           ondismiss: () => {
@@ -136,10 +136,10 @@ export default function GiftAWillForm(){
   if(successCode) {
     return(
       <div className="bg-white p-6 rounded-2xl border border-[#E5E8E3] text-center fade-in">
-        <div className="w-14 h-14 bg-[#EDF6EA] rounded-full flex items-center justify-center mx-auto mb-4"><Gift size={26} className="text-brand"/></div>
+        <div className="w-14 h-14 bg-[#F3F7E7] rounded-full flex items-center justify-center mx-auto mb-4"><Gift size={26} className="text-brand"/></div>
         <h3 className="text-slate-900 font-bold text-lg serif mb-1.5">Gift Voucher Sent!</h3>
         <p className="text-slate-500 text-sm mb-4">A unique voucher code has been emailed to <strong className="text-slate-700">{recipientEmail}</strong>. It's valid for 12 months.</p>
-        <div className="my-3 py-3 px-4 bg-[#EDF6EA] border border-dashed border-brand rounded-xl text-lg font-bold tracking-widest text-brand-dark font-mono">{successCode}</div>
+        <div className="my-3 py-3 px-4 bg-[#F3F7E7] border border-dashed border-brand rounded-xl text-lg font-bold tracking-widest text-brand-dark font-mono">{successCode}</div>
         <div className="flex items-center justify-center gap-2">
           <button onClick={()=>navigator.clipboard?.writeText(successCode)} className="apv-btn-alt text-sm px-4 py-2"><Copy size={13}/>Copy Code</button>
           <button
@@ -163,9 +163,9 @@ export default function GiftAWillForm(){
       <div className="grid gap-2 mb-4">
         {GIFT_PLANS.map(p=>(
           <label key={p.amount}
-            className={`flex items-center justify-between gap-3 px-4 py-3 rounded-xl border-[1.5px] cursor-pointer transition-colors ${amount===p.amount?"border-brand bg-[#EDF6EA]":"border-[#E5E8E3] hover:border-[#8BC34A]"}`}>
+            className={`flex items-center justify-between gap-3 px-4 py-3 rounded-xl border-[1.5px] cursor-pointer transition-colors ${amount===p.amount?"border-brand bg-[#F3F7E7]":"border-[#E5E8E3] hover:border-[#C7D94A]"}`}>
             <span className="flex items-center gap-2 text-sm font-semibold text-slate-900">
-              <input type="radio" name="giftPlan" checked={amount===p.amount} onChange={()=>setAmount(p.amount)} className="accent-[#2F8132]"/>
+              <input type="radio" name="giftPlan" checked={amount===p.amount} onChange={()=>setAmount(p.amount)} className="accent-[#4F9D33]"/>
               {p.label}
             </span>
             <span className="font-bold text-brand text-sm">₹{p.amount.toLocaleString("en-IN")}</span>
