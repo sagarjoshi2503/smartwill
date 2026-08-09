@@ -22,7 +22,7 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,w
   onPrint: () => void;
   willDocRef: MutableRefObject<HTMLDivElement | null>;
 }){
-  const {testator,allIndiaAssets,allIndiaResidue,witnesses}=will;
+  const {testator,executor,guardian,allIndiaAssets,allIndiaResidue,witnesses}=will;
   const blank = "_______________________";
 
   // The browser's print header uses document.title (Chrome's default "Print
@@ -177,7 +177,7 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,w
 
             <p className="font-bold mb-1">A. Financial Assets:</p>
             <p className="text-justify mb-5">
-              I bequeath all my financial assets including Bank Accounts, Fixed Deposits (FDs), Recurring Deposits (RDs), Public Provident Fund (PPF), Life Insurance, Stocks, Mutual Funds, Cryptocurrency (Crypto), Digital Wallets, National Pension System (NPS), Bonds, Alternative Investment Fund (AIF), Specialized Investment Fund (SIF), and Portfolio Management Services (PMS) entirely to the nominees registered in those financial instruments.
+              I bequeath all my financial assets including Bank Accounts, Bank Locker, Fixed Deposits (FDs), Recurring Deposits (RDs), Public Provident Fund (PPF), Life Insurance, Stocks, Mutual Funds, Cryptocurrency (Crypto), Digital Wallets, National Pension System (NPS), Bonds, Alternative Investment Fund (AIF), Specialized Investment Fund (SIF), and Portfolio Management Services (PMS) entirely to the nominees registered in those financial instruments.
             </p>
           </Page>
 
@@ -216,7 +216,13 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,w
           </Page>
           )}
 
-          <Page isLast>
+          {(() => {
+            const showExecutor = executor.wantsExecutor;
+            const showGuardian = guardian.hasMinors;
+            const noTrailingPages = !showExecutor && !showGuardian;
+            return(
+          <>
+          <Page isLast={noTrailingPages}>
             <p className="text-justify mb-5">
               I hereby declare, direct, and devise that all the Rest and Residue of my estate, including any property or assets, both movable and immovable, which I may acquire after the execution of this Will, or which has been inadvertently omitted from this document, shall be given entirely to {allIndiaResidue.length>1&&"the following, in equal shares: "}
               {allIndiaResidue.map((entry,i)=>(
@@ -258,6 +264,69 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,w
               </div>
             ))}
           </Page>
+
+          {showExecutor && (
+            <>
+              <Page>
+                <h1 className="text-center text-lg font-bold uppercase mb-6">Appointment of Executor for this Will</h1>
+                {executor.executorType==="org" ? (
+                  <p className="text-justify mb-5">
+                    I appoint Organization / Entity Name: <strong>{executor.orgName||blank}</strong>, with Authorized Representative / Contact Person: <strong>{executor.orgRepName||blank}</strong>, bearing Registration / Tax ID Number: <strong>{executor.orgRegNumber||blank}</strong>, and having Registered Office Address: <strong>{executor.orgAddress||blank}</strong>.
+                  </p>
+                ) : (
+                  <p className="text-justify mb-5">
+                    I appoint (Executor's Full Name) <strong>{executor.name||blank}</strong>, having Relationship to Testator: <strong>{executor.relation||blank}</strong>, with Contact Details / Address: <strong>{executor.address||blank}</strong>, bearing {executor.idType} Number: <strong>{executor.idNumber||blank}</strong>.
+                  </p>
+                )}
+                <p className="mb-1">(a) The above executor shall dispose of the property and carry out the instructions as mentioned in this Will.</p>
+                <p className="mb-1">(b) The executor shall also be responsible for paying off any debts owed by me, taxes, and other fees due out of the proceeds of my assets.</p>
+                <p className="mb-1">(c) The executor may take steps to recover money due to me, with interest as agreed upon between me and the borrower.</p>
+                <p className="mb-1">(d) If any legal expenses are incurred in the recovery of the amount due, the executor shall be entitled to recover the said amount out of the funds belonging to me.</p>
+                <p className="mb-5">(e) If my executor is unable or unwilling to act with respect to property subject to administration in another jurisdiction, my beneficiaries may appoint by a signed instrument any person or qualified corporation as ancillary administrator in that jurisdiction.</p>
+                <p className="mb-1">Place and Date: <strong>{blank}</strong></p>
+                <p className="mb-1">Name of the Testator: <strong>{testator.fullName||blank}</strong></p>
+                <p>Signature of the Testator: {blank}</p>
+              </Page>
+              <Page isLast={!showGuardian}>
+                <h1 className="text-center text-lg font-bold uppercase mb-6">Executor's Consent</h1>
+                <p className="text-justify mb-5">
+                  I, <strong>{blank}</strong>, being {executor.executorType==="org"?"the Authorized Representative of the Organization mentioned":"the Executor named above"}, have read the contents of the Will and affirm my consent to act as the Executor of this Will and implement the same in the best possible manner.
+                </p>
+                <p className="mb-1">Place and Date: <strong>{blank}</strong></p>
+                <p className="mb-1">Name of the Executor{executor.executorType==="org"?" / Representative":""}: <strong>{blank}</strong></p>
+                <p>Signature of the Executor{executor.executorType==="org"?" / Representative":""}: {blank}</p>
+              </Page>
+            </>
+          )}
+
+          {showGuardian && (
+            <>
+              <Page>
+                <h1 className="text-center text-lg font-bold uppercase mb-6">Appointment of Guardian for Minor Beneficiary</h1>
+                <p className="text-justify mb-5">
+                  I appoint (Guardian's Full Name) <strong>{guardian.name||blank}</strong>, having Relation to Testator: <strong>{guardian.relation||blank}</strong>, with Address: <strong>{guardian.address||blank}</strong>, bearing {guardian.idType} Number: <strong>{guardian.idNumber||blank}</strong>.
+                </p>
+                <p className="text-justify mb-5">
+                  The above-appointed guardian shall have the care, custody, and management of any property or assets inherited by my minor beneficiaries under this Will until such beneficiaries attain the age of majority. The guardian shall act in the best fiduciary interests of the minors and may apply the income or principal of the inherited assets for their education, maintenance, and welfare as deemed necessary.
+                </p>
+                <p className="mb-1">Place and Date: <strong>{blank}</strong></p>
+                <p className="mb-1">Name of the Testator: <strong>{testator.fullName||blank}</strong></p>
+                <p>Signature of the Testator: {blank}</p>
+              </Page>
+              <Page isLast>
+                <h1 className="text-center text-lg font-bold uppercase mb-6">Guardian's Consent</h1>
+                <p className="text-justify mb-5">
+                  I, <strong>{blank}</strong>, being the Guardian mentioned, have read the contents of the Will relating to the minor beneficiaries and affirm my consent to act as the Guardian and manage their inheritance in the best possible manner until they attain majority.
+                </p>
+                <p className="mb-1">Place and Date: <strong>{blank}</strong></p>
+                <p className="mb-1">Name of the Guardian: <strong>{blank}</strong></p>
+                <p>Signature of the Guardian: {blank}</p>
+              </Page>
+            </>
+          )}
+          </>
+            );
+          })()}
         </div>
       </div>
     </div>

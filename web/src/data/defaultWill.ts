@@ -94,8 +94,9 @@ export const DEFAULT_WILL: WillState = {
   residualIdNumber:"",
   // Section VI - Special Instructions
   specialInstructions:"",
-  // Beneficiaries — starts empty; the user adds their own via "+ Add Beneficiary"
-  beneficiaries:[],
+  // Beneficiaries — always starts with one blank entry (a Will needs at
+  // least one beneficiary), the user adds more via "+ Add Beneficiary"
+  beneficiaries:[{id:1, name:"", relation:"Son", age:"", maritalStatus:"", occupation:"", occupationOther:"", address:"", pan:"", aadhaarNumber:""}],
   // Witnesses: the Indian Succession Act requires exactly two, so the two slots
   // stay (the UI has no "add witness" control), but with no fabricated identities
   witnesses:[

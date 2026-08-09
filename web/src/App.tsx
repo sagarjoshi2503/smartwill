@@ -237,6 +237,9 @@ export default function SmartWill() {
     executor: {...DEFAULT_WILL.executor, ...(fetched.executor||{})},
     guardian: {...DEFAULT_WILL.guardian, ...(fetched.guardian||{})},
     allIndiaAssets: {...DEFAULT_WILL.allIndiaAssets, ...(fetched.allIndiaAssets||{})},
+    // A Will needs at least one beneficiary — an older draft saved before
+    // this was enforced could have an empty array.
+    beneficiaries: fetched.beneficiaries&&fetched.beneficiaries.length>0 ? fetched.beneficiaries : DEFAULT_WILL.beneficiaries,
   });
 
   const handleCreateNewWill = () => {

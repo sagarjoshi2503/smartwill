@@ -87,8 +87,8 @@ interface WizardFormsProps {
 }
 
 export default function WizardForms({step,will,setWill,willType,setWillType,hideWillTypeStep,addBene,removeBene,updateBene,addAsset,removeAsset,updateAssetData,updateAssetAlloc,allocTotal,assetAdded,onNext,onPrev,onGenerate,willId,onSaved,adminReview,adminComplete,testatorEmailEditable,viewOnly,adminComments,willStatus,amount,paymentEnabled}: WizardFormsProps){
-  const IC="w-full apv-input rounded-2xl px-3.5 py-2.5 text-slate-900 placeholder:text-slate-500 text-sm focus:outline-none transition";
-  const LC="block apv-label mb-1";
+  const IC="w-full apv-input rounded-lg px-3.5 py-2.5 text-slate-900 placeholder:text-slate-500 text-sm focus:outline-none transition";
+  const LC="block text-[13px] font-semibold text-slate-900 mb-1.5";
   const set=(path: string, v: string | boolean)=>setWill(p=>{
     const keys=path.split(".");
     if(keys.length===1) return{...p,[keys[0]]:v} as WillState;
@@ -414,42 +414,6 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
             </div>
           </FormBlock>
           )}
-          <FormBlock title="Administration Type">
-            <div className="flex gap-3">
-              {[{v:"jointly",l:"Jointly (Must act together)"},{v:"jointly_severally",l:"Jointly & Severally (May act independently)"}].map(o=>(
-                <label key={o.v}
-                  className={`flex-1 flex items-center gap-2 p-3 rounded-xl border cursor-pointer transition-all ${will.executor.adminType===o.v?"border-[#2F8132]/50 bg-[#2F8132]/10":"border-slate-700 hover:border-slate-600"}`}>
-                  <input type="radio" name="adminType" className="sr-only peer" checked={will.executor.adminType===o.v} onChange={()=>set("executor.adminType",o.v)}/>
-                  <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all peer-focus-visible:ring-2 peer-focus-visible:ring-[#2F8132] peer-focus-visible:ring-offset-2 ${will.executor.adminType===o.v?"border-brand bg-brand":"border-slate-600"}`}>
-                    {will.executor.adminType===o.v&&<div className="w-1.5 h-1.5 rounded-full bg-white"/>}
-                  </div>
-                  <span className="text-slate-700 text-xs">{o.l}</span>
-                </label>
-              ))}
-            </div>
-          </FormBlock>
-          <Toggle label="Add Joint Executor (Optional)" checked={will.executor.hasJoint} onChange={v=>set("executor.hasJoint",v)}/>
-          {will.executor.hasJoint&&(
-            <FormBlock title="Joint Executor">
-              <div><label className={LC}>{LBL_FULL_NAME}</label><input value={will.executor.jointName} onChange={e=>set("executor.jointName",e.target.value)} className={IC} placeholder="Joint executor name"/></div>
-              <div className="grid grid-cols-2 gap-3">
-                <div><label className={LC}>{LBL_ID_TYPE}</label><select value={will.executor.jointIdType} onChange={e=>set("executor.jointIdType",e.target.value)} className={IC+" appearance-none"}>{ID_TYPES.map(t=><option key={t}>{t}</option>)}</select></div>
-                <div><label className={LC}>{LBL_ID_NUMBER}</label><input value={will.executor.jointIdNumber} onChange={e=>set("executor.jointIdNumber",e.target.value)} onBlur={e=>handleIdBlur(will.executor.jointIdType,e.target.value,v=>set("executor.jointIdNumber",v))} disabled={idFieldsLocked} className={idInputCls(IC)} title={idInputTitle(TIP_NO_ID_SAVED)}/></div>
-              </div>
-              <div><label className={LC}>{LBL_ADDRESS}</label><textarea value={will.executor.jointAddress} onChange={e=>set("executor.jointAddress",e.target.value)} rows={2} className={IC+" resize-none"}/></div>
-            </FormBlock>
-          )}
-          <Toggle label="Add Substitute Executor (Recommended)" checked={will.executor.hasSubstitute} onChange={v=>set("executor.hasSubstitute",v)}/>
-          {will.executor.hasSubstitute&&(
-            <FormBlock title="Substitute Executor">
-              <div><label className={LC}>{LBL_FULL_NAME}</label><input value={will.executor.subName} onChange={e=>set("executor.subName",e.target.value)} className={IC} placeholder="Substitute executor name"/></div>
-              <div className="grid grid-cols-2 gap-3">
-                <div><label className={LC}>{LBL_ID_TYPE}</label><select value={will.executor.subIdType} onChange={e=>set("executor.subIdType",e.target.value)} className={IC+" appearance-none"}>{ID_TYPES.map(t=><option key={t}>{t}</option>)}</select></div>
-                <div><label className={LC}>{LBL_ID_NUMBER}</label><input value={will.executor.subIdNumber} onChange={e=>set("executor.subIdNumber",e.target.value)} onBlur={e=>handleIdBlur(will.executor.subIdType,e.target.value,v=>set("executor.subIdNumber",v))} disabled={idFieldsLocked} className={idInputCls(IC)} title={idInputTitle(TIP_NO_ID_SAVED)}/></div>
-              </div>
-              <div><label className={LC}>{LBL_ADDRESS}</label><textarea value={will.executor.subAddress} onChange={e=>set("executor.subAddress",e.target.value)} rows={2} className={IC+" resize-none"}/></div>
-            </FormBlock>
-          )}
           </>
           )}
           <Nav onNext={onNext} onPrev={onPrev}/>
@@ -483,17 +447,6 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                 </div>
                 <div><label className={LC}>{LBL_ADDRESS}</label><input value={will.guardian.address} onChange={e=>set("guardian.address",e.target.value)} className={IC}/></div>
               </FormBlock>
-              <Toggle label="Add Substitute Guardian" checked={will.guardian.hasSubstitute} onChange={v=>set("guardian.hasSubstitute",v)}/>
-              {will.guardian.hasSubstitute&&(
-                <FormBlock title="Substitute Guardian">
-                  <div><label className={LC}>{LBL_FULL_NAME}</label><input value={will.guardian.subName} onChange={e=>set("guardian.subName",e.target.value)} className={IC} placeholder="Substitute guardian name"/></div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div><label className={LC}>{LBL_ID_TYPE}</label><select value={will.guardian.subIdType} onChange={e=>set("guardian.subIdType",e.target.value)} className={IC+" appearance-none"}>{ID_TYPES.map(t=><option key={t}>{t}</option>)}</select></div>
-                    <div><label className={LC}>{LBL_ID_NUMBER}</label><input value={will.guardian.subIdNumber} onChange={e=>set("guardian.subIdNumber",e.target.value)} onBlur={e=>handleIdBlur(will.guardian.subIdType,e.target.value,v=>set("guardian.subIdNumber",v))} disabled={idFieldsLocked} className={idInputCls(IC)} title={idInputTitle(TIP_NO_ID_SAVED)}/></div>
-                  </div>
-                  <div><label className={LC}>{LBL_ADDRESS}</label><textarea value={will.guardian.subAddress} onChange={e=>set("guardian.subAddress",e.target.value)} rows={2} className={IC+" resize-none"}/></div>
-                </FormBlock>
-              )}
             </>
           )}
           <Nav onNext={onNext} onPrev={onPrev}/>

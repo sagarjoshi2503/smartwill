@@ -47,9 +47,10 @@ describe("plans", () => {
 });
 
 describe("defaultWill", () => {
-  it("starts with no assets or beneficiaries and exactly two blank witnesses", () => {
+  it("starts with no assets, one blank beneficiary, and exactly two blank witnesses", () => {
     expect(DEFAULT_WILL.assets).toEqual([]);
-    expect(DEFAULT_WILL.beneficiaries).toEqual([]);
+    expect(DEFAULT_WILL.beneficiaries).toHaveLength(1);
+    expect(DEFAULT_WILL.beneficiaries[0].name).toBe("");
     expect(DEFAULT_WILL.witnesses).toHaveLength(2);
     expect(DEFAULT_WILL.testator.fullName).toBe("");
   });
