@@ -40,6 +40,17 @@ app.add_middleware(
 client = anthropic.Anthropic()
 
 
+# vercel.json only rewrites "/chat" to this service — nothing else routes
+# through to it on the public domain — so the health check lives at
+# "/chat/healthz" with a matching rewrite, rather than a bare "/healthz"
+# that Vercel Cron/an Azure availability test could never actually reach.
+# AKS's own liveness/readiness probes (infra/k8s/chatbot/deployment.yaml)
+# call the service directly and don't go through this path at all.
+@app.get("/chat/healthz")
+def healthz():
+    return {"status": "ok"}
+
+
 class ChatMessage(BaseModel):
     role: str
     content: str

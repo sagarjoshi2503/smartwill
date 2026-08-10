@@ -36,3 +36,15 @@ app.include_router(gift_voucher_router)
 @app.get("/healthz")
 def healthz():
     return {"status": "ok"}
+
+
+# Same handler, also mounted under /api — vercel.json's rewrites only send
+# "/api/(.*)" to this service (nothing routes bare "/healthz" through the
+# public domain), so an external caller (Vercel Cron, an Azure availability
+# test) needs this path to reach the service at all. The bare /healthz stays
+# for AKS's liveness/readiness probes (infra/k8s/api/deployment.yaml) and
+# mcp's health_check tool, which both call the service directly, not through
+# this rewrite.
+@app.get("/api/healthz")
+def api_healthz():
+    return {"status": "ok"}
