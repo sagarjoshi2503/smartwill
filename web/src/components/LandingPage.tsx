@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { ArrowRight, Check, ShieldCheck, Lock, ListChecks, Headset, Plus } from "lucide-react";
 import { fmt } from "../utils/format";
-import { PLAN_EXTRA_BOXES } from "../data/plans";
+import { PLANS, PLAN_EXTRA_BOXES } from "../data/plans";
 import GiftAWillForm from "./GiftAWillForm";
 import type { Plan, Addon } from "../types";
 
@@ -195,7 +195,7 @@ export default function LandingPage({plans,addons,selectedPlan,setSelectedPlan,a
               <h2 className="text-3xl font-extrabold text-slate-900 serif mb-5">Gift a Will</h2>
               <ol className="space-y-4 mb-6">
                 {[
-                  {title:"Select Your Plan", body:"Choose from All India Will ₹4,999, Goan Will ₹6,999, or the CUSTOMIZED WILL ₹24,999."},
+                  {title:"Select Your Plan", body:`Choose from All India Will ${fmt(PLANS.find(p=>p.id==="notarized")!.price)}, Goan Will ${fmt(PLANS.find(p=>p.id==="registered")!.price)}, or the Customized Will ${fmt(PLANS.find(p=>p.id==="nri")!.price)}.`},
                   {title:"Personalize Your Gift", body:"Enter the recipient's details and add a custom message."},
                   {title:"Redemption", body:"The recipient receives a unique code by email to book and make their Will."},
                 ].map((step,i)=>(

@@ -2,19 +2,22 @@ import { useState } from "react";
 import { Gift, Copy, Download } from "lucide-react";
 import { apiUrl } from "../utils/apiBase";
 import { API_GIFT_VOUCHER_ORDER, API_GIFT_VOUCHER_PURCHASE, API_GIFT_VOUCHER_VERIFY, RAZORPAY_KEY_ID } from "../constants";
+import { PLANS } from "../data/plans";
 import type { RazorpaySuccessResponse } from "../types/razorpay";
 
-// Pricing from the theme's Gift a Will form (lines 640-651) — ₹4,999 /
-// ₹6,999 / ₹24,999. Kept as a local literal (not reused from
-// data/plans.tsx's PLANS) since this form only needs amount + a short
-// label. Labels renamed per explicit product request (theme's "WILL" for
-// both allindia/goan read as duplicate/ambiguous — see the same rename on
-// the Home page plan cards in data/plans.tsx).
-const GIFT_PLANS = [
-  { amount: 4999, label: "All India Will" },
-  { amount: 6999, label: "Goan Will" },
-  { amount: 24999, label: "CUSTOMIZED WILL" },
+// Prices are read from data/plans.tsx's PLANS (the single source of truth
+// for plan pricing) instead of being duplicated here — only the label is
+// overridden for allindia/goan, since the theme's "WILL" for both read as
+// duplicate/ambiguous (see the same rename on the Home page plan cards).
+const GIFT_PLAN_IDS: { id: string; label: string }[] = [
+  { id: "notarized", label: "All India Will" },
+  { id: "registered", label: "Goan Will" },
+  { id: "nri", label: "Customized Will" },
 ];
+const GIFT_PLANS = GIFT_PLAN_IDS.map(({ id, label }) => ({
+  amount: PLANS.find(p => p.id === id)!.price,
+  label,
+}));
 
 export default function GiftAWillForm(){
   const [amount, setAmount] = useState(GIFT_PLANS[0].amount);

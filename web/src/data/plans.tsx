@@ -34,7 +34,7 @@ export const PLANS: Plan[] = [
     willType: "goan",
   },
   {
-    id: "nri", name: "CUSTOMIZED WILL", price: 24999,
+    id: "nri", name: "Customized Will", price: 24999,
     gradient: "from-violet-800 to-violet-900", icon: <Globe size={18} />, badge: null,
     features: [
       "For NRIs & OCIs — Cross-border asset structuring with full Indian legal compliance",
@@ -47,7 +47,7 @@ export const PLANS: Plan[] = [
     willType: "customwill",
   },
   {
-    id: "premium", name: "SUCCESSION DEED", price: 9999,
+    id: "premium", name: "Succession Deed", price: 9999,
     gradient: "from-slate-700 to-[#4F9D33]", icon: <Star size={18} />, badge: null,
     features: [
       "Goa-Specific Legal Process — Drafted per Special Notaries and Inventory Proceeding rules",

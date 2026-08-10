@@ -7,6 +7,7 @@ import {
   ROLE_TESTATOR,
 } from "../../constants";
 import { WILL_TYPE_LBL_SHORT } from "../../data/willTypes";
+import Pagination, { PAGE_SIZE } from "../../components/shared/Pagination";
 import type { TestatorWill, WillState, WillType } from "../../types";
 
 const STATUS_STYLE: Record<TestatorWill["status"], string> = {
@@ -28,11 +29,20 @@ export default function TestatorWillsView({email,onCreateNew,onEditWill,onViewWi
   const [busyId,setBusyId]=useState<string|null>(null);
   const [actionError,setActionError]=useState("");
   const [statusFilter,setStatusFilter]=useState<"All"|TestatorWill["status"]>("All");
+  const [page,setPage]=useState(1);
 
   const draftCount = wills.filter(w=>w.status===STATUS_DRAFT).length;
   const pendingReviewCount = wills.filter(w=>w.status===STATUS_PENDING_REVIEW).length;
   const completedCount = wills.filter(w=>w.status===STATUS_COMPLETED).length;
   const filteredWills = statusFilter==="All" ? wills : wills.filter(w=>w.status===statusFilter);
+  const pagedWills = filteredWills.slice((page-1)*PAGE_SIZE, page*PAGE_SIZE);
+
+  // Clamp back to a valid page after a delete (or filter change) leaves the
+  // current page past the end of the list.
+  useEffect(()=>{
+    const maxPage = Math.max(1, Math.ceil(filteredWills.length/PAGE_SIZE));
+    if(page>maxPage) setPage(maxPage);
+  },[filteredWills.length, page]);
 
   const fetchWill = async (willId: string): Promise<{ will: WillState; willType: WillType; status: TestatorWill["status"]; adminComments?: string }> => {
     const res = await authFetch(ROLE_TESTATOR, apiPathWill(willId));
@@ -133,7 +143,7 @@ export default function TestatorWillsView({email,onCreateNew,onEditWill,onViewWi
                   {v:STATUS_PENDING_REVIEW,label:STATUS_LBL[STATUS_PENDING_REVIEW],count:pendingReviewCount},
                   {v:STATUS_COMPLETED,label:STATUS_LBL[STATUS_COMPLETED],count:completedCount},
                 ] as const).map(f=>(
-                  <button key={f.v} onClick={()=>setStatusFilter(f.v)}
+                  <button key={f.v} onClick={()=>{setStatusFilter(f.v);setPage(1);}}
                     className={`text-[10px] font-bold px-2.5 py-1 rounded-full border transition-colors ${statusFilter===f.v?"bg-brand text-[#ffffff] border-brand hover:bg-brand hover:text-[#ffffff]":"bg-white text-slate-600 border-slate-200 hover:border-slate-300"}`}>
                     {f.label} <span className="opacity-70">{f.count}</span>
                   </button>
@@ -154,6 +164,7 @@ export default function TestatorWillsView({email,onCreateNew,onEditWill,onViewWi
             <p className="text-slate-500 text-sm px-5 py-6">No Wills match this filter.</p>
           )}
           {status==="ready" && filteredWills.length>0 && (
+            <div className="overflow-x-auto">
             <table className="w-full">
               <thead><tr className="border-b border-slate-200">
                 {["Testator Email","Full Legal Name","Updated","Will Type","Status","Action"].map(h=>(
@@ -161,7 +172,7 @@ export default function TestatorWillsView({email,onCreateNew,onEditWill,onViewWi
                 ))}
               </tr></thead>
               <tbody>
-                {filteredWills.map(w=>(
+                {pagedWills.map(w=>(
                   <tr key={w.willId} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
                     <td className="px-5 py-3.5 text-slate-500 text-sm">{w.testatorEmail}</td>
                     <td className="px-5 py-3.5 text-slate-900 text-sm font-medium">{w.fullLegalName||"Unnamed"}</td>
@@ -200,7 +211,9 @@ export default function TestatorWillsView({email,onCreateNew,onEditWill,onViewWi
                 ))}
               </tbody>
             </table>
+            </div>
           )}
+          {status==="ready" && <Pagination page={page} total={filteredWills.length} onChange={setPage}/>}
         </div>
       </div>
     </div>

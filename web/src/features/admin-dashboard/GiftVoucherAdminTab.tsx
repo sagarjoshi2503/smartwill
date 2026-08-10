@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Search, Sparkles } from "lucide-react";
 import { authFetch } from "../../utils/apiBase";
 import { ROLE_ADMIN, API_GIFT_VOUCHER_ADMIN_GENERATE, API_GIFT_VOUCHER_ADMIN_LIST, API_GIFT_VOUCHER_VERIFY } from "../../constants";
+import { PLANS } from "../../data/plans";
 
 // Mirrors the theme's Voucher Admin modal (api/Data/Entire Site theme.html
 // lines 1062-1141) but as a tab inside the already-authenticated
@@ -19,10 +20,12 @@ interface VoucherSummary {
   expiresAt: string;
 }
 
+// Amounts read from data/plans.tsx's PLANS (the single source of truth for
+// plan pricing) instead of being duplicated here.
 const GEN_PLANS = [
-  { amount: 4999, label: "WILL" },
-  { amount: 6999, label: "WILL" },
-  { amount: 24999, label: "CUSTOMIZED WILL" },
+  { amount: PLANS.find(p=>p.id==="notarized")!.price, label: "WILL" },
+  { amount: PLANS.find(p=>p.id==="registered")!.price, label: "WILL" },
+  { amount: PLANS.find(p=>p.id==="nri")!.price, label: "Customized Will" },
 ];
 
 const BADGE_STYLE: Record<string, string> = {

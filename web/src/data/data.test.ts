@@ -28,8 +28,8 @@ describe("plans", () => {
     const byId = Object.fromEntries(PLANS.map(p => [p.id, p]));
     expect(byId.notarized).toMatchObject({ name: "All-Indian Will", price: 4999, willType: "allindia" });
     expect(byId.registered).toMatchObject({ name: "Goan Will", price: 6999, willType: "goan", badge: "Most Popular" });
-    expect(byId.nri).toMatchObject({ name: "CUSTOMIZED WILL", price: 24999, willType: "customwill" });
-    expect(byId.premium).toMatchObject({ name: "SUCCESSION DEED", price: 9999, willType: "successiondeed" });
+    expect(byId.nri).toMatchObject({ name: "Customized Will", price: 24999, willType: "customwill" });
+    expect(byId.premium).toMatchObject({ name: "Succession Deed", price: 9999, willType: "successiondeed" });
   });
 
   it("keeps the willType linkage other code (App.tsx, TestatorWillsView, AdminPortal) relies on", () => {

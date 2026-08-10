@@ -494,21 +494,21 @@ export default function SmartWill() {
             <div className={`${isSitePage(view)?"hidden lg:flex":"flex"} items-center gap-3 shrink-0`}>
               {view==="admin" && adminProfile ? (
                 <>
-                  <div className="flex items-center gap-2 bg-slate-100 rounded-full px-3 py-1.5 text-sm border border-slate-200">
-                    <div className="w-6 h-6 bg-slate-200 rounded-full flex items-center justify-center text-[9px] font-bold text-slate-900">
+                  <div className="flex items-center gap-2 bg-slate-100 rounded-full px-3 py-1.5 text-sm border border-slate-200 min-w-0">
+                    <div className="w-6 h-6 bg-slate-200 rounded-full flex items-center justify-center text-[9px] font-bold text-slate-900 shrink-0">
                       {adminProfile.name.split(" ").slice(0,2).map(n=>n[0]).join("").toUpperCase()}
                     </div>
-                    <span className="text-brand text-sm">{adminProfile.name}</span>
+                    <span className="text-brand text-sm truncate max-w-[140px] sm:max-w-[220px]">{adminProfile.name}</span>
                   </div>
                   <button onClick={()=>{clearAuthToken(ROLE_ADMIN);setAdminProfile(null);setView("landing");}} className="flex items-center gap-1.5 text-slate-600 hover:text-slate-900 text-sm transition-colors"><LogOut size={13}/>{BTN_LOGOUT}</button>
                 </>
               ):testatorAuthenticated && !isAdminView(view) ? (
                 <>
-                  <div className="flex items-center gap-2 bg-slate-100 rounded-full px-3 py-1.5 text-sm border border-slate-200">
-                    <div className="w-6 h-6 bg-slate-200 rounded-full flex items-center justify-center text-[9px] font-bold text-slate-900">
+                  <div className="flex items-center gap-2 bg-slate-100 rounded-full px-3 py-1.5 text-sm border border-slate-200 min-w-0">
+                    <div className="w-6 h-6 bg-slate-200 rounded-full flex items-center justify-center text-[9px] font-bold text-slate-900 shrink-0">
                       {(signup.name||signup.email).split(" ").slice(0,2).map(n=>n[0]).join("").toUpperCase()}
                     </div>
-                    <span className="text-brand text-sm">{signup.name||signup.email}</span>
+                    <span className="text-brand text-sm truncate max-w-[140px] sm:max-w-[220px]">{signup.name||signup.email}</span>
                   </div>
                   <button onClick={handleTestatorLogout} className="flex items-center gap-1.5 text-slate-600 hover:text-slate-900 text-sm transition-colors"><LogOut size={13}/>{BTN_LOGOUT}</button>
                 </>
@@ -573,25 +573,25 @@ export default function SmartWill() {
       {view==="wizard" && (
         <div className={`flex flex-col ${livePreviewEnabled?"lg:h-screen":""} bg-slate-100 fade-in`}>
           {/* Wizard bar */}
-          <div className="flex-none bg-white/95 border-b border-slate-200 px-4 h-[60px] flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <button onClick={()=>setView(adminProfile?"admin":(signup.email?"myWills":"landing"))} className="text-slate-600 hover:text-slate-900 transition-colors"><ChevronLeft size={16}/></button>
-              <BrandMark size={28}/>
-              <div>
-                <div className="text-slate-900 font-semibold serif text-sm">Forward Legacy</div>
-                <div className="text-slate-500 text-[10px]">{LBL_WILL_DRAFTING}{willType&&` - ${WILL_TYPE_LBL_SHORT[willType]}`}</div>
+          <div className="flex-none bg-white/95 border-b border-slate-200 px-4 h-[60px] flex items-center justify-between gap-2">
+            <div className="flex items-center gap-3 shrink-0 min-w-0">
+              <button onClick={()=>setView(adminProfile?"admin":(signup.email?"myWills":"landing"))} className="text-slate-600 hover:text-slate-900 transition-colors shrink-0"><ChevronLeft size={16}/></button>
+              <BrandMark size={28} className="shrink-0"/>
+              <div className="hidden sm:block min-w-0">
+                <div className="text-slate-900 font-semibold serif text-sm truncate">Forward Legacy</div>
+                <div className="text-slate-500 text-[10px] truncate">{LBL_WILL_DRAFTING}{willType&&` - ${WILL_TYPE_LBL_SHORT[willType]}`}</div>
               </div>
             </div>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1 overflow-x-auto flex-1 min-w-0">
               {WIZARD_STEPS.filter(s=>!(skipWillTypeStep&&s.n===1)).map(s=>(
                 <button key={s.n} onClick={()=>setWizardStep(s.n)}
-                    className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-[10px] font-semibold transition-all ${wizardStep===s.n?"bg-brand text-[#ffffff]":"border border-slate-200 text-slate-600 hover:bg-slate-100 hover:text-slate-900"}`}>
+                    className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-[10px] font-semibold transition-all shrink-0 ${wizardStep===s.n?"bg-brand text-[#ffffff]":"border border-slate-200 text-slate-600 hover:bg-slate-100 hover:text-slate-900"}`}>
                   {wizardStep>s.n?<Check size={9}/>:<span>{s.n}</span>}
                   <span className="hidden md:inline">{s.label}</span>
                 </button>
               ))}
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 shrink-0">
               {!adminReviewMode && (
                 <button onClick={handleSaveDraft} disabled={draftStatus==="saving"||viewOnlyMode}
                   title={viewOnlyMode?MSG_VIEW_ONLY:draftStatus==="error"?draftError:undefined}

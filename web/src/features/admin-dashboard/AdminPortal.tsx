@@ -8,6 +8,7 @@ import {
   STATUS_LBL, ROLE_ADMIN,
 } from "../../constants";
 import { WILL_TYPE_LBL_SHORT } from "../../data/willTypes";
+import Pagination, { PAGE_SIZE } from "../../components/shared/Pagination";
 import GiftVoucherAdminTab from "./GiftVoucherAdminTab";
 import type { AdminClient, AdminProfile, WillState, WillType } from "../../types";
 
@@ -43,11 +44,20 @@ export default function AdminPortal({admin,onCreateWill,onReviewWill}:{
   const [reviewError,setReviewError]=useState("");
   const [statusFilter,setStatusFilter]=useState<"All"|AdminClient["status"]>("All");
   const [mainTab,setMainTab]=useState<"wills"|"vouchers">("wills");
+  const [page,setPage]=useState(1);
 
   const pendingReviewCount = clients.filter(c=>c.status===STATUS_PENDING_REVIEW).length;
   const completedCount = clients.filter(c=>c.status===STATUS_COMPLETED).length;
   const draftCount = clients.filter(c=>c.status===STATUS_DRAFT).length;
   const filteredClients = statusFilter==="All" ? clients : clients.filter(c=>c.status===statusFilter);
+  const pagedClients = filteredClients.slice((page-1)*PAGE_SIZE, page*PAGE_SIZE);
+
+  // Clamp back to a valid page after a delete (or filter change) leaves the
+  // current page past the end of the list.
+  useEffect(()=>{
+    const maxPage = Math.max(1, Math.ceil(filteredClients.length/PAGE_SIZE));
+    if(page>maxPage) setPage(maxPage);
+  },[filteredClients.length, page]);
 
   useEffect(()=>{
     let cancelled=false;
@@ -159,7 +169,7 @@ export default function AdminPortal({admin,onCreateWill,onReviewWill}:{
                   {v:STATUS_PENDING_REVIEW,label:STATUS_LBL[STATUS_PENDING_REVIEW],count:pendingReviewCount},
                   {v:STATUS_COMPLETED,label:STATUS_LBL[STATUS_COMPLETED],count:completedCount},
                 ] as const).map(f=>(
-                  <button key={f.v} onClick={()=>setStatusFilter(f.v)}
+                  <button key={f.v} onClick={()=>{setStatusFilter(f.v);setPage(1);}}
                     className={`text-[10px] font-bold px-2.5 py-1 rounded-full border transition-colors ${statusFilter===f.v?"bg-brand text-[#ffffff] border-brand hover:bg-brand hover:text-[#ffffff]":"bg-white text-slate-600 border-slate-200 hover:border-slate-300"}`}>
                     {f.label} <span className="opacity-70">{f.count}</span>
                   </button>
@@ -177,6 +187,7 @@ export default function AdminPortal({admin,onCreateWill,onReviewWill}:{
             <p className="text-slate-500 text-sm px-5 py-6">No Wills match this filter.</p>
           )}
           {status==="ready" && filteredClients.length>0 && (
+            <div className="overflow-x-auto">
             <table className="w-full">
               <thead><tr className="border-b border-slate-800">
                 {["Client","Contact","Updated","Will Type","Status","Payment","Amount","Action"].map(h=>(
@@ -184,7 +195,7 @@ export default function AdminPortal({admin,onCreateWill,onReviewWill}:{
                 ))}
               </tr></thead>
               <tbody>
-                {filteredClients.map(c=>(
+                {pagedClients.map(c=>(
                   <tr key={c.willId} className="border-b border-slate-800/50 hover:bg-slate-800/30 transition-colors">
                     <td className="px-5 py-3.5">
                       <div className="flex items-center gap-2.5">
@@ -223,7 +234,9 @@ export default function AdminPortal({admin,onCreateWill,onReviewWill}:{
                 ))}
               </tbody>
             </table>
+            </div>
           )}
+          {status==="ready" && <Pagination page={page} total={filteredClients.length} onChange={setPage}/>}
         </div>
         </>)}
       </div>
