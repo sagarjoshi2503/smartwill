@@ -72,7 +72,10 @@ export async function generateAnnexPdf(state: AnnexState, testatorName: string):
   y -= 20;
 
   page.drawText("Schedule of Financial Assets", { x: MARGIN, y: y - 23, size: 23, font: fontB, color: COLORS.ink });
-  y -= 18;
+  // 23pt bold text needs more clearance than a flat 18pt gap gives it (its
+  // descender alone eats ~5pt of that), which was letting the intro
+  // paragraph's first line render up into the heading's own line box.
+  y -= 32;
 
   const introText = "This Schedule forms Annexure A to the Last Will and Testament" +
     (testatorName ? ` of ${testatorName}` : "") +

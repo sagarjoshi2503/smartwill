@@ -120,6 +120,15 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,w
           .no-print{display:none!important}
           body{margin:0;padding:0}
           .will-print-page{box-shadow:none!important;margin:0!important;border-radius:0!important;max-width:100%!important;padding:0!important}
+          /* Must not exceed the printable content height (A4 297mm minus the
+             25.4mm top + bottom margins = 246.2mm) — a taller min-height
+             forces every page to overflow onto a near-blank continuation
+             page, which is where extra blank pages in generated PDFs came
+             from (see the same pattern/warning in GoanWillDocument.tsx).
+             flex + space-between pins the footer signature line to the
+             bottom of the page instead of wherever the content happens to
+             end. */
+          .pdf-page{min-height:calc(297mm - 25.4mm - 25.4mm);display:flex;flex-direction:column;justify-content:space-between}
           .pdf-page-break{break-after:page}
           /* Belt-and-braces: even if a page's own content still overflows,
              never let the footer signature line get separated from what
@@ -230,13 +239,6 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,w
               ))}
             </p>
 
-            <div className="mb-6">
-              <div className="inline-block min-w-[280px]">
-                <div className="border-b-2 border-slate-800 pt-10 mb-1"/>
-                <p className="mb-1">Signature of {title}</p>
-              </div>
-            </div>
-
             <p className="text-justify mb-5">
               I have fully understood the contents, significance and implications contained in this WILL which has been executed out of my free will, and choice. There has been no misrepresentation in regard to this WILL and no one has any right to object and/or to challenge this WILL as this is culmination of my discretion and best for me to safeguard my interest and interest of my family.
             </p>
@@ -275,7 +277,7 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,w
                   </p>
                 ) : (
                   <p className="text-justify mb-5">
-                    I appoint (Executor's Full Name) <strong>{executor.name||blank}</strong>, having Relationship to Testator: <strong>{executor.relation||blank}</strong>, with Contact Details / Address: <strong>{executor.address||blank}</strong>, bearing {executor.idType} Number: <strong>{executor.idNumber||blank}</strong>.
+                    I appoint <strong>{executor.name||blank}</strong>, having Relationship to Testator: <strong>{executor.relation||blank}</strong>, with Contact Details / Address: <strong>{executor.address||blank}</strong>, bearing {executor.idType} Number: <strong>{executor.idNumber||blank}</strong>.
                   </p>
                 )}
                 <p className="mb-1">(a) The above executor shall dispose of the property and carry out the instructions as mentioned in this Will.</p>
@@ -304,7 +306,7 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,w
               <Page>
                 <h1 className="text-center text-lg font-bold uppercase mb-6">Appointment of Guardian for Minor Beneficiary</h1>
                 <p className="text-justify mb-5">
-                  I appoint (Guardian's Full Name) <strong>{guardian.name||blank}</strong>, having Relation to Testator: <strong>{guardian.relation||blank}</strong>, with Address: <strong>{guardian.address||blank}</strong>, bearing {guardian.idType} Number: <strong>{guardian.idNumber||blank}</strong>.
+                  I appoint <strong>{guardian.name||blank}</strong>, having Relation to Testator: <strong>{guardian.relation||blank}</strong>, with Address: <strong>{guardian.address||blank}</strong>, bearing {guardian.idType} Number: <strong>{guardian.idNumber||blank}</strong>.
                 </p>
                 <p className="text-justify mb-5">
                   The above-appointed guardian shall have the care, custody, and management of any property or assets inherited by my minor beneficiaries under this Will until such beneficiaries attain the age of majority. The guardian shall act in the best fiduciary interests of the minors and may apply the income or principal of the inherited assets for their education, maintenance, and welfare as deemed necessary.
