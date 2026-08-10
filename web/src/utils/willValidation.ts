@@ -29,7 +29,13 @@ function missingAssetIdFields(assets: WillState["allIndiaAssets"] | WillState["g
   });
 }
 
-export function getMissingIdFields(will: WillState, willType: WillType): string[] {
+// `skipValidation` is driven by the "skip-idfields-validation" remote flag
+// (see flags.ts/useFlag) — a dev/testing escape hatch to generate documents
+// without filling in every ID field first. Defaults to false (fail-closed,
+// same as useFlag itself) so validation stays on unless explicitly disabled.
+export function getMissingIdFields(will: WillState, willType: WillType, skipValidation = false): string[] {
+  if (skipValidation) return [];
+
   const missing: string[] = [];
 
   if (willType === "goan") {

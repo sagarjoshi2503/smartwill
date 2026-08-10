@@ -127,6 +127,11 @@ export default function SmartWill() {
   const livePreviewEnabled = useFlag(FLAGS.livePreview);
   // Build number in the footer is gated behind "show-build-nr".
   const showBuildNr = useFlag(FLAGS.showBuildNr);
+  // Dev/testing escape hatch — "skip-idfields-validation" lets the
+  // Generate/Preview flow skip the "every in-use ID field must be filled
+  // in" check, so document generation can be tested without typing
+  // PAN/Aadhaar/etc. into every field first.
+  const skipIdFieldsValidation = useFlag(FLAGS.skipIdFieldsValidation);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   // ServicesView's "Got a query?" buttons deep-link into a specific FaqView
   // accordion section — mirrors how onHome/onServices already thread view
@@ -400,7 +405,7 @@ export default function SmartWill() {
   // before the document is actually generated.
   const [showGenerateInstructions, setShowGenerateInstructions] = useState(false);
   const requestGenerateWill = () => {
-    const missing = getMissingIdFields(will, willType);
+    const missing = getMissingIdFields(will, willType, skipIdFieldsValidation);
     if (missing.length > 0) {
       setGenWillErrors(missing);
       return;

@@ -9,6 +9,7 @@ export const FLAGS = {
   adminSignup: "enable-admin-signup",
   livePreview: "enable-live-preview",
   showBuildNr: "show-build-nr",
+  skipIdFieldsValidation: "skip-idfields-validation",
 } as const;
 
 export type FlagKey = typeof FLAGS[keyof typeof FLAGS];
