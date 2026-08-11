@@ -138,8 +138,12 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,w
              page. position:relative + the footer's position:absolute pins
              the signature line to the bottom of the page instead of
              wherever the content happens to end. */
+          /* No extra padding-bottom reserved beyond min-height here — content
+             that already nearly fills a full page (e.g. the residue/
+             signature/witnesses page) would otherwise be pushed past the
+             true printable height by that padding, spilling a near-empty
+             continuation page. */
           .pdf-page{min-height:calc(297mm - 25.4mm - 25.4mm);position:relative}
-          .pdf-page-content{padding-bottom:1.6em}
           .pdf-page-break{break-after:page}
           /* Belt-and-braces: even if a page's own content still overflows,
              never let the footer signature line get separated from what

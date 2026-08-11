@@ -124,8 +124,8 @@ export default function TestatorWillsView({email,onCreateNew,onEditWill,onViewWi
             <h2 className="text-xl font-bold text-slate-900 serif">My Wills</h2>
             <p className="text-slate-600 text-sm">{email}</p>
           </div>
-          <button onClick={onCreateNew} className="apv-btn flex items-center gap-2 py-2 px-4 rounded-xl text-sm font-semibold">
-            <Plus size={14}/>Create New Will
+          <button onClick={onCreateNew} className="apv-btn flex items-center gap-1.5 py-1.5 px-3 rounded-lg text-xs font-semibold">
+            <Plus size={12}/>Create New Will
           </button>
         </div>
         <div className="bg-[#F3F7E7] border border-[#4F9D33]/25 rounded-xl p-3.5 text-xs text-brand-dark flex items-start gap-2 mb-6">

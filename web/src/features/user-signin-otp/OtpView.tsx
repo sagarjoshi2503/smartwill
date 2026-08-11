@@ -45,11 +45,11 @@ export default function OtpView({otp,handleOtp,otpRefs,phone,email,onNext}:{
         <div className="w-14 h-14 bg-[#4F9D33]/15 border border-[#4F9D33]/20 rounded-3xl flex items-center justify-center mx-auto mb-4"><Phone size={22} className="text-brand"/></div>
         <h2 className="text-2xl font-black text-slate-900 serif mb-2">Verify Mobile</h2>
         <p className="text-slate-600 text-sm mb-6">OTP sent to {COUNTRY_CODE_PREFIX}{phone.slice(0,PHONE_MASK_DIGITS)}XXXXX</p>
-        <div className="flex justify-center gap-3 mb-5">
+        <div className="flex justify-center gap-1.5 mb-5">
           {otp.map((d,i)=>(
             <input key={i} ref={el=>otpRefs.current[i]=el} type="text" inputMode="numeric" maxLength={1} value={d}
               onChange={e=>handleOtp(i,e.target.value)}
-              className="w-12 h-14 apv-input rounded-2xl text-center text-slate-900 text-lg font-bold focus:outline-none"/>
+              className="w-9 h-12 apv-input rounded-xl text-center text-slate-900 text-lg font-bold focus:outline-none"/>
           ))}
         </div>
         {error&&<p className="text-red-500 text-xs mb-4">{error}</p>}

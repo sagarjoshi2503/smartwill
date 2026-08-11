@@ -80,8 +80,11 @@ export default function GoanWillDocument({will,person,onBack,onPrint,willDocRef}
              ancestor doesn't depend on flex layout and prints reliably. A
              short section still consuming a full page is a confirmed,
              deliberate tradeoff. */
+          /* No extra padding-bottom reserved beyond min-height here — content
+             that already nearly fills a full page would otherwise be pushed
+             past the true printable height by that padding, spilling a
+             near-empty continuation page. */
           .pdf-page{min-height:calc(297mm - 3cm - 3cm);position:relative}
-          .pdf-page-content{padding-bottom:1.6em}
           .pdf-page-break{break-after:page}
           .pdf-sig-line{break-inside:avoid}
           .pdf-sig-line-footer{position:absolute;bottom:0;left:0;right:0;break-before:avoid}
