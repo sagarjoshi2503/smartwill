@@ -89,7 +89,7 @@ export default function AllIndiaLiveDocPreview({will}:{
 
         <p className="text-justify mb-3">I bequeath my specific assets to the designated beneficiaries as outlined below:</p>
 
-        <p className="font-bold mb-1">A. Financial Assets:</p>
+        <p className="mb-1">A. Financial Assets:</p>
         <p className="text-justify mb-3">
           I bequeath all my financial assets including Bank Accounts, Fixed Deposits (FDs), Recurring Deposits (RDs), Public Provident Fund (PPF), Life Insurance, Stocks, Mutual Funds, Cryptocurrency (Crypto), Digital Wallets, National Pension System (NPS), Bonds, Alternative Investment Fund (AIF), Specialized Investment Fund (SIF), and Portfolio Management Services (PMS) entirely to the nominees registered in those financial instruments.
         </p>
@@ -97,7 +97,7 @@ export default function AllIndiaLiveDocPreview({will}:{
 
         {hasImmovable&&(
           <>
-            <p className="font-bold mb-1">{letterImmovable}. Immovable Property:</p>
+            <p className="mb-1">{letterImmovable}. Immovable Property:</p>
             {renderAssetList(houseFlat,"House / Flat")}
             {renderAssetList(landPlot,"Land / Plot")}
             <div className="mb-3">{renderAssetList(commercialProperty,"Commercial Property")}</div>
@@ -106,21 +106,21 @@ export default function AllIndiaLiveDocPreview({will}:{
 
         {hasVehicle&&(
           <>
-            <p className="font-bold mb-1">{letterVehicle}. Motor Vehicles:</p>
+            <p className="mb-1">{letterVehicle}. Motor Vehicles:</p>
             <div className="mb-3">{renderAssetList(vehicle,"Vehicle / Car")}</div>
           </>
         )}
 
         {hasPersonal&&(
           <>
-            <p className="font-bold mb-1">{letterPersonal}. Personal &amp; Valuables:</p>
+            <p className="mb-1">{letterPersonal}. Personal &amp; Valuables:</p>
             <div className="mb-3">{renderAssetList(jewellery,"Jewellery & Heirlooms")}</div>
           </>
         )}
 
         {hasDigitalMisc&&(
           <>
-            <p className="font-bold mb-1">{letterDigitalMisc}. Digital &amp; Miscellaneous Assets:</p>
+            <p className="mb-1">{letterDigitalMisc}. Digital &amp; Miscellaneous Assets:</p>
             {renderAssetList(socialMediaDigital,"Social Media / Digital")}
             <div className="mb-3">{renderAssetList(intellectualProperty,"Intellectual Property")}</div>
           </>
@@ -135,7 +135,7 @@ export default function AllIndiaLiveDocPreview({will}:{
         </p>
         <SectionSignatureLine/>
 
-        <p className="font-bold mb-1">Witnesses:</p>
+        <p className="mb-1">Witnesses:</p>
         {witnesses.map((w,i)=>(
           <p key={i} className="text-justify mb-1">
             {i+1}) <strong>{w.name||blank}</strong>, {w.parentRelation} of <strong>{w.parentName||blank}</strong>, Age: <strong>{w.age||"___"}</strong>, {w.maritalStatus}, nationality <strong>{w.nationality?`${w.nationality} National`:blank}</strong>, occupation <strong>{occupationOf(w)||blank}</strong>, resident of <strong>{w.address||blank}</strong>, bearing Aadhaar Number <strong>{w.aadhaarNumber||blank}</strong>, Relation to Testator: <strong>{witnessRelOf(w)||blank}</strong>

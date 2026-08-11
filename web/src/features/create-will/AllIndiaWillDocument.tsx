@@ -117,8 +117,9 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,w
         @page { size: A4; margin: 25.4mm; }
         .will-print-page p { text-align: justify; }
         /* Filled-in values (wrapped in <strong>) render at the same weight as
-           the surrounding body text — only actual section headings/titles
-           (h1/h2, the bold "A. Financial Assets:"-style labels) keep bold. */
+           the surrounding body text — only the page-level h1 titles keep
+           bold; sub-section labels ("A. Financial Assets:") and the
+           Witnesses heading are non-bold too. */
         .will-print-page strong { font-weight: normal; }
         .will-print-page em { font-style: normal; }
         @media print {
@@ -189,7 +190,7 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,w
 
             <p className="text-justify mb-5">I bequeath my specific assets to the designated beneficiaries as outlined below:</p>
 
-            <p className="font-bold mb-1">A. Financial Assets:</p>
+            <p className="mb-1">A. Financial Assets:</p>
             <p className="text-justify mb-5">
               I bequeath all my financial assets including Bank Accounts, Bank Locker, Fixed Deposits (FDs), Recurring Deposits (RDs), Public Provident Fund (PPF), Life Insurance, Stocks, Mutual Funds, Cryptocurrency (Crypto), Digital Wallets, National Pension System (NPS), Bonds, Alternative Investment Fund (AIF), Specialized Investment Fund (SIF), and Portfolio Management Services (PMS) entirely to the nominees registered in those financial instruments.
             </p>
@@ -199,7 +200,7 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,w
           <Page>
             {hasImmovable&&(
               <>
-                <p className="font-bold mb-1">{letterImmovable}. Immovable Property:</p>
+                <p className="mb-1">{letterImmovable}. Immovable Property:</p>
                 {renderAssetList(houseFlat,"House / Flat")}
                 {renderAssetList(landPlot,"Land / Plot")}
                 <div className="mb-5">{renderAssetList(commercialProperty,"Commercial Property")}</div>
@@ -208,21 +209,21 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,w
 
             {hasVehicle&&(
               <>
-                <p className="font-bold mb-1">{letterVehicle}. Motor Vehicles:</p>
+                <p className="mb-1">{letterVehicle}. Motor Vehicles:</p>
                 <div className="mb-5">{renderAssetList(vehicle,"Vehicle / Car")}</div>
               </>
             )}
 
             {hasPersonal&&(
               <>
-                <p className="font-bold mb-1">{letterPersonal}. Personal &amp; Valuables:</p>
+                <p className="mb-1">{letterPersonal}. Personal &amp; Valuables:</p>
                 <div className="mb-5">{renderAssetList(jewellery,"Jewellery & Heirlooms")}</div>
               </>
             )}
 
             {hasDigitalMisc&&(
               <>
-                <p className="font-bold mb-1">{letterDigitalMisc}. Digital &amp; Miscellaneous Assets:</p>
+                <p className="mb-1">{letterDigitalMisc}. Digital &amp; Miscellaneous Assets:</p>
                 {renderAssetList(socialMediaDigital,"Social Media / Digital")}
                 <div className="mb-5">{renderAssetList(intellectualProperty,"Intellectual Property")}</div>
               </>
@@ -262,7 +263,7 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,w
             <p className="mb-1">Place: <strong>{testator.signPlace||blank}</strong></p>
             <p className="mb-8">Date: <strong>{signDateDDMMYYYY}</strong></p>
 
-            <h2 className="font-bold text-lg uppercase mb-8">Witnesses</h2>
+            <h2 className="text-lg uppercase mb-8">Witnesses</h2>
             {witnesses.map((w,i)=>(
               <div key={i} className="mb-10">
                 <p className="mb-1">{i+1})</p>

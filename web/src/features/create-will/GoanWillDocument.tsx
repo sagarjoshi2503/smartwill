@@ -60,8 +60,9 @@ export default function GoanWillDocument({will,person,onBack,onPrint,willDocRef}
            GOAN WILL FINAL.pdf / GOAN DEED OF CONSENT.pdf). */
         @page { size: A4; margin: 3cm 1cm 3cm 5cm; }
         /* Filled-in values (wrapped in <strong>) render at the same weight as
-           the surrounding body text — only actual section headings/titles
-           (h1/h2, the bold "A. Financial Assets:"-style labels) keep bold. */
+           the surrounding body text — only the page-level h1 title keeps
+           bold; sub-section labels ("A. Financial Assets:") and the
+           Witnesses heading are non-bold too. */
         .will-print-page strong { font-weight: normal; }
         .will-print-page em { font-style: normal; }
         @media print {
@@ -115,25 +116,25 @@ export default function GoanWillDocument({will,person,onBack,onPrint,willDocRef}
 
             <p className="text-justify mb-5">I bequeath my specific assets to the designated beneficiaries as outlined below:</p>
 
-            <p className="font-bold mb-1">A. Financial Assets:</p>
+            <p className="mb-1">A. Financial Assets:</p>
             <p className="text-justify mb-5">
               I bequeath all my financial assets including Bank Accounts, Fixed Deposits (FDs), Recurring Deposits (RDs), Public Provident Fund (PPF), Life Insurance, Stocks, Mutual Funds, Cryptocurrency (Crypto), Digital Wallets, National Pension System (NPS), Bonds, Alternative Investment Fund (AIF), Specialized Investment Fund (SIF), and Portfolio Management Services (PMS) entirely to the nominees registered in those financial instruments.
             </p>
           </Page>
 
           <Page>
-            <p className="font-bold mb-1">B. Immovable Property:</p>
+            <p className="mb-1">B. Immovable Property:</p>
             {renderAssetList(goanAssets.houseFlat,"House / Flat")}
             {renderAssetList(goanAssets.landPlot,"Land / Plot")}
             <div className="mb-5">{renderAssetList(goanAssets.commercialProperty,"Commercial Property")}</div>
 
-            <p className="font-bold mb-1">C. Motor Vehicles:</p>
+            <p className="mb-1">C. Motor Vehicles:</p>
             <div className="mb-5">{renderAssetList(goanAssets.vehicle,"Vehicle / Car")}</div>
 
-            <p className="font-bold mb-1">D. Personal &amp; Valuables:</p>
+            <p className="mb-1">D. Personal &amp; Valuables:</p>
             <div className="mb-5">{renderAssetList(goanAssets.jewellery,"Jewellery & Heirlooms")}</div>
 
-            <p className="font-bold mb-1">E. Digital &amp; Miscellaneous Assets:</p>
+            <p className="mb-1">E. Digital &amp; Miscellaneous Assets:</p>
             {goanAssets.socialMediaDigital.map((item,i)=>(
               <p key={i} className="mb-1">{i===0?"(1) ":""}Social Media / Digital: <strong>{item.description||blank}</strong> Bequeathed to: <strong>{item.beneficiary||blank}</strong> Relationship: <strong>{relOf(item)||blank}</strong>, bearing {item.idType||"Aadhaar Card"} Number: <strong>{item.idNumber||blank}</strong>.</p>
             ))}
@@ -186,7 +187,7 @@ export default function GoanWillDocument({will,person,onBack,onPrint,willDocRef}
             <p className="mb-1">Place: <strong>{blank}</strong></p>
             <p className="mb-8">Date: <strong>{blank}</strong></p>
 
-            <h2 className="font-bold text-lg uppercase mb-8">Witnesses</h2>
+            <h2 className="text-lg uppercase mb-8">Witnesses</h2>
             {goanWitnesses.map((w,i)=>(
               <div key={i} className="mb-10">
                 <p className="mb-1">{i+1})</p>

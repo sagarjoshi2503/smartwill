@@ -34,9 +34,9 @@ export default function WillDocument({will,residualBene,onBack,onPrint,willDocRe
     <div className="min-h-screen bg-slate-800 print:bg-white">
       <style>{`
         /* Filled-in values (wrapped in <strong>/<em>) render at the same
-           weight/style as the surrounding body text — only actual section
-           headings/titles (WillSection's <h2>, the bold "A. Immovable
-           Property:"-style labels) keep bold. */
+           weight/style as the surrounding body text — only the page-level
+           h1 title and WillSection's <h2> keep bold; sub-section labels
+           ("A. Immovable Property:") are non-bold too. */
         .will-print-page strong { font-weight: normal; }
         .will-print-page em { font-style: normal; }
         .print-sig-footer{display:none;}
@@ -152,7 +152,7 @@ export default function WillDocument({will,residualBene,onBack,onPrint,willDocRe
                 {/* Section A - Immovable */}
                 {sectionMap.A.length>0&&(
                   <div className="mb-4">
-                    <p className="font-bold mb-2">A. Immovable Property:</p>
+                    <p className="mb-2">A. Immovable Property:</p>
                     {sectionMap.A.map((a,i)=>(
                       <div key={a.uid} className="ml-4 mb-3">
                         <p className="font-semibold">({i+1}) {a.catItem.label}:</p>
@@ -163,7 +163,7 @@ export default function WillDocument({will,residualBene,onBack,onPrint,willDocRe
                 )}
                 {sectionMap.B.length>0&&(
                   <div className="mb-4">
-                    <p className="font-bold mb-2">B. Motor Vehicles:</p>
+                    <p className="mb-2">B. Motor Vehicles:</p>
                     {sectionMap.B.map((a,i)=>(
                       <div key={a.uid} className="ml-4 mb-3">
                         <p className="font-semibold">({i+1}) {a.catItem.label}:</p>
@@ -174,7 +174,7 @@ export default function WillDocument({will,residualBene,onBack,onPrint,willDocRe
                 )}
                 {sectionMap.C.length>0&&(
                   <div className="mb-4">
-                    <p className="font-bold mb-2">C. Financial Securities & Stocks:</p>
+                    <p className="mb-2">C. Financial Securities & Stocks:</p>
                     {sectionMap.C.map((a,i)=>(
                       <div key={a.uid} className="ml-4 mb-3">
                         <p className="font-semibold">({i+1}) {a.catItem.label}:</p>
@@ -185,7 +185,7 @@ export default function WillDocument({will,residualBene,onBack,onPrint,willDocRe
                 )}
                 {sectionMap.D.length>0&&(
                   <div className="mb-4">
-                    <p className="font-bold mb-2">D. Bank Accounts & Lockers:</p>
+                    <p className="mb-2">D. Bank Accounts & Lockers:</p>
                     {sectionMap.D.map((a,i)=>(
                       <div key={a.uid} className="ml-4 mb-3">
                         <p className="font-semibold">({i+1}) {a.catItem.label}:</p>
@@ -196,7 +196,7 @@ export default function WillDocument({will,residualBene,onBack,onPrint,willDocRe
                 )}
                 {sectionMap.E.length>0&&(
                   <div className="mb-4">
-                    <p className="font-bold mb-2">E. Cash & Strategic Collections:</p>
+                    <p className="mb-2">E. Cash & Strategic Collections:</p>
                     {sectionMap.E.map((a,i)=>(
                       <div key={a.uid} className="ml-4 mb-3">
                         <p className="font-semibold">({i+1}) {a.catItem.label}:</p>
@@ -207,7 +207,7 @@ export default function WillDocument({will,residualBene,onBack,onPrint,willDocRe
                 )}
                 {sectionMap.F.length>0&&(
                   <div className="mb-4">
-                    <p className="font-bold mb-2">F. Other Movable Assets (Jewellery, Valuables, Digital):</p>
+                    <p className="mb-2">F. Other Movable Assets (Jewellery, Valuables, Digital):</p>
                     {sectionMap.F.map((a,i)=>(
                       <div key={a.uid} className="ml-4 mb-3">
                         <p className="font-semibold">({i+1}) {a.catItem.label}:</p>
