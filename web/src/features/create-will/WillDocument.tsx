@@ -33,6 +33,12 @@ export default function WillDocument({will,residualBene,onBack,onPrint,willDocRe
   return(
     <div className="min-h-screen bg-slate-800 print:bg-white">
       <style>{`
+        /* Filled-in values (wrapped in <strong>/<em>) render at the same
+           weight/style as the surrounding body text — only actual section
+           headings/titles (WillSection's <h2>, the bold "A. Immovable
+           Property:"-style labels) keep bold. */
+        .will-print-page strong { font-weight: normal; }
+        .will-print-page em { font-style: normal; }
         .print-sig-footer{display:none;}
         @media print {
           .no-print{display:none!important}
@@ -65,7 +71,7 @@ export default function WillDocument({will,residualBene,onBack,onPrint,willDocRe
       {/* Document */}
       <div className="py-10 px-5 flex justify-center" ref={willDocRef}>
         <div className="will-print-page bg-white shadow-2xl rounded-lg max-w-[780px] w-full p-14 print:p-10"
-          style={{fontFamily:"'Source Serif 4','Times New Roman',Georgia,serif",fontSize:"14px",lineHeight:"1.85",color:"#1a1a1a"}}>
+          style={{fontFamily:"'Source Serif 4','Times New Roman',Georgia,serif",fontSize:"14px",lineHeight:"2",color:"#1a1a1a"}}>
 
           {/* Header */}
           <div className="text-center mb-8 pb-6 border-b-2 border-slate-800">
@@ -76,11 +82,11 @@ export default function WillDocument({will,residualBene,onBack,onPrint,willDocRe
 
           {/* Opening */}
           <p className="text-justify mb-6 leading-loose">
-            I, <span className="font-bold underline">{testator.fullName||"_______________________"}</span>, having PAN <span className="font-bold">{testator.pan||"_______________________"}</span>, Aadhaar No. <span className="font-bold">{testator.aadhaarNumber||"_______________________"}</span>, {testator.relation} of <span className="font-bold">{testator.parentSpouseName||"_______________________"}</span>, aged about <span className="font-bold">{testator.age||"___"}</span> years, {testator.maritalStatus}, residing permanently at <span className="font-bold">{testator.address||"_______________________"}</span>
+            I, <span className="underline">{testator.fullName||"_______________________"}</span>, having PAN <span>{testator.pan||"_______________________"}</span>, Aadhaar No. <span>{testator.aadhaarNumber||"_______________________"}</span>, {testator.relation} of <span>{testator.parentSpouseName||"_______________________"}</span>, aged about <span>{testator.age||"___"}</span> years, {testator.maritalStatus}, residing permanently at <span>{testator.address||"_______________________"}</span>
             {testator.maritalStatus==="married"&&(
-              <>, I am married to <span className="font-bold">{testator.spouseName||"_______________________"}</span>, bearing Aadhaar No. <span className="font-bold">{testator.spouseAadhaarNumber||"_______________________"}</span>
-                {testator.sonNames.filter(Boolean).length>0&&<> and I have {testator.sonNames.filter(Boolean).length} son(s), namely <span className="font-bold">{testator.sonNames.filter(Boolean).join(", ")}</span></>}
-                {testator.daughterNames.filter(Boolean).length>0&&<> and {testator.daughterNames.filter(Boolean).length} daughter(s), namely <span className="font-bold">{testator.daughterNames.filter(Boolean).join(", ")}</span></>}
+              <>, I am married to <span>{testator.spouseName||"_______________________"}</span>, bearing Aadhaar No. <span>{testator.spouseAadhaarNumber||"_______________________"}</span>
+                {testator.sonNames.filter(Boolean).length>0&&<> and I have {testator.sonNames.filter(Boolean).length} son(s), namely <span>{testator.sonNames.filter(Boolean).join(", ")}</span></>}
+                {testator.daughterNames.filter(Boolean).length>0&&<> and {testator.daughterNames.filter(Boolean).length} daughter(s), namely <span>{testator.daughterNames.filter(Boolean).join(", ")}</span></>}
               </>
             )}, do hereby execute, publish, and declare this to be my last Will and Testament (<strong>"Will"</strong>), hereby revoking all prior Wills, codicils, or testamentary dispositions made by me at any time heretofore.
           </p>
@@ -108,7 +114,7 @@ export default function WillDocument({will,residualBene,onBack,onPrint,willDocRe
                 )}
               </>
             ):(
-              <p className="text-slate-500 italic">Not applicable — no Executor appointed for this Will.</p>
+              <p className="text-slate-500">Not applicable — no Executor appointed for this Will.</p>
             )}
           </WillSection>
 
@@ -122,7 +128,7 @@ export default function WillDocument({will,residualBene,onBack,onPrint,willDocRe
                 )}
               </>
             ):(
-              <p className="text-slate-500 italic">Not applicable — no minor beneficiaries designated or guardian not appointed.</p>
+              <p className="text-slate-500">Not applicable — no minor beneficiaries designated or guardian not appointed.</p>
             )}
           </WillSection>
 
@@ -210,7 +216,7 @@ export default function WillDocument({will,residualBene,onBack,onPrint,willDocRe
                     ))}
                   </div>
                 )}
-                {assets.length===0&&<p className="text-slate-400 italic">No specific assets were itemized.</p>}
+                {assets.length===0&&<p className="text-slate-400">No specific assets were itemized.</p>}
               </>
             )}
           </WillSection>
@@ -225,7 +231,7 @@ export default function WillDocument({will,residualBene,onBack,onPrint,willDocRe
             {will.specialInstructions?(
               <p className="text-justify whitespace-pre-line">{will.specialInstructions}</p>
             ):(
-              <p className="text-slate-400 italic">No special non-asset instructions provided.</p>
+              <p className="text-slate-400">No special non-asset instructions provided.</p>
             )}
           </WillSection>
 
@@ -237,19 +243,19 @@ export default function WillDocument({will,residualBene,onBack,onPrint,willDocRe
             <div className="mb-8">
               <div className="inline-block min-w-[280px]">
                 <div className="border-b-2 border-slate-800 pt-12 mb-1"/>
-                <p className="font-bold text-sm uppercase tracking-wide">{testator.fullName||"TESTATOR"}</p>
+                <p className="uppercase tracking-wide">{testator.fullName||"TESTATOR"}</p>
                 <p className="text-xs text-slate-500">Signature of the Testator</p>
               </div>
             </div>
 
-            <p className="text-justify mb-6 text-sm italic">SIGNED, acknowledged, and declared by the above-named Testator as their Last Will and Testament, in the presence of us, who in their presence, at their request, and in the presence of each other, have hereunto subscribed our names as attesting witnesses:</p>
+            <p className="text-justify mb-6">SIGNED, acknowledged, and declared by the above-named Testator as their Last Will and Testament, in the presence of us, who in their presence, at their request, and in the presence of each other, have hereunto subscribed our names as attesting witnesses:</p>
 
             {/* Witness signatures */}
             <div className="grid grid-cols-2 gap-10">
               {will.witnesses.map((w,i)=>(
                 <div key={i}>
                   <div className="border-b-2 border-slate-700 pt-10 mb-1"/>
-                  <p className="font-bold text-sm">{w.name||`Witness ${i+1}`}</p>
+                  <p>{w.name||`Witness ${i+1}`}</p>
                   <p className="text-xs text-slate-500 mt-0.5">{w.parentRelation} of {w.parentName||"_______"}, aged {w.age||"___"}, {w.maritalStatus}</p>
                   <p className="text-xs text-slate-500 mt-0.5">{w.address||"Address:"}</p>
                   <p className="text-xs text-slate-500 mt-0.5">Aadhaar No. {w.aadhaarNumber||"_______________________"}</p>

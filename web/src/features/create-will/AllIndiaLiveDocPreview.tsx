@@ -56,15 +56,19 @@ export default function AllIndiaLiveDocPreview({will}:{
   const letterDigitalMisc = hasDigitalMisc ? String.fromCharCode(nextLetter++) : "";
 
   const SectionSignatureLine = () => (
-    <p className="mb-3">Testator's Signature: ___________________ Witness 1: _________ Witness 2: _________</p>
+    <p className="mb-3">Testator's Signature: __________ Witness 1: ______ Witness 2: ______</p>
   );
 
   return(
     <div className="w-full max-w-[520px] rounded-xl shadow-2xl overflow-hidden border border-[#4F9D33]/20">
+      {/* Filled-in values (wrapped in <strong>) render at the same weight as
+          the surrounding body text, matching AllIndiaWillDocument.tsx — only
+          the "WILL" heading keeps bold. */}
+      <style>{`.aidp strong { font-weight: normal; }`}</style>
       <div className="bg-white border-b border-slate-200 px-4 py-2.5 flex items-center gap-2">
         <span className="text-brand text-xs font-semibold flex items-center gap-1.5"><Eye size={12}/>Live Preview — All India Will</span>
       </div>
-      <div className="bg-white p-7 text-[12.5px]" style={{fontFamily:"'Times New Roman',Times,serif",lineHeight:"1.15",color:"#14181B"}}>
+      <div className="aidp bg-white p-7 text-[12.5px]" style={{fontFamily:"'Times New Roman',Times,serif",lineHeight:"2",color:"#14181B"}}>
         <h1 className="text-center text-base font-bold tracking-widest uppercase mb-4">WILL</h1>
 
         <p className="text-justify mb-3">

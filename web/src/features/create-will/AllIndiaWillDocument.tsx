@@ -90,7 +90,7 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,w
   const letterDigitalMisc = hasDigitalMisc ? String.fromCharCode(nextLetter++) : "";
 
   const SigLine = ({className}:{className?: string})=>(
-    <p className={`pdf-sig-line mb-0 ${className||""}`}>Testator's Signature: ___________________ Witness 1: _________ Witness 2: _________</p>
+    <p className={`pdf-sig-line mb-0 ${className||""}`}>Testator's Signature: __________ Witness 1: ______ Witness 2: ______</p>
   );
 
   // Each logical section is its own print page (`break-after:page` on every
@@ -116,6 +116,11 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,w
         /* Standard 1" margins on all sides, per the required print spec. */
         @page { size: A4; margin: 25.4mm; }
         .will-print-page p { text-align: justify; }
+        /* Filled-in values (wrapped in <strong>) render at the same weight as
+           the surrounding body text — only actual section headings/titles
+           (h1/h2, the bold "A. Financial Assets:"-style labels) keep bold. */
+        .will-print-page strong { font-weight: normal; }
+        .will-print-page em { font-style: normal; }
         @media print {
           .no-print{display:none!important}
           body{margin:0;padding:0}
@@ -161,7 +166,7 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,w
       {/* Document */}
       <div className="py-10 px-5 flex justify-center" ref={willDocRef}>
         <div className="will-print-page bg-white shadow-2xl rounded-lg max-w-[780px] w-full p-14 print:p-10"
-          style={{fontFamily:"'Times New Roman',Times,Georgia,serif",fontSize:"12pt",lineHeight:"1.15",color:"#1a1a1a"}}>
+          style={{fontFamily:"'Times New Roman',Times,Georgia,serif",fontSize:"12pt",lineHeight:"2",color:"#1a1a1a"}}>
 
           <Page>
             <h1 className="text-center text-2xl font-bold tracking-widest uppercase mb-6">WILL</h1>

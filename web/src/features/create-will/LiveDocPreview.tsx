@@ -10,10 +10,14 @@ export default function LiveDocPreview({will,residualBene}:{
   const {testator,executor,beneficiaries,assets}=will;
   return(
     <div className="w-full max-w-[520px] rounded-xl shadow-2xl overflow-hidden border border-[#4F9D33]/20">
+      {/* Filled-in values (wrapped in <strong>/<em>) render at the same
+          weight/style as the surrounding body text, matching
+          WillDocument.tsx — only Clause titles keep bold. */}
+      <style>{`.ldp strong { font-weight: normal; } .ldp em { font-style: normal; }`}</style>
       <div className="bg-white border-b border-slate-200 px-4 py-2.5 flex items-center gap-2">
         <span className="text-brand text-xs font-semibold flex items-center gap-1.5"><Eye size={12}/>Live Preview — Will Document</span>
       </div>
-      <div className="bg-white p-7 text-[12.5px] leading-relaxed" style={{fontFamily:"'Source Serif 4','Times New Roman',serif",color:"#14181B"}}>
+      <div className="ldp bg-white p-7 text-[12.5px] leading-relaxed" style={{fontFamily:"'Source Serif 4','Times New Roman',serif",color:"#14181B"}}>
         <div className="text-center mb-4">
           <div className="text-[9px] tracking-[0.3em] uppercase text-slate-500 mb-0.5">Republic of India</div>
           <h1 className="text-base font-bold tracking-widest uppercase mb-0.5">Last Will and Testament</h1>

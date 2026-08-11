@@ -47,7 +47,7 @@ export default function GoanWillDocument({will,person,onBack,onPrint,willDocRef}
   const Page = ({children,isLast}:{children: ReactNode; isLast?: boolean})=>(
     <section className={`pdf-page${isLast?"":" pdf-page-break"}`}>
       <div>{children}</div>
-      {!isLast && <p className="pdf-sig-line mb-0 mt-4">Testator's Signature: ___________________ Witness 1: _________ Witness 2: _________</p>}
+      {!isLast && <p className="pdf-sig-line mb-0 mt-4">Testator's Signature: __________ Witness 1: ______ Witness 2: ______</p>}
     </section>
   );
 
@@ -59,6 +59,11 @@ export default function GoanWillDocument({will,person,onBack,onPrint,willDocRef}
            left margin is standard for Goan notarial documents, matching
            GOAN WILL FINAL.pdf / GOAN DEED OF CONSENT.pdf). */
         @page { size: A4; margin: 3cm 1cm 3cm 5cm; }
+        /* Filled-in values (wrapped in <strong>) render at the same weight as
+           the surrounding body text — only actual section headings/titles
+           (h1/h2, the bold "A. Financial Assets:"-style labels) keep bold. */
+        .will-print-page strong { font-weight: normal; }
+        .will-print-page em { font-style: normal; }
         @media print {
           .no-print{display:none!important}
           body{margin:0;padding:0}

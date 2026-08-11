@@ -32,8 +32,8 @@ export default function GoanDeedDocument({will,onBack,onPrint,willDocRef}:{
       <div>{children}</div>
       {!isLast && (
         <p className="pdf-sig-line mb-0 mt-4">
-          Testator Signature: ___________________ Witness 1: _________ Witness 2: _________<br/>
-          Testatrix Signature: ___________________ Witness 1: _________ Witness 2: _________
+          Testator Signature: __________ Witness 1: ______ Witness 2: ______<br/>
+          Testatrix Signature: __________ Witness 1: ______ Witness 2: ______
         </p>
       )}
     </section>
@@ -46,6 +46,11 @@ export default function GoanDeedDocument({will,onBack,onPrint,willDocRef}:{
            spacing, Times New Roman, Top 3cm / Right 1cm / Bottom 3cm /
            Left 5cm margins, matching GOAN DEED OF CONSENT.pdf. */
         @page { size: A4; margin: 3cm 1cm 3cm 5cm; }
+        /* Filled-in values (wrapped in <strong>) render at the same weight as
+           the surrounding body text — only actual section headings/titles
+           keep bold. */
+        .will-print-page strong { font-weight: normal; }
+        .will-print-page em { font-style: normal; }
         @media print {
           .no-print{display:none!important}
           body{margin:0;padding:0}

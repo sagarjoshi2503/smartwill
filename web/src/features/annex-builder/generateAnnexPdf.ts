@@ -44,7 +44,6 @@ export async function generateAnnexPdf(state: AnnexState, testatorName: string):
   const form = pdfDoc.getForm();
   const fontR = await pdfDoc.embedFont(StandardFonts.Helvetica);
   const fontB = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
-  const fontI = await pdfDoc.embedFont(StandardFonts.HelveticaOblique);
 
   const PAGE_W = 595.28, PAGE_H = 841.89;
   const MARGIN = 50;
@@ -112,8 +111,8 @@ export async function generateAnnexPdf(state: AnnexState, testatorName: string):
     y -= barH + 5;
 
     if (section.subtitle && !continued) {
-      const wrapped = wrapText(section.subtitle, fontI, 8, CONTENT_W - 4);
-      wrapped.forEach((line, i) => page.drawText(line, { x: MARGIN + 2, y: y - 7 - i * 9.5, size: 8, font: fontI, color: COLORS.inkFaint }));
+      const wrapped = wrapText(section.subtitle, fontR, 8, CONTENT_W - 4);
+      wrapped.forEach((line, i) => page.drawText(line, { x: MARGIN + 2, y: y - 7 - i * 9.5, size: 8, font: fontR, color: COLORS.inkFaint }));
       y -= wrapped.length * 9.5 + 6;
     }
 
@@ -146,7 +145,7 @@ export async function generateAnnexPdf(state: AnnexState, testatorName: string):
     const nomineeField = section.fields.find(f => f.type === "radio");
     const nomineeVal = nomineeField ? (row[nomineeField.key] || "—") : "—";
 
-    const mainLines = wrapText(mainVal, fontB, 9, colWidths[0] - 6);
+    const mainLines = wrapText(mainVal, fontR, 9, colWidths[0] - 6);
     const detailLines = wrapText(detailVal, fontR, 8, colWidths[1] - 6);
     const textLines = Math.max(mainLines.length, detailLines.length, 1);
     const rowH = Math.max(28, textLines * 11 + 14);
@@ -157,11 +156,11 @@ export async function generateAnnexPdf(state: AnnexState, testatorName: string):
     drawBlankBox(colX(3), colWidths[3], `${section.id}_blank0`);
     drawBlankBox(colX(4), colWidths[4], `${section.id}_blank1`);
 
-    mainLines.forEach((line, i) => page.drawText(line, { x: colX(0), y: rowY - 12 - i * 11, size: 9, font: fontB, color: COLORS.ink }));
+    mainLines.forEach((line, i) => page.drawText(line, { x: colX(0), y: rowY - 12 - i * 11, size: 9, font: fontR, color: COLORS.ink }));
     detailLines.forEach((line, i) => page.drawText(line, { x: colX(1), y: rowY - 12 - i * 11, size: 8, font: fontR, color: COLORS.inkSoft }));
 
     const nomineeColor = nomineeVal === "Yes" ? COLORS.green : COLORS.inkFaint;
-    page.drawText(nomineeVal, { x: colX(2), y: rowY - 12, size: 8.3, font: fontB, color: nomineeColor });
+    page.drawText(nomineeVal, { x: colX(2), y: rowY - 12, size: 8.3, font: fontR, color: nomineeColor });
 
     y = rowY - rowH;
     page.drawLine({ start: { x: MARGIN, y }, end: { x: MARGIN + CONTENT_W, y }, thickness: 0.5, color: COLORS.border });
@@ -181,9 +180,9 @@ export async function generateAnnexPdf(state: AnnexState, testatorName: string):
 
   if (!anyData) {
     ensure(40);
-    page.drawText("No entries were filled in on the web form. Blank category sheets follow;", { x: MARGIN, y: y - 11, size: 11, font: fontI, color: COLORS.inkFaint });
+    page.drawText("No entries were filled in on the web form. Blank category sheets follow;", { x: MARGIN, y: y - 11, size: 11, font: fontR, color: COLORS.inkFaint });
     y -= 14;
-    page.drawText("fill in details directly by hand as needed.", { x: MARGIN, y: y - 11, size: 11, font: fontI, color: COLORS.inkFaint });
+    page.drawText("fill in details directly by hand as needed.", { x: MARGIN, y: y - 11, size: 11, font: fontR, color: COLORS.inkFaint });
     y -= 20;
   }
 
