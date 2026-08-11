@@ -18,7 +18,7 @@ export default function WillTypeSelectView({onSelect,onBack}:{
         <div className="w-full max-w-lg apv-card shadow-2xl">
           <div className="bg-gradient-to-r from-[#4F9D33]/15 to-[#4F9D33]/10 border-b border-slate-200 p-5 rounded-t-3xl flex gap-4">
             <FileText size={22} className="text-brand shrink-0 mt-0.5"/>
-            <div><h3 className="text-slate-900 font-bold text-lg serif">Select Will Type</h3><p className="text-slate-600 text-sm">Choose the format that applies to you</p></div>
+            <div><h3 className="text-slate-900 font-bold text-lg serif">Select Your Document Type</h3><p className="text-slate-600 text-sm">Choose the legal document that fits your current estate planning requirements.</p></div>
           </div>
           <div className="p-6">
             <div className="space-y-3 mb-6">

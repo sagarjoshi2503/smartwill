@@ -11,8 +11,8 @@ export interface WillTypeOption {
 
 export const WILL_TYPE_OPTIONS: WillTypeOption[] = [
   { id: "allindia", label: "All India (Non-Goan) Will", description: "For Testators Governed under the Indian Succession Act, 1925", icon: <FileText size={18} /> },
-  { id: "goan", label: "Goan Will", description: "For testators governed by the Goa Civil Code / Portuguese Civil Code succession rules.", icon: <Landmark size={18} /> },
-  { id: "successiondeed", label: "Succession Deed", description: "A deed of succession rather than a testamentary Will.", icon: <Scroll size={18} /> },
+  { id: "goan", label: "Will For Goans", description: "For Testators governed by the unique succession rules of the Uniform Civil Code/Goa Succession Rules 2012.", icon: <Landmark size={18} /> },
+  { id: "successiondeed", label: "Succession Deed", description: "For individuals governed by the Uniform Civil Code/Goa Succession Rules 2012 seeking official proof of heirship u/s 346A.", icon: <Scroll size={18} /> },
   { id: "customwill", label: "Custom Will", description: "A bespoke format for requirements not covered by the standard templates.", icon: <Sparkles size={18} /> },
 ];
 

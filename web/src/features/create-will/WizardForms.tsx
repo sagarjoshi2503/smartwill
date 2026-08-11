@@ -319,7 +319,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
       {/* ── STEP 1: WILL TYPE ────────────────────────────────── */}
       {step===1&&!hideWillTypeStep&&(
         <div className="space-y-4">
-          <StepHeader icon={<FileText size={17}/>} title="Select Will Type" sub="Choose the format that applies to you"/>
+          <StepHeader icon={<FileText size={17}/>} title="Select Your Document Type" sub="Choose the legal document that fits your current estate planning requirements."/>
           <div className="space-y-3">
             {WILL_TYPE_OPTIONS.map(opt=>(
               <label key={opt.id}
