@@ -29,8 +29,8 @@ export default function GoanDeedDocument({will,onBack,onPrint,willDocRef}:{
 
   const Page = ({children,isLast}:{children: ReactNode; isLast?: boolean})=>(
     <section className={`pdf-page${isLast?"":" pdf-page-break"}`}>
-      <div>{children}</div>
-      <p className="pdf-sig-line mb-0 mt-4">
+      <div className="pdf-page-content">{children}</div>
+      <p className="pdf-sig-line pdf-sig-line-footer mb-0">
         Testator Signature: __________ Witness 1: ______ Witness 2: ______<br/>
         Testatrix Signature: __________ Witness 1: ______ Witness 2: ______
       </p>
@@ -56,14 +56,19 @@ export default function GoanDeedDocument({will,onBack,onPrint,willDocRef}:{
           /* Must not exceed the printable content height (A4 297mm minus
              the 3cm top + 3cm bottom margins = 237mm) — a taller min-height
              forces every page to overflow onto a near-blank continuation
-             page. Chrome's print engine doesn't reliably repeat a
-             position:fixed footer across pages, so page-per-section +
-             space-between is the only reliable way to get the signature
-             line on every physical page — a short section still consuming
-             a full page is a confirmed, deliberate tradeoff. */
-          .pdf-page{min-height:calc(297mm - 3cm - 3cm);display:flex;flex-direction:column;justify-content:space-between}
+             page. Chrome's print engine (a) doesn't reliably repeat a
+             position:fixed footer across pages, and (b) has known bugs
+             where flexbox min-height/justify-content:space-between silently
+             fails to stretch during print pagination on some pages but not
+             others — position:absolute against a sized position:relative
+             ancestor doesn't depend on flex layout and prints reliably. A
+             short section still consuming a full page is a confirmed,
+             deliberate tradeoff. */
+          .pdf-page{min-height:calc(297mm - 3cm - 3cm);position:relative}
+          .pdf-page-content{padding-bottom:1.6em}
           .pdf-page-break{break-after:page}
-          .pdf-sig-line{break-inside:avoid;break-before:avoid}
+          .pdf-sig-line{break-inside:avoid}
+          .pdf-sig-line-footer{position:absolute;bottom:0;left:0;right:0;break-before:avoid}
         }
       `}</style>
       <div className="no-print sticky top-0 z-50 bg-white border-b border-slate-200 px-5 py-3 flex items-center justify-between">

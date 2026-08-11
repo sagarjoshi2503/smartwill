@@ -98,18 +98,21 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,w
   );
 
   // Each logical section is its own print page (`break-after:page` on every
-  // page but the last), with this attestation line repeated at the bottom
-  // of every page (including the last) via a pinned min-height/flex layout
-  // — Chrome's print engine doesn't reliably repeat a `position:fixed`
-  // element across pages, so a page-per-section + space-between footer is
-  // the only reliable way to get the signature line on every physical page.
-  // This does mean a short section still consumes a full physical page
-  // (trading page-count efficiency for guaranteed footer placement) — a
-  // deliberate, confirmed tradeoff, not an oversight.
+  // page but the last), with this attestation line pinned to the bottom of
+  // every page (including the last) via `position:absolute;bottom:0` inside
+  // a `position:relative;min-height:<one page>` section. Chrome's print
+  // engine (a) doesn't reliably repeat a `position:fixed` element across
+  // pages, and (b) has known bugs where a flexbox min-height/
+  // justify-content:space-between layout silently fails to stretch during
+  // print pagination on some pages but not others — absolute positioning
+  // against a sized relative ancestor doesn't depend on flex layout and
+  // prints reliably. This does mean a short section still consumes a full
+  // physical page (trading page-count efficiency for guaranteed footer
+  // placement) — a deliberate, confirmed tradeoff, not an oversight.
   const Page = ({children,isLast}:{children: ReactNode; isLast?: boolean})=>(
     <section className={`pdf-page${isLast?"":" pdf-page-break"}`}>
-      <div>{children}</div>
-      <SigLine className="pdf-sig-line-footer mt-4"/>
+      <div className="pdf-page-content">{children}</div>
+      <SigLine className="pdf-sig-line-footer"/>
     </section>
   );
 
@@ -132,17 +135,18 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,w
           /* Must not exceed the printable content height (A4 297mm minus the
              25.4mm top + bottom margins = 246.2mm) — a taller min-height
              forces every page to overflow onto a near-blank continuation
-             page. flex + space-between pins the footer signature line to
-             the bottom of the page instead of wherever the content happens
-             to end. */
-          .pdf-page{min-height:calc(297mm - 25.4mm - 25.4mm);display:flex;flex-direction:column;justify-content:space-between}
+             page. position:relative + the footer's position:absolute pins
+             the signature line to the bottom of the page instead of
+             wherever the content happens to end. */
+          .pdf-page{min-height:calc(297mm - 25.4mm - 25.4mm);position:relative}
+          .pdf-page-content{padding-bottom:1.6em}
           .pdf-page-break{break-after:page}
           /* Belt-and-braces: even if a page's own content still overflows,
              never let the footer signature line get separated from what
              precedes it — the pair moves to the next page together instead
              of the line appearing alone. */
           .pdf-sig-line{break-inside:avoid}
-          .pdf-sig-line-footer{break-before:avoid}
+          .pdf-sig-line-footer{position:absolute;bottom:0;left:0;right:0;break-before:avoid}
         }
       `}</style>
       {/* Top bar */}
