@@ -72,8 +72,11 @@ export default function GoanWillDocument({will,person,onBack,onPrint,willDocRef}
           /* Must not exceed the printable content height (A4 297mm minus
              the 3cm top + 3cm bottom margins = 237mm) — a taller min-height
              forces every page to overflow onto a near-blank continuation
-             page, which is where the extra blank pages in generated PDFs
-             came from. */
+             page. Chrome's print engine doesn't reliably repeat a
+             position:fixed footer across pages, so page-per-section +
+             space-between is the only reliable way to get the signature
+             line on every physical page — a short section still consuming
+             a full page is a confirmed, deliberate tradeoff. */
           .pdf-page{min-height:calc(297mm - 3cm - 3cm);display:flex;flex-direction:column;justify-content:space-between}
           .pdf-page-break{break-after:page}
           .pdf-sig-line{break-inside:avoid;break-before:avoid}

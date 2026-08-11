@@ -89,20 +89,23 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,w
   const letterPersonal = hasPersonal ? String.fromCharCode(nextLetter++) : "";
   const letterDigitalMisc = hasDigitalMisc ? String.fromCharCode(nextLetter++) : "";
 
+  const showExecutor = executor.wantsExecutor;
+  const showGuardian = guardian.hasMinors;
+  const noTrailingPages = !showExecutor && !showGuardian;
+
   const SigLine = ({className}:{className?: string})=>(
     <p className={`pdf-sig-line mb-0 ${className||""}`}>Testator's Signature: __________ Witness 1: ______ Witness 2: ______</p>
   );
 
   // Each logical section is its own print page (`break-after:page` on every
-  // page but the last) with this attestation line repeated at the bottom of
-  // every page except the last (nothing follows it there) — never at the
-  // top of a page. Pages are left to size to their actual content instead
-  // of being pinned to a fixed page-height — a fixed-height/space-between
-  // layout was tried, but it forced every section to consume a full
-  // physical page even when its content was much shorter, producing large
-  // trailing blank space and inflating the document by an extra page. The
-  // `pdf-page` rules only apply under @media print — on screen this still
-  // reads as one continuous scrollable document.
+  // page but the last), with this attestation line repeated at the bottom
+  // of every page (including the last) via a pinned min-height/flex layout
+  // — Chrome's print engine doesn't reliably repeat a `position:fixed`
+  // element across pages, so a page-per-section + space-between footer is
+  // the only reliable way to get the signature line on every physical page.
+  // This does mean a short section still consumes a full physical page
+  // (trading page-count efficiency for guaranteed footer placement) — a
+  // deliberate, confirmed tradeoff, not an oversight.
   const Page = ({children,isLast}:{children: ReactNode; isLast?: boolean})=>(
     <section className={`pdf-page${isLast?"":" pdf-page-break"}`}>
       <div>{children}</div>
@@ -129,11 +132,9 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,w
           /* Must not exceed the printable content height (A4 297mm minus the
              25.4mm top + bottom margins = 246.2mm) — a taller min-height
              forces every page to overflow onto a near-blank continuation
-             page, which is where extra blank pages in generated PDFs came
-             from (see the same pattern/warning in GoanWillDocument.tsx).
-             flex + space-between pins the footer signature line to the
-             bottom of the page instead of wherever the content happens to
-             end. */
+             page. flex + space-between pins the footer signature line to
+             the bottom of the page instead of wherever the content happens
+             to end. */
           .pdf-page{min-height:calc(297mm - 25.4mm - 25.4mm);display:flex;flex-direction:column;justify-content:space-between}
           .pdf-page-break{break-after:page}
           /* Belt-and-braces: even if a page's own content still overflows,
@@ -231,12 +232,6 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,w
           </Page>
           )}
 
-          {(() => {
-            const showExecutor = executor.wantsExecutor;
-            const showGuardian = guardian.hasMinors;
-            const noTrailingPages = !showExecutor && !showGuardian;
-            return(
-          <>
           <Page isLast={noTrailingPages}>
             <p className="text-justify mb-5">
               I hereby declare, direct, and devise that all the Rest and Residue of my estate, including any property or assets, both movable and immovable, which I may acquire after the execution of this Will, or which has been inadvertently omitted from this document, shall be given entirely to {allIndiaResidue.length>1&&"the following, in equal shares: "}
@@ -332,9 +327,6 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,w
               </Page>
             </>
           )}
-          </>
-            );
-          })()}
         </div>
       </div>
     </div>
