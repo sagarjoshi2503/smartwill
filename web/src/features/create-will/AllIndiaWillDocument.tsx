@@ -106,7 +106,7 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,w
   const Page = ({children,isLast}:{children: ReactNode; isLast?: boolean})=>(
     <section className={`pdf-page${isLast?"":" pdf-page-break"}`}>
       <div>{children}</div>
-      {!isLast && <SigLine className="pdf-sig-line-footer mt-4"/>}
+      <SigLine className="pdf-sig-line-footer mt-4"/>
     </section>
   );
 

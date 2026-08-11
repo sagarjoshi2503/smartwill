@@ -47,7 +47,7 @@ export default function GoanWillDocument({will,person,onBack,onPrint,willDocRef}
   const Page = ({children,isLast}:{children: ReactNode; isLast?: boolean})=>(
     <section className={`pdf-page${isLast?"":" pdf-page-break"}`}>
       <div>{children}</div>
-      {!isLast && <p className="pdf-sig-line mb-0 mt-4">Testator's Signature: __________ Witness 1: ______ Witness 2: ______</p>}
+      <p className="pdf-sig-line mb-0 mt-4">Testator's Signature: __________ Witness 1: ______ Witness 2: ______</p>
     </section>
   );
 
