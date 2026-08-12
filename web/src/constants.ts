@@ -156,3 +156,11 @@ export const MSG_CHAT_UNAVAILABLE = "Forward Legacy Assistant isn't available ri
 export const BTN_CONTACT_SUPPORT = "Contact Support";
 export const PH_CHAT_QUESTION = "Ask a question…";
 export const ARIA_OPEN_CHAT = "Open chat assistant";
+// Mirrors chatbot/constants.py's RETRIEVAL_MODE_RAG/RETRIEVAL_MODE_MCP
+// values — the backend sends one of these two literals in
+// ChatResponse.retrieval_mode.
+export const RETRIEVAL_MODE_RAG = "rag";
+export const RETRIEVAL_MODE_MCP = "mcp";
+export const LBL_RETRIEVAL_MODE_RAG = "Smart search (RAG)";
+export const LBL_RETRIEVAL_MODE_MCP = "Direct lookup (MCP)";
+export const ARIA_CLEAR_CHAT = "Clear chat messages";

@@ -73,6 +73,11 @@ class ChatResponse(BaseModel):
     # the frontend renders a distinct "not available" state with a Contact
     # Support option instead of treating this like a normal reply.
     unavailable: bool = False
+    # Which retrieval path ("mcp" or "rag") the "use-rag-or-mcp" flag
+    # selected for this request — lets the frontend show the user which
+    # search mode answered them. Always set, even on the unavailable/
+    # incomplete paths, since the flag is read before anything can fail.
+    retrieval_mode: str = DEFAULT_RETRIEVAL_MODE
 
 
 async def _execute_tool(
@@ -136,11 +141,11 @@ async def chat(body: ChatRequest) -> ChatResponse:
                 )
 
                 if response.stop_reason == STOP_REASON_REFUSAL:
-                    return ChatResponse(reply=REFUSAL_REPLY)
+                    return ChatResponse(reply=REFUSAL_REPLY, retrieval_mode=retrieval_mode)
 
                 if response.stop_reason != STOP_REASON_TOOL_USE:
                     text = "".join(b.text for b in response.content if b.type == "text")
-                    return ChatResponse(reply=text)
+                    return ChatResponse(reply=text, retrieval_mode=retrieval_mode)
 
                 messages.append({"role": MSG_ROLE_ASSISTANT, "content": response.content})
 
@@ -161,9 +166,9 @@ async def chat(body: ChatRequest) -> ChatResponse:
         # _execute_tool without raising) as well as any Claude API failure.
         # Either way, the assistant can't do anything useful right now.
         logger.warning("Chat request failed", exc_info=True)
-        return ChatResponse(reply=UNAVAILABLE_REPLY, unavailable=True)
+        return ChatResponse(reply=UNAVAILABLE_REPLY, unavailable=True, retrieval_mode=retrieval_mode)
 
-    return ChatResponse(reply=INCOMPLETE_REPLY)
+    return ChatResponse(reply=INCOMPLETE_REPLY, retrieval_mode=retrieval_mode)
 
 
 if __name__ == "__main__":

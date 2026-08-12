@@ -1,13 +1,14 @@
 import { useState } from "react";
-import { MessageCircle, X, Send, LifeBuoy } from "lucide-react";
+import { MessageCircle, X, Send, LifeBuoy, Trash2 } from "lucide-react";
 import { chatbotUrl } from "../../utils/chatbotBase";
 import { getAuthToken } from "../../utils/auth";
 import {
-  ARIA_OPEN_CHAT, BTN_CONTACT_SUPPORT, CHATBOT_CHAT, LBL_CHAT_ASSISTANT_TITLE, MSG_CHAT_EMPTY_STATE,
-  MSG_CHAT_THINKING, MSG_CHAT_UNAVAILABLE, PH_CHAT_QUESTION, ROLE_ADMIN, ROLE_TESTATOR,
+  ARIA_CLEAR_CHAT, ARIA_OPEN_CHAT, BTN_CONTACT_SUPPORT, CHATBOT_CHAT, LBL_CHAT_ASSISTANT_TITLE,
+  LBL_RETRIEVAL_MODE_MCP, LBL_RETRIEVAL_MODE_RAG, MSG_CHAT_EMPTY_STATE, MSG_CHAT_THINKING, MSG_CHAT_UNAVAILABLE,
+  PH_CHAT_QUESTION, RETRIEVAL_MODE_RAG, ROLE_ADMIN, ROLE_TESTATOR,
 } from "../../constants";
 
-type ChatMessage = { role: "user" | "assistant"; content: string };
+type ChatMessage = { role: "user" | "assistant"; content: string; retrievalMode?: string };
 
 // Whichever role's token is currently stored determines what the assistant
 // can look up on the user's behalf (see chatbot/tools.py's role whitelist) —
@@ -58,7 +59,7 @@ export default function ChatWidget({ onContactSupport }: { onContactSupport: () 
         return;
       }
       setUnavailable(!!data.unavailable);
-      setMessages(m => [...m, { role: "assistant", content: data.reply }]);
+      setMessages(m => [...m, { role: "assistant", content: data.reply, retrievalMode: data.retrieval_mode }]);
     } catch {
       setUnavailable(true);
     } finally {
@@ -71,15 +72,32 @@ export default function ChatWidget({ onContactSupport }: { onContactSupport: () 
     onContactSupport();
   };
 
+  const handleClearChat = () => {
+    setMessages([]);
+    setUnavailable(false);
+  };
+
   return (
     <div className="fixed bottom-5 right-5 z-[100]">
       {open && (
         <div className="mb-3 w-[340px] max-w-[calc(100vw-2.5rem)] h-[460px] apv-card flex flex-col overflow-hidden shadow-2xl">
           <div className="flex-none flex items-center justify-between px-4 py-3 border-b border-slate-200 bg-white/95">
             <span className="text-slate-900 font-semibold text-sm serif">{LBL_CHAT_ASSISTANT_TITLE}</span>
-            <button onClick={() => setOpen(false)} className="text-slate-500 hover:text-slate-900 transition-colors">
-              <X size={16} />
-            </button>
+            <div className="flex items-center gap-2.5">
+              {messages.length > 0 && (
+                <button
+                  onClick={handleClearChat}
+                  className="text-slate-500 hover:text-slate-900 transition-colors"
+                  aria-label={ARIA_CLEAR_CHAT}
+                  title={ARIA_CLEAR_CHAT}
+                >
+                  <Trash2 size={14} />
+                </button>
+              )}
+              <button onClick={() => setOpen(false)} className="text-slate-500 hover:text-slate-900 transition-colors">
+                <X size={16} />
+              </button>
+            </div>
           </div>
 
           <div className="flex-1 overflow-y-auto px-4 py-3 space-y-2.5 bg-slate-50">
@@ -87,7 +105,7 @@ export default function ChatWidget({ onContactSupport }: { onContactSupport: () 
               <p className="text-slate-500 text-xs">{MSG_CHAT_EMPTY_STATE}</p>
             )}
             {messages.map((m, i) => (
-              <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
+              <div key={i} className={`flex flex-col ${m.role === "user" ? "items-end" : "items-start"}`}>
                 <div
                   className={`max-w-[85%] rounded-2xl px-3 py-2 text-xs whitespace-pre-wrap ${
                     m.role === "user"
@@ -97,6 +115,11 @@ export default function ChatWidget({ onContactSupport }: { onContactSupport: () 
                 >
                   {m.content}
                 </div>
+                {m.role === "assistant" && m.retrievalMode && (
+                  <span className="mt-1 text-[10px] text-slate-400">
+                    {m.retrievalMode === RETRIEVAL_MODE_RAG ? LBL_RETRIEVAL_MODE_RAG : LBL_RETRIEVAL_MODE_MCP}
+                  </span>
+                )}
               </div>
             ))}
             {sending && <p className="text-slate-500 text-xs">{MSG_CHAT_THINKING}</p>}
