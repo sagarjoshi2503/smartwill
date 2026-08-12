@@ -293,7 +293,7 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,w
             <p className="mb-1">Place: <strong>{testator.signPlace||blank}</strong></p>
             <p className="mb-8">Date: <strong>{signDateDDMMYYYY}</strong></p>
 
-            <h2 className="text-lg uppercase mb-8">Witnesses</h2>
+            <h2 className="text-lg uppercase mb-1">Witnesses</h2>
             {witnesses.map((w,i)=>(
               <div key={i} className="mb-10">
                 <p className="mb-1">{i+1})</p>

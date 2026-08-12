@@ -225,7 +225,7 @@ export default function GoanWillDocument({will,person,onBack,onPrint,willDocRef}
             <p className="mb-1">Place: <strong>{blank}</strong></p>
             <p className="mb-8">Date: <strong>{blank}</strong></p>
 
-            <h2 className="text-lg uppercase mb-8">Witnesses</h2>
+            <h2 className="text-lg uppercase mb-1">Witnesses</h2>
             {goanWitnesses.map((w,i)=>(
               <div key={i} className="mb-10">
                 <p className="mb-1">{i+1})</p>
