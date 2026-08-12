@@ -27,13 +27,19 @@ export default function GoanDeedDocument({will,onBack,onPrint,willDocRef}:{
     return () => { document.title = original; };
   }, []);
 
-  const Page = ({children,isLast}:{children: ReactNode; isLast?: boolean})=>(
+  // The footer's `position:absolute;bottom:0` (see print CSS below) never
+  // reserves space in flow, so it renders on top of a page's own trailing
+  // content instead of below it — only safe on pages that don't already end
+  // with their own real signature block. `noFooterSig` opts a page out.
+  const Page = ({children,isLast,noFooterSig}:{children: ReactNode; isLast?: boolean; noFooterSig?: boolean})=>(
     <section className={`pdf-page${isLast?"":" pdf-page-break"}`}>
       <div className="pdf-page-content">{children}</div>
-      <p className="pdf-sig-line pdf-sig-line-footer mb-0">
-        Testator Signature: __________ Witness 1: ______ Witness 2: ______<br/>
-        Testatrix Signature: __________ Witness 1: ______ Witness 2: ______
-      </p>
+      {!noFooterSig && (
+        <p className="pdf-sig-line pdf-sig-line-footer mb-0">
+          Testator Signature: __________ Witness 1: ______ Witness 2: ______<br/>
+          Testatrix Signature: __________ Witness 1: ______ Witness 2: ______
+        </p>
+      )}
     </section>
   );
 
@@ -118,7 +124,7 @@ export default function GoanDeedDocument({will,onBack,onPrint,willDocRef}:{
             <p className="text-justify mb-8">This deed bears Notarial Stamp of Rupees <strong>{blank}</strong> only.</p>
           </Page>
 
-          <Page isLast>
+          <Page isLast noFooterSig>
             <div className="mb-6">
               <div className="inline-block min-w-[280px]">
                 <div className="border-b-2 border-slate-800 pt-10 mb-1"/>

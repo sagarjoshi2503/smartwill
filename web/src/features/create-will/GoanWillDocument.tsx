@@ -44,10 +44,14 @@ export default function GoanWillDocument({will,person,onBack,onPrint,willDocRef}
     ));
   };
 
-  const Page = ({children,isLast}:{children: ReactNode; isLast?: boolean})=>(
+  // The footer's `position:absolute;bottom:0` (see print CSS below) never
+  // reserves space in flow, so it renders on top of a page's own trailing
+  // content instead of below it — only safe on pages that don't already end
+  // with their own real signature block. `noFooterSig` opts a page out.
+  const Page = ({children,isLast,noFooterSig}:{children: ReactNode; isLast?: boolean; noFooterSig?: boolean})=>(
     <section className={`pdf-page${isLast?"":" pdf-page-break"}`}>
       <div className="pdf-page-content">{children}</div>
-      <p className="pdf-sig-line pdf-sig-line-footer mb-0">Testator's Signature: __________ Witness 1: ______ Witness 2: ______</p>
+      {!noFooterSig && <p className="pdf-sig-line pdf-sig-line-footer mb-0">Testator's Signature: __________ Witness 1: ______ Witness 2: ______</p>}
     </section>
   );
 
@@ -179,7 +183,7 @@ export default function GoanWillDocument({will,person,onBack,onPrint,willDocRef}
             </ol>
           </Page>
 
-          <Page isLast>
+          <Page isLast noFooterSig>
             <p className="text-justify mb-5">
               This Will was read out loudly by me, the Notary Ex-Officio. I declare that all legal formalities were complied with within a continuous process. It will bear a notarial stamp of <strong>{blank}</strong>.
             </p>

@@ -109,10 +109,18 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,w
   // prints reliably. This does mean a short section still consumes a full
   // physical page (trading page-count efficiency for guaranteed footer
   // placement) — a deliberate, confirmed tradeoff, not an oversight.
-  const Page = ({children,isLast}:{children: ReactNode; isLast?: boolean})=>(
+  // The footer SigLine is `position:absolute;bottom:0` (see the print CSS
+  // below), which never reserves space in normal flow — so on a page whose
+  // own content already ends with its own real signature block (the
+  // residue/witnesses page, and every Executor/Guardian appointment/consent
+  // page), that trailing content runs right up to the bottom of the page
+  // and the generic footer renders directly on top of it. Only pages with
+  // no signature content of their own need the generic per-page attestation
+  // line — `noFooterSig` opts a page out of it.
+  const Page = ({children,isLast,noFooterSig}:{children: ReactNode; isLast?: boolean; noFooterSig?: boolean})=>(
     <section className={`pdf-page${isLast?"":" pdf-page-break"}`}>
       <div className="pdf-page-content">{children}</div>
-      <SigLine className="pdf-sig-line-footer"/>
+      {!noFooterSig && <SigLine className="pdf-sig-line-footer"/>}
     </section>
   );
 
@@ -240,7 +248,7 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,w
           </Page>
           )}
 
-          <Page isLast={noTrailingPages}>
+          <Page isLast={noTrailingPages} noFooterSig>
             <p className="text-justify mb-5">
               I hereby declare, direct, and devise that all the Rest and Residue of my estate, including any property or assets, both movable and immovable, which I may acquire after the execution of this Will, or which has been inadvertently omitted from this document, shall be given entirely to {allIndiaResidue.length>1&&"the following, in equal shares: "}
               {allIndiaResidue.map((entry,i)=>(
@@ -278,7 +286,7 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,w
 
           {showExecutor && (
             <>
-              <Page>
+              <Page noFooterSig>
                 <h1 className="text-center text-lg font-bold uppercase mb-6">Appointment of Executor for this Will</h1>
                 {executor.executorType==="org" ? (
                   <p className="text-justify mb-5">
@@ -298,7 +306,7 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,w
                 <p className="mb-1">Name of the Testator: <strong>{testator.fullName||blank}</strong></p>
                 <p>Signature of the Testator: {blank}</p>
               </Page>
-              <Page isLast={!showGuardian}>
+              <Page isLast={!showGuardian} noFooterSig>
                 <h1 className="text-center text-lg font-bold uppercase mb-6">Executor's Consent</h1>
                 <p className="text-justify mb-5">
                   I, <strong>{blank}</strong>, being {executor.executorType==="org"?"the Authorized Representative of the Organization mentioned":"the Executor named above"}, have read the contents of the Will and affirm my consent to act as the Executor of this Will and implement the same in the best possible manner.
@@ -312,7 +320,7 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,w
 
           {showGuardian && (
             <>
-              <Page>
+              <Page noFooterSig>
                 <h1 className="text-center text-lg font-bold uppercase mb-6">Appointment of Guardian for Minor Beneficiary</h1>
                 <p className="text-justify mb-5">
                   I appoint <strong>{guardian.name||blank}</strong>, having Relation to Testator: <strong>{guardian.relation||blank}</strong>, with Address: <strong>{guardian.address||blank}</strong>, bearing {guardian.idType} Number: <strong>{guardian.idNumber||blank}</strong>.
@@ -324,7 +332,7 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,w
                 <p className="mb-1">Name of the Testator: <strong>{testator.fullName||blank}</strong></p>
                 <p>Signature of the Testator: {blank}</p>
               </Page>
-              <Page isLast>
+              <Page isLast noFooterSig>
                 <h1 className="text-center text-lg font-bold uppercase mb-6">Guardian's Consent</h1>
                 <p className="text-justify mb-5">
                   I, <strong>{blank}</strong>, being the Guardian mentioned, have read the contents of the Will relating to the minor beneficiaries and affirm my consent to act as the Guardian and manage their inheritance in the best possible manner until they attain majority.
