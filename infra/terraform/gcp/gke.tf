@@ -72,9 +72,12 @@ resource "google_container_node_pool" "default" {
   }
 }
 
-# --- Workload Identity binding: lets a k8s ServiceAccount
-# (smartwill-api/smartwill-secrets-reader, created in infra/k8s/) impersonate
-# this GCP service account to read Secret Manager. ---
+# --- Workload Identity binding: lets a k8s ServiceAccount named
+# smartwill-secrets-reader, created in each secret-consuming service's own
+# namespace (infra/k8s/<service>/), impersonate this GCP service account to
+# read Secret Manager. Only the services that actually mount secrets need
+# this — mirrors which of infra/k8s/*/ has a secret-provider-class.yaml
+# (api, chatbot, flags, rag; web and mcp don't need any secret). ---
 resource "google_service_account" "secrets_reader" {
   account_id   = "${var.gke_cluster_name}-secrets-reader"
   display_name = "${var.gke_cluster_name} Secret Manager reader (Workload Identity)"
@@ -87,7 +90,8 @@ resource "google_project_iam_member" "secrets_reader_access" {
 }
 
 resource "google_service_account_iam_member" "secrets_reader_workload_identity" {
+  for_each           = toset(["smartwill-api", "smartwill-chatbot", "smartwill-flags", "smartwill-rag"])
   service_account_id = google_service_account.secrets_reader.name
   role               = "roles/iam.workloadIdentityUser"
-  member             = "serviceAccount:${var.gcp_project_id}.svc.id.goog[smartwill-api/smartwill-secrets-reader]"
+  member             = "serviceAccount:${var.gcp_project_id}.svc.id.goog[${each.value}/smartwill-secrets-reader]"
 }

@@ -5,7 +5,7 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY constants.py mcp_client.py tools.py main.py ./
+COPY constants.py feature_flags.py mcp_client.py rag_client.py tools.py main.py ./
 
 EXPOSE 8010
 

@@ -17,7 +17,7 @@ variable "tags" {
 variable "ecr_repository_names" {
   description = "Names of the ECR repositories to create (one per image)."
   type        = list(string)
-  default     = ["smartwill-api", "smartwill-web"]
+  default     = ["smartwill-api", "smartwill-web", "smartwill-mcp", "smartwill-chatbot", "smartwill-flags", "smartwill-rag"]
 }
 
 # --- Networking (minimal VPC for EKS — public subnets only, no NAT gateway,
@@ -87,5 +87,10 @@ variable "secret_names" {
     "RAZORPAY_KEY_SECRET",
     "VITE_GOOGLE_CLIENT_ID",
     "CORS_ALLOW_ORIGINS",
+    "CHATBOT_CORS_ALLOW_ORIGINS",
+    "ANTHROPIC_API_KEY",
+    "VOYAGE_API_KEY",
+    "FLAGS_SECRET",
+    "FLAGS",
   ]
 }

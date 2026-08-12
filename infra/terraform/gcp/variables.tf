@@ -85,5 +85,10 @@ variable "secret_names" {
     "razorpay-key-secret",
     "vite-google-client-id",
     "cors-allow-origins",
+    "chatbot-cors-allow-origins",
+    "anthropic-api-key",
+    "voyage-api-key",
+    "flags-secret",
+    "flags",
   ]
 }

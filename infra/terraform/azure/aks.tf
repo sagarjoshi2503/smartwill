@@ -40,8 +40,8 @@ resource "azurerm_kubernetes_cluster" "this" {
   tags = var.tags
 }
 
-# Lets AKS nodes pull smartwill-api/smartwill-web images from ACR without any
-# imagePullSecrets.
+# Lets AKS nodes pull any smartwill-* image (api, web, mcp, chatbot, flags,
+# rag) from ACR without any imagePullSecrets.
 resource "azurerm_role_assignment" "aks_acr_pull" {
   scope                = azurerm_container_registry.this.id
   role_definition_name = "AcrPull"
