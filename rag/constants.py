@@ -62,7 +62,7 @@ HEADER_AUTHORIZATION = "Authorization"
 BEARER_PREFIX = "Bearer "
 
 # --- Voyage AI ---
-VOYAGE_MODEL = "voyage-3.5-lite"
+VOYAGE_MODEL = "voyage-4-lite"
 
 # --- Hybrid search tuning ---
 # Reciprocal Rank Fusion constant — the standard default (also what
