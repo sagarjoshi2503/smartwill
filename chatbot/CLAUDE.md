@@ -28,6 +28,15 @@ mcp_client.py                  open_session() — one MCP ClientSession per
                              env var (AKS ConfigMap, local Docker) or a
                              Vercel service binding (which only ever
                              injects a bare base URL, never a full path)
+rag_client.py                   search() — a plain HTTP POST to smartwill-rag
+                             (see rag/CLAUDE.md), not an MCP call. rag/
+                             isn't an MCP server (it's one hybrid-search
+                             endpoint, not a menu of tools), so its tool
+                             schema is hand-defined in tools.py's
+                             RAG_TOOL_SCHEMA instead of coming from
+                             session.list_tools() — main.py's
+                             _execute_tool() branches on the tool name to
+                             route to this instead of session.call_tool()
 constants.py                   Central constants — model config, tool/role
                              names, CORS, copy strings. Env-var defaults
                              exist ONLY for the server's own listen
@@ -63,7 +72,7 @@ security-model change, not a routine tool addition — flag it explicitly.
 
 ## No hardcoded cross-environment URLs
 
-Same rule as every other service: `MCP_SERVER_URL` and
+Same rule as every other service: `MCP_SERVER_URL`, `RAG_SERVICE_URL`, and
 `CHATBOT_CORS_ALLOW_ORIGINS` must be supplied per-environment (Vercel
 service binding + a manually-set CORS var; AKS ConfigMap with in-cluster
 DNS; local `.env.local`/`docker-compose.yml` with the compose service

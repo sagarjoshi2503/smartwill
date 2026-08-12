@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: smartwill-rag
+  namespace: smartwill-rag
+spec:
+  # ClusterIP (not LoadBalancer): smartwill-rag trusts a bearer token it's
+  # handed to determine ownership scoping, with no user-facing access
+  # control of its own — only smartwill-chatbot should ever reach it, same
+  # reasoning as smartwill-mcp (see infra/k8s/mcp/service.yaml). No public IP.
+  type: ClusterIP
+  selector:
+    app: smartwill-rag
+  ports:
+    - port: 8030
+      targetPort: 8030

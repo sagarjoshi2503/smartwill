@@ -49,6 +49,14 @@ proxying to `smartwill-flags.smartwill-flags.svc.cluster.local` or
 `flags:8020` respectively. `flags` itself has no public IP on AKS
 (`ClusterIP`) and no top-level Vercel rewrite of its own.
 
+`chatbot/` is a second, direct caller (`chatbot/feature_flags.py`,
+`FLAGS_SERVICE_URL` env var/Vercel binding) — unlike `web/`, it doesn't go
+through nginx or a rewrite, since it's a backend service reaching another
+backend service directly, same relationship it already has with `mcp/`/
+`rag/`. This is fine (no new security surface — `flags` has no
+authentication of its own regardless of caller and returns nothing
+sensitive), but keep it in mind if `flags.ts`'s request shape ever changes.
+
 ## Env vars
 
 `FLAGS_SECRET` and `FLAGS` — both required, both secrets (already

@@ -8,3 +8,11 @@ data:
   # infra/k8s/mcp/service.yaml) — that Service has no public IP by design.
   # Base URL only — chatbot/mcp_client.py appends the /mcp path itself.
   MCP_SERVER_URL: "http://smartwill-mcp.smartwill-mcp.svc.cluster.local:8000"
+  # Same pattern for smartwill-rag's ClusterIP Service (see
+  # infra/k8s/rag/service.yaml) — also no public IP by design. Base URL
+  # only — chatbot/rag_client.py appends the /search path itself.
+  RAG_SERVICE_URL: "http://smartwill-rag.smartwill-rag.svc.cluster.local:8030"
+  # smartwill-flags' Service listens on port 80 (see
+  # infra/k8s/flags/service.yaml), not 8020 — port 80 is its Service's own
+  # `port`, mapped to the container's targetPort 8020 internally.
+  FLAGS_SERVICE_URL: "http://smartwill-flags.smartwill-flags.svc.cluster.local"

@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: smartwill-rag
+  namespace: smartwill-rag
+spec:
+  replicas: 1
+  # Recreate: the single small cluster node doesn't have spare CPU to run
+  # an old+new pod simultaneously during a rollout once 6 services share it.
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: smartwill-rag
+  template:
+    metadata:
+      labels:
+        app: smartwill-rag
+    spec:
+      containers:
+        - name: smartwill-rag
+          image: smartwillacr.azurecr.io/smartwill-rag:latest
+          ports:
+            - containerPort: 8030
+          envFrom:
+            - secretRef:
+                name: smartwill-rag-secrets
+          volumeMounts:
+            # Not read by the app directly (it reads env vars), but mounting
+            # this CSI volume is what triggers the SecretProviderClass's
+            # secretObjects sync into the smartwill-rag-secrets k8s Secret.
+            - name: secrets-store
+              mountPath: /mnt/secrets-store
+              readOnly: true
+          resources:
+            requests:
+              cpu: 150m
+              memory: 200Mi
+            limits:
+              cpu: 500m
+              memory: 400Mi
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8030
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 8030
+            initialDelaySeconds: 5
+            periodSeconds: 10
+      volumes:
+        - name: secrets-store
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: smartwill-rag-secrets

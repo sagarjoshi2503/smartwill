@@ -1,0 +1,10 @@
+.venv-rag
+__pycache__
+**/__pycache__
+.pytest_cache
+tests
+.env
+.env.*
+!.env.example
+requirements-dev.txt
+pytest.ini

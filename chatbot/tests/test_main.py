@@ -91,6 +91,13 @@ def patch_session(monkeypatch, session):
     monkeypatch.setattr(main, "open_session", fake_open_session)
 
 
+def patch_retrieval_mode(monkeypatch, mode):
+    async def fake_get_flag_value(key, *, default):
+        return mode
+
+    monkeypatch.setattr(main, "get_flag_value", fake_get_flag_value)
+
+
 @pytest.fixture
 def client():
     return TestClient(main.app)
@@ -162,6 +169,176 @@ def test_chat_ignores_any_token_the_model_supplies(monkeypatch, client):
     )
 
     assert session.call_tool_calls[0]["args"]["token"] == "real-jwt"
+
+
+# --- tool use: search_wills routes to rag_client, not the MCP session ---
+
+def test_chat_search_wills_calls_rag_client_not_mcp_session(monkeypatch, client):
+    session = FakeSession()
+    patch_session(monkeypatch, session)
+    patch_retrieval_mode(monkeypatch, "rag")
+
+    async def fake_search(query, token, limit=5):
+        assert query == "house in Panjim"
+        assert token == "real-jwt"
+        return {"results": [{"willId": "w1", "willType": "allindia", "status": "Draft", "snippet": "...", "score": 0.9}]}
+
+    monkeypatch.setattr(main.rag_client, "search", fake_search)
+    fake_messages = FakeMessagesApi([
+        FakeMessage("tool_use", [FakeToolUseBlock("tu_1", "search_wills", {"query": "house in Panjim"})]),
+        FakeMessage("end_turn", [FakeTextBlock("Found it.")]),
+    ])
+    monkeypatch.setattr(main.client, "messages", fake_messages)
+
+    res = client.post(
+        "/chat",
+        json={"messages": [{"role": "user", "content": "which will mentions my house"}], "token": "real-jwt", "role": "testator"},
+    )
+
+    assert res.status_code == 200
+    assert res.json() == {"reply": "Found it.", "unavailable": False}
+    assert session.call_tool_calls == []  # never went through the MCP session
+
+
+def test_chat_search_wills_ignores_any_token_the_model_supplies(monkeypatch, client):
+    session = FakeSession()
+    patch_session(monkeypatch, session)
+    patch_retrieval_mode(monkeypatch, "rag")
+
+    seen_tokens = []
+
+    async def fake_search(query, token, limit=5):
+        seen_tokens.append(token)
+        return {"results": []}
+
+    monkeypatch.setattr(main.rag_client, "search", fake_search)
+    fake_messages = FakeMessagesApi([
+        FakeMessage("tool_use", [FakeToolUseBlock("tu_1", "search_wills", {"query": "x", "token": "model-hallucinated"})]),
+        FakeMessage("end_turn", [FakeTextBlock("done")]),
+    ])
+    monkeypatch.setattr(main.client, "messages", fake_messages)
+
+    client.post(
+        "/chat",
+        json={"messages": [{"role": "user", "content": "x"}], "token": "real-jwt", "role": "testator"},
+    )
+
+    assert seen_tokens == ["real-jwt"]
+
+
+def test_chat_search_wills_failure_reports_error_without_500(monkeypatch, client):
+    session = FakeSession()
+    patch_session(monkeypatch, session)
+    patch_retrieval_mode(monkeypatch, "rag")
+
+    async def failing_search(query, token, limit=5):
+        raise ConnectionError("smartwill-rag: connection refused")
+
+    monkeypatch.setattr(main.rag_client, "search", failing_search)
+    fake_messages = FakeMessagesApi([
+        FakeMessage("tool_use", [FakeToolUseBlock("tu_1", "search_wills", {"query": "x"})]),
+        FakeMessage("end_turn", [FakeTextBlock("Search isn't working right now.")]),
+    ])
+    monkeypatch.setattr(main.client, "messages", fake_messages)
+
+    res = client.post(
+        "/chat",
+        json={"messages": [{"role": "user", "content": "x"}], "token": "real-jwt", "role": "testator"},
+    )
+
+    assert res.status_code == 200
+    second_call_messages = fake_messages.calls[1]["messages"]
+    tool_result = second_call_messages[-1]["content"][0]
+    assert "Error" in tool_result["content"]
+
+
+def test_anonymous_never_offered_search_wills_tool(monkeypatch, client):
+    session = FakeSession()
+    patch_session(monkeypatch, session)
+    patch_retrieval_mode(monkeypatch, "rag")
+    fake_messages = FakeMessagesApi([FakeMessage("end_turn", [FakeTextBlock("hi")])])
+    monkeypatch.setattr(main.client, "messages", fake_messages)
+
+    client.post("/chat", json={"messages": [{"role": "user", "content": "hi"}]})
+
+    offered = {t["name"] for t in fake_messages.calls[0]["tools"]}
+    assert "search_wills" not in offered
+
+
+# --- "use-rag-or-mcp" flag gates whether search_wills is offered/usable at all ---
+
+def test_testator_not_offered_search_wills_when_flag_is_mcp(monkeypatch, client):
+    session = FakeSession()
+    patch_session(monkeypatch, session)
+    patch_retrieval_mode(monkeypatch, "mcp")
+    fake_messages = FakeMessagesApi([FakeMessage("end_turn", [FakeTextBlock("hi")])])
+    monkeypatch.setattr(main.client, "messages", fake_messages)
+
+    client.post("/chat", json={"messages": [{"role": "user", "content": "hi"}], "token": "real-jwt", "role": "testator"})
+
+    offered = {t["name"] for t in fake_messages.calls[0]["tools"]}
+    assert "search_wills" not in offered
+
+
+def test_testator_offered_search_wills_when_flag_is_rag(monkeypatch, client):
+    session = FakeSession()
+    patch_session(monkeypatch, session)
+    patch_retrieval_mode(monkeypatch, "rag")
+    fake_messages = FakeMessagesApi([FakeMessage("end_turn", [FakeTextBlock("hi")])])
+    monkeypatch.setattr(main.client, "messages", fake_messages)
+
+    client.post("/chat", json={"messages": [{"role": "user", "content": "hi"}], "token": "real-jwt", "role": "testator"})
+
+    offered = {t["name"] for t in fake_messages.calls[0]["tools"]}
+    assert "search_wills" in offered
+
+
+def test_search_wills_refused_server_side_when_flag_is_mcp_even_if_requested(monkeypatch, client):
+    # Defense in depth: even if a stale/cached tool list somehow still
+    # offered search_wills, or Claude requests it anyway, the flag is
+    # re-checked before ever calling smartwill-rag.
+    session = FakeSession()
+    patch_session(monkeypatch, session)
+    patch_retrieval_mode(monkeypatch, "mcp")
+
+    async def fake_search(query, token, limit=5):
+        raise AssertionError("rag_client.search should never be called when the flag is 'mcp'")
+
+    monkeypatch.setattr(main.rag_client, "search", fake_search)
+    fake_messages = FakeMessagesApi([
+        FakeMessage("tool_use", [FakeToolUseBlock("tu_1", "search_wills", {"query": "x"})]),
+        FakeMessage("end_turn", [FakeTextBlock("done")]),
+    ])
+    monkeypatch.setattr(main.client, "messages", fake_messages)
+
+    res = client.post(
+        "/chat",
+        json={"messages": [{"role": "user", "content": "x"}], "token": "real-jwt", "role": "testator"},
+    )
+
+    assert res.status_code == 200
+    second_call_messages = fake_messages.calls[1]["messages"]
+    tool_result = second_call_messages[-1]["content"][0]
+    assert "not available" in tool_result["content"]
+
+
+def test_default_retrieval_mode_is_mcp_when_flags_service_unreachable(monkeypatch, client):
+    # No patch_retrieval_mode() here — exercises the real get_flag_value(),
+    # which talks to the dummy, unreachable FLAGS_SERVICE_URL conftest.py
+    # sets, and must fail safe to the conservative "mcp" default rather than
+    # raising or hanging the request.
+    session = FakeSession()
+    patch_session(monkeypatch, session)
+    fake_messages = FakeMessagesApi([FakeMessage("end_turn", [FakeTextBlock("hi")])])
+    monkeypatch.setattr(main.client, "messages", fake_messages)
+
+    res = client.post(
+        "/chat", json={"messages": [{"role": "user", "content": "hi"}], "token": "real-jwt", "role": "testator"},
+    )
+
+    assert res.status_code == 200
+    offered = {t["name"] for t in fake_messages.calls[0]["tools"]}
+    assert "search_wills" not in offered
 
 
 # --- defense in depth: out-of-whitelist tool name refused server-side ---

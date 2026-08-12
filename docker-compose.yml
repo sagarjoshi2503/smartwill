@@ -1,4 +1,4 @@
-# Local-only orchestration for all 5 services. Every inter-service URL here
+# Local-only orchestration for all 6 services. Every inter-service URL here
 # points at another container in this same compose network (or, for web's
 # browser-facing build args, at localhost) — never at an AKS or Vercel
 # endpoint, so this stack is fully self-contained and works with no internet
@@ -11,6 +11,9 @@
 # API:      http://localhost:8051
 # MCP:      http://localhost:8000 (internal-only in AKS/Vercel; published
 #           here purely for local debugging convenience)
+# RAG:      http://localhost:8030 (internal-only in AKS/Vercel, same as MCP;
+#           published here purely for local debugging convenience — needs a
+#           real VOYAGE_API_KEY in rag/.env.local to actually index/search)
 # Chatbot:  http://localhost:8010
 # Flags:    http://localhost:8020
 
@@ -33,6 +36,13 @@ services:
     depends_on:
       - api
 
+  rag:
+    build: ./rag
+    ports:
+      - "8030:8030"
+    env_file:
+      - ./rag/.env.local
+
   chatbot:
     build: ./chatbot
     ports:
@@ -40,13 +50,18 @@ services:
     env_file:
       - ./chatbot/.env.local
     environment:
-      # Overrides chatbot/.env.local's MCP_SERVER_URL (which points at
-      # host.docker.internal for the "chatbot alone in Docker, mcp on the
-      # host" workflow) with the in-network service name, since mcp is also
+      # Overrides chatbot/.env.local's MCP_SERVER_URL/RAG_SERVICE_URL/
+      # FLAGS_SERVICE_URL (which point at host.docker.internal for the
+      # "chatbot alone in Docker, everything else on the host" workflow)
+      # with the in-network service names, since mcp/rag/flags are also
       # containerized here.
       MCP_SERVER_URL: http://mcp:8000
+      RAG_SERVICE_URL: http://rag:8030
+      FLAGS_SERVICE_URL: http://flags:8020
     depends_on:
       - mcp
+      - rag
+      - flags
 
   flags:
     build: ./flags

@@ -11,6 +11,9 @@ match one defined elsewhere (e.g. tool/role names also present in mcp/)."""
 MCP_STREAMABLE_HTTP_PATH = "/mcp"
 DEFAULT_HOST = "0.0.0.0"
 DEFAULT_PORT = "8010"
+RAG_SEARCH_TIMEOUT_SECONDS = 15.0
+FLAGS_TIMEOUT_SECONDS = 2.0
+FLAGS_CACHE_TTL_SECONDS = 30
 
 # CHATBOT_CORS_ALLOW_ORIGINS (not the bare CORS_ALLOW_ORIGINS api/ uses) is a
 # deliberately distinct key: this project deploys api/, mcp/, and chatbot/ as
@@ -19,6 +22,18 @@ DEFAULT_PORT = "8010"
 ENV_CORS_ALLOW_ORIGINS = "CHATBOT_CORS_ALLOW_ORIGINS"
 ERR_MCP_SERVER_URL_REQUIRED = "MCP_SERVER_URL environment variable is required (base URL of smartwill-mcp)"
 ERR_CORS_ALLOW_ORIGINS_REQUIRED = f"{ENV_CORS_ALLOW_ORIGINS} environment variable is required (comma-separated origins)"
+ERR_RAG_SERVICE_URL_REQUIRED = "RAG_SERVICE_URL environment variable is required (base URL of smartwill-rag)"
+ERR_FLAGS_SERVICE_URL_REQUIRED = "FLAGS_SERVICE_URL environment variable is required (base URL of smartwill-flags)"
+
+# --- "use-rag-or-mcp" flag (see feature_flags.py) — picks which retrieval
+# path the assistant uses for Will-content questions. "mcp" is the
+# conservative default (pre-existing behavior, no search_wills tool
+# offered) so smartwill-rag issues can't affect anyone until this is
+# explicitly flipped to "rag" in the flags dashboard. ---
+FLAG_USE_RAG_OR_MCP = "use-rag-or-mcp"
+RETRIEVAL_MODE_MCP = "mcp"
+RETRIEVAL_MODE_RAG = "rag"
+DEFAULT_RETRIEVAL_MODE = RETRIEVAL_MODE_MCP
 
 # --- Claude model / request shape ---
 MODEL = "claude-opus-5"
@@ -36,6 +51,10 @@ TOOL_LIST_MY_WILLS = "list_my_wills"
 TOOL_GET_WILL = "get_will"
 TOOL_LIST_ADMIN_WILLS = "list_admin_wills"
 TOOL_ADMIN_GET_WILL = "admin_get_will"
+
+# --- rag/ tool (not an MCP tool — doesn't come from session.list_tools(),
+# see tools.py's RAG_TOOL_SCHEMA and main.py's _execute_tool()) ---
+TOOL_SEARCH_WILLS = "search_wills"
 
 # --- Message-role literals (Claude Messages API / this service's own wire shape) ---
 MSG_ROLE_USER = "user"
@@ -57,7 +76,11 @@ SYSTEM_PROMPT = (
     "You are the SmartWill assistant, embedded in the SmartWill web app. "
     "Answer questions about SmartWill (an India-focused Will-drafting service) and, "
     "when a tool is available, look up the signed-in user's own Wills to answer "
-    "questions about their status. You can only ever look things up — you have no "
+    "questions about their status. When a question is about the *content* of a "
+    "Will (e.g. what it says, who's mentioned, which Will covers a particular "
+    "asset or instruction) rather than a specific Will you already know the ID "
+    "of, use the search tool to find relevant Wills by meaning or keyword instead "
+    "of guessing. You can only ever look things up — you have no "
     "way to create, edit, delete, or pay for a Will, and no way to sign anyone up "
     "or log anyone in. If asked to do any of those, explain that this assistant "
     "can only answer questions and that the action has to be done in the app "

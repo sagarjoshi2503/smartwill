@@ -29,7 +29,7 @@ terraform/
                              applied. Treat as a reference sketch, not a
                              second live environment.
 k8s/
-  api/ mcp/ chatbot/ flags/ web/     One namespace + deployment.yaml +
+  api/ mcp/ rag/ chatbot/ flags/ web/     One namespace + deployment.yaml +
                              service.yaml per service, plus
                              secret-provider-class.yaml where the service
                              needs Key Vault secrets and configmap.yaml
@@ -40,7 +40,7 @@ k8s/
 
 ## Single-node constraints (why things look unusual)
 
-The cluster is **one small node**, shared by 5 services. Two consequences
+The cluster is **one small node**, shared by 6 services. Two consequences
 baked into every `deployment.yaml`:
 
 - `strategy: type: Recreate`, not the `RollingUpdate` default — the node
@@ -59,7 +59,7 @@ baked into every `deployment.yaml`:
 | Service | k8s Service type | Why |
 |---|---|---|
 | `api`, `web`, `chatbot` | `LoadBalancer` | Called directly by the browser (web) or need to be reachable from outside the cluster (api, chatbot — chatbot also gets called by web's browser client) |
-| `mcp`, `flags` | `ClusterIP` (no public IP) | `mcp` has no auth beyond a forwarded token — only `chatbot` should ever reach it. `flags` is only ever proxied to via `web`'s nginx — see `flags/CLAUDE.md` and `web/CLAUDE.md`. If a task asks to expose either of these publicly, that's a security-model change worth flagging, not a routine tweak. |
+| `mcp`, `rag`, `flags` | `ClusterIP` (no public IP) | `mcp` has no auth beyond a forwarded token — only `chatbot` should ever reach it. `rag` verifies the forwarded token itself (see `rag/CLAUDE.md`) but is still internal-only, same reasoning as `mcp`. `flags` is only ever proxied to via `web`'s nginx — see `flags/CLAUDE.md` and `web/CLAUDE.md`. If a task asks to expose any of these publicly, that's a security-model change worth flagging, not a routine tweak. |
 
 ## Secrets: Key Vault → Secrets Store CSI driver → k8s Secret
 

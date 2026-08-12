@@ -25,11 +25,17 @@
         { "type": "service", "service": "api", "format": "url", "env": "API_BASE_URL" }
       ]
     },
+    "rag": {
+      "root": "rag/",
+      "entrypoint": "main:app"
+    },
     "chatbot": {
       "root": "chatbot/",
       "entrypoint": "main:app",
       "bindings": [
-        { "type": "service", "service": "mcp", "format": "url", "env": "MCP_SERVER_URL" }
+        { "type": "service", "service": "mcp", "format": "url", "env": "MCP_SERVER_URL" },
+        { "type": "service", "service": "rag", "format": "url", "env": "RAG_SERVICE_URL" },
+        { "type": "service", "service": "flags", "format": "url", "env": "FLAGS_SERVICE_URL" }
       ]
     }
   },
