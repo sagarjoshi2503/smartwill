@@ -78,13 +78,17 @@ export default function GoanDeedDocument({will,onBack,onPrint,willDocRef}:{
              all the way to the bottom would have its last line(s) overlap
              the footer instead of sitting above it. This footer is two
              lines (Testator + Testatrix) at 9pt/line-height 2, ~13mm tall;
-             18mm leaves clearance. Applies on every page, unconditionally,
-             since the footer now renders on every page. Trade-off: on a
-             page whose content is already very close to a full page, this
-             can push the tail end onto a mostly-blank continuation page —
-             accepted deliberately, since that's far better than illegible
-             overlapping text on a legal document. */
-          .pdf-page-content{padding-bottom:18mm}
+             14mm leaves a little clearance. Applies on every page,
+             unconditionally, since the footer now renders on every page.
+             Trade-off: on a page whose content is already very close to a
+             full page, this can push the tail end onto a mostly-blank
+             continuation page — accepted deliberately, since that's far
+             better than illegible overlapping text on a legal document.
+             Kept tight rather than generous — the last page has four
+             separate signature blocks whose own margins were also trimmed
+             down for the same reason: extra padding here was tipping that
+             page onto a near-blank continuation page in practice. */
+          .pdf-page-content{padding-bottom:14mm}
           .pdf-page{min-height:calc(297mm - 3cm - 3cm);position:relative}
           .pdf-page-break{break-after:page}
           .pdf-sig-line{break-inside:avoid}
@@ -140,26 +144,26 @@ export default function GoanDeedDocument({will,onBack,onPrint,willDocRef}:{
           </Page>
 
           <Page isLast>
-            <div className="mb-6">
+            <div className="mb-3">
               <div className="inline-block min-w-[280px]">
-                <div className="border-b-2 border-slate-800 pt-10 mb-1"/>
+                <div className="border-b-2 border-slate-800 pt-6 mb-1"/>
                 <p className="mb-1">Testator / Party 1 (Signature)</p>
               </div>
             </div>
-            <p className="mb-6">Name: <strong>{t.name||blank}</strong></p>
+            <p className="mb-3">Name: <strong>{t.name||blank}</strong></p>
 
-            <div className="mb-6">
+            <div className="mb-3">
               <div className="inline-block min-w-[280px]">
-                <div className="border-b-2 border-slate-800 pt-10 mb-1"/>
+                <div className="border-b-2 border-slate-800 pt-6 mb-1"/>
                 <p className="mb-1">Testatrix / Party No. 2 (Signature)</p>
               </div>
             </div>
-            <p className="mb-6">Name: <strong>{s.name||blank}</strong></p>
+            <p className="mb-3">Name: <strong>{s.name||blank}</strong></p>
 
             {deedWitnesses.map((w,i)=>(
-              <div key={i} className="mb-6">
+              <div key={i} className="mb-3">
                 <div className="inline-block min-w-[280px]">
-                  <div className="border-b-2 border-slate-800 pt-10 mb-1"/>
+                  <div className="border-b-2 border-slate-800 pt-6 mb-1"/>
                   <p className="mb-1">Witness No. {i+1} (Signature)</p>
                 </div>
                 <p className="mt-1">Name: <strong>{w.name||blank}</strong></p>

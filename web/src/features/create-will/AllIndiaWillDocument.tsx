@@ -149,14 +149,18 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,w
              content (prose, or its own real signature/witness block) runs
              all the way to the bottom would have its last line(s) overlap
              the footer instead of sitting above it. One footer line at
-             10pt/line-height 2 is ~7mm tall; 14mm leaves clearance.
+             10pt/line-height 2 is ~7mm tall; 10mm leaves a little clearance
+             (kept tight deliberately — the page's own signature/witness
+             block already has generous margins, so overflow onto a
+             near-blank continuation page was happening before this was
+             trimmed down from an earlier, more generous 14mm).
              Applies on every page, unconditionally, since the footer now
              renders on every page. Trade-off: on a page whose content is
              already very close to a full page, this can push the tail end
              onto a mostly-blank continuation page — accepted deliberately,
              since that's far better than illegible overlapping text on a
              legal document. */
-          .pdf-page-content{padding-bottom:14mm}
+          .pdf-page-content{padding-bottom:10mm}
           .pdf-page{min-height:calc(297mm - 25.4mm - 25.4mm);position:relative}
           .pdf-page-break{break-after:page}
           /* Belt-and-braces: even if a page's own content still overflows,
@@ -279,23 +283,23 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,w
               I have fully understood the contents, significance and implications contained in this WILL which has been executed out of my free will, and choice. There has been no misrepresentation in regard to this WILL and no one has any right to object and/or to challenge this WILL as this is culmination of my discretion and best for me to safeguard my interest and interest of my family.
             </p>
 
-            <p className="text-justify mb-8">
+            <p className="text-justify mb-4">
               {title} understands and approves the contents of document before signing and was not forced to do so by any person.
             </p>
 
             <div className="mb-2">
               <div className="inline-block min-w-[280px]">
-                <div className="border-b-2 border-slate-800 pt-10 mb-1"/>
+                <div className="border-b-2 border-slate-800 pt-6 mb-1"/>
                 <p className="mb-1">Signature of {title}</p>
               </div>
             </div>
             <p className="mb-1">Name of {title}: <strong>{testator.fullName||blank}</strong></p>
             <p className="mb-1">Place: <strong>{testator.signPlace||blank}</strong></p>
-            <p className="mb-8">Date: <strong>{signDateDDMMYYYY}</strong></p>
+            <p className="mb-4">Date: <strong>{signDateDDMMYYYY}</strong></p>
 
             <h2 className="text-lg uppercase mb-1">Witnesses</h2>
             {witnesses.map((w,i)=>(
-              <div key={i} className="mb-10">
+              <div key={i} className="mb-4">
                 <p className="mb-1">{i+1})</p>
                 <p className="mb-1">Name: <strong>{w.name||blank}</strong></p>
                 <p>Signature: {blank}</p>

@@ -97,8 +97,13 @@ export default function GoanWillDocument({will,person,onBack,onPrint,willDocRef}
              Trade-off: on a page whose content is already very close to a
              full page, this can push the tail end onto a mostly-blank
              continuation page — accepted deliberately, since that's far
-             better than illegible overlapping text on a legal document. */
-          .pdf-page-content{padding-bottom:12mm}
+             better than illegible overlapping text on a legal document.
+             Kept tight (9mm, vs. the footer's own ~6.5mm) rather than
+             generous — the last page's signature/witness block already has
+             its own margins trimmed down for the same reason: extra
+             padding here was tipping that page onto a near-blank
+             continuation page in practice, not just in theory. */
+          .pdf-page-content{padding-bottom:9mm}
           .pdf-page{min-height:calc(297mm - 3cm - 3cm);position:relative}
           .pdf-page-break{break-after:page}
           .pdf-sig-line{break-inside:avoid}
@@ -211,23 +216,23 @@ export default function GoanWillDocument({will,person,onBack,onPrint,willDocRef}
               This Will was read out loudly by me, the Notary Ex-Officio. I declare that all legal formalities were complied with within a continuous process. It will bear a notarial stamp of <strong>{blank}</strong>.
             </p>
 
-            <p className="text-justify mb-8">
+            <p className="text-justify mb-4">
               {title==="TESTATRIX"?"Testatrix":"Testator"}/{title==="TESTATRIX"?"Testator":"Testatrix"} understands and approves the contents of document before signing and was not forced to do so by any person.
             </p>
 
             <div className="mb-2">
               <div className="inline-block min-w-[280px]">
-                <div className="border-b-2 border-slate-800 pt-10 mb-1"/>
+                <div className="border-b-2 border-slate-800 pt-6 mb-1"/>
                 <p className="mb-1">Signature of Testator/Testatrix</p>
               </div>
             </div>
             <p className="mb-1">Name of Testator/Testatrix: <strong>{person.name||blank}</strong></p>
             <p className="mb-1">Place: <strong>{blank}</strong></p>
-            <p className="mb-8">Date: <strong>{blank}</strong></p>
+            <p className="mb-4">Date: <strong>{blank}</strong></p>
 
             <h2 className="text-lg uppercase mb-1">Witnesses</h2>
             {goanWitnesses.map((w,i)=>(
-              <div key={i} className="mb-10">
+              <div key={i} className="mb-4">
                 <p className="mb-1">{i+1})</p>
                 <p className="mb-1">Name: <strong>{w.name||blank}</strong></p>
                 <p>Signature: {blank}</p>
