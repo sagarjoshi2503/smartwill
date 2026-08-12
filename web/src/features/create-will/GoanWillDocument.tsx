@@ -44,14 +44,18 @@ export default function GoanWillDocument({will,person,onBack,onPrint,willDocRef}
     ));
   };
 
-  // The footer's `position:absolute;bottom:0` (see print CSS below) never
-  // reserves space in flow, so it renders on top of a page's own trailing
-  // content instead of below it — only safe on pages that don't already end
-  // with their own real signature block. `noFooterSig` opts a page out.
-  const Page = ({children,isLast,noFooterSig}:{children: ReactNode; isLast?: boolean; noFooterSig?: boolean})=>(
+  // Every page — including the last — gets this attestation line pinned to
+  // its bottom via `position:absolute;bottom:0`, deliberately, even on
+  // pages that already end with their own real signature block (a
+  // testator/witness signature line on every physical page, not just the
+  // final signature page, is the actual legal requirement — not
+  // redundant). Because position:absolute never reserves space in flow,
+  // `.pdf-page-content`'s padding-bottom (below) does that job instead, so
+  // this footer never overlaps a page's own trailing content.
+  const Page = ({children,isLast}:{children: ReactNode; isLast?: boolean})=>(
     <section className={`pdf-page${isLast?"":" pdf-page-break"}`}>
-      <div className={`pdf-page-content${noFooterSig?"":" pdf-page-content-footer-gap"}`}>{children}</div>
-      {!noFooterSig && <p className="pdf-sig-line pdf-sig-line-footer mb-0">Testator's Signature: __________ Witness 1: ______ Witness 2: ______</p>}
+      <div className="pdf-page-content">{children}</div>
+      <p className="pdf-sig-line pdf-sig-line-footer mb-0">Testator's Signature: __________ Witness 1: ______ Witness 2: ______</p>
     </section>
   );
 
@@ -85,20 +89,25 @@ export default function GoanWillDocument({will,person,onBack,onPrint,willDocRef}
              short section still consuming a full page is a confirmed,
              deliberate tradeoff. */
           /* pdf-sig-line-footer is position:absolute, which never reserves
-             space in normal flow — without this gap, a page whose own prose
-             happens to run long enough to reach the bottom on its own has
-             its last line(s) overlap the footer instead of sitting above
-             it. One footer line at 12pt/line-height 2 is ~8.5mm tall; 14mm
-             leaves clearance. Trade-off: on a page whose content is already
-             very close to a full page, this can push the tail end onto a
-             mostly-blank continuation page — accepted deliberately, since
-             that's far better than illegible overlapping text on a legal
-             document. */
-          .pdf-page-content-footer-gap{padding-bottom:14mm}
+             space in normal flow — without this gap, a page whose own
+             content (prose, or its own real signature/witness block) runs
+             all the way to the bottom would have its last line(s) overlap
+             the footer instead of sitting above it. Applies on every page,
+             unconditionally, since the footer now renders on every page.
+             Trade-off: on a page whose content is already very close to a
+             full page, this can push the tail end onto a mostly-blank
+             continuation page — accepted deliberately, since that's far
+             better than illegible overlapping text on a legal document. */
+          .pdf-page-content{padding-bottom:12mm}
           .pdf-page{min-height:calc(297mm - 3cm - 3cm);position:relative}
           .pdf-page-break{break-after:page}
           .pdf-sig-line{break-inside:avoid}
-          .pdf-sig-line-footer{position:absolute;bottom:0;left:0;right:0;break-before:avoid}
+          /* white-space:nowrap + a smaller font-size keep this on one
+             physical line — Goan's usable width (150mm — A4 210mm minus
+             1cm right + 5cm left margins) is narrower than the All India
+             template's, so this needs a slightly smaller size than that
+             template's 10pt to reliably avoid wrapping. */
+          .pdf-sig-line-footer{position:absolute;bottom:0;left:0;right:0;break-before:avoid;white-space:nowrap;font-size:9pt}
         }
       `}</style>
       <div className="no-print sticky top-0 z-50 bg-white border-b border-slate-200 px-5 py-3 flex items-center justify-between">
@@ -197,7 +206,7 @@ export default function GoanWillDocument({will,person,onBack,onPrint,willDocRef}
             </ol>
           </Page>
 
-          <Page isLast noFooterSig>
+          <Page isLast>
             <p className="text-justify mb-5">
               This Will was read out loudly by me, the Notary Ex-Officio. I declare that all legal formalities were complied with within a continuous process. It will bear a notarial stamp of <strong>{blank}</strong>.
             </p>

@@ -97,30 +97,28 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,w
     <p className={`pdf-sig-line mb-0 ${className||""}`}>Testator's Signature: __________ Witness 1: ______ Witness 2: ______</p>
   );
 
-  // Each logical section is its own print page (`break-after:page` on every
-  // page but the last), with this attestation line pinned to the bottom of
-  // every page (including the last) via `position:absolute;bottom:0` inside
-  // a `position:relative;min-height:<one page>` section. Chrome's print
-  // engine (a) doesn't reliably repeat a `position:fixed` element across
-  // pages, and (b) has known bugs where a flexbox min-height/
-  // justify-content:space-between layout silently fails to stretch during
-  // print pagination on some pages but not others — absolute positioning
-  // against a sized relative ancestor doesn't depend on flex layout and
-  // prints reliably. This does mean a short section still consumes a full
-  // physical page (trading page-count efficiency for guaranteed footer
-  // placement) — a deliberate, confirmed tradeoff, not an oversight.
-  // The footer SigLine is `position:absolute;bottom:0` (see the print CSS
-  // below), which never reserves space in normal flow — so on a page whose
-  // own content already ends with its own real signature block (the
-  // residue/witnesses page, and every Executor/Guardian appointment/consent
-  // page), that trailing content runs right up to the bottom of the page
-  // and the generic footer renders directly on top of it. Only pages with
-  // no signature content of their own need the generic per-page attestation
-  // line — `noFooterSig` opts a page out of it.
-  const Page = ({children,isLast,noFooterSig}:{children: ReactNode; isLast?: boolean; noFooterSig?: boolean})=>(
+  // Every page — including the last — gets this attestation line pinned to
+  // its bottom via `position:absolute;bottom:0` inside a
+  // `position:relative;min-height:<one page>` section, deliberately, even
+  // on pages that already end with their own real signature block (a
+  // testator/witness signature line on every physical page, not just the
+  // final signature page, is the actual legal requirement here — it's not
+  // redundant, it's intentional). Chrome's print engine (a) doesn't
+  // reliably repeat a `position:fixed` element across pages, and (b) has
+  // known bugs where a flexbox min-height/justify-content:space-between
+  // layout silently fails to stretch during print pagination on some pages
+  // but not others — absolute positioning against a sized relative
+  // ancestor doesn't depend on flex layout and prints reliably. This does
+  // mean a short section still consumes a full physical page (trading
+  // page-count efficiency for guaranteed footer placement) — a deliberate,
+  // confirmed tradeoff, not an oversight. Because position:absolute never
+  // reserves space in flow, `.pdf-page-content`'s padding-bottom (below)
+  // does that job instead, so this footer never overlaps a page's own
+  // trailing content no matter how close to the bottom that content runs.
+  const Page = ({children,isLast}:{children: ReactNode; isLast?: boolean})=>(
     <section className={`pdf-page${isLast?"":" pdf-page-break"}`}>
-      <div className={`pdf-page-content${noFooterSig?"":" pdf-page-content-footer-gap"}`}>{children}</div>
-      {!noFooterSig && <SigLine className="pdf-sig-line-footer"/>}
+      <div className="pdf-page-content">{children}</div>
+      <SigLine className="pdf-sig-line-footer"/>
     </section>
   );
 
@@ -147,16 +145,18 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,w
              the signature line to the bottom of the page instead of
              wherever the content happens to end. */
           /* pdf-sig-line-footer is position:absolute, which never reserves
-             space in normal flow — without this gap, a page whose own prose
-             happens to run long enough to reach the bottom on its own (not
-             just short pages padded out by min-height) has its last line(s)
-             overlap the footer instead of sitting above it. One footer line
-             at 12pt/line-height 2 is ~8.5mm tall; 14mm leaves clearance.
-             Trade-off: on a page whose content is already very close to a
-             full page, this can push the tail end onto a mostly-blank
-             continuation page — accepted deliberately, since that's far
-             better than illegible overlapping text on a legal document. */
-          .pdf-page-content-footer-gap{padding-bottom:14mm}
+             space in normal flow — without this gap, a page whose own
+             content (prose, or its own real signature/witness block) runs
+             all the way to the bottom would have its last line(s) overlap
+             the footer instead of sitting above it. One footer line at
+             10pt/line-height 2 is ~7mm tall; 14mm leaves clearance.
+             Applies on every page, unconditionally, since the footer now
+             renders on every page. Trade-off: on a page whose content is
+             already very close to a full page, this can push the tail end
+             onto a mostly-blank continuation page — accepted deliberately,
+             since that's far better than illegible overlapping text on a
+             legal document. */
+          .pdf-page-content{padding-bottom:14mm}
           .pdf-page{min-height:calc(297mm - 25.4mm - 25.4mm);position:relative}
           .pdf-page-break{break-after:page}
           /* Belt-and-braces: even if a page's own content still overflows,
@@ -164,7 +164,13 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,w
              precedes it — the pair moves to the next page together instead
              of the line appearing alone. */
           .pdf-sig-line{break-inside:avoid}
-          .pdf-sig-line-footer{position:absolute;bottom:0;left:0;right:0;break-before:avoid}
+          /* white-space:nowrap + a smaller font-size keep this on one
+             physical line — at the body's 12pt it can wrap to a second
+             line on this page width, which then either gets clipped by the
+             fixed-height footer box or collides with the min-height
+             ceiling; 10pt reliably fits the full line at this page's
+             159mm usable width (A4 210mm - 25.4mm*2 margins). */
+          .pdf-sig-line-footer{position:absolute;bottom:0;left:0;right:0;break-before:avoid;white-space:nowrap;font-size:10pt}
         }
       `}</style>
       {/* Top bar */}
@@ -254,7 +260,7 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,w
           </Page>
           )}
 
-          <Page isLast={noTrailingPages} noFooterSig>
+          <Page isLast={noTrailingPages}>
             <p className="text-justify mb-5">
               I hereby declare, direct, and devise that all the Rest and Residue of my estate, including any property or assets, both movable and immovable, which I may acquire after the execution of this Will, or which has been inadvertently omitted from this document, shall be given entirely to {allIndiaResidue.length>1&&"the following, in equal shares: "}
               {allIndiaResidue.map((entry,i)=>(
@@ -299,7 +305,7 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,w
 
           {showExecutor && (
             <>
-              <Page noFooterSig>
+              <Page>
                 <h1 className="text-center text-lg font-bold uppercase mb-6">Appointment of Executor for this Will</h1>
                 {executor.executorType==="org" ? (
                   <p className="text-justify mb-5">
@@ -319,7 +325,7 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,w
                 <p className="mb-1">Name of the Testator: <strong>{testator.fullName||blank}</strong></p>
                 <p>Signature of the Testator: {blank}</p>
               </Page>
-              <Page isLast={!showGuardian} noFooterSig>
+              <Page isLast={!showGuardian}>
                 <h1 className="text-center text-lg font-bold uppercase mb-6">Executor's Consent</h1>
                 <p className="text-justify mb-5">
                   I, <strong>{blank}</strong>, being {executor.executorType==="org"?"the Authorized Representative of the Organization mentioned":"the Executor named above"}, have read the contents of the Will and affirm my consent to act as the Executor of this Will and implement the same in the best possible manner.
@@ -333,7 +339,7 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,w
 
           {showGuardian && (
             <>
-              <Page noFooterSig>
+              <Page>
                 <h1 className="text-center text-lg font-bold uppercase mb-6">Appointment of Guardian for Minor Beneficiary</h1>
                 <p className="text-justify mb-5">
                   I appoint <strong>{guardian.name||blank}</strong>, having Relation to Testator: <strong>{guardian.relation||blank}</strong>, with Address: <strong>{guardian.address||blank}</strong>, bearing {guardian.idType} Number: <strong>{guardian.idNumber||blank}</strong>.
@@ -345,7 +351,7 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,w
                 <p className="mb-1">Name of the Testator: <strong>{testator.fullName||blank}</strong></p>
                 <p>Signature of the Testator: {blank}</p>
               </Page>
-              <Page isLast noFooterSig>
+              <Page isLast>
                 <h1 className="text-center text-lg font-bold uppercase mb-6">Guardian's Consent</h1>
                 <p className="text-justify mb-5">
                   I, <strong>{blank}</strong>, being the Guardian mentioned, have read the contents of the Will relating to the minor beneficiaries and affirm my consent to act as the Guardian and manage their inheritance in the best possible manner until they attain majority.
