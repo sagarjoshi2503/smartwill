@@ -135,6 +135,13 @@ export default function AllIndiaLiveDocPreview({will}:{
         </p>
         <SectionSignatureLine/>
 
+        {will.specialInstructions&&(
+          <>
+            <p className="mb-1">Special Non-Asset Instructions:</p>
+            <p className="text-justify mb-3 whitespace-pre-line">{will.specialInstructions}</p>
+          </>
+        )}
+
         <p className="mb-1">Witnesses:</p>
         {witnesses.map((w,i)=>(
           <p key={i} className="text-justify mb-1">

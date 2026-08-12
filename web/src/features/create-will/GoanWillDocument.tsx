@@ -166,6 +166,13 @@ export default function GoanWillDocument({will,person,onBack,onPrint,willDocRef}
               ))}
             </p>
 
+            {will.specialInstructions&&(
+              <>
+                <p className="mb-1">Special Non-Asset Instructions:</p>
+                <p className="text-justify mb-5 whitespace-pre-line">{will.specialInstructions}</p>
+              </>
+            )}
+
             <p className="text-justify mb-5">
               The {title} further stated that by this present Will, {subj}, the {title} revokes all the Wills made by {obj} earlier and further declares that this is {poss} last and final Will. The {title} is well conversant with English and has read the contents of this Will thoroughly.
             </p>

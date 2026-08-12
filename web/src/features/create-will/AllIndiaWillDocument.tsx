@@ -256,6 +256,13 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,w
               ))}
             </p>
 
+            {will.specialInstructions&&(
+              <>
+                <p className="mb-1">Special Non-Asset Instructions:</p>
+                <p className="text-justify mb-5 whitespace-pre-line">{will.specialInstructions}</p>
+              </>
+            )}
+
             <p className="text-justify mb-5">
               I have fully understood the contents, significance and implications contained in this WILL which has been executed out of my free will, and choice. There has been no misrepresentation in regard to this WILL and no one has any right to object and/or to challenge this WILL as this is culmination of my discretion and best for me to safeguard my interest and interest of my family.
             </p>
