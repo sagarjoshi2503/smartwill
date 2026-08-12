@@ -50,7 +50,7 @@ export default function GoanWillDocument({will,person,onBack,onPrint,willDocRef}
   // with their own real signature block. `noFooterSig` opts a page out.
   const Page = ({children,isLast,noFooterSig}:{children: ReactNode; isLast?: boolean; noFooterSig?: boolean})=>(
     <section className={`pdf-page${isLast?"":" pdf-page-break"}`}>
-      <div className="pdf-page-content">{children}</div>
+      <div className={`pdf-page-content${noFooterSig?"":" pdf-page-content-footer-gap"}`}>{children}</div>
       {!noFooterSig && <p className="pdf-sig-line pdf-sig-line-footer mb-0">Testator's Signature: __________ Witness 1: ______ Witness 2: ______</p>}
     </section>
   );
@@ -84,10 +84,17 @@ export default function GoanWillDocument({will,person,onBack,onPrint,willDocRef}
              ancestor doesn't depend on flex layout and prints reliably. A
              short section still consuming a full page is a confirmed,
              deliberate tradeoff. */
-          /* No extra padding-bottom reserved beyond min-height here — content
-             that already nearly fills a full page would otherwise be pushed
-             past the true printable height by that padding, spilling a
-             near-empty continuation page. */
+          /* pdf-sig-line-footer is position:absolute, which never reserves
+             space in normal flow — without this gap, a page whose own prose
+             happens to run long enough to reach the bottom on its own has
+             its last line(s) overlap the footer instead of sitting above
+             it. One footer line at 12pt/line-height 2 is ~8.5mm tall; 14mm
+             leaves clearance. Trade-off: on a page whose content is already
+             very close to a full page, this can push the tail end onto a
+             mostly-blank continuation page — accepted deliberately, since
+             that's far better than illegible overlapping text on a legal
+             document. */
+          .pdf-page-content-footer-gap{padding-bottom:14mm}
           .pdf-page{min-height:calc(297mm - 3cm - 3cm);position:relative}
           .pdf-page-break{break-after:page}
           .pdf-sig-line{break-inside:avoid}

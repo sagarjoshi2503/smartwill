@@ -119,7 +119,7 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,w
   // line — `noFooterSig` opts a page out of it.
   const Page = ({children,isLast,noFooterSig}:{children: ReactNode; isLast?: boolean; noFooterSig?: boolean})=>(
     <section className={`pdf-page${isLast?"":" pdf-page-break"}`}>
-      <div className="pdf-page-content">{children}</div>
+      <div className={`pdf-page-content${noFooterSig?"":" pdf-page-content-footer-gap"}`}>{children}</div>
       {!noFooterSig && <SigLine className="pdf-sig-line-footer"/>}
     </section>
   );
@@ -146,11 +146,17 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,w
              page. position:relative + the footer's position:absolute pins
              the signature line to the bottom of the page instead of
              wherever the content happens to end. */
-          /* No extra padding-bottom reserved beyond min-height here — content
-             that already nearly fills a full page (e.g. the residue/
-             signature/witnesses page) would otherwise be pushed past the
-             true printable height by that padding, spilling a near-empty
-             continuation page. */
+          /* pdf-sig-line-footer is position:absolute, which never reserves
+             space in normal flow — without this gap, a page whose own prose
+             happens to run long enough to reach the bottom on its own (not
+             just short pages padded out by min-height) has its last line(s)
+             overlap the footer instead of sitting above it. One footer line
+             at 12pt/line-height 2 is ~8.5mm tall; 14mm leaves clearance.
+             Trade-off: on a page whose content is already very close to a
+             full page, this can push the tail end onto a mostly-blank
+             continuation page — accepted deliberately, since that's far
+             better than illegible overlapping text on a legal document. */
+          .pdf-page-content-footer-gap{padding-bottom:14mm}
           .pdf-page{min-height:calc(297mm - 25.4mm - 25.4mm);position:relative}
           .pdf-page-break{break-after:page}
           /* Belt-and-braces: even if a page's own content still overflows,
