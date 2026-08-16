@@ -1,0 +1,27 @@
+1) show seperate url for admin
+2) remove client from client login
+3) Rows per page
+4) page number for pagination
+5) client will column header seperate color and add sorting
+6) save preferences
+7) different colors for cards on admin page
+8) Whats the use of verify\redeem code
+9) Update MCP as per latest API
+10) For adsmin show token usage and cost per thread
+11) language transation
+12) Input form in local language
+13) Date of birth instead of age
+14) Use Gender
+15) for trans ?
+16) max Validation on age - 150
+17) max character on Name - 50 
+18) % while assets
+19) in-laws in relation
+20) ID type for Guarding as trust\charity
+21) trust as beneficiary in drop down , and fields accordongly 
+22) Witness Adhar mandatory
+23) Review all mandatory fields and put star on mandatory fields
+24) all IDS should not be editable while review for admin
+25) If ID field in locked then no need to show star for mandatory fields
+26) Show ID field validation as Popup on generate will button
+27) generate PDF on serverside

@@ -21,8 +21,110 @@
 | **Analytics** | $0 | $0 |
 | **Auth (Google Sign-In)** | $0 | $0 |
 | **CDN & Storage** | $5–$20 | $60–$240 |
+| **SSL/TLS Certificate** | $0 | $0 |
 | **Monitoring & Logging** | $0–$50 | $0–$600 |
 | **TOTAL ESTIMATE** | **$203–$1,135** | **$2,440–$13,620** |
+
+---
+
+## Sourced Vendor Cost Sheet — INR/Month (18 Components)
+
+This section is built from actual vendor quotes gathered
+(`ForwardLegacyHostingCost.pdf`, 2026-08-16) rather than the estimated
+USD ranges in the rest of this document — treat the numbers here as the
+more authoritative current figures. All figures are **₹/month**.
+
+| SN | Component | Mandatory | Vercel Basic | Vercel Enterprise | Azure Basic | Azure Enterprise | Status |
+|---|---|---|---|---|---|---|---|
+| 1 | Domain Name | Yes | 0 | 0 | 0 | 0 | Paid annually |
+| 2 | Email Provider | Yes | 0 | 2,000 | 0 | 2,000 | |
+| 3 | SMS Provider | Yes | 1,475 | 6,372 | 1,475 | 6,372 | |
+| 4 | WhatsApp Provider | No | 575 | 3,450 | 575 | 3,450 | |
+| 5 | Code Repository + CI/CD | Yes | 400 | 2,000 | 400 | 2,000 | |
+| 6 | Website Hosting | Yes | 3,000 | 5,000 | 7,200 | 14,400 | |
+| 7 | Claude Subscription | Yes | 2,000 | 2,000 | 2,000 | 2,000 | |
+| 8 | Anthropic API Subscription | No | 3,000 | 6,000 | 3,000 | 6,000 | |
+| 9 | Database (MongoDB) | Yes | 8,300 | 22,800 | 4,670 | 7,790 | |
+| 10 | Vector DB (Mongo) | No | — | — | — | — | Included in #9's Atlas tier, see note below |
+| 11 | Payment Integration (Razorpay) | Yes | 0 | 0 | 0 | 0 | Transaction-fee model, not a subscription |
+| 12 | Embedding API (Voyage AI) | No | 3,000 | 6,000 | 3,000 | 6,000 | |
+| 13 | Google Auth | Yes | 0 | 0 | 0 | 0 | |
+| 14 | CDN | No | 0 | 0 | 0 | 0 | |
+| 15 | Monitoring | Yes | 0 | 0 | 5,465 | 10,000 | |
+| 16 | Firewall | Yes | 0 | 0 | 27,800 | 27,800 | |
+| 17 | SSL Certificates | No | 0 | 0 | 0 | 0 | |
+| 18 | Email ID | Yes | 150 | 450 | 150 | 450 | Paid |
+| | **Total per month** | | **₹21,900** | **₹56,072** | **₹55,735** | **₹88,262** | |
+
+**Annualized**: Vercel Basic ≈ **₹2,62,800/yr**, Vercel Enterprise ≈
+**₹6,72,864/yr**, Azure Basic ≈ **₹6,68,820/yr**, Azure Enterprise ≈
+**₹10,59,144/yr**.
+
+### What's driving the Vercel-vs-Azure gap
+
+- **Hosting** (#6): Azure runs 2.4x–2.9x Vercel's cost at both tiers —
+  consistent with `HOSTING_COST_ANALYSIS.md`'s existing Scenario 4 note
+  that AKS is more expensive than Vercel except at high scale.
+- **Database** (#9): inverted at Basic — Vercel-path quote (₹8,300) is
+  *higher* than the Azure-path quote (₹4,670), likely a different Atlas
+  region/tier bundled with each quote. Worth confirming both quotes are
+  for the same Atlas tier before treating this as a real Vercel-vs-Azure
+  difference.
+- **Monitoring** (#15) and **Firewall** (#16) are ₹0 on Vercel (bundled:
+  Vercel Analytics + built-in edge DDoS protection) but real, sizeable
+  costs on Azure (Azure Monitor/Log Analytics + Azure Firewall Standard) —
+  this is the single largest structural gap between the two paths:
+  ₹33,265/month (Basic) to ₹37,800/month (Enterprise) of Azure's total is
+  Monitoring + Firewall alone, with no Vercel equivalent.
+
+### Vendor selection notes (from the supporting comparison sheets)
+
+**Email** — MSG91 (₹0/month up to 5,000 emails, ₹2,000/month up to
+100,000) was selected over Resend ($20/mo for 50k) and Twilio SendGrid
+($19.95/mo for 50k). This is a **better choice than this document's
+earlier USD-only analysis assumed** (see Email section below, which
+modeled Resend as primary) — INR-billed MSG91 avoids forex exposure on a
+recurring cost and is cheaper per email at the 100k tier (₹2,000 ≈ $24
+for 100k vs. Resend's $20 for only 50k). **Recommend updating the Email
+section's "primary provider" assumption from Resend to MSG91** given
+INR billing removes currency risk on a recurring OpEx line.
+
+**SMS** — MSG91 (₹1,475/mo for 5,000 SMS ≈ ₹0.295/SMS; ₹6,372/mo for
+30,000 SMS ≈ ₹0.212/SMS) was selected over Twilio (India rates ≈ $0.0075
+≈ ₹0.62/SMS at the assumed ₹83/$ rate). **MSG91 is ~2–3x cheaper per SMS
+than Twilio for the India corridor** — same recommendation logic as
+Email: INR billing + lower per-unit cost. This document's SMS section
+below should be updated to reflect MSG91 as the cost baseline, not
+Twilio.
+
+**WhatsApp** — MSG91 at ₹575/month (5,000 messages included) or
+₹0.115/message pay-as-you-go beyond that (the ₹3,450 Enterprise figure =
+30,000 messages × ₹0.115). Note this MSG91 rate may or may not already
+include Meta's per-conversation WhatsApp Business Platform fee — confirm
+with MSG91 before treating ₹0.115/message as the fully-loaded cost, since
+Meta bills conversation fees separately from most BSPs' own markup.
+
+**Database** — the comparison sheet lists MongoDB / Supabase / Azure
+Cosmos as columns but **both Basic and Enterprise rows are blank** in the
+source PDF — this comparison was started but not completed. Since
+`api/CLAUDE.md` confirms MongoDB Atlas is the actual database in use
+(Supabase/Cosmos aren't integrated anywhere in the codebase), this
+comparison is exploratory only and doesn't affect the real cost — the
+₹8,300/₹22,800/₹4,670/₹7,790 figures in row 9 above are the ones that
+matter.
+
+### Suggested additional components (not in the 18)
+
+A few recurring costs this sheet doesn't itemize, worth adding if the
+Azure/AKS path is pursued or as the product matures:
+
+| Component | Why it's missing | Est. ₹/month |
+|---|---|---|
+| **Azure Container Registry** | AKS image builds push to `smartwillacr` (`api/CLAUDE.md`) — a real, separate Azure resource from AKS compute (#6) and not folded into any existing row | ₹400–₹800 |
+| **Azure Key Vault** | Already in use for secrets (Secrets Store CSI driver, per `api/CLAUDE.md`) — cheap but non-zero, and currently uncounted | ₹50–₹150 |
+| **Legal-document backup/archival** | Wills are legal instruments that plausibly need retention beyond MongoDB's standard backup window (e.g., regulatory/dispute retention) — a cold-storage tier (Azure Blob Archive / S3 Glacier-equivalent) is worth budgeting even at low volume | ₹200–₹1,000 (scales with stored Wills) |
+| **Meta WhatsApp Business verification/template fees** | Typically one-time or per-template, not monthly — but budget for it separately since it's easy to miss if only tracking MSG91's per-message rate | One-time, not recurring |
+| **Vercel/Azure paid support plan** | Only relevant at Enterprise scale — Azure's Developer/Standard support tiers or Vercel's dedicated support start around $29–$100/month if an SLA is needed beyond community support | ₹2,400–₹8,300 (Enterprise-tier only) |
 
 ---
 
@@ -55,6 +157,23 @@
 #### Current Configuration
 - **Tier**: M0 (Shared/Free)
 - **Storage**: 512 MB (sufficient for ~10,000 Wills with metadata)
+
+#### Per-Will Storage Size
+
+Each Will is stored as one document holding the full `WillState` blob
+(testator, executor, guardian, assets, beneficiaries, witnesses, residue
+entries, etc. — the entire wizard state, since the frontend saves it as a
+single unified object regardless of `willType`), plus a tiny (<1 KB)
+companion pointer document in `admin_wills` once submitted for review.
+
+| Scenario | Size |
+|---|---|
+| **Typical Will** (most optional fields skipped, 1–2 items per repeatable section) | ~5–15 KB |
+| **Worst case** (every optional field filled; 5 items in each of the 7 asset categories for both All India and Goan shapes; 10 beneficiaries; 10 residue entries; 3,000-char special instructions; full addresses/IDs everywhere) | ~36 KB JSON → **~40–42 KB BSON on disk** (BSON runs ~10–15% larger than compact JSON due to type/length prefixes) |
+
+**Capacity check**: 512 MB / ~40 KB worst-case ≈ **~12,800 Wills** even in the
+worst case, or well beyond that at typical sizes — confirms the ~10,000
+Wills estimate above is conservative, not optimistic.
 
 | Cluster Tier | Monthly | Annual | Storage | Details |
 |---|---|---|---|---|
@@ -119,18 +238,28 @@
 ### 4. **Transactional Email**
 
 #### A. Resend (Primary)
-- **Tier**: Free / Paid
+- **Tier**: Free / Pro
 - **Free Tier**: 100 emails/day (3,000/month) included
-- **Paid**: $20/month + $0.25 per email above 3,000
+- **Pro**: $20/month, includes 50,000 emails; overage billed in 1,000-email
+  buckets at ~$0.0008/email (~$0.90 per 1,000) beyond that
+  ([source: Resend pricing](https://resend.com/docs/knowledge-base/what-is-resend-pricing))
+
+*Corrected 2026-08-16 — this section previously modeled overage at
+$0.25/email (a ~300x overstatement vs. Resend's actual per-email rate);
+the table below uses the real pricing.*
 
 | Emails/Month | Monthly Cost | Annual Cost | Use Case |
 |---|---|---|---|
 | **≤3,000** | $0 | $0 | Will submission confirmations, OTP (limited) |
-| **~5,000** | $20 + $0.25×(5000–3000) = $20.50 | $246 | Moderate legal notifications |
-| **~10,000** | $20 + $0.25×(10000–3000) = $21.75 | $261 | Higher volume notifications |
-| **~20,000** | $20 + $0.25×(20000–3000) = $24.25 | $291 | Full integration + admin alerts |
+| **~5,000** | $0 (free tier: 3,000/mo cap — needs Pro once past this) or $20 flat on Pro | $0–$240 | Moderate legal notifications |
+| **~10,000** | $20 (within Pro's 50,000 included) | $240 | Higher volume notifications |
+| **~50,000** | $20 (within Pro's included allowance) | $240 | Full integration + admin alerts |
+| **~65,000** | $20 + ~$0.90×15 = ~$33.50 | ~$402 | High-volume production |
 
-**Estimated Cost**: **$0–$25/month ($0–$300/year)**
+**Estimated Cost**: **$0–$20/month ($0–$240/year)** for anything under ~50,000
+emails/month — Pro's included allowance comfortably covers this app's
+per-Will email volume (confirmation, OTP, admin notify, status/payment
+receipts) well past 3,000 Wills/month; see Scenario 5 below.
 
 #### B. SendGrid (Fallback)
 - **Free Tier**: 100 emails/day (3,000/month)
@@ -279,6 +408,26 @@
 
 ---
 
+### 13. **SSL/TLS Certificate**
+
+#### Vercel (Primary Hosting)
+- **Provider**: Let's Encrypt, auto-issued and auto-renewed for any custom domain (`forwardlegacy.co.in`) attached to the project
+- **Included on**: every tier, including the free Hobby tier — no upgrade required
+
+**Cost**: **$0/month** (no purchase needed)
+
+#### AKS (Scenario 4, if ever migrated)
+- **Provider**: Let's Encrypt via `cert-manager` on the ingress controller — same free, auto-renewing model
+- **Cost**: **$0/month**
+
+#### Optional: Commercial CA / EV Certificate
+- Only relevant if a paid Certificate Authority (e.g., DigiCert, GlobalSign) or Extended Validation (EV) cert is specifically required — not needed for SmartWill's stack, and EV's old "green bar" browser trust indicator is no longer shown by major browsers anyway
+- **Typical cost if pursued**: $50–$300/year (DV/OV) or $150–$1,000+/year (EV, wildcard)
+
+**Estimated Cost**: **$0/month ($0/year)** — no SSL purchase required under the current or AKS deployment paths
+
+---
+
 ## Total Monthly & Annual Costs
 
 ### Scenario 1: Minimal Viable Product (Bootstrap/MVP)
@@ -356,6 +505,70 @@ If migrating from Vercel to **Azure Kubernetes Service (AKS)**:
 | **TOTAL** | **$311–$411 + Payment %** | **$3,739–$5,179 + Payment %** |
 
 **Note**: AKS is more expensive than Vercel for small/medium deployments; only economical at scale (>10,000 requests/day).
+
+---
+
+### Scenario 5: High-Volume Will Creation (100 Wills/Day, ~3,000/Month)
+
+This models cost driven by **Will-creation throughput** specifically
+(distinct from Scenario 3's "1,000+ active users" framing) — useful if
+100 Wills/day is the actual funnel target rather than a general user-count
+guess.
+
+**Assumptions**:
+- ~15–20 API calls per Will (wizard step autosaves, asset CRUD, PDF
+  generation, list/status polling) → ~45,000–60,000 calls/month from Will
+  creation alone, plus incidental traffic (landing pages, admin dashboard)
+  — total comfortably under Vercel Pro's 10M included edge requests/month
+  and 1,000 included function GB-hours
+  ([source: Vercel pricing](https://checkthat.ai/brands/vercel/pricing))
+- Storage growth ≈ 3,000 Wills/month × ~15 KB typical size (see MongoDB
+  section above) ≈ 45 MB/month — crosses M0's 512 MB free cap within
+  ~11 months, and at production/revenue-generating volume the lack of
+  backups on M0 is a real risk regardless of capacity, so **M2 is the
+  realistic floor here, not M0**
+- Chatbot engagement varies by how many testators actually use it —
+  modeled as Medium (steady) to Heavy (most testators chat) usage
+- Voyage AI scales linearly with Wills indexed: ~500 embedding calls/Will
+  (per the existing Light/Medium/Heavy ratios above) × 3,000 = 1,500,000
+  embeddings/month
+- ~4–5 transactional emails per Will (confirmation, OTP, admin notify,
+  status change, payment receipt) × 3,000 ≈ 12,000–15,000 emails/month —
+  within Resend Pro's 50,000 included, so **flat $20/month**, not the
+  scaled overage the old $0.25/email figure implied
+- ~2–3 SMS per Will (OTP + reminder) × 3,000 ≈ 6,000–9,000 SMS/month
+- Payment conversion is the one true unknown — modeled at two conversion
+  rates below rather than assumed
+
+| Component | Monthly (Low) | Monthly (High) | Notes |
+|---|---|---|---|
+| Vercel Pro | $20 | $40 | Included allowances cover this traffic; upper end allows headroom for function-hour overage on chatbot/PDF calls |
+| MongoDB M2 | $9 | $9 | 10 GB comfortably covers years of growth at this rate; recommended for backups at this volume regardless of capacity |
+| Anthropic Claude (chatbot) | $40 | $160 | Medium → Heavy usage band, depending on chatbot adoption |
+| Voyage AI (RAG indexing) | $30 | $30 | 1.5M embeddings/month |
+| Resend Email | $20 | $20 | Flat — 12–15K emails/month is well inside Pro's 50K included |
+| Twilio SMS | $60 | $90 | 6K–9K SMS/month |
+| Domain | $1 | $1 | |
+| Monitoring (Sentry recommended at this volume) | $0 | $50 | |
+| CDN & Storage | $0 | $20 | Mostly covered by Vercel Pro's included 1 TB transfer |
+| **Subtotal** | **$180** | **$420** | **excludes payment processing fees** |
+
+**Annual subtotal**: **$2,160–$5,040/year** (excluding payment fees)
+
+**Payment processing, at two conversion assumptions** (₹999 avg plan price,
+2% Razorpay fee):
+
+| Conversion of 3,000 Wills/month → paid | Monthly Revenue | Razorpay Fee (~2%) |
+|---|---|---|
+| 30% (900 paid) | ₹899,100 (~$10,800) | ~₹17,980 (~$216) |
+| 60% (1,800 paid) | ₹1,798,200 (~$21,600) | ~₹35,960 (~$430) |
+
+**All-in monthly estimate**: **~$400–$850/month** ($4,800–$10,200/year)
+depending on chatbot adoption and payment conversion — broadly in line
+with Scenario 3's "Scale Production" band, since 100 Wills/day and
+1,000+ active users represent similar real-world throughput; this
+scenario just derives the number from the Will-creation funnel directly
+instead of a user-count proxy.
 
 ---
 
@@ -444,6 +657,7 @@ If migrating from Vercel to **Azure Kubernetes Service (AKS)**:
 | **MVP** | $53–$110 | $636–$1,320 | Sufficient for <500 users |
 | **Growth** | $110–$300 | $1,320–$3,600 | Scaling to 1,000+ users |
 | **Production Scale** | $421–$681 | $5,052–$8,832 | 1,000+ active users |
+| **High-Volume (100 Wills/day, ~3,000/mo)** | $180–$420 (+$216–$430 payment fees) | $2,160–$5,040 (+payment fees) | Will-creation-funnel view; ~$400–$850/mo all-in |
 | **Enterprise** | $1,000+ | $12,000+ | Dedicated support, custom infra |
 
 **Most likely current state** (Aug 2026): **MVP tier, ~$100–$150/month** = **$1,200–$1,800/year**
@@ -467,6 +681,7 @@ To refine this estimate further, you'll need:
 
 ## Files & References
 
+- **Sourced vendor quotes (INR)**: `ForwardLegacyHostingCost.pdf` — see "Sourced Vendor Cost Sheet" section above
 - **Deployment**: `vercel.json` (6 services), `docker-compose.yml` (local orchestration)
 - **Database**: MongoDB Atlas M0 (free tier, `MONGODB_URI` in config)
 - **Config Files**:
@@ -477,5 +692,5 @@ To refine this estimate further, you'll need:
 
 ---
 
-**Last Updated**: August 14, 2026  
+**Last Updated**: August 16, 2026  
 **Prepared for**: SmartWill / Forward Legacy team
