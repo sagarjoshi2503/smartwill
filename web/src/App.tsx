@@ -33,15 +33,16 @@ import { allocTotal } from "./utils/allocation";
 import { authFetch } from "./utils/apiBase";
 import { clearAuthToken } from "./utils/auth";
 import { getMissingIdFields } from "./utils/willValidation";
+import { extractIdFields } from "./utils/willIdFields";
 import { trackPageview } from "./utils/analytics";
 import { FLAGS } from "./flags";
 import useFlag from "./hooks/useFlag";
 import {
-  ADMIN_PATH, API_WILL_SAVE, apiPathSendBack,
+  ADMIN_PATH, API_WILL_SAVE, apiPathSendBack, apiPathWillPdf,
   OTP_LENGTH, STATUS_DRAFT, STATUS_PENDING_REVIEW, STATUS_COMPLETED,
-  SEND_BACK_REDIRECT_MS, DRAFT_RESET_MS, WIZARD_REDIRECT_MS,
+  SEND_BACK_REDIRECT_MS, DRAFT_RESET_MS, WIZARD_REDIRECT_MS, ANNEX_PDF_URL_REVOKE_MS,
   MSG_VIEW_ONLY, MSG_SAVING, BTN_SAVE_AS_DRAFT, ROLE_ADMIN, ROLE_TESTATOR,
-  errSendBackTmpl, ERR_SEND_BACK, errSaveDraftTmpl, ERR_SAVE_DRAFT, BTN_LOGOUT,
+  errSendBackTmpl, ERR_SEND_BACK, errSaveDraftTmpl, ERR_SAVE_DRAFT, ERR_GENERATE_PDF, BTN_LOGOUT,
   BTN_ADMIN_PORTAL, BTN_CREATE_YOUR_WILL, LBL_WILL_DRAFTING, MSG_DRAFT_SAVED, MSG_DRAFT_FAILED,
   BTN_SEND_BACK_TO_TESTATOR, LBL_SEND_BACK_FOR_CHANGES, PH_SEND_BACK_COMMENTS, MSG_SENDING,
   BTN_SEND_BACK, BTN_CANCEL, BTN_GENERATE_WILL, ERR_GENERATE_WILL_MISSING_IDS, BTN_DISMISS,
@@ -414,19 +415,30 @@ export default function SmartWill() {
     setShowGenerateInstructions(true);
   };
 
+  // Shared by handleSaveDraft and the PDF-generation handlers below — both
+  // need a fresh, server-confirmed willId before they can proceed (the PDF
+  // endpoint fetches everything but ID fields from the saved draft, so a
+  // draft must exist and be current). Returns the willId directly from the
+  // response rather than relying on editingWillId state, which wouldn't be
+  // updated yet in the same tick.
+  const saveDraftAndGetWillId = async (): Promise<string> => {
+    const res = await authFetch(ROLE_TESTATOR, API_WILL_SAVE, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ will, testatorEmail: will.testator.email, status: STATUS_DRAFT, willId: editingWillId, willType }),
+    });
+    const isJson = res.headers.get("content-type")?.includes("application/json");
+    const data = isJson ? await res.json() : null;
+    if(!res.ok) throw new Error(data?.error || errSaveDraftTmpl(res.status));
+    setEditingWillId(data.willId);
+    return data.willId as string;
+  };
+
   // Save as draft
   const handleSaveDraft = async () => {
     setDraftStatus("saving"); setDraftError("");
     try {
-      const res = await authFetch(ROLE_TESTATOR, API_WILL_SAVE, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ will, testatorEmail: will.testator.email, status: STATUS_DRAFT, willId: editingWillId, willType }),
-      });
-      const isJson = res.headers.get("content-type")?.includes("application/json");
-      const data = isJson ? await res.json() : null;
-      if(!res.ok) throw new Error(data?.error || errSaveDraftTmpl(res.status));
-      setEditingWillId(data.willId);
+      await saveDraftAndGetWillId();
       setDraftStatus("done");
       setTimeout(()=>setDraftStatus("idle"), DRAFT_RESET_MS);
     } catch (err) {
@@ -436,8 +448,68 @@ export default function SmartWill() {
     }
   };
 
-  // Print / Download
+  // Print / Download — Goan and the generic successiondeed/customwill
+  // preview still use the browser's own print-to-PDF (out of scope for
+  // server-side generation for now).
   const handlePrint = useCallback(() => window.print(), []);
+
+  // All India Will — server-generated PDF. ID Numbers are never persisted
+  // (see api/_app/shared/redaction.py), so every generation re-saves the
+  // current draft first (guaranteeing the DB copy's array order/length
+  // matches what's about to be sent) and sends only the ID fields
+  // alongside the willId; the API fetches the rest from the saved draft.
+  const [pdfStatus, setPdfStatus] = useState<"idle" | "generating" | "error">("idle");
+  const [pdfError, setPdfError] = useState("");
+
+  const fetchWillPdfBlob = async (): Promise<Blob> => {
+    const willId = await saveDraftAndGetWillId();
+    const res = await authFetch(ROLE_TESTATOR, apiPathWillPdf(willId), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ idFields: extractIdFields(will) }),
+    });
+    if(!res.ok) {
+      const isJson = res.headers.get("content-type")?.includes("application/json");
+      const data = isJson ? await res.json() : null;
+      throw new Error(data?.error || ERR_GENERATE_PDF);
+    }
+    return res.blob();
+  };
+
+  const handleGeneratePdfAndPrint = useCallback(async () => {
+    setPdfStatus("generating"); setPdfError("");
+    try {
+      const blob = await fetchWillPdfBlob();
+      const url = URL.createObjectURL(blob);
+      window.open(url, "_blank");
+      setTimeout(()=>URL.revokeObjectURL(url), ANNEX_PDF_URL_REVOKE_MS);
+      setPdfStatus("idle");
+    } catch (err) {
+      setPdfStatus("error");
+      setPdfError(err instanceof Error ? err.message : ERR_GENERATE_PDF);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [will, editingWillId, willType]);
+
+  const handleGeneratePdfAndDownload = useCallback(async () => {
+    setPdfStatus("generating"); setPdfError("");
+    try {
+      const blob = await fetchWillPdfBlob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "Will.pdf";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(()=>URL.revokeObjectURL(url), ANNEX_PDF_URL_REVOKE_MS);
+      setPdfStatus("idle");
+    } catch (err) {
+      setPdfStatus("error");
+      setPdfError(err instanceof Error ? err.message : ERR_GENERATE_PDF);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [will, editingWillId, willType]);
 
   // "See Will Pricing Options" (Services page) sends the visitor to the Home
   // page's Plan Options section specifically, rather than just the top of
@@ -458,7 +530,8 @@ export default function SmartWill() {
 
   if(showWillDoc) return willType==="allindia" ? (
     <AllIndiaWillDocument will={will} residualBene={residualBene}
-      onBack={()=>setShowWillDoc(false)} onPrint={handlePrint} willDocRef={willDocRef} />
+      onBack={()=>setShowWillDoc(false)} onPrint={handleGeneratePdfAndPrint} onDownload={handleGeneratePdfAndDownload}
+      pdfStatus={pdfStatus} pdfError={pdfError} willDocRef={willDocRef} />
   ) : willType==="goan" ? (
     <GoanDocumentsView will={will} onBack={()=>setShowWillDoc(false)} onPrint={handlePrint} />
   ) : (

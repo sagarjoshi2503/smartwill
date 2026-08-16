@@ -15,11 +15,14 @@ const occupationOf = (it: {occupation: string; occupationOther: string}) => it.o
 // template — wording, clause order, and asset sections (A-E) match the PDF
 // verbatim, with blanks filled from the collected data. Used only when
 // willType==="allindia"; other Will types keep using the generic WillDocument.
-export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,willDocRef}:{
+export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,onDownload,pdfStatus,pdfError,willDocRef}:{
   will: WillState;
   residualBene: Beneficiary | undefined;
   onBack: () => void;
   onPrint: () => void;
+  onDownload: () => void;
+  pdfStatus: "idle" | "generating" | "error";
+  pdfError: string;
   willDocRef: MutableRefObject<HTMLDivElement | null>;
 }){
   const {testator,executor,guardian,allIndiaAssets,allIndiaResidue,witnesses}=will;
@@ -185,13 +188,17 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,w
           <span className="text-slate-900 font-bold serif">Forward Legacy — All India Will Document</span>
         </div>
         <div className="flex items-center gap-3">
-          <span className="text-slate-400 text-[11px] hidden md:inline">In the print dialog, turn off "Headers and footers" so no URL or date is added.</span>
+          {pdfStatus==="error" ? (
+            <span className="text-red-500 text-[11px] hidden md:inline">{pdfError}</span>
+          ) : (
+            <span className="text-slate-400 text-[11px] hidden md:inline">Print and Download generate the actual PDF from the server — this may take a moment.</span>
+          )}
           <div className="flex items-center gap-2.5">
-            <button onClick={onPrint} className="flex items-center gap-1.5 bg-slate-700 hover:bg-slate-600 text-white rounded-lg px-3.5 py-2 text-sm transition-colors">
-              <Printer size={14}/>Print
+            <button onClick={onPrint} disabled={pdfStatus==="generating"} className="flex items-center gap-1.5 bg-slate-700 hover:bg-slate-600 disabled:opacity-60 disabled:cursor-not-allowed text-white rounded-lg px-3.5 py-2 text-sm transition-colors">
+              <Printer size={14}/>{pdfStatus==="generating"?"Generating…":"Print"}
             </button>
-            <button onClick={onPrint} className="flex items-center gap-1.5 bg-brand hover:bg-brand-dark text-[#ffffff] rounded-lg px-3.5 py-2 text-sm font-semibold transition-colors">
-              <Download size={14}/>Download PDF
+            <button onClick={onDownload} disabled={pdfStatus==="generating"} className="flex items-center gap-1.5 bg-brand hover:bg-brand-dark disabled:opacity-60 disabled:cursor-not-allowed text-[#ffffff] rounded-lg px-3.5 py-2 text-sm font-semibold transition-colors">
+              <Download size={14}/>{pdfStatus==="generating"?"Generating…":"Download PDF"}
             </button>
           </div>
         </div>

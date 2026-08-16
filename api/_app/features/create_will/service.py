@@ -6,12 +6,15 @@ from pymongo.database import Database
 from _app.core.config import Settings
 from _app.core.exceptions import AppError
 from _app.features.create_will import repository
+from _app.features.create_will.pdf_generator import generate_all_india_will_pdf
+from _app.features.create_will.pdf_merge import merge_id_fields
 from _app.shared import email
 from _app.shared.constants import (
     FLD_ADMIN_COMMENTS, FLD_ADMIN_EMAIL, FLD_ASSIGNED_AT, FLD_CREATED_AT, FLD_CREATED_BY, FLD_FULL_LEGAL_NAME,
     FLD_FULL_NAME, FLD_PAYMENT_AMOUNT, FLD_PAYMENT_STATUS, FLD_STATUS, FLD_TESTATOR, FLD_TESTATOR_EMAIL,
     FLD_UPDATED_AT, FLD_WILL, FLD_WILL_ID, FLD_WILL_TYPE, HTTP_BAD_REQUEST, HTTP_FORBIDDEN, HTTP_NOT_FOUND,
-    BAD_TESTATOR_EMAIL, BAD_WILL_STATUS, BAD_WILL_TYPE, STATUS_DRAFT, STATUS_PENDING_REVIEW, WILL_VISIBLE_DAYS,
+    BAD_TESTATOR_EMAIL, BAD_WILL_STATUS, BAD_WILL_TYPE, PDF_UNSUPPORTED_WILL_TYPE, STATUS_DRAFT,
+    STATUS_PENDING_REVIEW, WILL_VISIBLE_DAYS,
     UNKNOWN_NAME, WILL_ACCESS_DENIED, WILL_REQUIRED, WILL_LOCKED, WILL_NOT_FOUND, SUBMIT_SUBJECT_TMPL,
 )
 from _app.shared.redaction import redact_id_numbers
@@ -172,6 +175,20 @@ def get_will_for_edit(db: Database, will_id: str, email: str) -> dict:
         FLD_PAYMENT_STATUS: document.get(FLD_PAYMENT_STATUS) or PaymentStatus.NOT_PAID.value,
         FLD_PAYMENT_AMOUNT: document.get(FLD_PAYMENT_AMOUNT),
     }
+
+
+def generate_will_pdf(db: Database, will_id: str, id_fields: dict, testator_email: str) -> bytes:
+    testator_email = normalize_email(testator_email)
+    document = repository.find_will_by_id(db, will_id)
+    if not document:
+        raise AppError(HTTP_NOT_FOUND, WILL_NOT_FOUND)
+    if normalize_email(document.get(FLD_TESTATOR_EMAIL)) != testator_email:
+        raise AppError(HTTP_FORBIDDEN, WILL_ACCESS_DENIED)
+    if document.get(FLD_WILL_TYPE) != WillType.ALL_INDIA.value:
+        raise AppError(HTTP_BAD_REQUEST, PDF_UNSUPPORTED_WILL_TYPE)
+
+    merged_will = merge_id_fields(document.get(FLD_WILL) or {}, id_fields or {})
+    return generate_all_india_will_pdf(merged_will)
 
 
 def delete_will_for_testator(db: Database, will_id: str, email: str) -> dict:

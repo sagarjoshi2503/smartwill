@@ -114,6 +114,11 @@ WILL_ACCESS_DENIED = "You do not have permission to access this Will."
 WILL_LOCKED = "This Will is pending review and cannot be edited."
 COMMENTS_REQUIRED = "Enter comments explaining what needs to change."
 
+PDF_UNSUPPORTED_WILL_TYPE = "PDF generation is only available for All India Wills."
+ID_FIELDS_LENGTH_MISMATCH = (
+    "The submitted ID numbers don't match the saved Will's structure. Please save the Will again and retry."
+)
+
 RAZORPAY_NOT_CONFIGURED = "Payments are not configured on the server (missing Razorpay credentials)."
 RAZORPAY_INVALID_AMOUNT = f"Amount must be at least {RAZORPAY_MIN_AMOUNT_PAISE} paise."
 RAZORPAY_ORDER_FAILED = "Could not create the payment order. Please try again."
@@ -181,6 +186,7 @@ FLD_GOAN_ASSETS = "goanAssets"
 FLD_GOAN_RESIDUE = "goanResidue"
 FLD_GOAN_WITNESSES = "goanWitnesses"
 FLD_GOAN_DEED_WITNESSES = "goanDeedWitnesses"
+FLD_ID_FIELDS = "idFields"
 FLD_AMOUNT = "amount"
 FLD_CURRENCY = "currency"
 FLD_RECEIPT = "receipt"

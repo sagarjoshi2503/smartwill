@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Request, Response
 from pymongo.database import Database
 
 from _app.core.config import Settings, get_settings
@@ -9,7 +9,8 @@ from _app.features.create_will.schemas import (
     DeleteWillResponse, ErrorResponse, SaveWillResponse, TestatorWillsResponse, WillDetailResponse,
 )
 from _app.shared.constants import (
-    HTTP_BAD_REQUEST, HTTP_CREATED, HTTP_FORBIDDEN, HTTP_SERVER_ERROR, HTTP_NOT_FOUND, HTTP_UNAUTHORIZED,
+    FLD_ID_FIELDS, HTTP_BAD_REQUEST, HTTP_CREATED, HTTP_FORBIDDEN, HTTP_SERVER_ERROR, HTTP_NOT_FOUND,
+    HTTP_UNAUTHORIZED,
 )
 
 router = APIRouter(prefix="/api/will", tags=["create-will"])
@@ -54,6 +55,27 @@ async def my_wills(db: Database = Depends(get_db), testator_email: str = Depends
 )
 async def get_will(will_id: str, db: Database = Depends(get_db), testator_email: str = Depends(get_current_testator)):
     return service.get_will_for_edit(db, will_id, testator_email)
+
+
+@router.post(
+    "/{will_id}/pdf",
+    responses={**ERROR_RESPONSES, HTTP_FORBIDDEN: {"model": ErrorResponse}, HTTP_NOT_FOUND: {"model": ErrorResponse}},
+    summary="Generate the All India Will as a PDF — everything except idFields is loaded from the saved draft",
+)
+async def generate_pdf(
+    will_id: str, request: Request, db: Database = Depends(get_db),
+    testator_email: str = Depends(get_current_testator),
+):
+    try:
+        body = await request.json()
+    except Exception:
+        body = None
+    id_fields = body.get(FLD_ID_FIELDS) if isinstance(body, dict) else None
+    pdf_bytes = service.generate_will_pdf(db, will_id, id_fields or {}, testator_email)
+    return Response(
+        content=pdf_bytes, media_type="application/pdf",
+        headers={"Content-Disposition": 'inline; filename="Will.pdf"'},
+    )
 
 
 @router.delete(

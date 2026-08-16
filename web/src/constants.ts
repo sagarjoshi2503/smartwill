@@ -40,6 +40,7 @@ export const API_OTP_VERIFY = "/api/auth/otp/verify";
 export const API_CONTACT_SEND = "/api/contact-us/send";
 export const API_CONTACT_INFO = "/api/contact-us/info";
 export const apiPathWill = (willId: string): string => `/api/will/${willId}`;
+export const apiPathWillPdf = (willId: string): string => `/api/will/${willId}/pdf`;
 
 // --- Gift a Will voucher feature ---
 export const API_GIFT_VOUCHER_ORDER = "/api/gift-voucher/order";
@@ -121,6 +122,8 @@ export const MSG_SAVING = "Saving…";
 // --- Confirmation / error copy ---
 export const CONFIRM_DELETE_WILL = "Delete this Will? This cannot be undone.";
 export const ERR_LOAD_WILL = "Could not load this Will.";
+export const MSG_GENERATING_PDF = "Generating…";
+export const ERR_GENERATE_PDF = "Could not generate the Will PDF. Please try again.";
 export const ERR_DELETE_WILL = "Could not delete this Will.";
 export const ERR_SEND_OTP = "Could not send OTP.";
 export const ERR_VERIFY_OTP = "Could not verify OTP.";
