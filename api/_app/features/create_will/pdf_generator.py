@@ -33,21 +33,28 @@ _MARGIN = 25.4 * mm
 _FOOTER_RESERVE = 10 * mm
 _FOOTER_TEXT = "Testator's Signature: __________ Witness 1: ______ Witness 2: ______"
 
+# Single font spec for the entire document — no bold anywhere, including
+# the per-page signature footer, which uses this exact font/size (not its
+# own smaller/different one) so it reads as part of the same document.
+_FONT_NAME = "Times-Roman"
+_FONT_SIZE = 12
+_LEADING = 20
+
 _env = Environment(trim_blocks=True, lstrip_blocks=True)
 _env.filters["yamlstr"] = json.dumps
 
 _STYLES = {
     "title": ParagraphStyle(
-        "title", fontName="Times-Bold", fontSize=16, leading=20, alignment=TA_CENTER, spaceAfter=14,
+        "title", fontName=_FONT_NAME, fontSize=_FONT_SIZE, leading=_LEADING, alignment=TA_CENTER, spaceAfter=14,
     ),
     "heading": ParagraphStyle(
-        "heading", fontName="Times-Bold", fontSize=13, leading=18, alignment=TA_CENTER, spaceAfter=14,
+        "heading", fontName=_FONT_NAME, fontSize=_FONT_SIZE, leading=_LEADING, alignment=TA_CENTER, spaceAfter=14,
     ),
     "subheading": ParagraphStyle(
-        "subheading", fontName="Times-Roman", fontSize=12, leading=20, spaceAfter=4,
+        "subheading", fontName=_FONT_NAME, fontSize=_FONT_SIZE, leading=_LEADING, spaceAfter=4,
     ),
     "paragraph": ParagraphStyle(
-        "paragraph", fontName="Times-Roman", fontSize=12, leading=20, alignment=TA_JUSTIFY, spaceAfter=10,
+        "paragraph", fontName=_FONT_NAME, fontSize=_FONT_SIZE, leading=_LEADING, alignment=TA_JUSTIFY, spaceAfter=10,
     ),
 }
 
@@ -57,9 +64,10 @@ def _draw_signature_footer(canvas, doc) -> None:
     the real, server-side equivalent of the browser preview's CSS
     `position:absolute;bottom:0` trick (AllIndiaWillDocument.tsx): the
     testator/witness attestation line is a legal requirement on every
-    physical page, not just the final signature page."""
+    physical page, not just the final signature page. Uses the exact same
+    font/size/family as the rest of the document (_FONT_NAME/_FONT_SIZE)."""
     canvas.saveState()
-    canvas.setFont("Times-Roman", 10)
+    canvas.setFont(_FONT_NAME, _FONT_SIZE)
     canvas.drawString(doc.leftMargin, doc.bottomMargin + 2 * mm, _FOOTER_TEXT)
     canvas.restoreState()
 
