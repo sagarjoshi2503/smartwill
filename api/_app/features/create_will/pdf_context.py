@@ -337,4 +337,5 @@ def build_pdf_context(will: dict) -> dict:
         "executor_label_suffix": " / Representative" if executor_type == "org" else "",
         "show_guardian": bool(guardian.get("hasMinors")),
         "guardian_appointment_clause": _guardian_appointment_clause(guardian),
+        "guardian_name": v(guardian, "name"),
     }

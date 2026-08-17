@@ -178,11 +178,11 @@
 - type: heading
   text: {{ "Guardian's Consent" | upper | yamlstr }}
 - type: paragraph
-  text: {{ ("I, " ~ blank ~ ", being the Guardian mentioned, have read the contents of the Will relating to the minor beneficiaries and affirm my consent to act as the Guardian and manage their inheritance in the best possible manner until they attain majority.") | yamlstr }}
+  text: {{ ("I, " ~ guardian_name ~ ", being the Guardian mentioned, have read the contents of the Will relating to the minor beneficiaries and affirm my consent to act as the Guardian and manage their inheritance in the best possible manner until they attain majority.") | yamlstr }}
 - type: paragraph
-  text: {{ ("Place and Date: " ~ blank) | yamlstr }}
+  text: {{ ("Place and Date: " ~ testator_sign_place ~ ", " ~ execution_date_str) | yamlstr }}
 - type: paragraph
-  text: {{ ("Name of the Guardian: " ~ blank) | yamlstr }}
+  text: {{ ("Name of the Guardian: " ~ guardian_name) | yamlstr }}
 - type: paragraph
   text: {{ ("Signature of the Guardian: " ~ blank) | yamlstr }}
 {% endif %}

@@ -326,10 +326,10 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,o
               <Page isLast>
                 <h1 className="text-center text-lg font-bold uppercase mb-6">Guardian's Consent</h1>
                 <p className="text-justify mb-5">
-                  I, <strong>{blank}</strong>, being the Guardian mentioned, have read the contents of the Will relating to the minor beneficiaries and affirm my consent to act as the Guardian and manage their inheritance in the best possible manner until they attain majority.
+                  I, <strong>{guardian.name||blank}</strong>, being the Guardian mentioned, have read the contents of the Will relating to the minor beneficiaries and affirm my consent to act as the Guardian and manage their inheritance in the best possible manner until they attain majority.
                 </p>
-                <p className="mb-1">Place and Date: <strong>{blank}</strong></p>
-                <p className="mb-1">Name of the Guardian: <strong>{blank}</strong></p>
+                <p className="mb-1">Place and Date: <strong>{testator.signPlace||blank}, {executionDateStr(testator)}</strong></p>
+                <p className="mb-1">Name of the Guardian: <strong>{guardian.name||blank}</strong></p>
                 <p>Signature of the Guardian: {blank}</p>
               </Page>
             </>
