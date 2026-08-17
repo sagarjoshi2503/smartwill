@@ -110,7 +110,7 @@ def v(d: dict, key: str, fallback: str = BLANK) -> str:
 
 def _national(d: dict, key: str = "nationality") -> str:
     value = (d or {}).get(key)
-    return f"{esc(value)} National" if value else BLANK
+    return esc(value) if value else BLANK
 
 
 def _filled(items) -> list:
@@ -141,9 +141,14 @@ def _witness_particular(index: int, w: dict) -> str:
 
 
 def _witness_particulars_text(witnesses: list) -> str:
+    # Each witness's particulars sit on their own line (a "<br/>" separator
+    # is real ReportLab Paragraph markup, not escaped user data — it's only
+    # ever inserted here, never built from a field value) — the last one
+    # is followed by a space instead, since "make my last and final WILL."
+    # continues straight on from it rather than starting a new line.
     parts = []
     for i, w in enumerate(witnesses):
-        sep = "; " if i < len(witnesses) - 1 else " "
+        sep = "<br/>" if i < len(witnesses) - 1 else " "
         parts.append(_witness_particular(i, w) + sep)
     return "".join(parts)
 
@@ -168,7 +173,7 @@ def _opening_clause(testator: dict, witnesses: list, execution_date_str: str) ->
             f"and I have {son_count} son, namely, {son_join} and {daughter_count} daughter, namely, {daughter_join}"
         )
     witness_particulars = _witness_particulars_text(witnesses)
-    clause += f". And on the {execution_date_str}, and in the presence of two following witnesses: {witness_particulars}make my last and final WILL."
+    clause += f". And on the {execution_date_str}, and in the presence of two following witnesses:<br/>{witness_particulars}make my last and final WILL."
     return clause
 
 

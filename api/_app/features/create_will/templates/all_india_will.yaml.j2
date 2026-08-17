@@ -113,7 +113,7 @@
   text: {{ "WITNESSES" | yamlstr }}
 {% for w in witnesses %}
 - type: paragraph
-  text: {{ ((loop.index | string) ~ ") Name: " ~ w.name ~ "   Signature: " ~ blank) | yamlstr }}
+  text: {{ ((loop.index | string) ~ ") Name: " ~ w.name ~ "<br/>Signature: " ~ blank) | yamlstr }}
 {% endfor %}
 {% if show_executor %}
 - type: pagebreak
