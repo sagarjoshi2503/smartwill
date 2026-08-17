@@ -134,6 +134,7 @@ export type GlobalMode = "equal" | "percentage";
 export interface AllIndiaAssetItem {
   description: string;
   beneficiary: string;
+  beneficiaryAge: string;
   relation: string;
   relationOther: string;
   idType: string;

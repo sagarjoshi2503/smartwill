@@ -513,9 +513,9 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
           <StepHeader icon={<Briefcase size={17}/>} title="Asset Selection" sub="Sections B–E — Bequests as per the All India Will format"/>
           {(()=>{
             type AllIndiaKey = keyof WillState["allIndiaAssets"];
-            const addItem=(key: AllIndiaKey)=>setWill(p=>({...p, allIndiaAssets:{...p.allIndiaAssets, [key]:[...p.allIndiaAssets[key],{description:"",beneficiary:"",relation:"",relationOther:"",idType:"Aadhaar Card",idNumber:""}]}}));
+            const addItem=(key: AllIndiaKey)=>setWill(p=>({...p, allIndiaAssets:{...p.allIndiaAssets, [key]:[...p.allIndiaAssets[key],{description:"",beneficiary:"",beneficiaryAge:"",relation:"",relationOther:"",idType:"Aadhaar Card",idNumber:""}]}}));
             const removeItem=(key: AllIndiaKey, idx: number)=>setWill(p=>({...p, allIndiaAssets:{...p.allIndiaAssets, [key]:p.allIndiaAssets[key].filter((_,j)=>j!==idx)}}));
-            const setItem=(key: AllIndiaKey, idx: number, field: "description"|"beneficiary"|"relation"|"relationOther"|"idType"|"idNumber", value: string)=>
+            const setItem=(key: AllIndiaKey, idx: number, field: "description"|"beneficiary"|"beneficiaryAge"|"relation"|"relationOther"|"idType"|"idNumber", value: string)=>
               setWill(p=>({...p, allIndiaAssets:{...p.allIndiaAssets, [key]:p.allIndiaAssets[key].map((item,j)=>j===idx?{...item,[field]:value}:item)}}));
             const Category=({itemKey,label,descLabel,placeholder}:{itemKey: AllIndiaKey; label: string; descLabel: string; placeholder: string})=>(
               <div>
@@ -529,10 +529,14 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                       </div>
                       {will.allIndiaAssets[itemKey].length>1&&<button onClick={()=>removeItem(itemKey,idx)} className="text-red-400 hover:text-red-500 shrink-0 mt-6"><Trash2 size={14}/></button>}
                     </div>
-                    <div className="mt-2.5 mb-2.5">
-                      <label className={LC}>Bequeathed To (Name of Person)</label>
-                      <BeneficiarySelect value={item.beneficiary} beneficiaryNames={will.beneficiaries.filter(b=>b.name.trim()).map(b=>b.name)}
-                        onChange={v=>setItem(itemKey,idx,"beneficiary",v)} className={IC+" appearance-none"}/>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mt-2.5 mb-2.5">
+                      <div>
+                        <label className={LC}>Bequeathed To (Name of Person)</label>
+                        <BeneficiarySelect value={item.beneficiary} beneficiaryNames={will.beneficiaries.filter(b=>b.name.trim()).map(b=>b.name)}
+                          onChange={v=>setItem(itemKey,idx,"beneficiary",v)} className={IC+" appearance-none"}/>
+                      </div>
+                      <div><label className={LC}>Age</label>
+                        <input type="number" value={item.beneficiaryAge} onChange={e=>setItem(itemKey,idx,"beneficiaryAge",e.target.value)} className={IC} placeholder="Age"/></div>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
                       <div><label className={LC}>Relationship</label>
@@ -578,11 +582,11 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                 <FormBlock title="D. Personal & Valuables">
                   {Category({itemKey:"jewellery", label:"Jewellery & Heirlooms", descLabel:"Description", placeholder:"Describe the item(s)"})}
                 </FormBlock>
-                <FormBlock title="E. Digital & Miscellaneous Assets">
-                  <div className="space-y-4">
-                    {Category({itemKey:"socialMediaDigital", label:"Social Media / Digital", descLabel:"Account / Application", placeholder:"e.g., Instagram handle, Google account email"})}
-                    {Category({itemKey:"intellectualProperty", label:"Intellectual Property", descLabel:"Patents, Copyrights, etc.", placeholder:"e.g., Patent No. / Copyright registration details"})}
-                  </div>
+                <FormBlock title="E. Social Media / Digital Assets">
+                  {Category({itemKey:"socialMediaDigital", label:"Social Media / Digital", descLabel:"Account / Application", placeholder:"e.g., Instagram handle, Google account email"})}
+                </FormBlock>
+                <FormBlock title="F. Intellectual Property">
+                  {Category({itemKey:"intellectualProperty", label:"Intellectual Property", descLabel:"Patents, Copyrights, etc.", placeholder:"e.g., Patent No. / Copyright registration details"})}
                 </FormBlock>
               </>
             );
@@ -596,7 +600,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
           <StepHeader icon={<Briefcase size={17}/>} title="Asset Selection" sub="Sections B–E — Bequests as per the Goan Will format"/>
           {(()=>{
             type GoanKey = keyof WillState["goanAssets"];
-            const addItem=(key: GoanKey)=>setWill(p=>({...p, goanAssets:{...p.goanAssets, [key]:[...p.goanAssets[key],{description:"",beneficiary:"",relation:"",relationOther:"",idType:"Aadhaar Card",idNumber:""}]}}));
+            const addItem=(key: GoanKey)=>setWill(p=>({...p, goanAssets:{...p.goanAssets, [key]:[...p.goanAssets[key],{description:"",beneficiary:"",beneficiaryAge:"",relation:"",relationOther:"",idType:"Aadhaar Card",idNumber:""}]}}));
             const removeItem=(key: GoanKey, idx: number)=>setWill(p=>({...p, goanAssets:{...p.goanAssets, [key]:p.goanAssets[key].filter((_,j)=>j!==idx)}}));
             const setItem=(key: GoanKey, idx: number, field: "description"|"beneficiary"|"relation"|"relationOther"|"idType"|"idNumber", value: string)=>
               setWill(p=>({...p, goanAssets:{...p.goanAssets, [key]:p.goanAssets[key].map((item,j)=>j===idx?{...item,[field]:value}:item)}}));

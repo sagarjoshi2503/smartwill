@@ -34,6 +34,15 @@ _ONES = [
 ]
 _TENS = ["", "", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"]
 
+# Spelled-out day-of-month ordinals ("Seventeenth", not "17th") — legal-
+# document phrasing for the execution-date clause.
+_ORDINAL_WORDS = [
+    "First", "Second", "Third", "Fourth", "Fifth", "Sixth", "Seventh", "Eighth", "Ninth", "Tenth",
+    "Eleventh", "Twelfth", "Thirteenth", "Fourteenth", "Fifteenth", "Sixteenth", "Seventeenth", "Eighteenth",
+    "Nineteenth", "Twentieth", "Twenty-First", "Twenty-Second", "Twenty-Third", "Twenty-Fourth", "Twenty-Fifth",
+    "Twenty-Sixth", "Twenty-Seventh", "Twenty-Eighth", "Twenty-Ninth", "Thirtieth", "Thirty-First",
+]
+
 
 def esc(value) -> str:
     if value is None:
@@ -57,6 +66,16 @@ def ordinal(n) -> str:
     v = num % 100
     suffix = "th" if 11 <= v <= 13 else {1: "st", 2: "nd", 3: "rd"}.get(num % 10, "th")
     return f"{num}{suffix}"
+
+
+def ordinal_in_words(n) -> str:
+    """Same output as web/src/utils/format.ts's ordinalInWords() — the
+    spelled-out day-of-month used in execution-date phrasing, e.g. 17 ->
+    "Seventeenth" (as opposed to ordinal()'s numeric "17th")."""
+    num = _int(n)
+    if num is None or not (1 <= num <= 31):
+        return esc(n)
+    return _ORDINAL_WORDS[num - 1]
 
 
 def _two_digit_words(n: int) -> str:
@@ -130,6 +149,7 @@ def _render_asset_list(items: list, label: str) -> list:
         id_type = item.get("idType") or "Aadhaar Card"
         lines.append(
             f"{prefix}{label}: {v(item, 'description')} Bequeathed to: {v(item, 'beneficiary')} "
+            f"Age: {esc(item.get('beneficiaryAge')) or '___'} "
             f"Relationship: {rel_of(item) or BLANK}, bearing {esc(id_type)} Number: {v(item, 'idNumber')}."
         )
     return lines
@@ -162,7 +182,8 @@ def _witness_particulars_text(witnesses: list) -> str:
 def _opening_clause(testator: dict, witnesses: list, execution_date_str: str) -> str:
     marital_status = esc(testator.get("maritalStatus")) or ""
     clause = (
-        f"I, {v(testator, 'fullName')}, having PAN {v(testator, 'pan')}, Aadhaar No. {v(testator, 'aadhaarNumber')}, "
+        f"I, {v(testator, 'fullName')}, gender: {v(testator, 'gender')}, "
+        f"PAN {v(testator, 'pan')}, Aadhaar Number {v(testator, 'aadhaarNumber')}, "
         f"{esc(testator.get('relation')) or ''} of {v(testator, 'parentSpouseName')}, aged {esc(testator.get('age')) or '___'}, "
         f"{marital_status} nationality {_national(testator)}, occupation {occupation_of(testator) or BLANK}, "
         f"resident of {v(testator, 'address')}"
@@ -176,7 +197,7 @@ def _opening_clause(testator: dict, witnesses: list, execution_date_str: str) ->
         daughter_join = esc(", ".join(daughter_names)) or BLANK
         clause += (
             f", I am married to {v(testator, 'spouseName')}, bearing PAN {v(testator, 'spousePan')}, "
-            f"Aadhaar No. {v(testator, 'spouseAadhaarNumber')} "
+            f"Aadhaar Number {v(testator, 'spouseAadhaarNumber')} "
             f"and I have {son_count} son, namely, {son_join} and {daughter_count} daughter, namely, {daughter_join}"
         )
     witness_particulars = _witness_particulars_text(witnesses)
@@ -211,7 +232,7 @@ def _executor_appointment_clause(executor: dict) -> str:
         )
     return (
         f"I appoint {v(executor, 'name')}, having Relationship to Testator: {v(executor, 'relation')}, "
-        f"with Contact Details / Address: {v(executor, 'address')}, bearing {esc(executor.get('idType')) or ''} "
+        f"with Address: {v(executor, 'address')}, bearing {esc(executor.get('idType')) or ''} "
         f"Number: {v(executor, 'idNumber')}."
     )
 
@@ -234,13 +255,11 @@ def build_pdf_context(will: dict) -> dict:
 
     if testator.get("signDay") and testator.get("signMonth") and testator.get("signYear"):
         execution_date_str = (
-            f"{ordinal(testator['signDay'])} day of {esc(testator['signMonth'])} "
+            f"{ordinal_in_words(testator['signDay'])} day of {esc(testator['signMonth'])} "
             f"of the year {year_in_words(testator['signYear'])}"
         )
-        sign_date_ddmmyyyy = date_ddmmyyyy(testator["signDay"], testator["signMonth"], testator["signYear"]) or "____________________"
     else:
         execution_date_str = "____________________"
-        sign_date_ddmmyyyy = "____________________"
 
     gender = testator.get("gender")
     title = "Testator" if gender == "male" else "Testatrix" if gender == "female" else "Testator/Testatrix"
@@ -252,22 +271,30 @@ def build_pdf_context(will: dict) -> dict:
     jewellery = _filled(all_india_assets.get("jewellery"))
     social_media_digital = _filled(all_india_assets.get("socialMediaDigital"))
     intellectual_property = _filled(all_india_assets.get("intellectualProperty"))
+    special_instructions = esc((will.get("specialInstructions") or "").strip()) or None
 
     has_immovable = bool(house_flat or land_plot or commercial_property)
     has_vehicle = bool(vehicle)
     has_personal = bool(jewellery)
-    has_digital_misc = bool(social_media_digital or intellectual_property)
+    has_social_digital = bool(social_media_digital)
+    has_intellectual_property = bool(intellectual_property)
+    has_special_instructions = bool(special_instructions)
 
     next_letter = ord("B")
-    letter_immovable = letter_vehicle = letter_personal = letter_digital_misc = ""
+    letter_immovable = letter_vehicle = letter_personal = ""
+    letter_social_digital = letter_intellectual_property = letter_special_instructions = ""
     if has_immovable:
         letter_immovable, next_letter = chr(next_letter), next_letter + 1
     if has_vehicle:
         letter_vehicle, next_letter = chr(next_letter), next_letter + 1
     if has_personal:
         letter_personal, next_letter = chr(next_letter), next_letter + 1
-    if has_digital_misc:
-        letter_digital_misc, next_letter = chr(next_letter), next_letter + 1
+    if has_social_digital:
+        letter_social_digital, next_letter = chr(next_letter), next_letter + 1
+    if has_intellectual_property:
+        letter_intellectual_property, next_letter = chr(next_letter), next_letter + 1
+    if has_special_instructions:
+        letter_special_instructions, next_letter = chr(next_letter), next_letter + 1
 
     executor_type = executor.get("executorType") or "individual"
 
@@ -278,11 +305,14 @@ def build_pdf_context(will: dict) -> dict:
         "has_immovable": has_immovable,
         "has_vehicle": has_vehicle,
         "has_personal": has_personal,
-        "has_digital_misc": has_digital_misc,
+        "has_social_digital": has_social_digital,
+        "has_intellectual_property": has_intellectual_property,
         "letter_immovable": letter_immovable,
         "letter_vehicle": letter_vehicle,
         "letter_personal": letter_personal,
-        "letter_digital_misc": letter_digital_misc,
+        "letter_social_digital": letter_social_digital,
+        "letter_intellectual_property": letter_intellectual_property,
+        "letter_special_instructions": letter_special_instructions,
         "house_flat_lines": _render_asset_list(house_flat, "House / Flat"),
         "land_plot_lines": _render_asset_list(land_plot, "Land / Plot"),
         "commercial_property_lines": _render_asset_list(commercial_property, "Commercial Property"),
@@ -291,11 +321,11 @@ def build_pdf_context(will: dict) -> dict:
         "social_media_digital_lines": _render_asset_list(social_media_digital, "Social Media / Digital"),
         "intellectual_property_lines": _render_asset_list(intellectual_property, "Intellectual Property"),
         "residue_clause": _residue_clause(all_india_residue),
-        "special_instructions": esc((will.get("specialInstructions") or "").strip()) or None,
+        "special_instructions": special_instructions,
         "testator_full_name": v(testator, "fullName"),
         "testator_email": v(testator, "email"),
         "testator_sign_place": v(testator, "signPlace"),
-        "sign_date_ddmmyyyy": sign_date_ddmmyyyy,
+        "execution_date_str": execution_date_str,
         "witnesses": [{"name": v(w, "name")} for w in witnesses],
         "show_executor": bool(executor.get("wantsExecutor")),
         "executor_type": executor_type,

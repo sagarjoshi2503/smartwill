@@ -59,7 +59,7 @@ describe("getMissingIdFields", () => {
       ...FILLED_WILL,
       allIndiaAssets: {
         ...FILLED_WILL.allIndiaAssets,
-        houseFlat: [{ description: "Flat 1", beneficiary: "Bob", relation: "Son", relationOther: "", idType: "PAN Card", idNumber: "" }],
+        houseFlat: [{ description: "Flat 1", beneficiary: "Bob", beneficiaryAge: "", relation: "Son", relationOther: "", idType: "PAN Card", idNumber: "" }],
       },
     };
     expect(getMissingIdFields(inUse, "allindia")).toContain("House / Flat PAN Card Number");
@@ -129,7 +129,7 @@ describe("getMissingIdFields", () => {
         ...GOAN_FILLED,
         goanAssets: {
           ...GOAN_FILLED.goanAssets,
-          houseFlat: [{ description: "Flat 1", beneficiary: "Bob", relation: "Son", relationOther: "", idType: "PAN Card", idNumber: "" }],
+          houseFlat: [{ description: "Flat 1", beneficiary: "Bob", beneficiaryAge: "", relation: "Son", relationOther: "", idType: "PAN Card", idNumber: "" }],
         },
       };
       expect(getMissingIdFields(inUseAsset, "goan")).toContain("House / Flat PAN Card Number");

@@ -10,7 +10,7 @@ const newGoanWitness = (): GoanWitness => ({
   name:"", parentRelation:"s/o.", parentName:"", age:"", maritalStatus:"",
   occupation:"", address:"", pan:"", aadhaarNumber:"",
 });
-const newGoanAssetItem = () => ({description:"",beneficiary:"",relation:"",relationOther:"",idType:"Aadhaar Card",idNumber:""});
+const newGoanAssetItem = () => ({description:"",beneficiary:"",beneficiaryAge:"",relation:"",relationOther:"",idType:"Aadhaar Card",idNumber:""});
 
 export const DEFAULT_WILL: WillState = {
   // Section 0 - Identity
@@ -59,13 +59,13 @@ export const DEFAULT_WILL: WillState = {
   // Fixed asset line-items from the All India (Non-Goan) Will PDF template —
   // only used/shown when willType==="allindia".
   allIndiaAssets:{
-    houseFlat:[{description:"",beneficiary:"",relation:"",relationOther:"",idType:"Aadhaar Card",idNumber:""}],
-    landPlot:[{description:"",beneficiary:"",relation:"",relationOther:"",idType:"Aadhaar Card",idNumber:""}],
-    commercialProperty:[{description:"",beneficiary:"",relation:"",relationOther:"",idType:"Aadhaar Card",idNumber:""}],
-    vehicle:[{description:"",beneficiary:"",relation:"",relationOther:"",idType:"Aadhaar Card",idNumber:""}],
-    jewellery:[{description:"",beneficiary:"",relation:"",relationOther:"",idType:"Aadhaar Card",idNumber:""}],
-    socialMediaDigital:[{description:"",beneficiary:"",relation:"",relationOther:"",idType:"Aadhaar Card",idNumber:""}],
-    intellectualProperty:[{description:"",beneficiary:"",relation:"",relationOther:"",idType:"Aadhaar Card",idNumber:""}],
+    houseFlat:[{description:"",beneficiary:"",beneficiaryAge:"",relation:"",relationOther:"",idType:"Aadhaar Card",idNumber:""}],
+    landPlot:[{description:"",beneficiary:"",beneficiaryAge:"",relation:"",relationOther:"",idType:"Aadhaar Card",idNumber:""}],
+    commercialProperty:[{description:"",beneficiary:"",beneficiaryAge:"",relation:"",relationOther:"",idType:"Aadhaar Card",idNumber:""}],
+    vehicle:[{description:"",beneficiary:"",beneficiaryAge:"",relation:"",relationOther:"",idType:"Aadhaar Card",idNumber:""}],
+    jewellery:[{description:"",beneficiary:"",beneficiaryAge:"",relation:"",relationOther:"",idType:"Aadhaar Card",idNumber:""}],
+    socialMediaDigital:[{description:"",beneficiary:"",beneficiaryAge:"",relation:"",relationOther:"",idType:"Aadhaar Card",idNumber:""}],
+    intellectualProperty:[{description:"",beneficiary:"",beneficiaryAge:"",relation:"",relationOther:"",idType:"Aadhaar Card",idNumber:""}],
   },
   // Residuary beneficiaries for the All India Will format (relationship,
   // name, nationality, occupation, ID proof — more than one allowed) — only

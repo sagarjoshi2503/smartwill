@@ -1,4 +1,4 @@
-import { ordinal, yearInWords } from "../../utils/format";
+import { ordinalInWords, yearInWords } from "../../utils/format";
 import type { AllIndiaAssetItem, AllIndiaAssets, AllIndiaResidueEntry, Testator, Witness } from "../../types";
 
 // Single source of truth for the All India Will's wording/section logic on
@@ -35,7 +35,7 @@ export function nationalityLabel(value: string): string {
 
 export function executionDateStr(testator: Testator) {
   return testator.signDay && testator.signMonth && testator.signYear
-    ? <>{ordinal(testator.signDay)} day of {testator.signMonth} of the year {yearInWords(testator.signYear)}</>
+    ? <>{ordinalInWords(testator.signDay)} day of {testator.signMonth} of the year {yearInWords(testator.signYear)}</>
     : "____________________";
 }
 
@@ -57,15 +57,15 @@ export function witnessParticulars(witnesses: Witness[]) {
   ));
 }
 
-// The opening "I, <testator>, having PAN..." clause — identical wording in
-// the full document and the compact preview.
+// The opening "I, <testator>, gender: ..., PAN..." clause — identical
+// wording in the full document and the compact preview.
 export function openingClauseNodes(testator: Testator, witnesses: Witness[]) {
   const {sonNames, daughterNames} = sonDaughterNames(testator);
   return (
     <>
-      I, <strong>{testator.fullName || BLANK}</strong>, having PAN <strong>{testator.pan || BLANK}</strong>, Aadhaar No. <strong>{testator.aadhaarNumber || BLANK}</strong>, {testator.relation} of <strong>{testator.parentSpouseName || BLANK}</strong>, aged <strong>{testator.age || "___"}</strong>, {testator.maritalStatus} nationality <strong>{nationalityLabel(testator.nationality)}</strong>, occupation <strong>{occupationOf(testator) || BLANK}</strong>, resident of <strong>{testator.address || BLANK}</strong>
+      I, <strong>{testator.fullName || BLANK}</strong>, gender: <strong>{testator.gender || BLANK}</strong>, PAN <strong>{testator.pan || BLANK}</strong>, Aadhaar Number <strong>{testator.aadhaarNumber || BLANK}</strong>, {testator.relation} of <strong>{testator.parentSpouseName || BLANK}</strong>, aged <strong>{testator.age || "___"}</strong>, {testator.maritalStatus} nationality <strong>{nationalityLabel(testator.nationality)}</strong>, occupation <strong>{occupationOf(testator) || BLANK}</strong>, resident of <strong>{testator.address || BLANK}</strong>
       {testator.maritalStatus === "married" && (
-        <>, I am married to <strong>{testator.spouseName || BLANK}</strong>, bearing PAN <strong>{testator.spousePan || BLANK}</strong>, Aadhaar No. <strong>{testator.spouseAadhaarNumber || BLANK}</strong> and I have {sonNames.length === 1 ? "one" : sonNames.length || "___"} son, namely, <strong>{sonNames.join(", ") || BLANK}</strong> and {daughterNames.length === 1 ? "one" : daughterNames.length || "___"} daughter, namely, <strong>{daughterNames.join(", ") || BLANK}</strong>
+        <>, I am married to <strong>{testator.spouseName || BLANK}</strong>, bearing PAN <strong>{testator.spousePan || BLANK}</strong>, Aadhaar Number <strong>{testator.spouseAadhaarNumber || BLANK}</strong> and I have {sonNames.length === 1 ? "one" : sonNames.length || "___"} son, namely, <strong>{sonNames.join(", ") || BLANK}</strong> and {daughterNames.length === 1 ? "one" : daughterNames.length || "___"} daughter, namely, <strong>{daughterNames.join(", ") || BLANK}</strong>
         </>
       )}. And on the <strong>{executionDateStr(testator)}</strong>, and in the presence of two following witnesses: {witnessParticulars(witnesses)}make my last and final WILL.
     </>
@@ -88,7 +88,7 @@ export function residueClauseNodes(entries: AllIndiaResidueEntry[]) {
 export function renderAssetList(items: AllIndiaAssetItem[], label: string) {
   const numbered = items.length > 1;
   return items.map((item, i) => (
-    <p key={i} className="mb-1">{numbered ? `(${i + 1}) ` : ""}{label}: <strong>{item.description || BLANK}</strong> Bequeathed to: <strong>{item.beneficiary || BLANK}</strong> Relationship: <strong>{relOf(item) || BLANK}</strong>, bearing {item.idType || "Aadhaar Card"} Number: <strong>{item.idNumber || BLANK}</strong>.</p>
+    <p key={i} className="mb-1">{numbered ? `(${i + 1}) ` : ""}{label}: <strong>{item.description || BLANK}</strong> Bequeathed to: <strong>{item.beneficiary || BLANK}</strong> Age: <strong>{item.beneficiaryAge || "___"}</strong> Relationship: <strong>{relOf(item) || BLANK}</strong>, bearing {item.idType || "Aadhaar Card"} Number: <strong>{item.idNumber || BLANK}</strong>.</p>
   ));
 }
 
@@ -103,17 +103,21 @@ export interface AssetSections {
   hasImmovable: boolean;
   hasVehicle: boolean;
   hasPersonal: boolean;
-  hasDigitalMisc: boolean;
+  hasSocialDigital: boolean;
+  hasIntellectualProperty: boolean;
   letterImmovable: string;
   letterVehicle: string;
   letterPersonal: string;
-  letterDigitalMisc: string;
+  letterSocialDigital: string;
+  letterIntellectualProperty: string;
+  letterSpecialInstructions: string;
 }
 
 // Section letters are assigned dynamically, skipping any category the
 // testator left entirely blank ('A' is always the fixed Financial Assets
-// boilerplate, never itemized).
-export function computeAssetSections(allIndiaAssets: AllIndiaAssets): AssetSections {
+// boilerplate, never itemized) — matches pdf_context.py's build_pdf_context
+// exactly, including the trailing letter for Special Non-Asset Instructions.
+export function computeAssetSections(allIndiaAssets: AllIndiaAssets, hasSpecialInstructions: boolean): AssetSections {
   const houseFlat = filled(allIndiaAssets.houseFlat);
   const landPlot = filled(allIndiaAssets.landPlot);
   const commercialProperty = filled(allIndiaAssets.commercialProperty);
@@ -125,17 +129,21 @@ export function computeAssetSections(allIndiaAssets: AllIndiaAssets): AssetSecti
   const hasImmovable = houseFlat.length > 0 || landPlot.length > 0 || commercialProperty.length > 0;
   const hasVehicle = vehicle.length > 0;
   const hasPersonal = jewellery.length > 0;
-  const hasDigitalMisc = socialMediaDigital.length > 0 || intellectualProperty.length > 0;
+  const hasSocialDigital = socialMediaDigital.length > 0;
+  const hasIntellectualProperty = intellectualProperty.length > 0;
 
   let nextLetter = 66; // 'B' — 'A' is always Financial Assets
   const letterImmovable = hasImmovable ? String.fromCharCode(nextLetter++) : "";
   const letterVehicle = hasVehicle ? String.fromCharCode(nextLetter++) : "";
   const letterPersonal = hasPersonal ? String.fromCharCode(nextLetter++) : "";
-  const letterDigitalMisc = hasDigitalMisc ? String.fromCharCode(nextLetter++) : "";
+  const letterSocialDigital = hasSocialDigital ? String.fromCharCode(nextLetter++) : "";
+  const letterIntellectualProperty = hasIntellectualProperty ? String.fromCharCode(nextLetter++) : "";
+  const letterSpecialInstructions = hasSpecialInstructions ? String.fromCharCode(nextLetter++) : "";
 
   return {
     houseFlat, landPlot, commercialProperty, vehicle, jewellery, socialMediaDigital, intellectualProperty,
-    hasImmovable, hasVehicle, hasPersonal, hasDigitalMisc,
-    letterImmovable, letterVehicle, letterPersonal, letterDigitalMisc,
+    hasImmovable, hasVehicle, hasPersonal, hasSocialDigital, hasIntellectualProperty,
+    letterImmovable, letterVehicle, letterPersonal, letterSocialDigital, letterIntellectualProperty,
+    letterSpecialInstructions,
   };
 }

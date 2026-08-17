@@ -2,9 +2,11 @@ import { useEffect } from "react";
 import type { MutableRefObject, ReactNode } from "react";
 import { ChevronLeft, Printer, Download } from "lucide-react";
 import BrandMark from "../../components/shared/BrandMark";
-import { dateDDMMYYYY } from "../../utils/format";
 import type { Beneficiary, WillState } from "../../types";
-import { BLANK as blank, renderAssetList, computeAssetSections, openingClauseNodes, residueClauseNodes } from "./allIndiaWillShared";
+import {
+  BLANK as blank, renderAssetList, computeAssetSections, openingClauseNodes, residueClauseNodes,
+  executionDateStr,
+} from "./allIndiaWillShared";
 
 // Renders the Will exactly per the "WILL NONGOAN FORWARDLEGACY FORMAT.pdf"
 // template — wording, clause order, and asset sections (A-E) match the PDF
@@ -34,13 +36,6 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,o
     return () => { document.title = original; };
   }, []);
 
-  // Legal-document phrasing spells the year out in words (e.g. "of the year
-  // Two Thousand and Twenty Six") — matches the reference All India Will PDF
-  // template's "...of the year Two Thousand and ____" wording.
-  const signDateDDMMYYYY = testator.signDay && testator.signMonth && testator.signYear
-    ? dateDDMMYYYY(testator.signDay, testator.signMonth, testator.signYear)
-    : "____________________";
-
   // Prints the correctly gendered term once the testator has picked a
   // Gender; falls back to the original slash-form so in-progress Wills
   // started before this field existed still render exactly as before.
@@ -53,9 +48,10 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,o
   // the testator doesn't own.
   const {
     houseFlat, landPlot, commercialProperty, vehicle, jewellery, socialMediaDigital, intellectualProperty,
-    hasImmovable, hasVehicle, hasPersonal, hasDigitalMisc,
-    letterImmovable, letterVehicle, letterPersonal, letterDigitalMisc,
-  } = computeAssetSections(allIndiaAssets);
+    hasImmovable, hasVehicle, hasPersonal, hasSocialDigital, hasIntellectualProperty,
+    letterImmovable, letterVehicle, letterPersonal, letterSocialDigital, letterIntellectualProperty,
+    letterSpecialInstructions,
+  } = computeAssetSections(allIndiaAssets, Boolean(will.specialInstructions));
 
   const showExecutor = executor.wantsExecutor;
   const showGuardian = guardian.hasMinors;
@@ -191,17 +187,17 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,o
 
             <p className="text-justify mb-5">I bequeath my specific assets to the designated beneficiaries as outlined below:</p>
 
-            <p className="mb-1">A. Financial Assets:</p>
+            <p className="mb-1 uppercase">A. Financial Assets:</p>
             <p className="text-justify mb-5">
               I bequeath all my financial assets including Bank Accounts, Bank Locker, Fixed Deposits (FDs), Recurring Deposits (RDs), Public Provident Fund (PPF), Life Insurance, Stocks, Mutual Funds, Cryptocurrency (Crypto), Digital Wallets, National Pension System (NPS), Bonds, Alternative Investment Fund (AIF), Specialized Investment Fund (SIF), and Portfolio Management Services (PMS) entirely to the nominees registered in those financial instruments.
             </p>
           </Page>
 
-          {(hasImmovable||hasVehicle||hasPersonal||hasDigitalMisc)&&(
+          {(hasImmovable||hasVehicle||hasPersonal||hasSocialDigital||hasIntellectualProperty)&&(
           <Page>
             {hasImmovable&&(
               <>
-                <p className="mb-1">{letterImmovable}. Immovable Property:</p>
+                <p className="mb-1 uppercase">{letterImmovable}. Immovable Property:</p>
                 {renderAssetList(houseFlat,"House / Flat")}
                 {renderAssetList(landPlot,"Land / Plot")}
                 <div className="mb-5">{renderAssetList(commercialProperty,"Commercial Property")}</div>
@@ -210,22 +206,28 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,o
 
             {hasVehicle&&(
               <>
-                <p className="mb-1">{letterVehicle}. Motor Vehicles:</p>
+                <p className="mb-1 uppercase">{letterVehicle}. Motor Vehicles:</p>
                 <div className="mb-5">{renderAssetList(vehicle,"Vehicle / Car")}</div>
               </>
             )}
 
             {hasPersonal&&(
               <>
-                <p className="mb-1">{letterPersonal}. Personal &amp; Valuables:</p>
+                <p className="mb-1 uppercase">{letterPersonal}. Personal &amp; Valuables:</p>
                 <div className="mb-5">{renderAssetList(jewellery,"Jewellery & Heirlooms")}</div>
               </>
             )}
 
-            {hasDigitalMisc&&(
+            {hasSocialDigital&&(
               <>
-                <p className="mb-1">{letterDigitalMisc}. Digital &amp; Miscellaneous Assets:</p>
-                {renderAssetList(socialMediaDigital,"Social Media / Digital")}
+                <p className="mb-1 uppercase">{letterSocialDigital}. Social Media / Digital Assets:</p>
+                <div className="mb-5">{renderAssetList(socialMediaDigital,"Social Media / Digital")}</div>
+              </>
+            )}
+
+            {hasIntellectualProperty&&(
+              <>
+                <p className="mb-1 uppercase">{letterIntellectualProperty}. Intellectual Property:</p>
                 <div className="mb-5">{renderAssetList(intellectualProperty,"Intellectual Property")}</div>
               </>
             )}
@@ -239,7 +241,7 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,o
 
             {will.specialInstructions&&(
               <>
-                <p className="mb-1">Special Non-Asset Instructions:</p>
+                <p className="mb-1 uppercase">{letterSpecialInstructions}. Special Non-Asset Instructions:</p>
                 <p className="text-justify mb-5 whitespace-pre-line">{will.specialInstructions}</p>
               </>
             )}
@@ -261,7 +263,7 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,o
             <p className="mb-1">Name of {title}: <strong>{testator.fullName||blank}</strong></p>
             <p className="mb-1">{title} Email Address: <strong>{testator.email||blank}</strong></p>
             <p className="mb-1">Place: <strong>{testator.signPlace||blank}</strong></p>
-            <p className="mb-4">Date: <strong>{signDateDDMMYYYY}</strong></p>
+            <p className="mb-4">Date: <strong>{executionDateStr(testator)}</strong></p>
 
             <h2 className="text-lg uppercase mb-1">Witnesses</h2>
             {witnesses.map((w,i)=>(
@@ -283,14 +285,14 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,o
                   </p>
                 ) : (
                   <p className="text-justify mb-5">
-                    I appoint <strong>{executor.name||blank}</strong>, having Relationship to Testator: <strong>{executor.relation||blank}</strong>, with Contact Details / Address: <strong>{executor.address||blank}</strong>, bearing {executor.idType} Number: <strong>{executor.idNumber||blank}</strong>.
+                    I appoint <strong>{executor.name||blank}</strong>, having Relationship to Testator: <strong>{executor.relation||blank}</strong>, with Address: <strong>{executor.address||blank}</strong>, bearing {executor.idType} Number: <strong>{executor.idNumber||blank}</strong>.
                   </p>
                 )}
-                <p className="mb-1">(a) The above executor shall dispose of the property and carry out the instructions as mentioned in this Will.</p>
-                <p className="mb-1">(b) The executor shall also be responsible for paying off any debts owed by me, taxes, and other fees due out of the proceeds of my assets.</p>
-                <p className="mb-1">(c) The executor may take steps to recover money due to me, with interest as agreed upon between me and the borrower.</p>
-                <p className="mb-1">(d) If any legal expenses are incurred in the recovery of the amount due, the executor shall be entitled to recover the said amount out of the funds belonging to me.</p>
-                <p className="mb-5">(e) If my executor is unable or unwilling to act with respect to property subject to administration in another jurisdiction, my beneficiaries may appoint by a signed instrument any person or qualified corporation as ancillary administrator in that jurisdiction.</p>
+                <p className="mb-1">The above executor shall dispose of the property and carry out the instructions as mentioned in this Will.</p>
+                <p className="mb-1">The executor shall also be responsible for paying off any debts owed by me, taxes, and other fees due out of the proceeds of my assets.</p>
+                <p className="mb-1">The executor may take steps to recover money due to me, with interest as agreed upon between me and the borrower.</p>
+                <p className="mb-1">If any legal expenses are incurred in the recovery of the amount due, the executor shall be entitled to recover the said amount out of the funds belonging to me.</p>
+                <p className="mb-5">If my executor is unable or unwilling to act with respect to property subject to administration in another jurisdiction, my beneficiaries may appoint by a signed instrument any person or qualified corporation as ancillary administrator in that jurisdiction.</p>
                 <p className="mb-1">Place and Date: <strong>{blank}</strong></p>
                 <p className="mb-1">Name of the Testator: <strong>{testator.fullName||blank}</strong></p>
                 <p>Signature of the Testator: {blank}</p>

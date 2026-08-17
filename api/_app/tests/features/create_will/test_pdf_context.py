@@ -84,7 +84,8 @@ def test_empty_asset_categories_produce_no_asset_sections():
     assert ctx["has_immovable"] is False
     assert ctx["has_vehicle"] is False
     assert ctx["has_personal"] is False
-    assert ctx["has_digital_misc"] is False
+    assert ctx["has_social_digital"] is False
+    assert ctx["has_intellectual_property"] is False
     assert ctx["letter_immovable"] == ""
 
 
@@ -101,12 +102,14 @@ def test_section_lettering_skips_empty_categories():
     will["allIndiaAssets"]["vehicle"] = [{"description": "Car", "beneficiary": "Bob", "relation": "Son", "idNumber": "X"}]
     will["allIndiaAssets"]["intellectualProperty"] = [{"description": "Book", "beneficiary": "Bob", "relation": "Son", "idNumber": "Y"}]
     ctx = build_pdf_context(will)
-    # Immovable/personal are both empty, so vehicle gets "B" and digital-misc gets "C" —
-    # matches AllIndiaWillDocument.tsx's dynamic letterImmovable/letterVehicle/... assignment.
+    # Immovable/personal/social-digital are all empty, so vehicle gets "B" and
+    # intellectual property gets "C" — matches AllIndiaWillDocument.tsx's
+    # dynamic letterImmovable/letterVehicle/... assignment.
     assert ctx["letter_immovable"] == ""
     assert ctx["letter_vehicle"] == "B"
     assert ctx["letter_personal"] == ""
-    assert ctx["letter_digital_misc"] == "C"
+    assert ctx["letter_social_digital"] == ""
+    assert ctx["letter_intellectual_property"] == "C"
 
 
 def test_multiple_items_in_one_category_are_numbered():

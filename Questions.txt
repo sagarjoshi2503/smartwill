@@ -25,3 +25,9 @@
 25) If ID field in locked then no need to show star for mandatory fields
 26) Show ID field validation as Popup on generate will button
 27) generate PDF on serverside
+-------------------------------------------------------------------
+1) Somewhere its mentioned Aaadhar "Card" Number , somewhere "Card" word not there
+2) Some where No and Somewhere Number
+3) Somewhere bearing and somewhere having mentioned.
+4) Executors consent should be shown for both individual and org executor ?
+5) Guardiangs Consent should be shown only when Guarding is added ?

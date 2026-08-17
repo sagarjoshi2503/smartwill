@@ -30,6 +30,22 @@ const ONES = ["","One","Two","Three","Four","Five","Six","Seven","Eight","Nine",
   "Eleven","Twelve","Thirteen","Fourteen","Fifteen","Sixteen","Seventeen","Eighteen","Nineteen"];
 const TENS = ["","","Twenty","Thirty","Forty","Fifty","Sixty","Seventy","Eighty","Ninety"];
 
+const ORDINAL_WORDS = [
+  "First","Second","Third","Fourth","Fifth","Sixth","Seventh","Eighth","Ninth","Tenth",
+  "Eleventh","Twelfth","Thirteenth","Fourteenth","Fifteenth","Sixteenth","Seventeenth","Eighteenth",
+  "Nineteenth","Twentieth","Twenty-First","Twenty-Second","Twenty-Third","Twenty-Fourth","Twenty-Fifth",
+  "Twenty-Sixth","Twenty-Seventh","Twenty-Eighth","Twenty-Ninth","Thirtieth","Thirty-First",
+];
+
+// Spelled-out day-of-month ordinal ("Seventeenth", not "17th") — matches
+// api/_app/features/create_will/pdf_context.py's ordinal_in_words(), used
+// for the legal-document execution-date phrasing (as opposed to ordinal()'s
+// numeric form, kept for the informal live-preview footer date).
+export const ordinalInWords = (n: string | number): string => {
+  const num = typeof n==="number" ? n : parseInt(n,10);
+  return Number.isFinite(num) && num>=1 && num<=31 ? ORDINAL_WORDS[num-1] : String(n);
+};
+
 const twoDigitWords = (n: number): string => {
   if(n<20) return ONES[n];
   const t = Math.floor(n/10), o = n%10;

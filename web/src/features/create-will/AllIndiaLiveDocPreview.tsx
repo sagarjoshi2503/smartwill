@@ -22,9 +22,10 @@ export default function AllIndiaLiveDocPreview({will}:{
 
   const {
     houseFlat, landPlot, commercialProperty, vehicle, jewellery, socialMediaDigital, intellectualProperty,
-    hasImmovable, hasVehicle, hasPersonal, hasDigitalMisc,
-    letterImmovable, letterVehicle, letterPersonal, letterDigitalMisc,
-  } = computeAssetSections(allIndiaAssets);
+    hasImmovable, hasVehicle, hasPersonal, hasSocialDigital, hasIntellectualProperty,
+    letterImmovable, letterVehicle, letterPersonal, letterSocialDigital, letterIntellectualProperty,
+    letterSpecialInstructions,
+  } = computeAssetSections(allIndiaAssets, Boolean(will.specialInstructions));
 
   const SectionSignatureLine = () => (
     <p className="mb-3">Testator's Signature: __________ Witness 1: ______ Witness 2: ______</p>
@@ -85,10 +86,16 @@ export default function AllIndiaLiveDocPreview({will}:{
           </>
         )}
 
-        {hasDigitalMisc&&(
+        {hasSocialDigital&&(
           <>
-            <p className="mb-1">{letterDigitalMisc}. Digital &amp; Miscellaneous Assets:</p>
-            {renderAssetList(socialMediaDigital,"Social Media / Digital")}
+            <p className="mb-1">{letterSocialDigital}. Social Media / Digital Assets:</p>
+            <div className="mb-3">{renderAssetList(socialMediaDigital,"Social Media / Digital")}</div>
+          </>
+        )}
+
+        {hasIntellectualProperty&&(
+          <>
+            <p className="mb-1">{letterIntellectualProperty}. Intellectual Property:</p>
             <div className="mb-3">{renderAssetList(intellectualProperty,"Intellectual Property")}</div>
           </>
         )}
@@ -101,7 +108,7 @@ export default function AllIndiaLiveDocPreview({will}:{
 
         {will.specialInstructions&&(
           <>
-            <p className="mb-1">Special Non-Asset Instructions:</p>
+            <p className="mb-1">{letterSpecialInstructions}. Special Non-Asset Instructions:</p>
             <p className="text-justify mb-3 whitespace-pre-line">{will.specialInstructions}</p>
           </>
         )}
