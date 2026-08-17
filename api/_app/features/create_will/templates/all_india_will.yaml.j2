@@ -152,11 +152,11 @@
 - type: heading
   text: {{ "Executor's Consent" | upper | yamlstr }}
 - type: paragraph
-  text: {{ ("I, " ~ blank ~ ", being " ~ executor_consent_who ~ ", have read the contents of the Will and affirm my consent to act as the Executor of this Will and implement the same in the best possible manner.") | yamlstr }}
+  text: {{ ("I, " ~ executor_consent_name ~ ", being " ~ executor_consent_who ~ ", have read the contents of the Will and affirm my consent to act as the Executor of this Will and implement the same in the best possible manner.") | yamlstr }}
 - type: paragraph
-  text: {{ ("Place and Date: " ~ blank) | yamlstr }}
+  text: {{ ("Place and Date: " ~ testator_sign_place ~ ", " ~ execution_date_str) | yamlstr }}
 - type: paragraph
-  text: {{ ("Name of the Executor" ~ executor_label_suffix ~ ": " ~ blank) | yamlstr }}
+  text: {{ ("Name of the Executor" ~ executor_label_suffix ~ ": " ~ executor_consent_name) | yamlstr }}
 - type: paragraph
   text: {{ ("Signature of the Executor" ~ executor_label_suffix ~ ": " ~ blank) | yamlstr }}
 {% endif %}

@@ -31,3 +31,4 @@
 3) Somewhere bearing and somewhere having mentioned.
 4) Executors consent should be shown for both individual and org executor ?
 5) Guardians Consent should be shown only when Guarding is added ?
+6) Place and Date textbox should be there on Guardian , Executor and witness screens ? Or it should be only in last witness screen ?
