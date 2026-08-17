@@ -108,7 +108,8 @@
   text: {{ ("Place: " ~ testator_sign_place) | yamlstr }}
 - type: paragraph
   text: {{ ("Date: " ~ sign_date_ddmmyyyy) | yamlstr }}
-- type: subheading
+- type: pagebreak
+- type: heading
   text: {{ "WITNESSES" | yamlstr }}
 {% for w in witnesses %}
 - type: paragraph
