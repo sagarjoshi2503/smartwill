@@ -8,8 +8,8 @@ const FILLED_WILL: WillState = {
   testator: { ...DEFAULT_WILL.testator, pan: "ABCDE1234F", aadhaarNumber: "111122223333" },
   executor: { ...DEFAULT_WILL.executor, name: "Bob", idNumber: "BBBBB2222B" },
   witnesses: [
-    { ...DEFAULT_WILL.witnesses[0], name: "Wit One", aadhaarNumber: "777788889999" },
-    { ...DEFAULT_WILL.witnesses[1], name: "Wit Two", aadhaarNumber: "666677778888" },
+    { ...DEFAULT_WILL.witnesses[0], name: "Wit One", pan: "WWWWW1111W", aadhaarNumber: "777788889999" },
+    { ...DEFAULT_WILL.witnesses[1], name: "Wit Two", pan: "WWWWW2222W", aadhaarNumber: "666677778888" },
   ],
   residualIdNumber: "GGGGG7777G",
 };

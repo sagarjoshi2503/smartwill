@@ -2,19 +2,17 @@ import { useEffect } from "react";
 import type { MutableRefObject, ReactNode } from "react";
 import { ChevronLeft, Printer, Download } from "lucide-react";
 import BrandMark from "../../components/shared/BrandMark";
-import { ordinal, yearInWords, dateDDMMYYYY } from "../../utils/format";
-import type { AllIndiaAssetItem, Beneficiary, WillState } from "../../types";
-
-// "Other" relationship/occupation choices carry their free-text value in a
-// sibling *Other field — these resolve to whichever is actually meant to
-// print in the generated document.
-const relOf = (it: {relation: string; relationOther: string}) => it.relation==="Other" ? it.relationOther : it.relation;
-const occupationOf = (it: {occupation: string; occupationOther: string}) => it.occupation==="Other" ? it.occupationOther : it.occupation;
+import { dateDDMMYYYY } from "../../utils/format";
+import type { Beneficiary, WillState } from "../../types";
+import { BLANK as blank, renderAssetList, computeAssetSections, openingClauseNodes, residueClauseNodes } from "./allIndiaWillShared";
 
 // Renders the Will exactly per the "WILL NONGOAN FORWARDLEGACY FORMAT.pdf"
 // template — wording, clause order, and asset sections (A-E) match the PDF
 // verbatim, with blanks filled from the collected data. Used only when
 // willType==="allindia"; other Will types keep using the generic WillDocument.
+// Content logic (wording, section letters, witness particulars, asset
+// lines) lives in the shared allIndiaWillShared module so it can't drift
+// from AllIndiaLiveDocPreview.tsx's compact preview.
 export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,onDownload,pdfStatus,pdfError,willDocRef}:{
   will: WillState;
   residualBene: Beneficiary | undefined;
@@ -26,7 +24,6 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,o
   willDocRef: MutableRefObject<HTMLDivElement | null>;
 }){
   const {testator,executor,guardian,allIndiaAssets,allIndiaResidue,witnesses}=will;
-  const blank = "_______________________";
 
   // The browser's print header uses document.title (Chrome's default "Print
   // headers and footers" option shows it top-left) — blank it out while this
@@ -40,57 +37,25 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,o
   // Legal-document phrasing spells the year out in words (e.g. "of the year
   // Two Thousand and Twenty Six") — matches the reference All India Will PDF
   // template's "...of the year Two Thousand and ____" wording.
-  const executionDateStr = testator.signDay && testator.signMonth && testator.signYear
-    ? <>{ordinal(testator.signDay)} day of {testator.signMonth} of the year {yearInWords(testator.signYear)}</>
-    : "____________________";
   const signDateDDMMYYYY = testator.signDay && testator.signMonth && testator.signYear
     ? dateDDMMYYYY(testator.signDay, testator.signMonth, testator.signYear)
     : "____________________";
-
-  const sonNames = testator.sonNames.filter(Boolean);
-  const daughterNames = testator.daughterNames.filter(Boolean);
 
   // Prints the correctly gendered term once the testator has picked a
   // Gender; falls back to the original slash-form so in-progress Wills
   // started before this field existed still render exactly as before.
   const title = testator.gender==="male" ? "Testator" : testator.gender==="female" ? "Testatrix" : "Testator/Testatrix";
 
-  // Both witnesses' full particulars are recited inline in the opening
-  // clause (matching the reference template — see api/Data/NON GOAN-All
-  // India/NON GOAN WILL FINAL DOCUMENT), in addition to the standalone
-  // Witnesses page at the end which carries their signatures.
-  const witnessParticulars = witnesses.map((w,i)=>(
-    <span key={i}>
-      {String.fromCharCode(97+i)}) <strong>{w.name||blank}</strong> {w.parentRelation||"son/daughter/wife"} of <strong>{w.parentName||blank}</strong>, aged <strong>{w.age||"___"}</strong>, {w.maritalStatus||"unmarried/married"} nationality <strong>{w.nationality?`${w.nationality} National`:blank}</strong>, occupation <strong>{occupationOf(w)||blank}</strong>, resident of <strong>{w.address||blank}</strong> bearing Aadhaar Number <strong>{w.aadhaarNumber||blank}</strong>{i<witnesses.length-1?"; ":" "}
-    </span>
-  ));
-
-  const renderAssetList = (items: AllIndiaAssetItem[], label: string) => {
-    const numbered = items.length>1;
-    return items.map((item,i)=>(
-      <p key={i} className="mb-1">{numbered?`(${i+1}) `:""}{label}: <strong>{item.description||blank}</strong> Bequeathed to: <strong>{item.beneficiary||blank}</strong> Relationship: <strong>{relOf(item)||blank}</strong>, bearing {item.idType||"Aadhaar Card"} Number: <strong>{item.idNumber||blank}</strong>.</p>
-    ));
-  };
-
   // Section letters are assigned dynamically, skipping any category the
   // testator left entirely blank (Financial Assets is always "A" since it's
   // fixed boilerplate, not itemized) — matches the latest Non-Goan Will input
   // form spec, which no longer prints an empty "___" line for asset types
   // the testator doesn't own.
-  const filled = (items: AllIndiaAssetItem[]) => items.filter(it=>it.description.trim());
-  const houseFlat = filled(allIndiaAssets.houseFlat), landPlot = filled(allIndiaAssets.landPlot), commercialProperty = filled(allIndiaAssets.commercialProperty);
-  const vehicle = filled(allIndiaAssets.vehicle);
-  const jewellery = filled(allIndiaAssets.jewellery);
-  const socialMediaDigital = filled(allIndiaAssets.socialMediaDigital), intellectualProperty = filled(allIndiaAssets.intellectualProperty);
-  const hasImmovable = houseFlat.length>0||landPlot.length>0||commercialProperty.length>0;
-  const hasVehicle = vehicle.length>0;
-  const hasPersonal = jewellery.length>0;
-  const hasDigitalMisc = socialMediaDigital.length>0||intellectualProperty.length>0;
-  let nextLetter = 66; // 'B' — 'A' is always Financial Assets
-  const letterImmovable = hasImmovable ? String.fromCharCode(nextLetter++) : "";
-  const letterVehicle = hasVehicle ? String.fromCharCode(nextLetter++) : "";
-  const letterPersonal = hasPersonal ? String.fromCharCode(nextLetter++) : "";
-  const letterDigitalMisc = hasDigitalMisc ? String.fromCharCode(nextLetter++) : "";
+  const {
+    houseFlat, landPlot, commercialProperty, vehicle, jewellery, socialMediaDigital, intellectualProperty,
+    hasImmovable, hasVehicle, hasPersonal, hasDigitalMisc,
+    letterImmovable, letterVehicle, letterPersonal, letterDigitalMisc,
+  } = computeAssetSections(allIndiaAssets);
 
   const showExecutor = executor.wantsExecutor;
   const showGuardian = guardian.hasMinors;
@@ -213,11 +178,7 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,o
             <h1 className="text-center text-2xl font-bold tracking-widest uppercase mb-6">WILL</h1>
 
             <p className="text-justify mb-5">
-              I, <strong>{testator.fullName||blank}</strong>, having PAN <strong>{testator.pan||blank}</strong>, Aadhaar No. <strong>{testator.aadhaarNumber||blank}</strong>, {testator.relation} of <strong>{testator.parentSpouseName||blank}</strong>, aged <strong>{testator.age||"___"}</strong>, {testator.maritalStatus} nationality <strong>{testator.nationality?`${testator.nationality} National`:blank}</strong>, occupation <strong>{occupationOf(testator)||blank}</strong>, resident of <strong>{testator.address||blank}</strong>
-              {testator.maritalStatus==="married"&&(
-                <>, I am married to <strong>{testator.spouseName||blank}</strong>, bearing Aadhaar No. <strong>{testator.spouseAadhaarNumber||blank}</strong> and I have {sonNames.length===1?"one":sonNames.length||"___"} son, namely, <strong>{sonNames.join(", ")||blank}</strong> and {daughterNames.length===1?"one":daughterNames.length||"___"} daughter, namely, <strong>{daughterNames.join(", ")||blank}</strong>
-                </>
-              )}. And on the <strong>{executionDateStr}</strong>, and in the presence of two following witnesses: {witnessParticulars}make my last and final WILL.
+              {openingClauseNodes(testator,witnesses)}
             </p>
 
             <p className="text-justify mb-5">
@@ -273,10 +234,7 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,o
 
           <Page isLast={noTrailingPages}>
             <p className="text-justify mb-5">
-              I hereby declare, direct, and devise that all the Rest and Residue of my estate, including any property or assets, both movable and immovable, which I may acquire after the execution of this Will, or which has been inadvertently omitted from this document, shall be given entirely to {allIndiaResidue.length>1&&"the following, in equal shares: "}
-              {allIndiaResidue.map((entry,i)=>(
-                <span key={i}><strong>{relOf(entry)||blank}</strong>, <strong>{entry.name||blank}</strong>, nationality <strong>{entry.nationality?`${entry.nationality} National`:blank}</strong>, occupation <strong>{occupationOf(entry)||blank}</strong>, bearing {entry.idType||"Aadhaar Card"} Number: <strong>{entry.idNumber||blank}</strong>{i<allIndiaResidue.length-1?"; ":"."}</span>
-              ))}
+              {residueClauseNodes(allIndiaResidue)}
             </p>
 
             {will.specialInstructions&&(
@@ -301,6 +259,7 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,o
               </div>
             </div>
             <p className="mb-1">Name of {title}: <strong>{testator.fullName||blank}</strong></p>
+            <p className="mb-1">{title} Email Address: <strong>{testator.email||blank}</strong></p>
             <p className="mb-1">Place: <strong>{testator.signPlace||blank}</strong></p>
             <p className="mb-4">Date: <strong>{signDateDDMMYYYY}</strong></p>
 

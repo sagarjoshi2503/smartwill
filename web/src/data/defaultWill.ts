@@ -23,7 +23,7 @@ export const DEFAULT_WILL: WillState = {
     email:"", fullName:"", gender:"", pan:"", aadhaarNumber:"",
     relation:"son", parentSpouseName:"",
     age:"", maritalStatus:"unmarried", nationality:"", occupation:"", occupationOther:"",
-    spouseName:"", spouseAadhaarNumber:"",
+    spouseName:"", spousePan:"", spouseAadhaarNumber:"",
     sonNames:[""], daughterNames:[""],
     address:"", country:"India",
     signPlace:"", signDay:String(today.day), signMonth:today.month, signYear:String(today.year),
@@ -100,7 +100,7 @@ export const DEFAULT_WILL: WillState = {
   // Witnesses: the Indian Succession Act requires exactly two, so the two slots
   // stay (the UI has no "add witness" control), but with no fabricated identities
   witnesses:[
-    { name:"", parentRelation:"son", parentName:"", age:"", maritalStatus:"unmarried", nationality:"", occupation:"", occupationOther:"", address:"", aadhaarNumber:"", relationToTestator:"", relationToTestatorOther:"" },
-    { name:"", parentRelation:"son", parentName:"", age:"", maritalStatus:"unmarried", nationality:"", occupation:"", occupationOther:"", address:"", aadhaarNumber:"", relationToTestator:"", relationToTestatorOther:"" },
+    { name:"", parentRelation:"son", parentName:"", age:"", maritalStatus:"unmarried", nationality:"", occupation:"", occupationOther:"", address:"", pan:"", aadhaarNumber:"", relationToTestator:"", relationToTestatorOther:"" },
+    { name:"", parentRelation:"son", parentName:"", age:"", maritalStatus:"unmarried", nationality:"", occupation:"", occupationOther:"", address:"", pan:"", aadhaarNumber:"", relationToTestator:"", relationToTestatorOther:"" },
   ],
 };

@@ -2,7 +2,7 @@ from _app.shared.constants import (
     FLD_AADHAAR_NUMBER, FLD_ALL_INDIA_ASSETS, FLD_ALL_INDIA_RESIDUE, FLD_EXECUTOR, FLD_GOAN_ASSETS,
     FLD_GOAN_DEED_WITNESSES, FLD_GOAN_RESIDUE, FLD_GOAN_SPOUSE, FLD_GOAN_TESTATOR, FLD_GOAN_WITNESSES,
     FLD_GUARDIAN, FLD_ID_NUMBER, FLD_JOINT_ID, FLD_PAN, FLD_RESIDUAL_ID, FLD_SPOUSE_AADHAAR_NUMBER,
-    FLD_SUB_ID, FLD_TESTATOR, FLD_WITNESSES,
+    FLD_SPOUSE_PAN, FLD_SUB_ID, FLD_TESTATOR, FLD_WITNESSES,
 )
 
 
@@ -35,7 +35,7 @@ def redact_id_numbers(will_data: dict) -> dict:
     redacted = dict(will_data)
     if isinstance(redacted.get(FLD_TESTATOR), dict):
         redacted[FLD_TESTATOR] = _strip_fields(
-            redacted[FLD_TESTATOR], (FLD_PAN, FLD_AADHAAR_NUMBER, FLD_SPOUSE_AADHAAR_NUMBER),
+            redacted[FLD_TESTATOR], (FLD_PAN, FLD_AADHAAR_NUMBER, FLD_SPOUSE_PAN, FLD_SPOUSE_AADHAAR_NUMBER),
         )
     if isinstance(redacted.get(FLD_EXECUTOR), dict):
         redacted[FLD_EXECUTOR] = _strip_fields(redacted[FLD_EXECUTOR], (FLD_ID_NUMBER, FLD_JOINT_ID, FLD_SUB_ID))
@@ -44,7 +44,7 @@ def redact_id_numbers(will_data: dict) -> dict:
     if FLD_RESIDUAL_ID in redacted:
         redacted[FLD_RESIDUAL_ID] = ""
     if isinstance(redacted.get(FLD_WITNESSES), list):
-        redacted[FLD_WITNESSES] = _strip_list(redacted[FLD_WITNESSES], (FLD_AADHAAR_NUMBER,))
+        redacted[FLD_WITNESSES] = _strip_list(redacted[FLD_WITNESSES], (FLD_PAN, FLD_AADHAAR_NUMBER))
     if isinstance(redacted.get(FLD_ALL_INDIA_ASSETS), dict):
         redacted[FLD_ALL_INDIA_ASSETS] = _strip_asset_categories(redacted[FLD_ALL_INDIA_ASSETS])
     if isinstance(redacted.get(FLD_ALL_INDIA_RESIDUE), list):

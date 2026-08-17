@@ -76,8 +76,9 @@ export function getMissingIdFields(will: WillState, willType: WillType, skipVali
 
   if (!testator.pan.trim()) missing.push("Testator PAN Number");
   if (!testator.aadhaarNumber.trim()) missing.push("Testator Aadhaar Number");
-  if (testator.maritalStatus === "married" && !testator.spouseAadhaarNumber.trim()) {
-    missing.push("Spouse's Aadhaar Number");
+  if (testator.maritalStatus === "married") {
+    if (!testator.spousePan.trim()) missing.push("Spouse's PAN Number");
+    if (!testator.spouseAadhaarNumber.trim()) missing.push("Spouse's Aadhaar Number");
   }
 
   if (executor.wantsExecutor) {
@@ -98,6 +99,7 @@ export function getMissingIdFields(will: WillState, willType: WillType, skipVali
   }
 
   witnesses.forEach((w, i) => {
+    if (!w.pan.trim()) missing.push(`Witness ${i + 1} PAN Number`);
     if (!w.aadhaarNumber.trim()) missing.push(`Witness ${i + 1} Aadhaar Number`);
   });
 

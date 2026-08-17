@@ -98,6 +98,11 @@ def rel_of(item: dict) -> str:
     return esc(value) if value else ""
 
 
+def witness_rel_of(w: dict) -> str:
+    value = w.get("relationToTestatorOther") if w.get("relationToTestator") == "Other" else w.get("relationToTestator")
+    return esc(value) if value else ""
+
+
 def occupation_of(item: dict) -> str:
     value = item.get("occupationOther") if item.get("occupation") == "Other" else item.get("occupation")
     return esc(value) if value else ""
@@ -110,7 +115,7 @@ def v(d: dict, key: str, fallback: str = BLANK) -> str:
 
 def _national(d: dict, key: str = "nationality") -> str:
     value = (d or {}).get(key)
-    return esc(value) if value else BLANK
+    return f"{esc(value)} national" if value else BLANK
 
 
 def _filled(items) -> list:
@@ -135,8 +140,9 @@ def _witness_particular(index: int, w: dict) -> str:
     return (
         f"{letter}) {v(w, 'name')} {esc(w.get('parentRelation')) or 'son/daughter/wife'} of {v(w, 'parentName')}, "
         f"aged {esc(w.get('age')) or '___'}, {esc(w.get('maritalStatus')) or 'unmarried/married'} "
-        f"nationality {_national(w)}, occupation {occupation_of(w) or BLANK}, resident of {v(w, 'address')} "
-        f"bearing Aadhaar Number {v(w, 'aadhaarNumber')}"
+        f"nationality {_national(w)}, occupation {occupation_of(w) or BLANK}, resident of {v(w, 'address')}, "
+        f"bearing PAN Number {v(w, 'pan')}, Aadhaar Number {v(w, 'aadhaarNumber')}, "
+        f"Relation to Testator: {witness_rel_of(w) or BLANK}"
     )
 
 
@@ -169,7 +175,8 @@ def _opening_clause(testator: dict, witnesses: list, execution_date_str: str) ->
         son_join = esc(", ".join(son_names)) or BLANK
         daughter_join = esc(", ".join(daughter_names)) or BLANK
         clause += (
-            f", I am married to {v(testator, 'spouseName')}, bearing Aadhaar No. {v(testator, 'spouseAadhaarNumber')} "
+            f", I am married to {v(testator, 'spouseName')}, bearing PAN {v(testator, 'spousePan')}, "
+            f"Aadhaar No. {v(testator, 'spouseAadhaarNumber')} "
             f"and I have {son_count} son, namely, {son_join} and {daughter_count} daughter, namely, {daughter_join}"
         )
     witness_particulars = _witness_particulars_text(witnesses)
@@ -286,6 +293,7 @@ def build_pdf_context(will: dict) -> dict:
         "residue_clause": _residue_clause(all_india_residue),
         "special_instructions": esc((will.get("specialInstructions") or "").strip()) or None,
         "testator_full_name": v(testator, "fullName"),
+        "testator_email": v(testator, "email"),
         "testator_sign_place": v(testator, "signPlace"),
         "sign_date_ddmmyyyy": sign_date_ddmmyyyy,
         "witnesses": [{"name": v(w, "name")} for w in witnesses],

@@ -21,6 +21,10 @@ export default function TestatorStep({will,set,setWill,idFieldsLocked,idInputCls
   adminComments?: string;
   onNext: () => void;
 }){
+  // Prints "Testator"/"Testatrix" once a Gender is picked, matching the
+  // generated document's gendered title (AllIndiaWillDocument.tsx /
+  // pdf_context.py) — falls back to the slash-form until then.
+  const title = will.testator.gender==="male" ? "Testator" : will.testator.gender==="female" ? "Testatrix" : "Testator/Testatrix";
   return(
     <div className="space-y-4">
       <StepHeader icon={<User size={17}/>} title="Testator Details" sub="Section I — Your identity & declaration of fitness" info={<InfoTrigger title={WIZARD_HELP.testator.title}>{WIZARD_HELP.testator.body}</InfoTrigger>}/>
@@ -37,7 +41,7 @@ export default function TestatorStep({will,set,setWill,idFieldsLocked,idInputCls
       )}
       <div className="bg-slate-100 border border-slate-200 rounded-xl p-3.5 text-xs text-slate-600 flex items-start gap-2"><Info size={13} className="mt-0.5 shrink-0"/>You declare that you are of sound mind and executing this Will voluntarily, free from coercion or undue influence.</div>
       <div>
-        <label className={LC}>Testator Email Address {!testatorEmailEditable&&<span className="text-brand normal-case text-[9px]">(Locked)</span>}</label>
+        <label className={LC}>{title} Email Address {!testatorEmailEditable&&<span className="text-brand normal-case text-[9px]">(Locked)</span>}</label>
         <div className="relative">
           {!testatorEmailEditable&&<Lock size={11} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-600"/>}
           <input type="email" value={will.testator.email} onChange={e=>set("testator.email",e.target.value)} disabled={!testatorEmailEditable}
@@ -107,6 +111,7 @@ export default function TestatorStep({will,set,setWill,idFieldsLocked,idInputCls
         <FormBlock title="Spouse's Details">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div><label className={LC}>Spouse's Name</label><input value={will.testator.spouseName} onChange={e=>set("testator.spouseName",e.target.value)} className={IC}/></div>
+            <div><label className={LC}>Spouse's PAN Number</label><input value={will.testator.spousePan} onChange={e=>set("testator.spousePan",e.target.value)} onBlur={e=>handleIdBlur("PAN Card",e.target.value,v=>set("testator.spousePan",v))} disabled={idFieldsLocked} className={idInputCls(IC)} title={idInputTitle(TIP_NO_ID_SAVED)}/></div>
             <div><label className={LC}>Spouse's Aadhaar Number</label><input value={will.testator.spouseAadhaarNumber} onChange={e=>set("testator.spouseAadhaarNumber",e.target.value)} onBlur={e=>handleIdBlur("Aadhaar Card",e.target.value,v=>set("testator.spouseAadhaarNumber",v))} disabled={idFieldsLocked} className={idInputCls(IC)} title={idInputTitle(TIP_NO_ID_SAVED)}/></div>
           </div>
         </FormBlock>

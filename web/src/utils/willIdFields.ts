@@ -17,6 +17,7 @@ export function extractIdFields(will: WillState) {
     testator: {
       pan: will.testator.pan,
       aadhaarNumber: will.testator.aadhaarNumber,
+      spousePan: will.testator.spousePan,
       spouseAadhaarNumber: will.testator.spouseAadhaarNumber,
     },
     executor: {
@@ -29,7 +30,7 @@ export function extractIdFields(will: WillState) {
       subIdNumber: will.guardian.subIdNumber,
     },
     residualIdNumber: will.residualIdNumber,
-    witnesses: will.witnesses.map(w => ({ aadhaarNumber: w.aadhaarNumber })),
+    witnesses: will.witnesses.map(w => ({ pan: w.pan, aadhaarNumber: w.aadhaarNumber })),
     allIndiaAssets: {
       houseFlat: will.allIndiaAssets.houseFlat.map(it => ({ idNumber: it.idNumber })),
       landPlot: will.allIndiaAssets.landPlot.map(it => ({ idNumber: it.idNumber })),

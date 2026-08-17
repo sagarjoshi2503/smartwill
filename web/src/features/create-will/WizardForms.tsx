@@ -1121,6 +1121,9 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                   <div className="mt-2.5"><label className={LC}>Resident of (Address)</label>
                     <input value={w.address} onChange={e=>setW("address",e.target.value)} className={IC}/>
                   </div>
+                  <div className="mt-2.5"><label className={LC}>PAN Number</label>
+                    <input value={w.pan} onChange={e=>setW("pan",e.target.value)} onBlur={e=>handleIdBlur("PAN Card",e.target.value,v=>setW("pan",v))} disabled={idFieldsLocked} className={idInputCls(IC)} title={idInputTitle(TIP_NO_ID_SAVED)}/>
+                  </div>
                   <div className="mt-2.5"><label className={LC}>Relation to Testator</label>
                     <select value={w.relationToTestator} onChange={e=>setW("relationToTestator",e.target.value)} className={IC+" appearance-none"}>
                       <option value="">Select...</option>

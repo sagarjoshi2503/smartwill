@@ -14,6 +14,7 @@ export interface Testator {
   occupation: string;
   occupationOther: string;
   spouseName: string;
+  spousePan: string;
   spouseAadhaarNumber: string;
   sonNames: string[];
   daughterNames: string[];
@@ -87,6 +88,7 @@ export interface Witness {
   occupation: string;
   occupationOther: string;
   address: string;
+  pan: string;
   aadhaarNumber: string;
   relationToTestator: string;
   relationToTestatorOther: string;

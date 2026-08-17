@@ -105,6 +105,8 @@
 - type: paragraph
   text: {{ ("Name of " ~ title ~ ": " ~ testator_full_name) | yamlstr }}
 - type: paragraph
+  text: {{ (title ~ " Email Address: " ~ testator_email) | yamlstr }}
+- type: paragraph
   text: {{ ("Place: " ~ testator_sign_place) | yamlstr }}
 - type: paragraph
   text: {{ ("Date: " ~ sign_date_ddmmyyyy) | yamlstr }}

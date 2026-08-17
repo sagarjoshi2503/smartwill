@@ -1,8 +1,8 @@
 from _app.core.exceptions import AppError
 from _app.shared.constants import (
     FLD_AADHAAR_NUMBER, FLD_ALL_INDIA_ASSETS, FLD_ALL_INDIA_RESIDUE, FLD_EXECUTOR, FLD_GUARDIAN,
-    FLD_ID_NUMBER, FLD_JOINT_ID, FLD_PAN, FLD_RESIDUAL_ID, FLD_SPOUSE_AADHAAR_NUMBER, FLD_SUB_ID,
-    FLD_TESTATOR, FLD_WITNESSES, HTTP_BAD_REQUEST, ID_FIELDS_LENGTH_MISMATCH,
+    FLD_ID_NUMBER, FLD_JOINT_ID, FLD_PAN, FLD_RESIDUAL_ID, FLD_SPOUSE_AADHAAR_NUMBER, FLD_SPOUSE_PAN,
+    FLD_SUB_ID, FLD_TESTATOR, FLD_WITNESSES, HTTP_BAD_REQUEST, ID_FIELDS_LENGTH_MISMATCH,
 )
 
 
@@ -63,7 +63,7 @@ def merge_id_fields(will_data: dict, id_fields: dict) -> dict:
     if isinstance(merged.get(FLD_TESTATOR), dict):
         merged[FLD_TESTATOR] = _merge_fields(
             merged[FLD_TESTATOR], id_fields.get(FLD_TESTATOR),
-            (FLD_PAN, FLD_AADHAAR_NUMBER, FLD_SPOUSE_AADHAAR_NUMBER),
+            (FLD_PAN, FLD_AADHAAR_NUMBER, FLD_SPOUSE_PAN, FLD_SPOUSE_AADHAAR_NUMBER),
         )
     if isinstance(merged.get(FLD_EXECUTOR), dict):
         merged[FLD_EXECUTOR] = _merge_fields(
@@ -77,7 +77,7 @@ def merge_id_fields(will_data: dict, id_fields: dict) -> dict:
         merged[FLD_RESIDUAL_ID] = id_fields[FLD_RESIDUAL_ID]
     if isinstance(merged.get(FLD_WITNESSES), list):
         merged[FLD_WITNESSES] = _merge_list(
-            merged[FLD_WITNESSES], id_fields.get(FLD_WITNESSES), (FLD_AADHAAR_NUMBER,),
+            merged[FLD_WITNESSES], id_fields.get(FLD_WITNESSES), (FLD_PAN, FLD_AADHAAR_NUMBER),
         )
     if isinstance(merged.get(FLD_ALL_INDIA_ASSETS), dict):
         merged[FLD_ALL_INDIA_ASSETS] = _merge_asset_categories(
