@@ -137,6 +137,16 @@ def _national(d: dict, key: str = "nationality") -> str:
     return f"{esc(value)} national" if value else BLANK
 
 
+def _id_type_label(id_type: str) -> str:
+    """"Aadhaar Card"/"PAN Card" (the ID_TYPES dropdown values — see
+    web/src/data/options.ts) print as plain "Aadhaar"/"PAN" wherever this
+    document composes "<id type> Number" — other ID types (Passport, Voter
+    ID, Driving Licence) are unaffected since they don't carry a trailing
+    "Card"."""
+    text = esc(id_type)
+    return text[: -len(" Card")] if text.endswith(" Card") else text
+
+
 def _filled(items) -> list:
     return [it for it in (items or []) if isinstance(it, dict) and str(it.get("description") or "").strip()]
 
@@ -150,7 +160,7 @@ def _render_asset_list(items: list, label: str) -> list:
         lines.append(
             f"{prefix}{label}: {v(item, 'description')} Bequeathed to: {v(item, 'beneficiary')} "
             f"Age: {esc(item.get('beneficiaryAge')) or '___'} "
-            f"Relationship: {rel_of(item) or BLANK}, bearing {esc(id_type)} Number: {v(item, 'idNumber')}."
+            f"Relationship: {rel_of(item) or BLANK}, having {_id_type_label(id_type)} Number: {v(item, 'idNumber')}."
         )
     return lines
 
@@ -161,7 +171,7 @@ def _witness_particular(index: int, w: dict) -> str:
         f"{letter}) {v(w, 'name')} {esc(w.get('parentRelation')) or 'son/daughter/wife'} of {v(w, 'parentName')}, "
         f"aged {esc(w.get('age')) or '___'}, {esc(w.get('maritalStatus')) or 'unmarried/married'} "
         f"nationality {_national(w)}, occupation {occupation_of(w) or BLANK}, resident of {v(w, 'address')}, "
-        f"bearing PAN Number {v(w, 'pan')}, Aadhaar Number {v(w, 'aadhaarNumber')}, "
+        f"having PAN Number {v(w, 'pan')}, Aadhaar Number {v(w, 'aadhaarNumber')}, "
         f"Relation to Testator: {witness_rel_of(w) or BLANK}"
     )
 
@@ -196,7 +206,7 @@ def _opening_clause(testator: dict, witnesses: list, execution_date_str: str) ->
         son_join = esc(", ".join(son_names)) or BLANK
         daughter_join = esc(", ".join(daughter_names)) or BLANK
         clause += (
-            f", I am married to {v(testator, 'spouseName')}, bearing PAN {v(testator, 'spousePan')}, "
+            f", I am married to {v(testator, 'spouseName')}, having PAN {v(testator, 'spousePan')}, "
             f"Aadhaar Number {v(testator, 'spouseAadhaarNumber')} "
             f"and I have {son_count} son, namely, {son_join} and {daughter_count} daughter, namely, {daughter_join}"
         )
@@ -213,7 +223,7 @@ def _residue_clause(entries: list) -> str:
         suffix = "; " if i < len(entries) - 1 else "."
         parts.append(
             f"{rel_of(entry) or BLANK}, {v(entry, 'name')}, nationality {_national(entry)}, "
-            f"occupation {occupation_of(entry) or BLANK}, bearing {esc(id_type)} Number: {v(entry, 'idNumber')}{suffix}"
+            f"occupation {occupation_of(entry) or BLANK}, having {_id_type_label(id_type)} Number: {v(entry, 'idNumber')}{suffix}"
         )
     return (
         "I hereby declare, direct, and devise that all the Rest and Residue of my estate, including any "
@@ -227,12 +237,12 @@ def _executor_appointment_clause(executor: dict) -> str:
     if executor.get("executorType") == "org":
         return (
             f"I appoint Organization / Entity Name: {v(executor, 'orgName')}, with Authorized Representative / "
-            f"Contact Person: {v(executor, 'orgRepName')}, bearing Registration / Tax ID Number: "
+            f"Contact Person: {v(executor, 'orgRepName')}, having Registration / Tax ID Number: "
             f"{v(executor, 'orgRegNumber')}, and having Registered Office Address: {v(executor, 'orgAddress')}."
         )
     return (
         f"I appoint {v(executor, 'name')}, having Relationship to Testator: {v(executor, 'relation')}, "
-        f"with Address: {v(executor, 'address')}, bearing {esc(executor.get('idType')) or ''} "
+        f"with Address: {v(executor, 'address')}, having {_id_type_label(executor.get('idType')) or ''} "
         f"Number: {v(executor, 'idNumber')}."
     )
 
@@ -240,7 +250,7 @@ def _executor_appointment_clause(executor: dict) -> str:
 def _guardian_appointment_clause(guardian: dict) -> str:
     return (
         f"I appoint {v(guardian, 'name')}, having Relation to Testator: {v(guardian, 'relation')}, "
-        f"with Address: {v(guardian, 'address')}, bearing {esc(guardian.get('idType')) or ''} "
+        f"with Address: {v(guardian, 'address')}, having {_id_type_label(guardian.get('idType')) or ''} "
         f"Number: {v(guardian, 'idNumber')}."
     )
 
