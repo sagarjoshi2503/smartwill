@@ -227,7 +227,7 @@ def _witness_particular(index: int, w: dict) -> str:
     letter = chr(97 + index)
     return (
         f"{letter}) {v(w, 'name')} {esc(w.get('parentRelation')) or 'son/daughter/wife'} of {v(w, 'parentName')}, "
-        f"aged {_age_display(w.get('age'))}, {esc(w.get('maritalStatus')) or 'unmarried/married'} "
+        f"aged {_age_display(w.get('age'))}, {esc(w.get('maritalStatus')) or 'unmarried/married'}, "
         f"nationality {_national(w)}, occupation {occupation_of(w) or BLANK}, resident of {v(w, 'address')}, "
         f"having PAN Number {v(w, 'pan')}, Aadhaar Number {v_aadhaar(w, 'aadhaarNumber')}, "
         f"Relation to Testator: {witness_rel_of(w) or BLANK}"
@@ -253,7 +253,7 @@ def _opening_clause(testator: dict, witnesses: list, execution_date_str: str) ->
         f"I, {v(testator, 'fullName')}, gender: {v(testator, 'gender')}, "
         f"PAN {v(testator, 'pan')}, Aadhaar Number {v_aadhaar(testator, 'aadhaarNumber')}, "
         f"{esc(testator.get('relation')) or ''} of {v(testator, 'parentSpouseName')}, aged {_age_display(testator.get('age'))}, "
-        f"{marital_status} nationality {_national(testator)}, occupation {occupation_of(testator) or BLANK}, "
+        f"{marital_status}, nationality {_national(testator)}, occupation {occupation_of(testator) or BLANK}, "
         f"resident of {v(testator, 'address')}"
     )
     if testator.get("maritalStatus") == "married":
@@ -269,7 +269,7 @@ def _opening_clause(testator: dict, witnesses: list, execution_date_str: str) ->
             f"and I have {son_count} son, namely, {son_join} and {daughter_count} daughter, namely, {daughter_join}"
         )
     witness_particulars = _witness_particulars_text(witnesses)
-    clause += f". And on the {execution_date_str}, and in the presence of two following witnesses:<br/>{witness_particulars}make my last and final WILL."
+    clause += f". And on {execution_date_str}, and in the presence of two following witnesses:<br/>{witness_particulars}make my last and final WILL."
     return clause
 
 
