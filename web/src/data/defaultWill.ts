@@ -34,7 +34,7 @@ export const DEFAULT_WILL: WillState = {
   executor: {
     wantsExecutor:false,
     executorType:"individual", // "individual" | "org"
-    name:"", idType:"Aadhaar Card", idNumber:"",
+    name:"", age:"", idType:"Aadhaar Card", idNumber:"",
     address:"",
     relation:"Son",
     orgName:"", orgRepName:"", orgRegNumber:"", orgAddress:"",
@@ -47,7 +47,7 @@ export const DEFAULT_WILL: WillState = {
   // Section III - Guardians
   guardian: {
     hasMinors:false,
-    name:"", relation:"", occupation:"", occupationOther:"",
+    name:"", age:"", relation:"", occupation:"", occupationOther:"",
     idType:"PAN Card", idNumber:"", aadhaarNumber:"", address:"",
     hasSubstitute:false,
     subName:"", subIdType:"PAN Card", subIdNumber:"", subAddress:"",

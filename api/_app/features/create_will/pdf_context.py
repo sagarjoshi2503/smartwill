@@ -20,6 +20,15 @@ so this must happen once, here, before any composition/concatenation.
 import re
 from xml.sax.saxutils import escape as _xml_escape
 
+from _app.features.create_will.section_titles import (
+    ASSET_LABEL_COMMERCIAL_PROPERTY, ASSET_LABEL_HOUSE_FLAT, ASSET_LABEL_INTELLECTUAL_PROPERTY,
+    ASSET_LABEL_JEWELLERY, ASSET_LABEL_LAND_PLOT, ASSET_LABEL_SOCIAL_MEDIA_DIGITAL, ASSET_LABEL_VEHICLE,
+    HEADING_EXECUTOR_APPOINTMENT, HEADING_EXECUTOR_CONSENT, HEADING_GUARDIAN_APPOINTMENT,
+    HEADING_GUARDIAN_CONSENT, HEADING_WITNESSES, SECTION_DIGITAL_MISC_ASSETS, SECTION_FINANCIAL_ASSETS,
+    SECTION_IMMOVABLE_PROPERTY, SECTION_INTELLECTUAL_PROPERTY, SECTION_MOTOR_VEHICLES,
+    SECTION_PERSONAL_VALUABLES, SECTION_SPECIAL_INSTRUCTIONS, TITLE_WILL,
+)
+
 BLANK = "_______________________"
 
 # Mirrors web/src/data/options.ts's MONTHS array — needed to resolve a
@@ -154,6 +163,14 @@ def _national(d: dict, key: str = "nationality") -> str:
     return f"{esc(value)} national" if value else BLANK
 
 
+def _age_display(value) -> str:
+    """"31 Years" — every age printed in this document (testator, witnesses,
+    asset beneficiaries) goes through this one function, so the "Years"
+    suffix can't silently go missing from one call site while present in
+    another. A blank age stays "___" (no unit on a blank line)."""
+    return f"{esc(value)} Years" if value else "___"
+
+
 def _id_type_label(id_type) -> str:
     """"Aadhaar Card"/"PAN Card" (the ID_TYPES dropdown values — see
     web/src/data/options.ts) print as plain "Aadhaar"/"PAN" wherever this
@@ -179,15 +196,27 @@ def _filled(items) -> list:
     return [it for it in (items or []) if isinstance(it, dict) and str(it.get("description") or "").strip()]
 
 
-def _render_asset_list(items: list, label: str) -> list:
-    numbered = len(items) > 1
+def _filled_residue(entries) -> list:
+    """Mirrors web/src/utils/willValidation.ts's residue "in use" check
+    (relation or name filled in) — an untouched, still-blank residue row
+    (the wizard starts with one) shouldn't produce a Residuary Beneficiary
+    clause with nothing in it."""
+    return [
+        e for e in (entries or [])
+        if isinstance(e, dict) and (str(e.get("relation") or "").strip() or str(e.get("name") or "").strip())
+    ]
+
+
+def _render_asset_list(items: list, label: str, start_index: int = 1, numbered: "bool | None" = None) -> list:
+    if numbered is None:
+        numbered = len(items) > 1
     lines = []
     for i, item in enumerate(items):
-        prefix = f"({i + 1}) " if numbered else ""
+        prefix = f"({start_index + i}) " if numbered else ""
         id_type = item.get("idType") or "Aadhaar Card"
         lines.append(
             f"{prefix}{label}: {v(item, 'description')} Bequeathed to: {v(item, 'beneficiary')} "
-            f"Age: {esc(item.get('beneficiaryAge')) or '___'} "
+            f"Age: {_age_display(item.get('beneficiaryAge'))} "
             f"Relationship: {rel_of(item) or BLANK}, having {_id_type_label(id_type)} "
             f"Number: {_id_number_display(id_type, item.get('idNumber'))}."
         )
@@ -198,7 +227,7 @@ def _witness_particular(index: int, w: dict) -> str:
     letter = chr(97 + index)
     return (
         f"{letter}) {v(w, 'name')} {esc(w.get('parentRelation')) or 'son/daughter/wife'} of {v(w, 'parentName')}, "
-        f"aged {esc(w.get('age')) or '___'}, {esc(w.get('maritalStatus')) or 'unmarried/married'} "
+        f"aged {_age_display(w.get('age'))}, {esc(w.get('maritalStatus')) or 'unmarried/married'} "
         f"nationality {_national(w)}, occupation {occupation_of(w) or BLANK}, resident of {v(w, 'address')}, "
         f"having PAN Number {v(w, 'pan')}, Aadhaar Number {v_aadhaar(w, 'aadhaarNumber')}, "
         f"Relation to Testator: {witness_rel_of(w) or BLANK}"
@@ -223,7 +252,7 @@ def _opening_clause(testator: dict, witnesses: list, execution_date_str: str) ->
     clause = (
         f"I, {v(testator, 'fullName')}, gender: {v(testator, 'gender')}, "
         f"PAN {v(testator, 'pan')}, Aadhaar Number {v_aadhaar(testator, 'aadhaarNumber')}, "
-        f"{esc(testator.get('relation')) or ''} of {v(testator, 'parentSpouseName')}, aged {esc(testator.get('age')) or '___'}, "
+        f"{esc(testator.get('relation')) or ''} of {v(testator, 'parentSpouseName')}, aged {_age_display(testator.get('age'))}, "
         f"{marital_status} nationality {_national(testator)}, occupation {occupation_of(testator) or BLANK}, "
         f"resident of {v(testator, 'address')}"
     )
@@ -271,16 +300,18 @@ def _executor_appointment_clause(executor: dict) -> str:
             f"{v(executor, 'orgRegNumber')}, and having Registered Office Address: {v(executor, 'orgAddress')}."
         )
     return (
-        f"I appoint {v(executor, 'name')}, having Relationship to Testator: {v(executor, 'relation')}, "
-        f"with Address: {v(executor, 'address')}, having {_id_type_label(executor.get('idType')) or ''} "
+        f"I appoint {v(executor, 'name')}, having Age: {_age_display(executor.get('age'))}, "
+        f"Relationship to Testator: {v(executor, 'relation')}, "
+        f"Address: {v(executor, 'address')}, having {_id_type_label(executor.get('idType')) or ''} "
         f"Number: {_id_number_display(executor.get('idType'), executor.get('idNumber'))}."
     )
 
 
 def _guardian_appointment_clause(guardian: dict) -> str:
     return (
-        f"I appoint {v(guardian, 'name')}, having Relation to Testator: {v(guardian, 'relation')}, "
-        f"Occupation: {occupation_of(guardian) or BLANK}, with Address: {v(guardian, 'address')}, "
+        f"I appoint {v(guardian, 'name')}, having Age: {_age_display(guardian.get('age'))}, "
+        f"Relation to Testator: {v(guardian, 'relation')}, "
+        f"Occupation: {occupation_of(guardian) or BLANK}, Address: {v(guardian, 'address')}, "
         f"having {_id_type_label(guardian.get('idType')) or ''} "
         f"Number: {_id_number_display(guardian.get('idType'), guardian.get('idNumber'))}, "
         f"Aadhaar Number: {v_aadhaar(guardian, 'aadhaarNumber')}."
@@ -292,7 +323,7 @@ def build_pdf_context(will: dict) -> dict:
     executor = will.get("executor") or {}
     guardian = will.get("guardian") or {}
     all_india_assets = will.get("allIndiaAssets") or {}
-    all_india_residue = will.get("allIndiaResidue") or []
+    all_india_residue = _filled_residue(will.get("allIndiaResidue"))
     witnesses = will.get("witnesses") or []
 
     if testator.get("signDay") and testator.get("signMonth") and testator.get("signYear"):
@@ -340,9 +371,34 @@ def build_pdf_context(will: dict) -> dict:
 
     executor_type = executor.get("executorType") or "individual"
 
+    # House/Flat, Land/Plot, and Commercial Property all sit under the one
+    # "Immovable Property" section letter, so their item numbers run
+    # continuously across all three (1, 2, 3...) instead of each category
+    # restarting its own (1), (2) — matches every other numbered section,
+    # which has only a single category and so never showed this bug.
+    immovable_numbered = (len(house_flat) + len(land_plot) + len(commercial_property)) > 1
+    house_flat_lines = _render_asset_list(house_flat, ASSET_LABEL_HOUSE_FLAT, 1, immovable_numbered)
+    land_plot_lines = _render_asset_list(land_plot, ASSET_LABEL_LAND_PLOT, len(house_flat) + 1, immovable_numbered)
+    commercial_property_lines = _render_asset_list(
+        commercial_property, ASSET_LABEL_COMMERCIAL_PROPERTY, len(house_flat) + len(land_plot) + 1, immovable_numbered,
+    )
+
     return {
         "blank": BLANK,
         "title": title,
+        "title_will": TITLE_WILL,
+        "section_title_financial_assets": SECTION_FINANCIAL_ASSETS,
+        "section_title_immovable": SECTION_IMMOVABLE_PROPERTY,
+        "section_title_vehicle": SECTION_MOTOR_VEHICLES,
+        "section_title_personal": SECTION_PERSONAL_VALUABLES,
+        "section_title_social_digital": SECTION_DIGITAL_MISC_ASSETS,
+        "section_title_intellectual_property": SECTION_INTELLECTUAL_PROPERTY,
+        "section_title_special_instructions": SECTION_SPECIAL_INSTRUCTIONS,
+        "heading_witnesses": HEADING_WITNESSES,
+        "heading_executor_appointment": HEADING_EXECUTOR_APPOINTMENT,
+        "heading_executor_consent": HEADING_EXECUTOR_CONSENT,
+        "heading_guardian_appointment": HEADING_GUARDIAN_APPOINTMENT,
+        "heading_guardian_consent": HEADING_GUARDIAN_CONSENT,
         "opening_clause": _opening_clause(testator, witnesses, execution_date_str),
         "has_immovable": has_immovable,
         "has_vehicle": has_vehicle,
@@ -355,13 +411,14 @@ def build_pdf_context(will: dict) -> dict:
         "letter_social_digital": letter_social_digital,
         "letter_intellectual_property": letter_intellectual_property,
         "letter_special_instructions": letter_special_instructions,
-        "house_flat_lines": _render_asset_list(house_flat, "House / Flat"),
-        "land_plot_lines": _render_asset_list(land_plot, "Land / Plot"),
-        "commercial_property_lines": _render_asset_list(commercial_property, "Commercial Property"),
-        "vehicle_lines": _render_asset_list(vehicle, "Vehicle / Car"),
-        "jewellery_lines": _render_asset_list(jewellery, "Jewellery & Heirlooms"),
-        "social_media_digital_lines": _render_asset_list(social_media_digital, "Social Media / Digital"),
-        "intellectual_property_lines": _render_asset_list(intellectual_property, "Intellectual Property"),
+        "house_flat_lines": house_flat_lines,
+        "land_plot_lines": land_plot_lines,
+        "commercial_property_lines": commercial_property_lines,
+        "vehicle_lines": _render_asset_list(vehicle, ASSET_LABEL_VEHICLE),
+        "jewellery_lines": _render_asset_list(jewellery, ASSET_LABEL_JEWELLERY),
+        "social_media_digital_lines": _render_asset_list(social_media_digital, ASSET_LABEL_SOCIAL_MEDIA_DIGITAL),
+        "intellectual_property_lines": _render_asset_list(intellectual_property, ASSET_LABEL_INTELLECTUAL_PROPERTY),
+        "has_residue": bool(all_india_residue),
         "residue_clause": _residue_clause(all_india_residue),
         "special_instructions": special_instructions,
         "testator_full_name": v(testator, "fullName"),

@@ -30,6 +30,7 @@ export interface Executor {
   wantsExecutor: boolean;
   executorType: "individual" | "org";
   name: string;
+  age: string;
   idType: string;
   idNumber: string;
   address: string;
@@ -54,6 +55,7 @@ export interface Executor {
 export interface Guardian {
   hasMinors: boolean;
   name: string;
+  age: string;
   relation: string;
   occupation: string;
   occupationOther: string;

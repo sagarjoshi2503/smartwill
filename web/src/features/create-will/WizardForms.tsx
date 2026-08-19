@@ -386,7 +386,10 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
           </div>
           {will.executor.executorType==="individual"?(
           <FormBlock title="Primary Executor">
-            <div><label className={LC}>Executor's Full Name</label><input value={will.executor.name} onChange={e=>set("executor.name",e.target.value)} className={IC}/></div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div><label className={LC}>Executor's Full Name</label><input value={will.executor.name} onChange={e=>set("executor.name",e.target.value)} className={IC}/></div>
+              <div><label className={LC}>Age (Years)</label><input type="number" value={will.executor.age} onChange={e=>set("executor.age",e.target.value)} className={IC}/></div>
+            </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div><label className={LC}>Relationship to You</label>
                 <input value={will.executor.relation} onChange={e=>set("executor.relation",e.target.value)} className={IC} placeholder="e.g., Spouse, Child, Friend"/>
@@ -434,22 +437,23 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
               <FormBlock title="Main Guardian">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div><label className={LC}>{LBL_FULL_NAME}</label><input value={will.guardian.name} onChange={e=>set("guardian.name",e.target.value)} className={IC} placeholder="Guardian's name"/></div>
+                  <div><label className={LC}>Age (Years)</label><input type="number" value={will.guardian.age} onChange={e=>set("guardian.age",e.target.value)} className={IC}/></div>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div><label className={LC}>Relation to Testator</label>
                     <select value={will.guardian.relation} onChange={e=>set("guardian.relation",e.target.value)} className={IC+" appearance-none"}>
                       <option value="">Select...</option>
                       {RELATIONS.map(r=><option key={r}>{r}</option>)}
                     </select>
                   </div>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div><label className={LC}>Occupation</label>
                     <select value={will.guardian.occupation} onChange={e=>set("guardian.occupation",e.target.value)} className={IC+" appearance-none"}>
                       <option value="">Select...</option>
                       {OCCUPATIONS.map(o=><option key={o}>{o}</option>)}
                     </select>
                   </div>
-                  <div><label className={LC}>{LBL_ADDRESS}</label><input value={will.guardian.address} onChange={e=>set("guardian.address",e.target.value)} className={IC}/></div>
                 </div>
+                <div><label className={LC}>{LBL_ADDRESS}</label><input value={will.guardian.address} onChange={e=>set("guardian.address",e.target.value)} className={IC}/></div>
                 {will.guardian.occupation==="Other"&&(
                   <div><label className={LC}>Please specify occupation</label>
                     <input value={will.guardian.occupationOther} onChange={e=>set("guardian.occupationOther",e.target.value)} className={IC}/></div>
@@ -1119,16 +1123,11 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                       <input value={w.nationality} onChange={e=>setW("nationality",e.target.value)} className={IC} placeholder="e.g. Indian"/>
                     </div>
                   </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mt-2.5">
-                    <div><label className={LC}>Occupation</label>
-                      <select value={w.occupation} onChange={e=>setW("occupation",e.target.value)} className={IC+" appearance-none"}>
-                        <option value="">Select...</option>
-                        {OCCUPATIONS.map(o=><option key={o}>{o}</option>)}
-                      </select>
-                    </div>
-                    <div><label className={LC}>Aadhaar Number</label>
-                      <input value={w.aadhaarNumber} onChange={e=>setW("aadhaarNumber",e.target.value)} onBlur={e=>handleIdBlur("Aadhaar Card",e.target.value,v=>setW("aadhaarNumber",v))} disabled={idFieldsLocked} className={idInputCls(IC)} title={idInputTitle(TIP_NO_ID_SAVED)}/>
-                    </div>
+                  <div className="mt-2.5"><label className={LC}>Occupation</label>
+                    <select value={w.occupation} onChange={e=>setW("occupation",e.target.value)} className={IC+" appearance-none"}>
+                      <option value="">Select...</option>
+                      {OCCUPATIONS.map(o=><option key={o}>{o}</option>)}
+                    </select>
                   </div>
                   {w.occupation==="Other"&&(
                     <div className="mt-2.5"><label className={LC}>Please specify occupation</label>
@@ -1138,8 +1137,13 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                   <div className="mt-2.5"><label className={LC}>Resident of (Address)</label>
                     <input value={w.address} onChange={e=>setW("address",e.target.value)} className={IC}/>
                   </div>
-                  <div className="mt-2.5"><label className={LC}>PAN Number</label>
-                    <input value={w.pan} onChange={e=>setW("pan",e.target.value)} onBlur={e=>handleIdBlur("PAN Card",e.target.value,v=>setW("pan",v))} disabled={idFieldsLocked} className={idInputCls(IC)} title={idInputTitle(TIP_NO_ID_SAVED)}/>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mt-2.5">
+                    <div><label className={LC}>PAN Number</label>
+                      <input value={w.pan} onChange={e=>setW("pan",e.target.value)} onBlur={e=>handleIdBlur("PAN Card",e.target.value,v=>setW("pan",v))} disabled={idFieldsLocked} className={idInputCls(IC)} title={idInputTitle(TIP_NO_ID_SAVED)}/>
+                    </div>
+                    <div><label className={LC}>Aadhaar Number</label>
+                      <input value={w.aadhaarNumber} onChange={e=>setW("aadhaarNumber",e.target.value)} onBlur={e=>handleIdBlur("Aadhaar Card",e.target.value,v=>setW("aadhaarNumber",v))} disabled={idFieldsLocked} className={idInputCls(IC)} title={idInputTitle(TIP_NO_ID_SAVED)}/>
+                    </div>
                   </div>
                   <div className="mt-2.5"><label className={LC}>Relation to Testator</label>
                     <select value={w.relationToTestator} onChange={e=>setW("relationToTestator",e.target.value)} className={IC+" appearance-none"}>
