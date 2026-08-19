@@ -312,7 +312,7 @@ def _guardian_appointment_clause(guardian: dict) -> str:
     return (
         f"I appoint {v(guardian, 'name')}, having Age: {_age_display(guardian.get('age'))}, "
         f"Relation to Testator: {v(guardian, 'relation')}, "
-        f"Occupation: {occupation_of(guardian) or BLANK}, Address: {v(guardian, 'address')}, "
+        f"Occupation: {occupation_of(guardian) or BLANK}, Residential Address: {v(guardian, 'address')}, "
         f"having {_id_type_label(guardian.get('idType')) or ''} "
         f"Number: {_id_number_display(guardian.get('idType'), guardian.get('idNumber'))}, "
         f"Aadhaar Number: {v_aadhaar(guardian, 'aadhaarNumber')}."
