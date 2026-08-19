@@ -212,7 +212,7 @@ def _render_asset_list(items: list, label: str, start_index: int = 1, numbered: 
         numbered = len(items) > 1
     lines = []
     for i, item in enumerate(items):
-        prefix = f"({start_index + i}) " if numbered else ""
+        prefix = f"{start_index + i} " if numbered else ""
         id_type = item.get("idType") or "Aadhaar Card"
         lines.append(
             f"{prefix}{label}: {v(item, 'description')} Bequeathed to: {v(item, 'beneficiary')} "
@@ -302,6 +302,7 @@ def _executor_appointment_clause(executor: dict) -> str:
     return (
         f"I appoint {v(executor, 'name')}, having Age: {_age_display(executor.get('age'))}, "
         f"Relationship to Testator: {v(executor, 'relation')}, "
+        f"Occupation: {occupation_of(executor) or BLANK}, "
         f"Address: {v(executor, 'address')}, having {_id_type_label(executor.get('idType')) or ''} "
         f"Number: {_id_number_display(executor.get('idType'), executor.get('idNumber'))}."
     )

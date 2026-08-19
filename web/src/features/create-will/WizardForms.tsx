@@ -394,9 +394,19 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
               <div><label className={LC}>Relationship to You</label>
                 <input value={will.executor.relation} onChange={e=>set("executor.relation",e.target.value)} className={IC} placeholder="e.g., Spouse, Child, Friend"/>
               </div>
-              <div><label className={LC}>Contact Details / Address</label>
-                <input value={will.executor.address} onChange={e=>set("executor.address",e.target.value)} className={IC}/>
+              <div><label className={LC}>Occupation</label>
+                <select value={will.executor.occupation} onChange={e=>set("executor.occupation",e.target.value)} className={IC+" appearance-none"}>
+                  <option value="">Select...</option>
+                  {OCCUPATIONS.map(o=><option key={o}>{o}</option>)}
+                </select>
               </div>
+            </div>
+            {will.executor.occupation==="Other"&&(
+              <div><label className={LC}>Please specify occupation</label>
+                <input value={will.executor.occupationOther} onChange={e=>set("executor.occupationOther",e.target.value)} className={IC}/></div>
+            )}
+            <div><label className={LC}>Contact Details / Address</label>
+              <input value={will.executor.address} onChange={e=>set("executor.address",e.target.value)} className={IC}/>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div><label className={LC}>{LBL_ID_TYPE}</label>

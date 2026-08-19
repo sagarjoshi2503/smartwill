@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import type { MutableRefObject, ReactNode } from "react";
-import { ChevronLeft, Printer, Download } from "lucide-react";
+import { ChevronLeft, Download } from "lucide-react";
 import BrandMark from "../../components/shared/BrandMark";
 import type { Beneficiary, WillState } from "../../types";
 import {
@@ -15,11 +15,10 @@ import {
 // Content logic (wording, section letters, witness particulars, asset
 // lines) lives in the shared allIndiaWillShared module so it can't drift
 // from AllIndiaLiveDocPreview.tsx's compact preview.
-export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,onDownload,pdfStatus,pdfError,willDocRef}:{
+export default function AllIndiaWillDocument({will,residualBene,onBack,onDownload,pdfStatus,pdfError,willDocRef}:{
   will: WillState;
   residualBene: Beneficiary | undefined;
   onBack: () => void;
-  onPrint: () => void;
   onDownload: () => void;
   pdfStatus: "idle" | "generating" | "error";
   pdfError: string;
@@ -152,12 +151,9 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,o
           {pdfStatus==="error" ? (
             <span className="text-red-500 text-[11px] hidden md:inline">{pdfError}</span>
           ) : (
-            <span className="text-slate-400 text-[11px] hidden md:inline">Print and Download generate the actual PDF from the server — this may take a moment.</span>
+            <span className="text-slate-400 text-[11px] hidden md:inline">Download the actual PDF from the server — this may take a moment.</span>
           )}
           <div className="flex items-center gap-2.5">
-            <button onClick={onPrint} disabled={pdfStatus==="generating"} className="flex items-center gap-1.5 bg-slate-700 hover:bg-slate-600 disabled:opacity-60 disabled:cursor-not-allowed text-white rounded-lg px-3.5 py-2 text-sm transition-colors">
-              <Printer size={14}/>{pdfStatus==="generating"?"Generating…":"Print"}
-            </button>
             <button onClick={onDownload} disabled={pdfStatus==="generating"} className="flex items-center gap-1.5 bg-brand hover:bg-brand-dark disabled:opacity-60 disabled:cursor-not-allowed text-[#ffffff] rounded-lg px-3.5 py-2 text-sm font-semibold transition-colors">
               <Download size={14}/>{pdfStatus==="generating"?"Generating…":"Download PDF"}
             </button>

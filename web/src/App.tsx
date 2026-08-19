@@ -476,21 +476,6 @@ export default function SmartWill() {
     return res.blob();
   };
 
-  const handleGeneratePdfAndPrint = useCallback(async () => {
-    setPdfStatus("generating"); setPdfError("");
-    try {
-      const blob = await fetchWillPdfBlob();
-      const url = URL.createObjectURL(blob);
-      window.open(url, "_blank");
-      setTimeout(()=>URL.revokeObjectURL(url), ANNEX_PDF_URL_REVOKE_MS);
-      setPdfStatus("idle");
-    } catch (err) {
-      setPdfStatus("error");
-      setPdfError(err instanceof Error ? err.message : ERR_GENERATE_PDF);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [will, editingWillId, willType]);
-
   const handleGeneratePdfAndDownload = useCallback(async () => {
     setPdfStatus("generating"); setPdfError("");
     try {
@@ -530,7 +515,7 @@ export default function SmartWill() {
 
   if(showWillDoc) return willType==="allindia" ? (
     <AllIndiaWillDocument will={will} residualBene={residualBene}
-      onBack={()=>setShowWillDoc(false)} onPrint={handleGeneratePdfAndPrint} onDownload={handleGeneratePdfAndDownload}
+      onBack={()=>setShowWillDoc(false)} onDownload={handleGeneratePdfAndDownload}
       pdfStatus={pdfStatus} pdfError={pdfError} willDocRef={willDocRef} />
   ) : willType==="goan" ? (
     <GoanDocumentsView will={will} onBack={()=>setShowWillDoc(false)} onPrint={handlePrint} />

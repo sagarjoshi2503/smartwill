@@ -31,6 +31,8 @@ export interface Executor {
   executorType: "individual" | "org";
   name: string;
   age: string;
+  occupation: string;
+  occupationOther: string;
   idType: string;
   idNumber: string;
   address: string;

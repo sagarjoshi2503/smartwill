@@ -33,7 +33,8 @@
 5) Guardians Consent should be shown only when Guarding is added ?
 6) Place and Date textbox should be there on Guardian , Executor and witness screens ? Or it should be only in last witness screen ?
 --------------
-7) Should it be  "nationality India National" or just "India National"
+7) Should it be  "nationality Indian National" or just "Indian National" or "nationality Indian"
 8) Relation to Testator: Friend
 9) If gender is Male , should show
-/Testatrix
+Signature of Testator/Testatrix
+or just "Signature of Testator"

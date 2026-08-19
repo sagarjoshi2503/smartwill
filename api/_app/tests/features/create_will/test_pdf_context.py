@@ -119,8 +119,8 @@ def test_multiple_items_in_one_category_are_numbered():
         {"description": "Car 2", "beneficiary": "Amy", "relation": "Daughter", "idNumber": "Y"},
     ]
     ctx = build_pdf_context(will)
-    assert ctx["vehicle_lines"][0].startswith("(1) Vehicle / Car: Car 1")
-    assert ctx["vehicle_lines"][1].startswith("(2) Vehicle / Car: Car 2")
+    assert ctx["vehicle_lines"][0].startswith("1 Vehicle / Car: Car 1")
+    assert ctx["vehicle_lines"][1].startswith("2 Vehicle / Car: Car 2")
 
 
 def test_single_item_in_a_category_is_not_numbered():

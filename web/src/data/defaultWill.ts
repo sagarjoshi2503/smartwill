@@ -34,7 +34,7 @@ export const DEFAULT_WILL: WillState = {
   executor: {
     wantsExecutor:false,
     executorType:"individual", // "individual" | "org"
-    name:"", age:"", idType:"Aadhaar Card", idNumber:"",
+    name:"", age:"", occupation:"", occupationOther:"", idType:"Aadhaar Card", idNumber:"",
     address:"",
     relation:"Son",
     orgName:"", orgRepName:"", orgRegNumber:"", orgAddress:"",
