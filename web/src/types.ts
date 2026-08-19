@@ -55,8 +55,11 @@ export interface Guardian {
   hasMinors: boolean;
   name: string;
   relation: string;
+  occupation: string;
+  occupationOther: string;
   idType: string;
   idNumber: string;
+  aadhaarNumber: string;
   address: string;
   hasSubstitute: boolean;
   subName: string;

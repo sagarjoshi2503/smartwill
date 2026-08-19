@@ -8,7 +8,7 @@
 #      block's `type` to a ReportLab flowable:
 #        title      - large centered bold heading (used once, for "WILL")
 #        heading    - smaller centered bold heading (secondary sections)
-#        subheading - left-aligned label line (e.g. "A. FINANCIAL ASSETS:")
+#        subheading - left-aligned label line (e.g. "A. Financial Assets:")
 #        paragraph  - justified body text
 #        pagebreak  - forces a new page
 #
@@ -22,10 +22,11 @@
 # bottom of every page is drawn by pdf_generator.py's page template, not
 # this file, since it's positional/structural, not content.
 #
-# Every heading/subheading is printed in caps (literally, or via the
-# `upper` filter for ones built from a dynamic section letter) — ReportLab
-# renders plain text with no CSS, unlike the web preview's `uppercase`
-# uitility class, so the casing has to be real here.
+# Only `heading`-type blocks (Appointment of Executor, Executor's Consent,
+# Appointment of Guardian, Guardian's Consent, WITNESSES) are printed in
+# caps, literally — ReportLab renders plain text with no CSS, so the casing
+# has to be real here. `subheading`-type blocks (the lettered A/B/C/... asset
+# sections) stay Title Case — deliberately not capitalized, unlike headings.
 #
 # Every value is piped through the `yamlstr` filter (JSON-encodes it) —
 # that's what keeps this valid YAML regardless of quotes/newlines/unicode
@@ -42,14 +43,14 @@
 - type: paragraph
   text: {{ "I bequeath my specific assets to the designated beneficiaries as outlined below:" | yamlstr }}
 - type: subheading
-  text: {{ "A. FINANCIAL ASSETS:" | yamlstr }}
+  text: {{ "A. Financial Assets:" | yamlstr }}
 - type: paragraph
   text: {{ "I bequeath all my financial assets including Bank Accounts, Bank Locker, Fixed Deposits (FDs), Recurring Deposits (RDs), Public Provident Fund (PPF), Life Insurance, Stocks, Mutual Funds, Cryptocurrency (Crypto), Digital Wallets, National Pension System (NPS), Bonds, Alternative Investment Fund (AIF), Specialized Investment Fund (SIF), and Portfolio Management Services (PMS) entirely to the nominees registered in those financial instruments." | yamlstr }}
 {% if has_immovable or has_vehicle or has_personal or has_social_digital or has_intellectual_property %}
 - type: pagebreak
 {% if has_immovable %}
 - type: subheading
-  text: {{ (letter_immovable ~ ". Immovable Property:") | upper | yamlstr }}
+  text: {{ (letter_immovable ~ ". Immovable Property:") | yamlstr }}
 {% for line in house_flat_lines %}
 - type: paragraph
   text: {{ line | yamlstr }}
@@ -65,7 +66,7 @@
 {% endif %}
 {% if has_vehicle %}
 - type: subheading
-  text: {{ (letter_vehicle ~ ". Motor Vehicles:") | upper | yamlstr }}
+  text: {{ (letter_vehicle ~ ". Motor Vehicles:") | yamlstr }}
 {% for line in vehicle_lines %}
 - type: paragraph
   text: {{ line | yamlstr }}
@@ -73,7 +74,7 @@
 {% endif %}
 {% if has_personal %}
 - type: subheading
-  text: {{ (letter_personal ~ ". Personal & Valuables:") | upper | yamlstr }}
+  text: {{ (letter_personal ~ ". Personal & Valuables:") | yamlstr }}
 {% for line in jewellery_lines %}
 - type: paragraph
   text: {{ line | yamlstr }}
@@ -81,7 +82,7 @@
 {% endif %}
 {% if has_social_digital %}
 - type: subheading
-  text: {{ (letter_social_digital ~ ". Social Media / Digital Assets:") | upper | yamlstr }}
+  text: {{ (letter_social_digital ~ ". Social Media / Digital Assets:") | yamlstr }}
 {% for line in social_media_digital_lines %}
 - type: paragraph
   text: {{ line | yamlstr }}
@@ -89,7 +90,7 @@
 {% endif %}
 {% if has_intellectual_property %}
 - type: subheading
-  text: {{ (letter_intellectual_property ~ ". Intellectual Property:") | upper | yamlstr }}
+  text: {{ (letter_intellectual_property ~ ". Intellectual Property:") | yamlstr }}
 {% for line in intellectual_property_lines %}
 - type: paragraph
   text: {{ line | yamlstr }}
@@ -101,7 +102,7 @@
   text: {{ residue_clause | yamlstr }}
 {% if special_instructions %}
 - type: subheading
-  text: {{ (letter_special_instructions ~ ". Special Non-Asset Instructions:") | upper | yamlstr }}
+  text: {{ (letter_special_instructions ~ ". Special Non-Asset Instructions:") | yamlstr }}
 - type: paragraph
   text: {{ special_instructions | yamlstr }}
 {% endif %}
@@ -113,8 +114,6 @@
   text: {{ ("Signature of " ~ title ~ ": " ~ blank) | yamlstr }}
 - type: paragraph
   text: {{ ("Name of " ~ title ~ ": " ~ testator_full_name) | yamlstr }}
-- type: paragraph
-  text: {{ (title ~ " Email Address: " ~ testator_email) | yamlstr }}
 - type: paragraph
   text: {{ ("Place: " ~ testator_sign_place) | yamlstr }}
 - type: paragraph

@@ -6,6 +6,7 @@ from pymongo.database import Database
 from _app.core.config import Settings
 from _app.core.exceptions import AppError
 from _app.features.create_will import repository
+from _app.features.create_will.pdf_context import MONTHS
 from _app.features.create_will.pdf_generator import generate_all_india_will_pdf
 from _app.features.create_will.pdf_merge import merge_id_fields
 from _app.shared import email
@@ -177,6 +178,26 @@ def get_will_for_edit(db: Database, will_id: str, email: str) -> dict:
     }
 
 
+def _with_signing_date_today(will: dict) -> dict:
+    """The execution/signing date printed on the Will (opening clause,
+    signature page, executor/guardian consent pages) is always "today" —
+    the moment the PDF is actually generated/downloaded — never a date the
+    testator typed in earlier. testator.signDay/signMonth/signYear still
+    exist as real WillState/DB fields (see web/src/types.ts's Testator),
+    just with no UI to edit them; this overwrites them on the transient
+    dict handed to the PDF renderer only, never persisted back to Mongo."""
+    if not isinstance(will.get(FLD_TESTATOR), dict):
+        return will
+    today = datetime.now(timezone.utc).date()
+    testator = {
+        **will[FLD_TESTATOR],
+        "signDay": str(today.day),
+        "signMonth": MONTHS[today.month - 1],
+        "signYear": str(today.year),
+    }
+    return {**will, FLD_TESTATOR: testator}
+
+
 def generate_will_pdf(db: Database, will_id: str, id_fields: dict, testator_email: str) -> bytes:
     testator_email = normalize_email(testator_email)
     document = repository.find_will_by_id(db, will_id)
@@ -188,6 +209,7 @@ def generate_will_pdf(db: Database, will_id: str, id_fields: dict, testator_emai
         raise AppError(HTTP_BAD_REQUEST, PDF_UNSUPPORTED_WILL_TYPE)
 
     merged_will = merge_id_fields(document.get(FLD_WILL) or {}, id_fields or {})
+    merged_will = _with_signing_date_today(merged_will)
     return generate_all_india_will_pdf(merged_will)
 
 

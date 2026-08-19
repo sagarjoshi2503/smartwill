@@ -147,7 +147,7 @@ def test_executor_org_vs_individual_clause():
 
     individual = build_pdf_context(_will(executor={"wantsExecutor": True, "executorType": "individual", "name": "Bob"}))
     assert individual["executor_appointment_clause"].startswith("I appoint Bob")
-    assert individual["executor_consent_who"] == "the Executor named above"
+    assert individual["executor_consent_who"] == "the Executor of the Organization mentioned"
     assert individual["executor_label_suffix"] == ""
 
 

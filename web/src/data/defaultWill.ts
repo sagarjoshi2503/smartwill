@@ -47,7 +47,8 @@ export const DEFAULT_WILL: WillState = {
   // Section III - Guardians
   guardian: {
     hasMinors:false,
-    name:"", relation:"", idType:"PAN Card", idNumber:"", address:"",
+    name:"", relation:"", occupation:"", occupationOther:"",
+    idType:"PAN Card", idNumber:"", aadhaarNumber:"", address:"",
     hasSubstitute:false,
     subName:"", subIdType:"PAN Card", subIdNumber:"", subAddress:"",
   },

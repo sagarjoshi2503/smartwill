@@ -300,7 +300,7 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onPrint,o
               <Page isLast={!showGuardian}>
                 <h1 className="text-center text-lg font-bold uppercase mb-6">Executor's Consent</h1>
                 <p className="text-justify mb-5">
-                  I, <strong>{(executor.executorType==="org"?executor.orgRepName:executor.name)||blank}</strong>, being {executor.executorType==="org"?"the Authorized Representative of the Organization mentioned":"the Executor named above"}, have read the contents of the Will and affirm my consent to act as the Executor of this Will and implement the same in the best possible manner.
+                  I, <strong>{(executor.executorType==="org"?executor.orgRepName:executor.name)||blank}</strong>, being {executor.executorType==="org"?"the Authorized Representative of the Organization mentioned":"the Executor of the Organization mentioned"}, have read the contents of the Will and affirm my consent to act as the Executor of this Will and implement the same in the best possible manner.
                 </p>
                 <p className="mb-1">Place and Date: <strong>{testator.signPlace||blank}, {executionDateStr(testator)}</strong></p>
                 <p className="mb-1">Name of the Executor{executor.executorType==="org"?" / Representative":""}: <strong>{(executor.executorType==="org"?executor.orgRepName:executor.name)||blank}</strong></p>

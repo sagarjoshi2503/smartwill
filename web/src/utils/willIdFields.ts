@@ -27,6 +27,7 @@ export function extractIdFields(will: WillState) {
     },
     guardian: {
       idNumber: will.guardian.idNumber,
+      aadhaarNumber: will.guardian.aadhaarNumber,
       subIdNumber: will.guardian.subIdNumber,
     },
     residualIdNumber: will.residualIdNumber,

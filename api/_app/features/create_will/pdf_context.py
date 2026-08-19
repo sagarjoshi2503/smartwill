@@ -17,6 +17,7 @@ Paragraph, which interprets a small XML-like markup subset in its input,
 so this must happen once, here, before any composition/concatenation.
 """
 
+import re
 from xml.sax.saxutils import escape as _xml_escape
 
 BLANK = "_______________________"
@@ -132,12 +133,28 @@ def v(d: dict, key: str, fallback: str = BLANK) -> str:
     return esc(value) if value else fallback
 
 
+def _format_aadhaar(value) -> str:
+    """XXXX XXXX XXXX — spaced every 4 digits, matching the physical Aadhaar
+    card's printed format. Only reformats when the value has exactly 12
+    digits (ignoring any spaces/hyphens already typed in); anything else
+    (partial, non-numeric) prints as-is via esc(), unchanged."""
+    digits = re.sub(r"\D", "", str(value))
+    if len(digits) == 12:
+        return " ".join(digits[i:i + 4] for i in range(0, 12, 4))
+    return esc(value)
+
+
+def v_aadhaar(d: dict, key: str, fallback: str = BLANK) -> str:
+    value = (d or {}).get(key)
+    return _format_aadhaar(value) if value else fallback
+
+
 def _national(d: dict, key: str = "nationality") -> str:
     value = (d or {}).get(key)
     return f"{esc(value)} national" if value else BLANK
 
 
-def _id_type_label(id_type: str) -> str:
+def _id_type_label(id_type) -> str:
     """"Aadhaar Card"/"PAN Card" (the ID_TYPES dropdown values — see
     web/src/data/options.ts) print as plain "Aadhaar"/"PAN" wherever this
     document composes "<id type> Number" — other ID types (Passport, Voter
@@ -145,6 +162,17 @@ def _id_type_label(id_type: str) -> str:
     "Card"."""
     text = esc(id_type)
     return text[: -len(" Card")] if text.endswith(" Card") else text
+
+
+def _id_number_display(id_type, value) -> str:
+    """Formats a generic ID number for display — Aadhaar values (identified
+    by the accompanying ID Type, e.g. an asset/executor/guardian ID field
+    left on its default "Aadhaar Card" selection) get the same XXXX XXXX
+    XXXX spacing as the dedicated aadhaarNumber fields (see
+    v_aadhaar/_format_aadhaar); every other ID type prints as-is."""
+    if not value:
+        return BLANK
+    return _format_aadhaar(value) if _id_type_label(id_type) == "Aadhaar" else esc(value)
 
 
 def _filled(items) -> list:
@@ -160,7 +188,8 @@ def _render_asset_list(items: list, label: str) -> list:
         lines.append(
             f"{prefix}{label}: {v(item, 'description')} Bequeathed to: {v(item, 'beneficiary')} "
             f"Age: {esc(item.get('beneficiaryAge')) or '___'} "
-            f"Relationship: {rel_of(item) or BLANK}, having {_id_type_label(id_type)} Number: {v(item, 'idNumber')}."
+            f"Relationship: {rel_of(item) or BLANK}, having {_id_type_label(id_type)} "
+            f"Number: {_id_number_display(id_type, item.get('idNumber'))}."
         )
     return lines
 
@@ -171,7 +200,7 @@ def _witness_particular(index: int, w: dict) -> str:
         f"{letter}) {v(w, 'name')} {esc(w.get('parentRelation')) or 'son/daughter/wife'} of {v(w, 'parentName')}, "
         f"aged {esc(w.get('age')) or '___'}, {esc(w.get('maritalStatus')) or 'unmarried/married'} "
         f"nationality {_national(w)}, occupation {occupation_of(w) or BLANK}, resident of {v(w, 'address')}, "
-        f"having PAN Number {v(w, 'pan')}, Aadhaar Number {v(w, 'aadhaarNumber')}, "
+        f"having PAN Number {v(w, 'pan')}, Aadhaar Number {v_aadhaar(w, 'aadhaarNumber')}, "
         f"Relation to Testator: {witness_rel_of(w) or BLANK}"
     )
 
@@ -193,7 +222,7 @@ def _opening_clause(testator: dict, witnesses: list, execution_date_str: str) ->
     marital_status = esc(testator.get("maritalStatus")) or ""
     clause = (
         f"I, {v(testator, 'fullName')}, gender: {v(testator, 'gender')}, "
-        f"PAN {v(testator, 'pan')}, Aadhaar Number {v(testator, 'aadhaarNumber')}, "
+        f"PAN {v(testator, 'pan')}, Aadhaar Number {v_aadhaar(testator, 'aadhaarNumber')}, "
         f"{esc(testator.get('relation')) or ''} of {v(testator, 'parentSpouseName')}, aged {esc(testator.get('age')) or '___'}, "
         f"{marital_status} nationality {_national(testator)}, occupation {occupation_of(testator) or BLANK}, "
         f"resident of {v(testator, 'address')}"
@@ -207,7 +236,7 @@ def _opening_clause(testator: dict, witnesses: list, execution_date_str: str) ->
         daughter_join = esc(", ".join(daughter_names)) or BLANK
         clause += (
             f", I am married to {v(testator, 'spouseName')}, having PAN {v(testator, 'spousePan')}, "
-            f"Aadhaar Number {v(testator, 'spouseAadhaarNumber')} "
+            f"Aadhaar Number {v_aadhaar(testator, 'spouseAadhaarNumber')} "
             f"and I have {son_count} son, namely, {son_join} and {daughter_count} daughter, namely, {daughter_join}"
         )
     witness_particulars = _witness_particulars_text(witnesses)
@@ -223,7 +252,8 @@ def _residue_clause(entries: list) -> str:
         suffix = "; " if i < len(entries) - 1 else "."
         parts.append(
             f"{rel_of(entry) or BLANK}, {v(entry, 'name')}, nationality {_national(entry)}, "
-            f"occupation {occupation_of(entry) or BLANK}, having {_id_type_label(id_type)} Number: {v(entry, 'idNumber')}{suffix}"
+            f"occupation {occupation_of(entry) or BLANK}, having {_id_type_label(id_type)} "
+            f"Number: {_id_number_display(id_type, entry.get('idNumber'))}{suffix}"
         )
     return (
         "I hereby declare, direct, and devise that all the Rest and Residue of my estate, including any "
@@ -243,15 +273,17 @@ def _executor_appointment_clause(executor: dict) -> str:
     return (
         f"I appoint {v(executor, 'name')}, having Relationship to Testator: {v(executor, 'relation')}, "
         f"with Address: {v(executor, 'address')}, having {_id_type_label(executor.get('idType')) or ''} "
-        f"Number: {v(executor, 'idNumber')}."
+        f"Number: {_id_number_display(executor.get('idType'), executor.get('idNumber'))}."
     )
 
 
 def _guardian_appointment_clause(guardian: dict) -> str:
     return (
         f"I appoint {v(guardian, 'name')}, having Relation to Testator: {v(guardian, 'relation')}, "
-        f"with Address: {v(guardian, 'address')}, having {_id_type_label(guardian.get('idType')) or ''} "
-        f"Number: {v(guardian, 'idNumber')}."
+        f"Occupation: {occupation_of(guardian) or BLANK}, with Address: {v(guardian, 'address')}, "
+        f"having {_id_type_label(guardian.get('idType')) or ''} "
+        f"Number: {_id_number_display(guardian.get('idType'), guardian.get('idNumber'))}, "
+        f"Aadhaar Number: {v_aadhaar(guardian, 'aadhaarNumber')}."
     )
 
 
@@ -333,7 +365,6 @@ def build_pdf_context(will: dict) -> dict:
         "residue_clause": _residue_clause(all_india_residue),
         "special_instructions": special_instructions,
         "testator_full_name": v(testator, "fullName"),
-        "testator_email": v(testator, "email"),
         "testator_sign_place": v(testator, "signPlace"),
         "execution_date_str": execution_date_str,
         "witnesses": [{"name": v(w, "name")} for w in witnesses],
@@ -342,7 +373,7 @@ def build_pdf_context(will: dict) -> dict:
         "executor_appointment_clause": _executor_appointment_clause(executor),
         "executor_consent_who": (
             "the Authorized Representative of the Organization mentioned"
-            if executor_type == "org" else "the Executor named above"
+            if executor_type == "org" else "the Executor of the Organization mentioned"
         ),
         "executor_label_suffix": " / Representative" if executor_type == "org" else "",
         "executor_consent_name": v(executor, "orgRepName") if executor_type == "org" else v(executor, "name"),

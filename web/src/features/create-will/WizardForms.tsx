@@ -442,10 +442,23 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                   </div>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div><label className={LC}>Occupation</label>
+                    <select value={will.guardian.occupation} onChange={e=>set("guardian.occupation",e.target.value)} className={IC+" appearance-none"}>
+                      <option value="">Select...</option>
+                      {OCCUPATIONS.map(o=><option key={o}>{o}</option>)}
+                    </select>
+                  </div>
+                  <div><label className={LC}>{LBL_ADDRESS}</label><input value={will.guardian.address} onChange={e=>set("guardian.address",e.target.value)} className={IC}/></div>
+                </div>
+                {will.guardian.occupation==="Other"&&(
+                  <div><label className={LC}>Please specify occupation</label>
+                    <input value={will.guardian.occupationOther} onChange={e=>set("guardian.occupationOther",e.target.value)} className={IC}/></div>
+                )}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div><label className={LC}>{LBL_ID_TYPE}</label><select value={will.guardian.idType} onChange={e=>set("guardian.idType",e.target.value)} className={IC+" appearance-none"}>{ID_TYPES.map(t=><option key={t}>{t}</option>)}</select></div>
                   <div><label className={LC}>{LBL_ID_NUMBER}</label><input value={will.guardian.idNumber} onChange={e=>set("guardian.idNumber",e.target.value)} onBlur={e=>handleIdBlur(will.guardian.idType,e.target.value,v=>set("guardian.idNumber",v))} disabled={idFieldsLocked} className={idInputCls(IC)} title={idInputTitle(TIP_NO_ID_SAVED)}/></div>
                 </div>
-                <div><label className={LC}>{LBL_ADDRESS}</label><input value={will.guardian.address} onChange={e=>set("guardian.address",e.target.value)} className={IC}/></div>
+                <div><label className={LC}>Aadhaar Number</label><input value={will.guardian.aadhaarNumber} onChange={e=>set("guardian.aadhaarNumber",e.target.value)} onBlur={e=>handleIdBlur("Aadhaar Card",e.target.value,v=>set("guardian.aadhaarNumber",v))} disabled={idFieldsLocked} className={idInputCls(IC)} title={idInputTitle(TIP_NO_ID_SAVED)}/></div>
               </FormBlock>
             </>
           )}
@@ -1143,6 +1156,16 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
               );
             })}
           </FormBlock>
+          )}
+          {willType!=="goan"&&(
+            // Date of signing is never user-entered — the server stamps
+            // testator.signDay/Month/Year with the actual date at PDF
+            // generation time (see api/_app/features/create_will/service.py's
+            // _with_signing_date_today), so only Place needs a UI control here.
+            <FormBlock title="Signing Details">
+              <label className={LC}>Place of Signing</label>
+              <input value={will.testator.signPlace} onChange={e=>set("testator.signPlace",e.target.value)} className={IC} placeholder="City where you will sign this Will"/>
+            </FormBlock>
           )}
           {willType!=="allindia"&&willType!=="goan"&&(
             <div className="bg-[#4F9D33]/8 border border-[#4F9D33]/20 rounded-xl p-4 text-xs text-brand-dark">

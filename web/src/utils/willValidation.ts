@@ -93,6 +93,7 @@ export function getMissingIdFields(will: WillState, willType: WillType, skipVali
 
   if (guardian.hasMinors) {
     if (!guardian.idNumber.trim()) missing.push(`Guardian ${guardian.idType || "ID"} Number`);
+    if (!guardian.aadhaarNumber.trim()) missing.push("Guardian Aadhaar Number");
     if (guardian.hasSubstitute && !guardian.subIdNumber.trim()) {
       missing.push(`Substitute Guardian ${guardian.subIdType || "ID"} Number`);
     }
