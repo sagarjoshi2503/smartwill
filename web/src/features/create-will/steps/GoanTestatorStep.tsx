@@ -3,7 +3,10 @@ import StepHeader from "../../../components/shared/StepHeader";
 import FormBlock from "../../../components/shared/FormBlock";
 import Nav from "../../../components/shared/Nav";
 import { OCCUPATIONS, GOAN_MARITAL_STATUSES } from "../../../data/options";
-import { TIP_ID_LOCKED, TIP_NO_ID_SAVED } from "../../../constants";
+import {
+  TIP_ID_LOCKED, TIP_NO_ID_SAVED, MAX_LEN_ADDRESS, MIN_AGE, MAX_AGE,
+  MAX_LEN_NATIONALITY, MAX_LEN_OCCUPATION_OTHER,
+} from "../../../constants";
 import { IC, LC } from "./wizardStyles";
 import type { WillState, GoanPerson } from "../../../types";
 
@@ -33,7 +36,7 @@ export default function GoanTestatorStep({will,set,idFieldsLocked,idInputCls,idI
             <option value="F">Female (Testatrix)</option>
           </select>
         </div>
-        <div><label className={LC}>Age</label><input type="number" value={person.age} onChange={e=>set(path+".age",e.target.value)} className={IC}/></div>
+        <div><label className={LC}>Age</label><input type="number" min={MIN_AGE} max={MAX_AGE} value={person.age} onChange={e=>set(path+".age",e.target.value)} className={IC}/></div>
       </div>
       <div className="grid grid-cols-3 gap-3">
         <div><label className={LC}>Relation</label>
@@ -61,17 +64,17 @@ export default function GoanTestatorStep({will,set,idFieldsLocked,idInputCls,idI
             {OCCUPATIONS.map(o=><option key={o}>{o}</option>)}
           </select>
         </div>
-        <div><label className={LC}>Nationality</label><input value={person.nationality} onChange={e=>set(path+".nationality",e.target.value)} className={IC}/></div>
+        <div><label className={LC}>Nationality</label><input value={person.nationality} onChange={e=>set(path+".nationality",e.target.value)} maxLength={MAX_LEN_NATIONALITY} className={IC}/></div>
       </div>
       {person.occupation==="Other"&&(
-        <div><label className={LC}>Please specify occupation</label><input value={person.occupationOther} onChange={e=>set(path+".occupationOther",e.target.value)} className={IC}/></div>
+        <div><label className={LC}>Please specify occupation</label><input value={person.occupationOther} onChange={e=>set(path+".occupationOther",e.target.value)} maxLength={MAX_LEN_OCCUPATION_OTHER} className={IC}/></div>
       )}
       <div className="grid grid-cols-2 gap-3">
         <div><label className={LC}>PAN Card No.</label><input value={person.pan} onChange={e=>set(path+".pan",e.target.value)} onBlur={e=>handleIdBlur("PAN Card",e.target.value,v=>set(path+".pan",v))} disabled={idFieldsLocked} className={idInputCls(IC)} placeholder="ABCDE1234F" title={idInputTitle(TIP_NO_ID_SAVED)}/></div>
         <div><label className={LC}>Aadhaar Card No.</label><input value={person.aadhaarNumber} onChange={e=>set(path+".aadhaarNumber",e.target.value)} onBlur={e=>handleIdBlur("Aadhaar Card",e.target.value,v=>set(path+".aadhaarNumber",v))} disabled={idFieldsLocked} className={idInputCls(IC)} title={idInputTitle(TIP_NO_ID_SAVED)}/></div>
       </div>
       <div><label className={LC}>Residential Address</label>
-        <textarea value={person.address} onChange={e=>set(path+".address",e.target.value)} rows={2} className={IC+" resize-none"}/>
+        <textarea value={person.address} onChange={e=>set(path+".address",e.target.value)} maxLength={MAX_LEN_ADDRESS} rows={2} className={IC+" resize-none"}/>
         {goaHint(person.address)&&<p className="text-brand-dark text-[11px] mt-1">This Will is drafted under the Goa Succession framework — double-check this is a Goa address, matching your ID documents.</p>}
       </div>
     </>

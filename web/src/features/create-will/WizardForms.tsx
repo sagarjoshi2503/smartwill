@@ -29,6 +29,7 @@ import {
   BTN_COMPLETE_REVIEW, BTN_SUBMIT_REVIEW,
   STATUS_COMPLETED, STATUS_DRAFT, STATUS_PENDING_REVIEW,
   RAZORPAY_KEY_ID, ROLE_ADMIN, ROLE_TESTATOR, ID_POPUP_ERROR_MS,
+  MAX_LEN_ADDRESS, MIN_AGE, MAX_AGE, MAX_LEN_NATIONALITY, MAX_LEN_OCCUPATION_OTHER, MAX_LEN_RELATION_OTHER,
 } from "../../constants";
 import type { AssetCatalogItem, AssetInstance, Beneficiary, WillState, WillType } from "../../types";
 import type { RazorpaySuccessResponse } from "../../types/razorpay";
@@ -388,7 +389,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
           <FormBlock title="Primary Executor">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div><label className={LC}>Executor's Full Name</label><input value={will.executor.name} onChange={e=>set("executor.name",e.target.value)} className={IC}/></div>
-              <div><label className={LC}>Age (Years)</label><input type="number" value={will.executor.age} onChange={e=>set("executor.age",e.target.value)} className={IC}/></div>
+              <div><label className={LC}>Age (Years)</label><input type="number" min={MIN_AGE} max={MAX_AGE} value={will.executor.age} onChange={e=>set("executor.age",e.target.value)} className={IC}/></div>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div><label className={LC}>Relationship to You</label>
@@ -403,10 +404,10 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
             </div>
             {will.executor.occupation==="Other"&&(
               <div><label className={LC}>Please specify occupation</label>
-                <input value={will.executor.occupationOther} onChange={e=>set("executor.occupationOther",e.target.value)} className={IC}/></div>
+                <input value={will.executor.occupationOther} onChange={e=>set("executor.occupationOther",e.target.value)} maxLength={MAX_LEN_OCCUPATION_OTHER} className={IC}/></div>
             )}
             <div><label className={LC}>Contact Details / Address</label>
-              <input value={will.executor.address} onChange={e=>set("executor.address",e.target.value)} className={IC}/>
+              <input value={will.executor.address} onChange={e=>set("executor.address",e.target.value)} maxLength={MAX_LEN_ADDRESS} className={IC}/>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div><label className={LC}>{LBL_ID_TYPE}</label>
@@ -423,7 +424,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
             <div><label className={LC}>Authorized Representative / Contact Person <span className="text-slate-400 normal-case font-normal">(Optional)</span></label><input value={will.executor.orgRepName} onChange={e=>set("executor.orgRepName",e.target.value)} className={IC}/></div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div><label className={LC}>Registration / Tax ID Number <span className="text-slate-400 normal-case font-normal">(Optional)</span></label><input value={will.executor.orgRegNumber} onChange={e=>set("executor.orgRegNumber",e.target.value)} className={IC} placeholder="e.g. CIN, Registration No."/></div>
-              <div><label className={LC}>Registered Office Address <span className="text-slate-400 normal-case font-normal">(Optional)</span></label><input value={will.executor.orgAddress} onChange={e=>set("executor.orgAddress",e.target.value)} className={IC}/></div>
+              <div><label className={LC}>Registered Office Address <span className="text-slate-400 normal-case font-normal">(Optional)</span></label><input value={will.executor.orgAddress} onChange={e=>set("executor.orgAddress",e.target.value)} maxLength={MAX_LEN_ADDRESS} className={IC}/></div>
             </div>
           </FormBlock>
           )}
@@ -447,7 +448,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
               <FormBlock title="Main Guardian">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div><label className={LC}>{LBL_FULL_NAME}</label><input value={will.guardian.name} onChange={e=>set("guardian.name",e.target.value)} className={IC} placeholder="Guardian's name"/></div>
-                  <div><label className={LC}>Age (Years)</label><input type="number" value={will.guardian.age} onChange={e=>set("guardian.age",e.target.value)} className={IC}/></div>
+                  <div><label className={LC}>Age (Years)</label><input type="number" min={MIN_AGE} max={MAX_AGE} value={will.guardian.age} onChange={e=>set("guardian.age",e.target.value)} className={IC}/></div>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div><label className={LC}>Relation to Testator</label>
@@ -463,10 +464,10 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                     </select>
                   </div>
                 </div>
-                <div><label className={LC}>{LBL_ADDRESS}</label><input value={will.guardian.address} onChange={e=>set("guardian.address",e.target.value)} className={IC}/></div>
+                <div><label className={LC}>{LBL_ADDRESS}</label><input value={will.guardian.address} onChange={e=>set("guardian.address",e.target.value)} maxLength={MAX_LEN_ADDRESS} className={IC}/></div>
                 {will.guardian.occupation==="Other"&&(
                   <div><label className={LC}>Please specify occupation</label>
-                    <input value={will.guardian.occupationOther} onChange={e=>set("guardian.occupationOther",e.target.value)} className={IC}/></div>
+                    <input value={will.guardian.occupationOther} onChange={e=>set("guardian.occupationOther",e.target.value)} maxLength={MAX_LEN_OCCUPATION_OTHER} className={IC}/></div>
                 )}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div><label className={LC}>{LBL_ID_TYPE}</label><select value={will.guardian.idType} onChange={e=>set("guardian.idType",e.target.value)} className={IC+" appearance-none"}>{ID_TYPES.map(t=><option key={t}>{t}</option>)}</select></div>
@@ -493,7 +494,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-2.5">
                   <div><label className={LC}>{LBL_FULL_NAME}</label><input value={b.name} onChange={e=>updateBene(b.id,"name",e.target.value)} className={IC} placeholder="Full name"/></div>
-                  <div><label className={LC}>Age (Years)</label><input type="number" value={b.age||""} onChange={e=>updateBene(b.id,"age",e.target.value)} className={IC}/></div>
+                  <div><label className={LC}>Age (Years)</label><input type="number" min={MIN_AGE} max={MAX_AGE} value={b.age||""} onChange={e=>updateBene(b.id,"age",e.target.value)} className={IC}/></div>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-2.5">
                   <div><label className={LC}>Relation</label>
@@ -516,10 +517,10 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                 </div>
                 {b.occupation==="Other"&&(
                   <div className="mb-2.5"><label className={LC}>Please specify occupation</label>
-                    <input value={b.occupationOther||""} onChange={e=>updateBene(b.id,"occupationOther",e.target.value)} className={IC}/></div>
+                    <input value={b.occupationOther||""} onChange={e=>updateBene(b.id,"occupationOther",e.target.value)} maxLength={MAX_LEN_OCCUPATION_OTHER} className={IC}/></div>
                 )}
                 <div className="mb-2.5"><label className={LC}>Residential Address</label>
-                  <input value={b.address||""} onChange={e=>updateBene(b.id,"address",e.target.value)} className={IC}/></div>
+                  <input value={b.address||""} onChange={e=>updateBene(b.id,"address",e.target.value)} maxLength={MAX_LEN_ADDRESS} className={IC}/></div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                   <div><label className={LC}>PAN Card No.</label><input value={b.pan||""} onChange={e=>updateBene(b.id,"pan",e.target.value)} onBlur={e=>handleIdBlur("PAN Card",e.target.value,v=>updateBene(b.id,"pan",v))} disabled={idFieldsLocked} className={idInputCls(IC)} title={idInputTitle(TIP_NO_ID_SAVED)}/></div>
                   <div><label className={LC}>Aadhaar Card No.</label><input value={b.aadhaarNumber||""} onChange={e=>updateBene(b.id,"aadhaarNumber",e.target.value)} onBlur={e=>handleIdBlur("Aadhaar Card",e.target.value,v=>updateBene(b.id,"aadhaarNumber",v))} disabled={idFieldsLocked} className={idInputCls(IC)} title={idInputTitle(TIP_NO_ID_SAVED)}/></div>
@@ -563,7 +564,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                           onChange={v=>setItem(itemKey,idx,"beneficiary",v)} className={IC+" appearance-none"}/>
                       </div>
                       <div><label className={LC}>Age</label>
-                        <input type="number" value={item.beneficiaryAge} onChange={e=>setItem(itemKey,idx,"beneficiaryAge",e.target.value)} className={IC} placeholder="Age"/></div>
+                        <input type="number" min={MIN_AGE} max={MAX_AGE} value={item.beneficiaryAge} onChange={e=>setItem(itemKey,idx,"beneficiaryAge",e.target.value)} className={IC} placeholder="Age"/></div>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
                       <div><label className={LC}>Relationship</label>
@@ -581,7 +582,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                     </div>
                     {item.relation==="Other"&&(
                       <div className="mt-2.5"><label className={LC}>Please specify relationship</label>
-                        <input value={item.relationOther} onChange={e=>setItem(itemKey,idx,"relationOther",e.target.value)} className={IC}/></div>
+                        <input value={item.relationOther} onChange={e=>setItem(itemKey,idx,"relationOther",e.target.value)} maxLength={MAX_LEN_RELATION_OTHER} className={IC}/></div>
                     )}
                   </div>
                 ))}
@@ -662,7 +663,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                     </div>
                     {item.relation==="Other"&&(
                       <div className="mt-2.5"><label className={LC}>Please specify relationship</label>
-                        <input value={item.relationOther} onChange={e=>setItem(itemKey,idx,"relationOther",e.target.value)} className={IC}/></div>
+                        <input value={item.relationOther} onChange={e=>setItem(itemKey,idx,"relationOther",e.target.value)} maxLength={MAX_LEN_RELATION_OTHER} className={IC}/></div>
                     )}
                   </div>
                 ))}
@@ -897,10 +898,10 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                     </div>
                     {entry.relation==="Other"&&(
                       <div className="mb-2.5"><label className={LC}>Please specify relationship</label>
-                        <input value={entry.relationOther} onChange={e=>setEntry("relationOther",e.target.value)} className={IC}/></div>
+                        <input value={entry.relationOther} onChange={e=>setEntry("relationOther",e.target.value)} maxLength={MAX_LEN_RELATION_OTHER} className={IC}/></div>
                     )}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-2.5">
-                      <div><label className={LC}>Nationality</label><input value={entry.nationality} onChange={e=>setEntry("nationality",e.target.value)} className={IC} placeholder="e.g. Indian"/></div>
+                      <div><label className={LC}>Nationality</label><input value={entry.nationality} onChange={e=>setEntry("nationality",e.target.value)} maxLength={MAX_LEN_NATIONALITY} className={IC} placeholder="e.g. Indian"/></div>
                       <div><label className={LC}>Occupation</label>
                         <select value={entry.occupation} onChange={e=>setEntry("occupation",e.target.value)} className={IC+" appearance-none"}>
                           <option value="">Select...</option>
@@ -910,7 +911,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                     </div>
                     {entry.occupation==="Other"&&(
                       <div className="mb-2.5"><label className={LC}>Please specify occupation</label>
-                        <input value={entry.occupationOther} onChange={e=>setEntry("occupationOther",e.target.value)} className={IC}/></div>
+                        <input value={entry.occupationOther} onChange={e=>setEntry("occupationOther",e.target.value)} maxLength={MAX_LEN_OCCUPATION_OTHER} className={IC}/></div>
                     )}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                       <div><label className={LC}>{LBL_ID_TYPE}</label>
@@ -951,7 +952,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                     </div>
                     {entry.relation==="Other"&&(
                       <div className="mb-2.5"><label className={LC}>Please specify relationship</label>
-                        <input value={entry.relationOther} onChange={e=>setEntry("relationOther",e.target.value)} className={IC}/></div>
+                        <input value={entry.relationOther} onChange={e=>setEntry("relationOther",e.target.value)} maxLength={MAX_LEN_RELATION_OTHER} className={IC}/></div>
                     )}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                       <div><label className={LC}>{LBL_ID_TYPE}</label>
@@ -1008,7 +1009,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
               <>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                   <div><label className={LC}>Name</label><input value={w.name} onChange={e=>setW("name",e.target.value)} className={IC}/></div>
-                  <div><label className={LC}>Age (Years)</label><input type="number" value={w.age} onChange={e=>setW("age",e.target.value)} className={IC}/></div>
+                  <div><label className={LC}>Age (Years)</label><input type="number" min={MIN_AGE} max={MAX_AGE} value={w.age} onChange={e=>setW("age",e.target.value)} className={IC}/></div>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mt-2.5">
                   <div><label className={LC}>Relation</label>
@@ -1034,7 +1035,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                   </div>
                 </div>
                 <div className="mt-2.5"><label className={LC}>Residential Address</label>
-                  <textarea value={w.address} onChange={e=>setW("address",e.target.value)} rows={2} className={IC+" resize-none"}/></div>
+                  <textarea value={w.address} onChange={e=>setW("address",e.target.value)} maxLength={MAX_LEN_ADDRESS} rows={2} className={IC+" resize-none"}/></div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mt-2.5">
                   <div><label className={LC}>PAN Card No.</label><input value={w.pan} onChange={e=>setW("pan",e.target.value)} onBlur={e=>handleIdBlur("PAN Card",e.target.value,v=>setW("pan",v))} disabled={idFieldsLocked} className={idInputCls(IC)} title={idInputTitle(TIP_NO_ID_SAVED)}/></div>
                   <div><label className={LC}>Aadhaar Card No.</label><input value={w.aadhaarNumber} onChange={e=>setW("aadhaarNumber",e.target.value)} onBlur={e=>handleIdBlur("Aadhaar Card",e.target.value,v=>setW("aadhaarNumber",v))} disabled={idFieldsLocked} className={idInputCls(IC)} title={idInputTitle(TIP_NO_ID_SAVED)}/></div>
@@ -1110,7 +1111,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                       <input value={w.name} onChange={e=>setW("name",e.target.value)} className={IC}/>
                     </div>
                     <div><label className={LC}>Age (Years)</label>
-                      <input type="number" value={w.age} onChange={e=>setW("age",e.target.value)} className={IC}/>
+                      <input type="number" min={MIN_AGE} max={MAX_AGE} value={w.age} onChange={e=>setW("age",e.target.value)} className={IC}/>
                     </div>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mt-2.5">
@@ -1130,7 +1131,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                       </select>
                     </div>
                     <div><label className={LC}>Nationality</label>
-                      <input value={w.nationality} onChange={e=>setW("nationality",e.target.value)} className={IC} placeholder="e.g. Indian"/>
+                      <input value={w.nationality} onChange={e=>setW("nationality",e.target.value)} maxLength={MAX_LEN_NATIONALITY} className={IC} placeholder="e.g. Indian"/>
                     </div>
                   </div>
                   <div className="mt-2.5"><label className={LC}>Occupation</label>
@@ -1141,11 +1142,11 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                   </div>
                   {w.occupation==="Other"&&(
                     <div className="mt-2.5"><label className={LC}>Please specify occupation</label>
-                      <input value={w.occupationOther} onChange={e=>setW("occupationOther",e.target.value)} className={IC}/>
+                      <input value={w.occupationOther} onChange={e=>setW("occupationOther",e.target.value)} maxLength={MAX_LEN_OCCUPATION_OTHER} className={IC}/>
                     </div>
                   )}
                   <div className="mt-2.5"><label className={LC}>Resident of (Address)</label>
-                    <input value={w.address} onChange={e=>setW("address",e.target.value)} className={IC}/>
+                    <input value={w.address} onChange={e=>setW("address",e.target.value)} maxLength={MAX_LEN_ADDRESS} className={IC}/>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mt-2.5">
                     <div><label className={LC}>PAN Number</label>
@@ -1163,7 +1164,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                   </div>
                   {w.relationToTestator==="Other"&&(
                     <div className="mt-2.5"><label className={LC}>Please specify relation to testator</label>
-                      <input value={w.relationToTestatorOther} onChange={e=>setW("relationToTestatorOther",e.target.value)} className={IC}/>
+                      <input value={w.relationToTestatorOther} onChange={e=>setW("relationToTestatorOther",e.target.value)} maxLength={MAX_LEN_RELATION_OTHER} className={IC}/>
                     </div>
                   )}
                 </div>

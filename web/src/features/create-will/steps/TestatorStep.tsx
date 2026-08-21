@@ -3,7 +3,10 @@ import StepHeader from "../../../components/shared/StepHeader";
 import FormBlock from "../../../components/shared/FormBlock";
 import Nav from "../../../components/shared/Nav";
 import { OCCUPATIONS } from "../../../data/options";
-import { TIP_ID_LOCKED, TIP_NO_ID_SAVED } from "../../../constants";
+import {
+  TIP_ID_LOCKED, TIP_NO_ID_SAVED, MAX_LEN_SPOUSE_NAME, MAX_LEN_ADDRESS, MIN_AGE, MAX_AGE,
+  MAX_LEN_NATIONALITY, MAX_LEN_OCCUPATION_OTHER,
+} from "../../../constants";
 import { IC, LC } from "./wizardStyles";
 import InfoTrigger from "../../../components/shared/InfoTrigger";
 import { WIZARD_HELP } from "../../../data/wizardHelp";
@@ -60,7 +63,7 @@ export default function TestatorStep({will,set,setWill,idFieldsLocked,idInputCls
         </div>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <div><label className={LC}>Age <span className="text-brand">*</span></label><input type="number" value={will.testator.age} onChange={e=>set("testator.age",e.target.value)} className={IC} placeholder="Age"/></div>
+        <div><label className={LC}>Age <span className="text-brand">*</span></label><input type="number" min={MIN_AGE} max={MAX_AGE} value={will.testator.age} onChange={e=>set("testator.age",e.target.value)} className={IC} placeholder="Age"/></div>
         <div>
           <label className={LC}>You are the <span className="text-brand">*</span></label>
           <select value={will.testator.relation} onChange={e=>set("testator.relation",e.target.value)} className={IC+" appearance-none"}>
@@ -96,11 +99,11 @@ export default function TestatorStep({will,set,setWill,idFieldsLocked,idInputCls
       </div>
       {will.testator.occupation==="Other"&&(
         <div><label className={LC}>Please specify occupation</label>
-          <input value={will.testator.occupationOther} onChange={e=>set("testator.occupationOther",e.target.value)} className={IC}/></div>
+          <input value={will.testator.occupationOther} onChange={e=>set("testator.occupationOther",e.target.value)} maxLength={MAX_LEN_OCCUPATION_OTHER} className={IC}/></div>
       )}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <div><label className={LC}>Nationality</label><input value={will.testator.nationality} onChange={e=>set("testator.nationality",e.target.value)} className={IC} placeholder="e.g., Indian"/></div>
-        <div><label className={LC}>Residential Address</label><input value={will.testator.address} onChange={e=>set("testator.address",e.target.value)} className={IC} placeholder="Full residential address"/></div>
+        <div><label className={LC}>Nationality</label><input value={will.testator.nationality} onChange={e=>set("testator.nationality",e.target.value)} maxLength={MAX_LEN_NATIONALITY} className={IC} placeholder="e.g., Indian"/></div>
+        <div><label className={LC}>Residential Address</label><input value={will.testator.address} onChange={e=>set("testator.address",e.target.value)} maxLength={MAX_LEN_ADDRESS} className={IC} placeholder="Full residential address"/></div>
       </div>
       {will.testator.maritalStatus==="married"&&(
         <div className="bg-[#F3F7E7] border border-brand/20 rounded-xl p-3.5 text-xs text-brand-dark flex items-start gap-2">
@@ -110,7 +113,7 @@ export default function TestatorStep({will,set,setWill,idFieldsLocked,idInputCls
       {will.testator.maritalStatus==="married"&&(
         <FormBlock title="Spouse's Details">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div><label className={LC}>Spouse's Name</label><input value={will.testator.spouseName} onChange={e=>set("testator.spouseName",e.target.value)} className={IC}/></div>
+            <div><label className={LC}>Spouse's Name</label><input value={will.testator.spouseName} onChange={e=>set("testator.spouseName",e.target.value)} maxLength={MAX_LEN_SPOUSE_NAME} className={IC}/></div>
             <div><label className={LC}>Spouse's PAN Number</label><input value={will.testator.spousePan} onChange={e=>set("testator.spousePan",e.target.value)} onBlur={e=>handleIdBlur("PAN Card",e.target.value,v=>set("testator.spousePan",v))} disabled={idFieldsLocked} className={idInputCls(IC)} title={idInputTitle(TIP_NO_ID_SAVED)}/></div>
             <div><label className={LC}>Spouse's Aadhaar Number</label><input value={will.testator.spouseAadhaarNumber} onChange={e=>set("testator.spouseAadhaarNumber",e.target.value)} onBlur={e=>handleIdBlur("Aadhaar Card",e.target.value,v=>set("testator.spouseAadhaarNumber",v))} disabled={idFieldsLocked} className={idInputCls(IC)} title={idInputTitle(TIP_NO_ID_SAVED)}/></div>
           </div>
