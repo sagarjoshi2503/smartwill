@@ -2,10 +2,10 @@ import { User, Lock, AlertTriangle, Info, Plus, Trash2 } from "lucide-react";
 import StepHeader from "../../../components/shared/StepHeader";
 import FormBlock from "../../../components/shared/FormBlock";
 import Nav from "../../../components/shared/Nav";
-import { OCCUPATIONS } from "../../../data/options";
+import { OCCUPATIONS, TESTATOR_RELATION_OPTIONS } from "../../../data/options";
 import {
   TIP_ID_LOCKED, TIP_NO_ID_SAVED, MAX_LEN_SPOUSE_NAME, MAX_LEN_ADDRESS, MIN_AGE, MAX_AGE,
-  MAX_LEN_NATIONALITY, MAX_LEN_OCCUPATION_OTHER,
+  MAX_LEN_NATIONALITY, MAX_LEN_OCCUPATION_OTHER, MAX_LEN_RELATION_OTHER,
 } from "../../../constants";
 import { IC, LC } from "./wizardStyles";
 import InfoTrigger from "../../../components/shared/InfoTrigger";
@@ -68,12 +68,17 @@ export default function TestatorStep({will,set,setWill,idFieldsLocked,idInputCls
           <label className={LC}>You are the <span className="text-brand">*</span></label>
           <select value={will.testator.relation} onChange={e=>set("testator.relation",e.target.value)} className={IC+" appearance-none"}>
             <option value="">Select</option>
-            <option value="son">Son of</option><option value="daughter">Daughter of</option>
+            {TESTATOR_RELATION_OPTIONS.map(o=><option key={o.value} value={o.value}>{o.label}</option>)}
           </select>
         </div>
       </div>
+      {will.testator.relation==="other"&&(
+        <div><label className={LC}>Please specify relationship</label>
+          <input value={will.testator.relationOther} onChange={e=>set("testator.relationOther",e.target.value)} maxLength={MAX_LEN_RELATION_OTHER} className={IC}/>
+        </div>
+      )}
       <div>
-        <label className={LC}>Father's Name <span className="text-brand">*</span></label>
+        <label className={LC}>Father / Spouse Name <span className="text-brand">*</span></label>
         <input value={will.testator.parentSpouseName} onChange={e=>set("testator.parentSpouseName",e.target.value)} className={IC} placeholder="Father's full name"/>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">

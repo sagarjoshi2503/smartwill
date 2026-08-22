@@ -71,7 +71,7 @@ def merge_id_fields(will_data: dict, id_fields: dict) -> dict:
         )
     if isinstance(merged.get(FLD_GUARDIAN), dict):
         merged[FLD_GUARDIAN] = _merge_fields(
-            merged[FLD_GUARDIAN], id_fields.get(FLD_GUARDIAN), (FLD_ID_NUMBER, FLD_AADHAAR_NUMBER, FLD_SUB_ID),
+            merged[FLD_GUARDIAN], id_fields.get(FLD_GUARDIAN), (FLD_ID_NUMBER, FLD_SUB_ID),
         )
     if FLD_RESIDUAL_ID in merged and id_fields.get(FLD_RESIDUAL_ID):
         merged[FLD_RESIDUAL_ID] = id_fields[FLD_RESIDUAL_ID]

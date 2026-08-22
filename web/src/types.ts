@@ -6,7 +6,8 @@ export interface Testator {
   gender: "male" | "female" | "";
   pan: string;
   aadhaarNumber: string;
-  relation: "son" | "daughter";
+  relation: "son" | "daughter" | "wife" | "other" | "";
+  relationOther: string;
   parentSpouseName: string;
   age: string;
   maritalStatus: "unmarried" | "married" | "widowed" | "divorced" | "";
@@ -63,7 +64,6 @@ export interface Guardian {
   occupationOther: string;
   idType: string;
   idNumber: string;
-  aadhaarNumber: string;
   address: string;
   hasSubstitute: boolean;
   subName: string;
@@ -90,15 +90,13 @@ export interface Witness {
   parentRelation: "son" | "daughter" | "wife";
   parentName: string;
   age: string;
-  maritalStatus: "unmarried" | "married";
+  maritalStatus: "unmarried" | "married" | "widowed" | "divorced" | "";
   nationality: string;
   occupation: string;
   occupationOther: string;
   address: string;
   pan: string;
   aadhaarNumber: string;
-  relationToTestator: string;
-  relationToTestatorOther: string;
 }
 
 export interface AssetField {
@@ -171,9 +169,11 @@ export interface AllIndiaResidueEntry {
   relation: string;
   relationOther: string;
   name: string;
+  age: string;
   nationality: string;
   occupation: string;
   occupationOther: string;
+  address: string;
   idType: string;
   idNumber: string;
 }

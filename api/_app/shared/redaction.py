@@ -40,7 +40,7 @@ def redact_id_numbers(will_data: dict) -> dict:
     if isinstance(redacted.get(FLD_EXECUTOR), dict):
         redacted[FLD_EXECUTOR] = _strip_fields(redacted[FLD_EXECUTOR], (FLD_ID_NUMBER, FLD_JOINT_ID, FLD_SUB_ID))
     if isinstance(redacted.get(FLD_GUARDIAN), dict):
-        redacted[FLD_GUARDIAN] = _strip_fields(redacted[FLD_GUARDIAN], (FLD_ID_NUMBER, FLD_AADHAAR_NUMBER, FLD_SUB_ID))
+        redacted[FLD_GUARDIAN] = _strip_fields(redacted[FLD_GUARDIAN], (FLD_ID_NUMBER, FLD_SUB_ID))
     if FLD_RESIDUAL_ID in redacted:
         redacted[FLD_RESIDUAL_ID] = ""
     if isinstance(redacted.get(FLD_WITNESSES), list):

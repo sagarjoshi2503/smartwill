@@ -127,8 +127,12 @@ def rel_of(item: dict) -> str:
     return esc(value) if value else ""
 
 
-def witness_rel_of(w: dict) -> str:
-    value = w.get("relationToTestatorOther") if w.get("relationToTestator") == "Other" else w.get("relationToTestator")
+def _testator_relation(testator: dict) -> str:
+    """Testator.relation is a lowercase code ("son"/"daughter"/"wife"),
+    printed as-is in the opening clause ("<relation> of <name>") — except
+    "other", which pairs with the free-text relationOther box (see
+    web/src/data/options.ts's TESTATOR_RELATION_OPTIONS)."""
+    value = testator.get("relationOther") if testator.get("relation") == "other" else testator.get("relation")
     return esc(value) if value else ""
 
 
@@ -229,8 +233,7 @@ def _witness_particular(index: int, w: dict) -> str:
         f"{letter}) {v(w, 'name')} {esc(w.get('parentRelation')) or 'son/daughter/wife'} of {v(w, 'parentName')}, "
         f"aged {_age_display(w.get('age'))}, {esc(w.get('maritalStatus')) or 'unmarried/married'}, "
         f"nationality {_national(w)}, occupation {occupation_of(w) or BLANK}, resident of {v(w, 'address')}, "
-        f"having PAN Number {v(w, 'pan')}, Aadhaar Number {v_aadhaar(w, 'aadhaarNumber')}, "
-        f"Relation to Testator: {witness_rel_of(w) or BLANK}"
+        f"having PAN Number {v(w, 'pan')}, Aadhaar Number {v_aadhaar(w, 'aadhaarNumber')}"
     )
 
 
@@ -252,7 +255,7 @@ def _opening_clause(testator: dict, witnesses: list, execution_date_str: str) ->
     clause = (
         f"I, {v(testator, 'fullName')}, gender: {v(testator, 'gender')}, "
         f"PAN {v(testator, 'pan')}, Aadhaar Number {v_aadhaar(testator, 'aadhaarNumber')}, "
-        f"{esc(testator.get('relation')) or ''} of {v(testator, 'parentSpouseName')}, aged {_age_display(testator.get('age'))}, "
+        f"{_testator_relation(testator)} of {v(testator, 'parentSpouseName')}, aged {_age_display(testator.get('age'))}, "
         f"{marital_status}, nationality {_national(testator)}, occupation {occupation_of(testator) or BLANK}, "
         f"resident of {v(testator, 'address')}"
     )
@@ -280,8 +283,10 @@ def _residue_clause(entries: list) -> str:
         id_type = entry.get("idType") or "Aadhaar Card"
         suffix = "; " if i < len(entries) - 1 else "."
         parts.append(
-            f"{rel_of(entry) or BLANK}, {v(entry, 'name')}, nationality {_national(entry)}, "
-            f"occupation {occupation_of(entry) or BLANK}, having {_id_type_label(id_type)} "
+            f"{rel_of(entry) or BLANK}, {v(entry, 'name')}, Age: {_age_display(entry.get('age'))}, "
+            f"nationality {_national(entry)}, "
+            f"occupation {occupation_of(entry) or BLANK}, Residential Address: {v(entry, 'address')}, "
+            f"having {_id_type_label(id_type)} "
             f"Number: {_id_number_display(id_type, entry.get('idNumber'))}{suffix}"
         )
     return (
@@ -314,8 +319,7 @@ def _guardian_appointment_clause(guardian: dict) -> str:
         f"Relation to Testator: {v(guardian, 'relation')}, "
         f"Occupation: {occupation_of(guardian) or BLANK}, Residential Address: {v(guardian, 'address')}, "
         f"having {_id_type_label(guardian.get('idType')) or ''} "
-        f"Number: {_id_number_display(guardian.get('idType'), guardian.get('idNumber'))}, "
-        f"Aadhaar Number: {v_aadhaar(guardian, 'aadhaarNumber')}."
+        f"Number: {_id_number_display(guardian.get('idType'), guardian.get('idNumber'))}."
     )
 
 

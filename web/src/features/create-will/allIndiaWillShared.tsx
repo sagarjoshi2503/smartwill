@@ -19,9 +19,6 @@ export const relOf = (it: {relation: string; relationOther: string}) =>
 export const occupationOf = (it: {occupation: string; occupationOther: string}) =>
   it.occupation === "Other" ? it.occupationOther : it.occupation;
 
-export const witnessRelOf = (w: Witness) =>
-  w.relationToTestator === "Other" ? w.relationToTestatorOther : w.relationToTestator;
-
 export function filled(items: AllIndiaAssetItem[]): AllIndiaAssetItem[] {
   return items.filter(it => it.description.trim());
 }
@@ -52,7 +49,7 @@ export function sonDaughterNames(testator: Testator) {
 export function witnessParticulars(witnesses: Witness[]) {
   return witnesses.map((w, i) => (
     <span key={i}>
-      {String.fromCharCode(97 + i)}) <strong>{w.name || BLANK}</strong> {w.parentRelation || "son/daughter/wife"} of <strong>{w.parentName || BLANK}</strong>, aged <strong>{w.age || "___"}</strong>, {w.maritalStatus || "unmarried/married"} nationality <strong>{nationalityLabel(w.nationality)}</strong>, occupation <strong>{occupationOf(w) || BLANK}</strong>, resident of <strong>{w.address || BLANK}</strong>, bearing PAN Number <strong>{w.pan || BLANK}</strong>, Aadhaar Number <strong>{w.aadhaarNumber || BLANK}</strong>, Relation to Testator: <strong>{witnessRelOf(w) || BLANK}</strong>{i < witnesses.length - 1 ? "; " : " "}
+      {String.fromCharCode(97 + i)}) <strong>{w.name || BLANK}</strong> {w.parentRelation || "son/daughter/wife"} of <strong>{w.parentName || BLANK}</strong>, aged <strong>{w.age || "___"}</strong>, {w.maritalStatus || "unmarried/married"} nationality <strong>{nationalityLabel(w.nationality)}</strong>, occupation <strong>{occupationOf(w) || BLANK}</strong>, resident of <strong>{w.address || BLANK}</strong>, bearing PAN Number <strong>{w.pan || BLANK}</strong>, Aadhaar Number <strong>{w.aadhaarNumber || BLANK}</strong>{i < witnesses.length - 1 ? "; " : " "}
     </span>
   ));
 }

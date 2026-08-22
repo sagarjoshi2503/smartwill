@@ -71,7 +71,7 @@ describe("getMissingIdFields", () => {
 
     const inUse: WillState = {
       ...FILLED_WILL,
-      allIndiaResidue: [{ relation: "Brother", relationOther: "", name: "Sam", nationality: "", occupation: "", occupationOther: "", idType: "Aadhaar Card", idNumber: "" }],
+      allIndiaResidue: [{ relation: "Brother", relationOther: "", name: "Sam", age: "", nationality: "", occupation: "", occupationOther: "", address: "", idType: "Aadhaar Card", idNumber: "" }],
     };
     expect(getMissingIdFields(inUse, "allindia")).toContain("Residuary Beneficiary Aadhaar Card Number");
   });

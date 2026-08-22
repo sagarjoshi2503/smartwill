@@ -21,7 +21,7 @@ export const DEFAULT_WILL: WillState = {
   // not placeholder demo data.
   testator: {
     email:"", fullName:"", gender:"", pan:"", aadhaarNumber:"",
-    relation:"son", parentSpouseName:"",
+    relation:"son", relationOther:"", parentSpouseName:"",
     age:"", maritalStatus:"unmarried", nationality:"", occupation:"", occupationOther:"",
     spouseName:"", spousePan:"", spouseAadhaarNumber:"",
     sonNames:[""], daughterNames:[""],
@@ -48,7 +48,7 @@ export const DEFAULT_WILL: WillState = {
   guardian: {
     hasMinors:false,
     name:"", age:"", relation:"", occupation:"", occupationOther:"",
-    idType:"PAN Card", idNumber:"", aadhaarNumber:"", address:"",
+    idType:"PAN Card", idNumber:"", address:"",
     hasSubstitute:false,
     subName:"", subIdType:"PAN Card", subIdNumber:"", subAddress:"",
   },
@@ -71,7 +71,7 @@ export const DEFAULT_WILL: WillState = {
   // Residuary beneficiaries for the All India Will format (relationship,
   // name, nationality, occupation, ID proof — more than one allowed) — only
   // used when willType==="allindia".
-  allIndiaResidue:[{relation:"",relationOther:"",name:"",nationality:"",occupation:"",occupationOther:"",idType:"Aadhaar Card",idNumber:""}],
+  allIndiaResidue:[{relation:"",relationOther:"",name:"",age:"",nationality:"",occupation:"",occupationOther:"",address:"",idType:"Aadhaar Card",idNumber:""}],
   // Goan Will format — only used/shown when willType==="goan". nationality
   // defaults to "Indian" to match the reference form (still fully editable).
   goanTestator: newGoanPerson(),
@@ -101,7 +101,7 @@ export const DEFAULT_WILL: WillState = {
   // Witnesses: the Indian Succession Act requires exactly two, so the two slots
   // stay (the UI has no "add witness" control), but with no fabricated identities
   witnesses:[
-    { name:"", parentRelation:"son", parentName:"", age:"", maritalStatus:"unmarried", nationality:"", occupation:"", occupationOther:"", address:"", pan:"", aadhaarNumber:"", relationToTestator:"", relationToTestatorOther:"" },
-    { name:"", parentRelation:"son", parentName:"", age:"", maritalStatus:"unmarried", nationality:"", occupation:"", occupationOther:"", address:"", pan:"", aadhaarNumber:"", relationToTestator:"", relationToTestatorOther:"" },
+    { name:"", parentRelation:"son", parentName:"", age:"", maritalStatus:"unmarried", nationality:"", occupation:"", occupationOther:"", address:"", pan:"", aadhaarNumber:"" },
+    { name:"", parentRelation:"son", parentName:"", age:"", maritalStatus:"unmarried", nationality:"", occupation:"", occupationOther:"", address:"", pan:"", aadhaarNumber:"" },
   ],
 };

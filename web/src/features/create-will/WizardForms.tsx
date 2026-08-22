@@ -5,7 +5,7 @@ import {
 } from "lucide-react";
 import {
   ID_TYPES, RELATIONS, OCCUPATIONS, ALLINDIA_RELATIONSHIP_OPTIONS,
-  NONGOAN_RELATIONSHIP_OPTIONS, WITNESS_RELATION_OPTIONS,
+  NONGOAN_RELATIONSHIP_OPTIONS,
   GOAN_WITNESS_OCCUPATIONS,
 } from "../../data/options";
 import { ASSET_CATALOGUE, COLOR } from "../../data/assetCatalogue";
@@ -393,7 +393,10 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div><label className={LC}>Relationship to You</label>
-                <input value={will.executor.relation} onChange={e=>set("executor.relation",e.target.value)} className={IC} placeholder="e.g., Spouse, Child, Friend"/>
+                <select value={will.executor.relation} onChange={e=>set("executor.relation",e.target.value)} className={IC+" appearance-none"}>
+                  <option value="">Select...</option>
+                  {RELATIONS.map(r=><option key={r}>{r}</option>)}
+                </select>
               </div>
               <div><label className={LC}>Occupation</label>
                 <select value={will.executor.occupation} onChange={e=>set("executor.occupation",e.target.value)} className={IC+" appearance-none"}>
@@ -406,7 +409,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
               <div><label className={LC}>Please specify occupation</label>
                 <input value={will.executor.occupationOther} onChange={e=>set("executor.occupationOther",e.target.value)} maxLength={MAX_LEN_OCCUPATION_OTHER} className={IC}/></div>
             )}
-            <div><label className={LC}>Contact Details / Address</label>
+            <div><label className={LC}>{LBL_ADDRESS}</label>
               <input value={will.executor.address} onChange={e=>set("executor.address",e.target.value)} maxLength={MAX_LEN_ADDRESS} className={IC}/>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -473,7 +476,6 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                   <div><label className={LC}>{LBL_ID_TYPE}</label><select value={will.guardian.idType} onChange={e=>set("guardian.idType",e.target.value)} className={IC+" appearance-none"}>{ID_TYPES.map(t=><option key={t}>{t}</option>)}</select></div>
                   <div><label className={LC}>{LBL_ID_NUMBER}</label><input value={will.guardian.idNumber} onChange={e=>set("guardian.idNumber",e.target.value)} onBlur={e=>handleIdBlur(will.guardian.idType,e.target.value,v=>set("guardian.idNumber",v))} disabled={idFieldsLocked} className={idInputCls(IC)} title={idInputTitle(TIP_NO_ID_SAVED)}/></div>
                 </div>
-                <div><label className={LC}>Aadhaar Number</label><input value={will.guardian.aadhaarNumber} onChange={e=>set("guardian.aadhaarNumber",e.target.value)} onBlur={e=>handleIdBlur("Aadhaar Card",e.target.value,v=>set("guardian.aadhaarNumber",v))} disabled={idFieldsLocked} className={idInputCls(IC)} title={idInputTitle(TIP_NO_ID_SAVED)}/></div>
               </FormBlock>
             </>
           )}
@@ -879,7 +881,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
             <FormBlock title="Section V — Rest & Residue Clause">
               <p className="text-slate-500 text-xs mb-3 leading-relaxed">Even with careful planning, it's possible to miss mentioning an asset in this Will, or to acquire something new after signing it. A residuary clause is a safety net for exactly this. Any such asset should go to the following (more than one beneficiary shares equally):</p>
               {will.allIndiaResidue.map((entry,idx)=>{
-                const setEntry=(field: "relation"|"relationOther"|"name"|"nationality"|"occupation"|"occupationOther"|"idType"|"idNumber", value: string)=>
+                const setEntry=(field: "relation"|"relationOther"|"name"|"age"|"nationality"|"occupation"|"occupationOther"|"address"|"idType"|"idNumber", value: string)=>
                   setWill(p=>({...p, allIndiaResidue:p.allIndiaResidue.map((e,j)=>j===idx?{...e,[field]:value}:e)}));
                 return(
                   <div key={idx} className="bg-slate-50 border border-slate-200 rounded-xl p-3 mb-2.5">
@@ -889,30 +891,33 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-2.5">
                       <div><label className={LC}>Full Name</label><input value={entry.name} onChange={e=>setEntry("name",e.target.value)} className={IC}/></div>
+                      <div><label className={LC}>Age (Years)</label><input type="number" min={MIN_AGE} max={MAX_AGE} value={entry.age} onChange={e=>setEntry("age",e.target.value)} className={IC}/></div>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-2.5">
                       <div><label className={LC}>Relationship</label>
                         <select value={entry.relation} onChange={e=>setEntry("relation",e.target.value)} className={IC+" appearance-none"}>
                           <option value="">Select...</option>
                           {NONGOAN_RELATIONSHIP_OPTIONS.map(r=><option key={r}>{r}</option>)}
                         </select>
                       </div>
+                      <div><label className={LC}>Nationality</label><input value={entry.nationality} onChange={e=>setEntry("nationality",e.target.value)} maxLength={MAX_LEN_NATIONALITY} className={IC} placeholder="e.g. Indian"/></div>
                     </div>
                     {entry.relation==="Other"&&(
                       <div className="mb-2.5"><label className={LC}>Please specify relationship</label>
                         <input value={entry.relationOther} onChange={e=>setEntry("relationOther",e.target.value)} maxLength={MAX_LEN_RELATION_OTHER} className={IC}/></div>
                     )}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-2.5">
-                      <div><label className={LC}>Nationality</label><input value={entry.nationality} onChange={e=>setEntry("nationality",e.target.value)} maxLength={MAX_LEN_NATIONALITY} className={IC} placeholder="e.g. Indian"/></div>
-                      <div><label className={LC}>Occupation</label>
-                        <select value={entry.occupation} onChange={e=>setEntry("occupation",e.target.value)} className={IC+" appearance-none"}>
-                          <option value="">Select...</option>
-                          {OCCUPATIONS.map(o=><option key={o}>{o}</option>)}
-                        </select>
-                      </div>
+                    <div className="mb-2.5"><label className={LC}>Occupation</label>
+                      <select value={entry.occupation} onChange={e=>setEntry("occupation",e.target.value)} className={IC+" appearance-none"}>
+                        <option value="">Select...</option>
+                        {OCCUPATIONS.map(o=><option key={o}>{o}</option>)}
+                      </select>
                     </div>
                     {entry.occupation==="Other"&&(
                       <div className="mb-2.5"><label className={LC}>Please specify occupation</label>
                         <input value={entry.occupationOther} onChange={e=>setEntry("occupationOther",e.target.value)} maxLength={MAX_LEN_OCCUPATION_OTHER} className={IC}/></div>
                     )}
+                    <div className="mb-2.5"><label className={LC}>{LBL_ADDRESS}</label>
+                      <input value={entry.address} onChange={e=>setEntry("address",e.target.value)} maxLength={MAX_LEN_ADDRESS} className={IC}/></div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                       <div><label className={LC}>{LBL_ID_TYPE}</label>
                         <select value={entry.idType} onChange={e=>setEntry("idType",e.target.value)} className={IC+" appearance-none"}>
@@ -924,7 +929,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                   </div>
                 );
               })}
-              <button onClick={()=>setWill(p=>({...p, allIndiaResidue:[...p.allIndiaResidue,{relation:"",relationOther:"",name:"",nationality:"",occupation:"",occupationOther:"",idType:"Aadhaar Card",idNumber:""}]}))}
+              <button onClick={()=>setWill(p=>({...p, allIndiaResidue:[...p.allIndiaResidue,{relation:"",relationOther:"",name:"",age:"",nationality:"",occupation:"",occupationOther:"",address:"",idType:"Aadhaar Card",idNumber:""}]}))}
                 className="text-xs text-brand hover:text-brand-dark font-semibold flex items-center gap-1"><Plus size={12}/>Add another beneficiary</button>
             </FormBlock>
           ):willType==="goan"?(
@@ -1128,6 +1133,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                     <div><label className={LC}>Marital Status</label>
                       <select value={w.maritalStatus} onChange={e=>setW("maritalStatus",e.target.value)} className={IC+" appearance-none"}>
                         <option value="unmarried">Unmarried</option><option value="married">Married</option>
+                        <option value="widowed">Widowed</option><option value="divorced">Divorced</option>
                       </select>
                     </div>
                     <div><label className={LC}>Nationality</label>
@@ -1145,7 +1151,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                       <input value={w.occupationOther} onChange={e=>setW("occupationOther",e.target.value)} maxLength={MAX_LEN_OCCUPATION_OTHER} className={IC}/>
                     </div>
                   )}
-                  <div className="mt-2.5"><label className={LC}>Resident of (Address)</label>
+                  <div className="mt-2.5"><label className={LC}>{LBL_ADDRESS}</label>
                     <input value={w.address} onChange={e=>setW("address",e.target.value)} maxLength={MAX_LEN_ADDRESS} className={IC}/>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mt-2.5">
@@ -1156,17 +1162,6 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                       <input value={w.aadhaarNumber} onChange={e=>setW("aadhaarNumber",e.target.value)} onBlur={e=>handleIdBlur("Aadhaar Card",e.target.value,v=>setW("aadhaarNumber",v))} disabled={idFieldsLocked} className={idInputCls(IC)} title={idInputTitle(TIP_NO_ID_SAVED)}/>
                     </div>
                   </div>
-                  <div className="mt-2.5"><label className={LC}>Relation to Testator</label>
-                    <select value={w.relationToTestator} onChange={e=>setW("relationToTestator",e.target.value)} className={IC+" appearance-none"}>
-                      <option value="">Select...</option>
-                      {WITNESS_RELATION_OPTIONS.map(r=><option key={r}>{r}</option>)}
-                    </select>
-                  </div>
-                  {w.relationToTestator==="Other"&&(
-                    <div className="mt-2.5"><label className={LC}>Please specify relation to testator</label>
-                      <input value={w.relationToTestatorOther} onChange={e=>setW("relationToTestatorOther",e.target.value)} maxLength={MAX_LEN_RELATION_OTHER} className={IC}/>
-                    </div>
-                  )}
                 </div>
               );
             })}

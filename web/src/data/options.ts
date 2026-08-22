@@ -7,6 +7,18 @@ export const STATES = [
 
 export const RELATIONS = ["Son","Daughter","Spouse","Father","Mother","Brother","Sister","Friend","Charity","Other"];
 
+// The Testator's "You are the ___ of <Father / Spouse Name>" opening-clause
+// relation — value is what's stored/printed (testator.relation), label is
+// the dropdown text. "other" pairs with testator.relationOther (a free-text
+// "Please specify relationship" box, shown only when this is selected —
+// same pattern as every other relationOther field in this app).
+export const TESTATOR_RELATION_OPTIONS: {value: "son"|"daughter"|"wife"|"other"; label: string}[] = [
+  {value:"son", label:"Son of"},
+  {value:"daughter", label:"Daughter of"},
+  {value:"wife", label:"Wife of"},
+  {value:"other", label:"Other"},
+];
+
 export const ID_TYPES = ["Aadhaar Card","PAN Card","Passport","Driving Licence","Voter ID"];
 
 // Occupation choices exactly as worded in the All India (Non-Goan) Will PDF
@@ -28,12 +40,6 @@ export const ALLINDIA_RELATIONSHIP_OPTIONS = ["Spouse","Son","Daughter","Other"]
 export const NONGOAN_RELATIONSHIP_OPTIONS = [
   "Spouse","Son","Daughter","Father","Mother","Brother","Sister",
   "Grandson","Granddaughter","Nephew","Niece","Friend","Other",
-];
-
-// A witness's relationship to the testator — new field on the Non-Goan Will
-// input form spec, printed in each witness's entry in the generated document.
-export const WITNESS_RELATION_OPTIONS = [
-  "Friend","Neighbour","Colleague","Family member","Executor of the Will","Other",
 ];
 
 // Marital status choices exactly as worded in the Goan Will PDF template's

@@ -2,7 +2,7 @@ import { Eye } from "lucide-react";
 import { ordinal } from "../../utils/format";
 import type { WillState } from "../../types";
 import {
-  BLANK as blank, occupationOf, witnessRelOf, nationalityLabel, renderAssetList, computeAssetSections,
+  BLANK as blank, occupationOf, nationalityLabel, renderAssetList, computeAssetSections,
   openingClauseNodes, residueClauseNodes,
 } from "./allIndiaWillShared";
 
@@ -116,7 +116,7 @@ export default function AllIndiaLiveDocPreview({will}:{
         <p className="mb-1">Witnesses:</p>
         {witnesses.map((w,i)=>(
           <p key={i} className="text-justify mb-1">
-            {i+1}) <strong>{w.name||blank}</strong>, {w.parentRelation} of <strong>{w.parentName||blank}</strong>, Age: <strong>{w.age||"___"}</strong>, {w.maritalStatus}, nationality <strong>{nationalityLabel(w.nationality)}</strong>, occupation <strong>{occupationOf(w)||blank}</strong>, resident of <strong>{w.address||blank}</strong>, bearing PAN Number <strong>{w.pan||blank}</strong>, Aadhaar Number <strong>{w.aadhaarNumber||blank}</strong>, Relation to Testator: <strong>{witnessRelOf(w)||blank}</strong>
+            {i+1}) <strong>{w.name||blank}</strong>, {w.parentRelation} of <strong>{w.parentName||blank}</strong>, Age: <strong>{w.age||"___"}</strong>, {w.maritalStatus}, nationality <strong>{nationalityLabel(w.nationality)}</strong>, occupation <strong>{occupationOf(w)||blank}</strong>, resident of <strong>{w.address||blank}</strong>, bearing PAN Number <strong>{w.pan||blank}</strong>, Aadhaar Number <strong>{w.aadhaarNumber||blank}</strong>
           </p>
         ))}
 
