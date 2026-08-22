@@ -168,11 +168,11 @@ def _national(d: dict, key: str = "nationality") -> str:
 
 
 def _age_display(value) -> str:
-    """"31 Years" — every age printed in this document (testator, witnesses,
-    asset beneficiaries) goes through this one function, so the "Years"
+    """"31 years" — every age printed in this document (testator, witnesses,
+    asset beneficiaries) goes through this one function, so the "years"
     suffix can't silently go missing from one call site while present in
     another. A blank age stays "___" (no unit on a blank line)."""
-    return f"{esc(value)} Years" if value else "___"
+    return f"{esc(value)} years" if value else "___"
 
 
 def _id_type_label(id_type) -> str:
@@ -219,8 +219,8 @@ def _render_asset_list(items: list, label: str, start_index: int = 1, numbered: 
         prefix = f"{start_index + i} " if numbered else ""
         id_type = item.get("idType") or "Aadhaar Card"
         lines.append(
-            f"{prefix}{label}: {v(item, 'description')} Bequeathed to: {v(item, 'beneficiary')} "
-            f"Age: {_age_display(item.get('beneficiaryAge'))} "
+            f"{prefix}{label}: {v(item, 'description')} Bequeathed to: {v(item, 'beneficiary')}, "
+            f"age {_age_display(item.get('beneficiaryAge'))}, "
             f"Relationship: {rel_of(item) or BLANK}, having {_id_type_label(id_type)} "
             f"Number: {_id_number_display(id_type, item.get('idNumber'))}."
         )
@@ -231,7 +231,7 @@ def _witness_particular(index: int, w: dict) -> str:
     letter = chr(97 + index)
     return (
         f"{letter}) {v(w, 'name')} {esc(w.get('parentRelation')) or 'son/daughter/wife'} of {v(w, 'parentName')}, "
-        f"aged {_age_display(w.get('age'))}, {esc(w.get('maritalStatus')) or 'unmarried/married'}, "
+        f"age {_age_display(w.get('age'))}, {esc(w.get('maritalStatus')) or 'unmarried/married'}, "
         f"nationality {_national(w)}, occupation {occupation_of(w) or BLANK}, resident of {v(w, 'address')}, "
         f"having PAN Number {v(w, 'pan')}, Aadhaar Number {v_aadhaar(w, 'aadhaarNumber')}"
     )
@@ -255,7 +255,7 @@ def _opening_clause(testator: dict, witnesses: list, execution_date_str: str) ->
     clause = (
         f"I, {v(testator, 'fullName')}, gender: {v(testator, 'gender')}, "
         f"PAN {v(testator, 'pan')}, Aadhaar Number {v_aadhaar(testator, 'aadhaarNumber')}, "
-        f"{_testator_relation(testator)} of {v(testator, 'parentSpouseName')}, aged {_age_display(testator.get('age'))}, "
+        f"{_testator_relation(testator)} of {v(testator, 'parentSpouseName')}, age {_age_display(testator.get('age'))}, "
         f"{marital_status}, nationality {_national(testator)}, occupation {occupation_of(testator) or BLANK}, "
         f"resident of {v(testator, 'address')}"
     )
@@ -283,7 +283,7 @@ def _residue_clause(entries: list) -> str:
         id_type = entry.get("idType") or "Aadhaar Card"
         suffix = "; " if i < len(entries) - 1 else "."
         parts.append(
-            f"{rel_of(entry) or BLANK}, {v(entry, 'name')}, Age: {_age_display(entry.get('age'))}, "
+            f"{rel_of(entry) or BLANK}, {v(entry, 'name')}, age {_age_display(entry.get('age'))}, "
             f"nationality {_national(entry)}, "
             f"occupation {occupation_of(entry) or BLANK}, Residential Address: {v(entry, 'address')}, "
             f"having {_id_type_label(id_type)} "
@@ -305,17 +305,17 @@ def _executor_appointment_clause(executor: dict) -> str:
             f"{v(executor, 'orgRegNumber')}, and having Registered Office Address: {v(executor, 'orgAddress')}."
         )
     return (
-        f"I appoint {v(executor, 'name')}, having Age: {_age_display(executor.get('age'))}, "
+        f"I appoint {v(executor, 'name')}, age {_age_display(executor.get('age'))}, "
         f"Relationship to Testator: {v(executor, 'relation')}, "
         f"Occupation: {occupation_of(executor) or BLANK}, "
-        f"Address: {v(executor, 'address')}, having {_id_type_label(executor.get('idType')) or ''} "
+        f"Residential Address: {v(executor, 'address')}, having {_id_type_label(executor.get('idType')) or ''} "
         f"Number: {_id_number_display(executor.get('idType'), executor.get('idNumber'))}."
     )
 
 
 def _guardian_appointment_clause(guardian: dict) -> str:
     return (
-        f"I appoint {v(guardian, 'name')}, having Age: {_age_display(guardian.get('age'))}, "
+        f"I appoint {v(guardian, 'name')}, age {_age_display(guardian.get('age'))}, "
         f"Relation to Testator: {v(guardian, 'relation')}, "
         f"Occupation: {occupation_of(guardian) or BLANK}, Residential Address: {v(guardian, 'address')}, "
         f"having {_id_type_label(guardian.get('idType')) or ''} "

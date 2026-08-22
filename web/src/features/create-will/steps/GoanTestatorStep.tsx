@@ -4,7 +4,7 @@ import FormBlock from "../../../components/shared/FormBlock";
 import Nav from "../../../components/shared/Nav";
 import { OCCUPATIONS, GOAN_MARITAL_STATUSES } from "../../../data/options";
 import {
-  TIP_ID_LOCKED, TIP_NO_ID_SAVED, MAX_LEN_ADDRESS, MIN_AGE, MAX_AGE,
+  TIP_ID_LOCKED, TIP_NO_ID_SAVED, MAX_LEN_ADDRESS, MIN_AGE, MAX_AGE, MAX_AGE_DIGITS,
   MAX_LEN_NATIONALITY, MAX_LEN_OCCUPATION_OTHER,
 } from "../../../constants";
 import { IC, LC } from "./wizardStyles";
@@ -36,7 +36,7 @@ export default function GoanTestatorStep({will,set,idFieldsLocked,idInputCls,idI
             <option value="F">Female (Testatrix)</option>
           </select>
         </div>
-        <div><label className={LC}>Age</label><input type="number" min={MIN_AGE} max={MAX_AGE} value={person.age} onChange={e=>set(path+".age",e.target.value)} className={IC}/></div>
+        <div><label className={LC}>Age</label><input type="number" min={MIN_AGE} max={MAX_AGE} maxLength={MAX_AGE_DIGITS} value={person.age} onChange={e=>set(path+".age",e.target.value)} className={IC}/></div>
       </div>
       <div className="grid grid-cols-3 gap-3">
         <div><label className={LC}>Relation</label>

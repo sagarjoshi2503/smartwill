@@ -25,6 +25,7 @@ export const MAX_LEN_SPOUSE_NAME = 80;
 export const MAX_LEN_ADDRESS = 250;
 export const MIN_AGE = 0;
 export const MAX_AGE = 150;
+export const MAX_AGE_DIGITS = 3;
 export const MAX_LEN_NATIONALITY = 50;
 export const MAX_LEN_OCCUPATION_OTHER = 50;
 export const MAX_LEN_RELATION_OTHER = 80;

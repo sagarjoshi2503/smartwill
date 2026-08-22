@@ -257,7 +257,6 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onDownloa
               </div>
             </div>
             <p className="mb-1">Name of {title}: <strong>{testator.fullName||blank}</strong></p>
-            <p className="mb-1">{title} Email Address: <strong>{testator.email||blank}</strong></p>
             <p className="mb-1">Place: <strong>{testator.signPlace||blank}</strong></p>
             <p className="mb-4">Date: <strong>{executionDateStr(testator)}</strong></p>
 
