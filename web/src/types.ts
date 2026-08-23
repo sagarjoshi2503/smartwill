@@ -87,7 +87,7 @@ export interface Beneficiary {
 
 export interface Witness {
   name: string;
-  parentRelation: "son" | "daughter" | "wife";
+  parentRelation: "son" | "daughter" | "wife" | "";
   parentName: string;
   age: string;
   maritalStatus: "unmarried" | "married" | "widowed" | "divorced" | "";
@@ -189,7 +189,7 @@ export interface GoanPerson {
   name: string;
   gender: "M" | "F" | "";
   age: string;
-  parentRelation: "son of" | "daughter of" | "wife of" | "husband of";
+  parentRelation: "son of" | "daughter of" | "wife of" | "husband of" | "";
   parentName: string;
   maritalStatus: "married" | "unmarried" | "widowed" | "divorced" | "";
   occupation: string;
@@ -208,7 +208,7 @@ export interface GoanPerson {
 // the shared Witness interface above uses.
 export interface GoanWitness {
   name: string;
-  parentRelation: "s/o." | "d/o." | "w/o.";
+  parentRelation: "s/o." | "d/o." | "w/o." | "";
   parentName: string;
   age: string;
   maritalStatus: "Married" | "Unmarried" | "Widowed" | "Divorced" | "";

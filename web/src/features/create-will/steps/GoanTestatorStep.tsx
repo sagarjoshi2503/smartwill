@@ -41,6 +41,7 @@ export default function GoanTestatorStep({will,set,idFieldsLocked,idInputCls,idI
       <div className="grid grid-cols-3 gap-3">
         <div><label className={LC}>Relation</label>
           <select value={person.parentRelation} onChange={e=>set(path+".parentRelation",e.target.value)} className={IC+" appearance-none"}>
+            <option value="">Select</option>
             <option value="son of">Son of</option><option value="daughter of">Daughter of</option>
             <option value="wife of">Wife of</option><option value="husband of">Husband of</option>
           </select>

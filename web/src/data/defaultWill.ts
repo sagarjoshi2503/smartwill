@@ -2,12 +2,12 @@ import { today } from "../utils/format";
 import type { GoanPerson, GoanWitness, WillState } from "../types";
 
 const newGoanPerson = (): GoanPerson => ({
-  name:"", gender:"", age:"", parentRelation:"son of", parentName:"",
+  name:"", gender:"", age:"", parentRelation:"", parentName:"",
   maritalStatus:"", occupation:"", occupationOther:"", nationality:"Indian",
   pan:"", aadhaarNumber:"", address:"", alias:"",
 });
 const newGoanWitness = (): GoanWitness => ({
-  name:"", parentRelation:"s/o.", parentName:"", age:"", maritalStatus:"",
+  name:"", parentRelation:"", parentName:"", age:"", maritalStatus:"",
   occupation:"", address:"", pan:"", aadhaarNumber:"",
 });
 const newGoanAssetItem = () => ({description:"",beneficiary:"",beneficiaryAge:"",relation:"",relationOther:"",idType:"Aadhaar Card",idNumber:""});
@@ -21,22 +21,24 @@ export const DEFAULT_WILL: WillState = {
   // not placeholder demo data.
   testator: {
     email:"", fullName:"", gender:"", pan:"", aadhaarNumber:"",
-    relation:"son", relationOther:"", parentSpouseName:"",
-    age:"", maritalStatus:"unmarried", nationality:"", occupation:"", occupationOther:"",
+    relation:"", relationOther:"", parentSpouseName:"",
+    age:"", maritalStatus:"", nationality:"", occupation:"", occupationOther:"",
     spouseName:"", spousePan:"", spouseAadhaarNumber:"",
     sonNames:[""], daughterNames:[""],
     address:"", country:"India",
     signPlace:"", signDay:String(today.day), signMonth:today.month, signYear:String(today.year),
   },
-  // Section II - Executor. idType/relation/adminType are left at a neutral
+  // Section II - Executor. idType/adminType are left at a neutral
   // first/structural choice (they're <select>s with no blank option), but no
-  // fabricated name/address/ID-number text remains.
+  // fabricated name/address/ID-number text remains. Every dropdown that has a
+  // "Select..." placeholder option defaults to it (blank), so nothing looks
+  // pre-chosen until the user actually picks something.
   executor: {
     wantsExecutor:false,
     executorType:"individual", // "individual" | "org"
     name:"", age:"", occupation:"", occupationOther:"", idType:"Aadhaar Card", idNumber:"",
     address:"",
-    relation:"Son",
+    relation:"",
     orgName:"", orgRepName:"", orgRegNumber:"", orgAddress:"",
     hasJoint:false,
     jointName:"", jointIdType:"PAN Card", jointIdNumber:"", jointAddress:"",
@@ -97,11 +99,11 @@ export const DEFAULT_WILL: WillState = {
   specialInstructions:"",
   // Beneficiaries — always starts with one blank entry (a Will needs at
   // least one beneficiary), the user adds more via "+ Add Beneficiary"
-  beneficiaries:[{id:1, name:"", relation:"Son", age:"", maritalStatus:"", occupation:"", occupationOther:"", address:"", pan:"", aadhaarNumber:""}],
+  beneficiaries:[{id:1, name:"", relation:"", age:"", maritalStatus:"", occupation:"", occupationOther:"", address:"", pan:"", aadhaarNumber:""}],
   // Witnesses: the Indian Succession Act requires exactly two, so the two slots
   // stay (the UI has no "add witness" control), but with no fabricated identities
   witnesses:[
-    { name:"", parentRelation:"son", parentName:"", age:"", maritalStatus:"unmarried", nationality:"", occupation:"", occupationOther:"", address:"", pan:"", aadhaarNumber:"" },
-    { name:"", parentRelation:"son", parentName:"", age:"", maritalStatus:"unmarried", nationality:"", occupation:"", occupationOther:"", address:"", pan:"", aadhaarNumber:"" },
+    { name:"", parentRelation:"", parentName:"", age:"", maritalStatus:"", nationality:"", occupation:"", occupationOther:"", address:"", pan:"", aadhaarNumber:"" },
+    { name:"", parentRelation:"", parentName:"", age:"", maritalStatus:"", nationality:"", occupation:"", occupationOther:"", address:"", pan:"", aadhaarNumber:"" },
   ],
 };

@@ -502,6 +502,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-2.5">
                   <div><label className={LC}>Relation</label>
                     <select value={b.relation} onChange={e=>updateBene(b.id,"relation",e.target.value)} className={IC+" appearance-none"}>
+                      <option value="">Select...</option>
                       {RELATIONS.map(r=><option key={r}>{r}</option>)}
                     </select>
                   </div>
@@ -1020,6 +1021,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mt-2.5">
                   <div><label className={LC}>Relation</label>
                     <select value={w.parentRelation} onChange={e=>setW("parentRelation",e.target.value)} className={IC+" appearance-none"}>
+                      <option value="">Select...</option>
                       <option value="s/o.">Son of</option><option value="d/o.">Daughter of</option><option value="w/o.">Wife of</option>
                     </select>
                   </div>
@@ -1123,6 +1125,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mt-2.5">
                     <div><label className={LC}>Son / Daughter / Wife of</label>
                       <select value={w.parentRelation} onChange={e=>setW("parentRelation",e.target.value)} className={IC+" appearance-none"}>
+                        <option value="">Select...</option>
                         <option value="son">Son of</option><option value="daughter">Daughter of</option><option value="wife">Wife of</option>
                       </select>
                     </div>
@@ -1133,6 +1136,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mt-2.5">
                     <div><label className={LC}>Marital Status</label>
                       <select value={w.maritalStatus} onChange={e=>setW("maritalStatus",e.target.value)} className={IC+" appearance-none"}>
+                        <option value="">Select...</option>
                         <option value="unmarried">Unmarried</option><option value="married">Married</option>
                         <option value="widowed">Widowed</option><option value="divorced">Divorced</option>
                       </select>

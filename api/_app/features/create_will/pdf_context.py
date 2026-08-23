@@ -136,6 +136,13 @@ def _testator_relation(testator: dict) -> str:
     return esc(value) if value else ""
 
 
+def _gender_display(testator: dict) -> str:
+    """testator.gender is stored as "male"/"female" — printed as "Male"/
+    "Female" in the opening clause, not the raw lowercase code."""
+    gender = testator.get("gender")
+    return "Male" if gender == "male" else "Female" if gender == "female" else BLANK
+
+
 def occupation_of(item: dict) -> str:
     value = item.get("occupationOther") if item.get("occupation") == "Other" else item.get("occupation")
     return esc(value) if value else ""
@@ -253,8 +260,8 @@ def _witness_particulars_text(witnesses: list) -> str:
 def _opening_clause(testator: dict, witnesses: list, execution_date_str: str) -> str:
     marital_status = esc(testator.get("maritalStatus")) or ""
     clause = (
-        f"I, {v(testator, 'fullName')}, gender: {v(testator, 'gender')}, "
-        f"PAN {v(testator, 'pan')}, Aadhaar Number {v_aadhaar(testator, 'aadhaarNumber')}, "
+        f"I, {v(testator, 'fullName')}, {_gender_display(testator)}, "
+        f"having PAN {v(testator, 'pan')}, Aadhaar Number {v_aadhaar(testator, 'aadhaarNumber')}, "
         f"{_testator_relation(testator)} of {v(testator, 'parentSpouseName')}, age {_age_display(testator.get('age'))}, "
         f"{marital_status}, {_national(testator)}, occupation {occupation_of(testator) or BLANK}, "
         f"resident of {v(testator, 'address')}"
