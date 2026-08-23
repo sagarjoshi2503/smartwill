@@ -1,21 +1,24 @@
 import json
 import logging
 import os
+from datetime import datetime, timezone
 
 import anthropic
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 import rag_client
 from constants import (
     CORS_ALLOW_HEADERS, CORS_ALLOW_METHODS, DEFAULT_HOST, DEFAULT_PORT, DEFAULT_RETRIEVAL_MODE,
-    DEFAULT_SEARCH_LIMIT, ENV_CORS_ALLOW_ORIGINS, ERR_CORS_ALLOW_ORIGINS_REQUIRED, FLAG_USE_RAG_OR_MCP,
-    FLD_LIMIT, FLD_QUERY, FLD_TOKEN, INCOMPLETE_REPLY, MAX_TOKENS, MAX_TOOL_ITERATIONS, MODEL,
-    MSG_ROLE_ASSISTANT, MSG_ROLE_USER, REFUSAL_REPLY, RETRIEVAL_MODE_RAG, STOP_REASON_REFUSAL,
-    STOP_REASON_TOOL_USE, SYSTEM_PROMPT, TOOL_SEARCH_FAQ, TOOL_SEARCH_WILLS, UNAVAILABLE_REPLY,
-    err_tool_not_available, err_tool_result,
+    DEFAULT_SEARCH_LIMIT, ENV_CORS_ALLOW_ORIGINS, ERR_CORS_ALLOW_ORIGINS_REQUIRED, ERR_QUESTION_AND_ANSWER_REQUIRED,
+    ERR_REASON_REQUIRED, ERR_REASON_TOO_LONG, FEEDBACK_COLLECTION_NAME, FLAG_USE_RAG_OR_MCP, FLD_ANSWER, FLD_EMAIL,
+    FLD_LIMIT, FLD_NOT_LIKED_REASON, FLD_QUERY, FLD_QUESTION, FLD_RESPONSE_DATETIME, FLD_TOKEN, INCOMPLETE_REPLY,
+    MAX_LEN_NOT_LIKED_REASON, MAX_TOKENS, MAX_TOOL_ITERATIONS, MODEL, MSG_ROLE_ASSISTANT, MSG_ROLE_USER,
+    REFUSAL_REPLY, RETRIEVAL_MODE_RAG, STOP_REASON_REFUSAL, STOP_REASON_TOOL_USE, SYSTEM_PROMPT, TOOL_SEARCH_FAQ,
+    TOOL_SEARCH_WILLS, UNAVAILABLE_REPLY, err_tool_not_available, err_tool_result,
 )
+from db import get_db
 from feature_flags import get_flag_value
 from mcp_client import open_session
 from tools import TOOLS_REQUIRING_TOKEN, allowed_tool_names, claude_tools_for_role, faq_tool_for_role, rag_tool_for_role
@@ -79,6 +82,54 @@ class ChatResponse(BaseModel):
     # search mode answered them. Always set, even on the unavailable/
     # incomplete paths, since the flag is read before anything can fail.
     retrieval_mode: str = DEFAULT_RETRIEVAL_MODE
+
+
+class ChatFeedbackRequest(BaseModel):
+    # The signed-in user's email if known, "" for an anonymous visitor —
+    # this is a plain UI-logging action, not an authenticated write, so
+    # there's no token/JWT involved (see "Deliberately internal-only" note
+    # in chatbot/CLAUDE.md's write-action guidance: this doesn't create,
+    # edit, delete, or pay for anything, it just records feedback).
+    email: str | None = None
+    question: str
+    answer: str
+    liked: bool
+    reason: str | None = None
+
+
+class ChatFeedbackResponse(BaseModel):
+    ok: bool = True
+
+
+# A plain UI action (the user clicking thumbs up/down on an answer they
+# already received), not something Claude decides to do — so this never
+# goes through the tool-use loop/whitelist above, it's just a REST endpoint
+# the frontend calls directly.
+@app.post("/chat/feedback", response_model=ChatFeedbackResponse)
+def chat_feedback(body: ChatFeedbackRequest):
+    question = body.question.strip()
+    answer = body.answer.strip()
+    if not question or not answer:
+        raise HTTPException(status_code=400, detail=ERR_QUESTION_AND_ANSWER_REQUIRED)
+
+    # Thumbs up always stores a blank reason, even if the client sent one —
+    # the reason field only ever means "why wasn't this helpful".
+    reason = ""
+    if not body.liked:
+        reason = (body.reason or "").strip()
+        if not reason:
+            raise HTTPException(status_code=400, detail=ERR_REASON_REQUIRED)
+        if len(reason) > MAX_LEN_NOT_LIKED_REASON:
+            raise HTTPException(status_code=400, detail=ERR_REASON_TOO_LONG)
+
+    get_db()[FEEDBACK_COLLECTION_NAME].insert_one({
+        FLD_EMAIL: (body.email or "").strip(),
+        FLD_QUESTION: question,
+        FLD_ANSWER: answer,
+        FLD_RESPONSE_DATETIME: datetime.now(timezone.utc),
+        FLD_NOT_LIKED_REASON: reason,
+    })
+    return ChatFeedbackResponse(ok=True)
 
 
 async def _execute_tool(

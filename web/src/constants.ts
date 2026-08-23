@@ -71,6 +71,7 @@ export const API_GIFT_VOUCHER_ADMIN_LIST = "/api/gift-voucher/admin/list";
 
 // --- Chatbot (pass to utils/chatbotBase's chatbotUrl(), a separate service — see chatbot/.env.example) ---
 export const CHATBOT_CHAT = "/chat";
+export const CHATBOT_FEEDBACK = "/chat/feedback";
 export const apiPathAdminWill = (willId: string): string => `/api/will/admin/${willId}`;
 export const apiPathSendBack = (willId: string): string => `/api/will/admin/${willId}/send-back`;
 export const apiPathComplete = (willId: string): string => `/api/will/admin/${willId}/complete`;
@@ -186,3 +187,15 @@ export const RETRIEVAL_MODE_MCP = "mcp";
 export const LBL_RETRIEVAL_MODE_RAG = "Smart search (RAG)";
 export const LBL_RETRIEVAL_MODE_MCP = "Direct lookup (MCP)";
 export const ARIA_CLEAR_CHAT = "Clear chat messages";
+
+// --- Chat assistant feedback (thumbs up/down) ---
+export const ARIA_THUMBS_UP = "This answer was helpful";
+export const ARIA_THUMBS_DOWN = "This answer was not helpful";
+export const PH_FEEDBACK_REASON = "What was wrong with this answer?";
+export const BTN_SUBMIT_FEEDBACK = "Submit";
+export const BTN_CANCEL_FEEDBACK = "Cancel";
+export const MSG_FEEDBACK_THANKS = "Thanks for your feedback.";
+export const ERR_FEEDBACK_REASON_REQUIRED = "Please enter a reason.";
+export const ERR_FEEDBACK_FAILED = "Could not submit feedback. Please try again.";
+// Mirrors chatbot/constants.py's MAX_LEN_NOT_LIKED_REASON.
+export const MAX_LEN_FEEDBACK_REASON = 150;

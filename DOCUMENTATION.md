@@ -123,7 +123,7 @@ Each service has its own suite; there's no cross-service test runner.
 cd api      && .venv-api/Scripts/python.exe -m pytest _app/tests -q      # 272 tests
 cd mcp      && .venv-mcp/Scripts/python.exe -m pytest tests -q           # 34 tests
 cd rag      && .venv-rag/Scripts/python.exe -m pytest tests -q           # 44 tests
-cd chatbot  && .venv-chatbot/Scripts/python.exe -m pytest tests -q       # 37 tests
+cd chatbot  && .venv-chatbot/Scripts/python.exe -m pytest tests -q       # 46 tests
 cd web      && npx tsc --noEmit && npx vitest run                        # 82 tests (3 pre-existing failures, see web/CLAUDE.md)
 ```
 

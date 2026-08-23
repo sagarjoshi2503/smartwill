@@ -15,6 +15,13 @@ RAG_SEARCH_TIMEOUT_SECONDS = 15.0
 FLAGS_TIMEOUT_SECONDS = 2.0
 FLAGS_CACHE_TTL_SECONDS = 30
 
+# --- MongoDB (see db.py) — this service is otherwise stateless; the
+# chatbotresponses feedback collection (below) is the one thing it persists
+# itself, so it needs its own independent MONGODB_URI, same as rag/db.py.
+# No default: required, declared per-environment. ---
+DB_NAME = "smartwill"
+ERR_MONGODB_URI_REQUIRED = "MONGODB_URI environment variable is required"
+
 # CHATBOT_CORS_ALLOW_ORIGINS (not the bare CORS_ALLOW_ORIGINS api/ uses) is a
 # deliberately distinct key: this project deploys api/, mcp/, and chatbot/ as
 # separate Vercel services sharing one flat project-level env var pool, so a
@@ -77,6 +84,21 @@ CORS_ALLOW_HEADERS = ["Content-Type", "Authorization"]
 
 # --- Schema field name stripped/injected around the token security pattern ---
 FLD_TOKEN = "token"
+
+# --- chatbotresponses feedback collection (POST /chat/feedback — a plain
+# UI action, not an LLM tool call, so it doesn't go through the tool-use
+# loop above) ---
+FEEDBACK_COLLECTION_NAME = "chatbotresponses"
+FLD_EMAIL = "emailid"
+FLD_QUESTION = "question"
+FLD_ANSWER = "answer"
+FLD_RESPONSE_DATETIME = "responsedatetime"
+FLD_NOT_LIKED_REASON = "notlikedreason"
+MAX_LEN_NOT_LIKED_REASON = 150
+
+ERR_QUESTION_AND_ANSWER_REQUIRED = "question and answer are required"
+ERR_REASON_REQUIRED = "reason is required for a thumbs-down"
+ERR_REASON_TOO_LONG = f"reason must be {MAX_LEN_NOT_LIKED_REASON} characters or fewer"
 
 # --- rag/ tool-call argument field names + default limit (search_wills,
 # search_faq — both share this shape) ---

@@ -1,14 +1,17 @@
 import { useState } from "react";
-import { MessageCircle, X, Send, LifeBuoy, Trash2 } from "lucide-react";
+import { MessageCircle, X, Send, LifeBuoy, Trash2, ThumbsUp, ThumbsDown } from "lucide-react";
 import { chatbotUrl } from "../../utils/chatbotBase";
 import { getAuthToken } from "../../utils/auth";
 import {
-  ARIA_CLEAR_CHAT, ARIA_OPEN_CHAT, BTN_CONTACT_SUPPORT, CHATBOT_CHAT, CONTENT_TYPE_JSON, HEADER_CONTENT_TYPE,
-  LBL_CHAT_ASSISTANT_TITLE, LBL_RETRIEVAL_MODE_MCP, LBL_RETRIEVAL_MODE_RAG, MSG_CHAT_EMPTY_STATE,
-  MSG_CHAT_THINKING, MSG_CHAT_UNAVAILABLE, PH_CHAT_QUESTION, RETRIEVAL_MODE_RAG, ROLE_ADMIN, ROLE_TESTATOR,
+  ARIA_CLEAR_CHAT, ARIA_OPEN_CHAT, ARIA_THUMBS_DOWN, ARIA_THUMBS_UP, BTN_CANCEL_FEEDBACK, BTN_CONTACT_SUPPORT,
+  BTN_SUBMIT_FEEDBACK, CHATBOT_CHAT, CHATBOT_FEEDBACK, CONTENT_TYPE_JSON, ERR_FEEDBACK_FAILED,
+  ERR_FEEDBACK_REASON_REQUIRED, HEADER_CONTENT_TYPE, LBL_CHAT_ASSISTANT_TITLE, LBL_RETRIEVAL_MODE_MCP,
+  LBL_RETRIEVAL_MODE_RAG, MAX_LEN_FEEDBACK_REASON, MSG_CHAT_EMPTY_STATE, MSG_CHAT_THINKING, MSG_CHAT_UNAVAILABLE,
+  MSG_FEEDBACK_THANKS, PH_CHAT_QUESTION, PH_FEEDBACK_REASON, RETRIEVAL_MODE_RAG, ROLE_ADMIN, ROLE_TESTATOR,
 } from "../../constants";
 
 type ChatMessage = { role: "user" | "assistant"; content: string; retrievalMode?: string };
+type FeedbackChoice = "up" | "down";
 
 // Whichever role's token is currently stored determines what the assistant
 // can look up on the user's behalf (see chatbot/tools.py's role whitelist) —
@@ -25,12 +28,23 @@ const currentAuth = (): { token: string | null; role: "admin" | "testator" | nul
   return { token: null, role: null };
 };
 
-export default function ChatWidget({ onContactSupport }: { onContactSupport: () => void }) {
+export default function ChatWidget({ onContactSupport, email }: { onContactSupport: () => void; email?: string }) {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const [unavailable, setUnavailable] = useState(false);
+
+  // Feedback (thumbs up/down), keyed by the assistant message's index in
+  // `messages` — a plain UI action posted straight to chatbot/'s
+  // /chat/feedback endpoint, not something routed through the assistant's
+  // own tool-use loop (see chatbot/main.py's chat_feedback()).
+  const [feedbackGiven, setFeedbackGiven] = useState<Record<number, FeedbackChoice>>({});
+  const [feedbackSubmitting, setFeedbackSubmitting] = useState<number | null>(null);
+  const [feedbackError, setFeedbackError] = useState<Record<number, string>>({});
+  const [reasonPromptIndex, setReasonPromptIndex] = useState<number | null>(null);
+  const [reasonText, setReasonText] = useState("");
+  const [reasonError, setReasonError] = useState("");
 
   const handleSend = async () => {
     const text = input.trim();
@@ -75,6 +89,61 @@ export default function ChatWidget({ onContactSupport }: { onContactSupport: () 
   const handleClearChat = () => {
     setMessages([]);
     setUnavailable(false);
+    setFeedbackGiven({});
+    setFeedbackError({});
+    setReasonPromptIndex(null);
+    setReasonText("");
+    setReasonError("");
+  };
+
+  const submitFeedback = async (index: number, liked: boolean, reason?: string) => {
+    const answer = messages[index]?.content;
+    const question = messages[index - 1]?.content;
+    if (!answer || !question) return;
+
+    setFeedbackSubmitting(index);
+    setFeedbackError(e => ({ ...e, [index]: "" }));
+    try {
+      const res = await fetch(chatbotUrl(CHATBOT_FEEDBACK), {
+        method: "POST",
+        headers: { [HEADER_CONTENT_TYPE]: CONTENT_TYPE_JSON },
+        body: JSON.stringify({ email: email || "", question, answer, liked, reason }),
+      });
+      if (!res.ok) throw new Error();
+      setFeedbackGiven(f => ({ ...f, [index]: liked ? "up" : "down" }));
+      setReasonPromptIndex(null);
+      setReasonText("");
+      setReasonError("");
+    } catch {
+      setFeedbackError(e => ({ ...e, [index]: ERR_FEEDBACK_FAILED }));
+    } finally {
+      setFeedbackSubmitting(null);
+    }
+  };
+
+  const handleThumbsUp = (index: number) => {
+    if (feedbackGiven[index] || feedbackSubmitting !== null) return;
+    submitFeedback(index, true);
+  };
+
+  const handleThumbsDown = (index: number) => {
+    if (feedbackGiven[index] || feedbackSubmitting !== null) return;
+    setReasonPromptIndex(index);
+    setReasonText("");
+    setReasonError("");
+  };
+
+  const handleCancelReason = () => {
+    setReasonPromptIndex(null);
+    setReasonText("");
+    setReasonError("");
+  };
+
+  const handleSubmitReason = () => {
+    const trimmed = reasonText.trim();
+    if (!trimmed) { setReasonError(ERR_FEEDBACK_REASON_REQUIRED); return; }
+    if (reasonPromptIndex === null) return;
+    submitFeedback(reasonPromptIndex, false, trimmed);
   };
 
   return (
@@ -119,6 +188,62 @@ export default function ChatWidget({ onContactSupport }: { onContactSupport: () 
                   <span className="mt-1 text-[10px] text-slate-400">
                     {m.retrievalMode === RETRIEVAL_MODE_RAG ? LBL_RETRIEVAL_MODE_RAG : LBL_RETRIEVAL_MODE_MCP}
                   </span>
+                )}
+                {m.role === "assistant" && i > 0 && (
+                  <div className="mt-1 max-w-[85%]">
+                    {feedbackGiven[i] ? (
+                      <span className="text-[10px] text-slate-400">{MSG_FEEDBACK_THANKS}</span>
+                    ) : reasonPromptIndex === i ? (
+                      <div className="flex flex-col gap-1.5 bg-white border border-slate-200 rounded-xl p-2.5">
+                        <textarea
+                          value={reasonText}
+                          onChange={e => setReasonText(e.target.value)}
+                          maxLength={MAX_LEN_FEEDBACK_REASON}
+                          placeholder={PH_FEEDBACK_REASON}
+                          rows={2}
+                          className="apv-input rounded-lg px-2 py-1.5 text-slate-900 placeholder:text-slate-500 text-xs focus:outline-none transition resize-none"
+                        />
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] text-slate-400">{reasonText.length}/{MAX_LEN_FEEDBACK_REASON}</span>
+                          <div className="flex items-center gap-2">
+                            <button onClick={handleCancelReason} className="text-[11px] text-slate-500 hover:text-slate-700 font-medium">
+                              {BTN_CANCEL_FEEDBACK}
+                            </button>
+                            <button
+                              onClick={handleSubmitReason}
+                              disabled={feedbackSubmitting === i}
+                              className="text-[11px] text-brand hover:text-brand-dark font-semibold disabled:opacity-50"
+                            >
+                              {BTN_SUBMIT_FEEDBACK}
+                            </button>
+                          </div>
+                        </div>
+                        {reasonError && <p className="text-red-500 text-[10px]">{reasonError}</p>}
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => handleThumbsUp(i)}
+                          disabled={feedbackSubmitting !== null}
+                          aria-label={ARIA_THUMBS_UP}
+                          title={ARIA_THUMBS_UP}
+                          className="text-slate-400 hover:text-brand transition-colors disabled:opacity-50"
+                        >
+                          <ThumbsUp size={13} />
+                        </button>
+                        <button
+                          onClick={() => handleThumbsDown(i)}
+                          disabled={feedbackSubmitting !== null}
+                          aria-label={ARIA_THUMBS_DOWN}
+                          title={ARIA_THUMBS_DOWN}
+                          className="text-slate-400 hover:text-red-500 transition-colors disabled:opacity-50"
+                        >
+                          <ThumbsDown size={13} />
+                        </button>
+                      </div>
+                    )}
+                    {feedbackError[i] && <p className="text-red-500 text-[10px] mt-1">{feedbackError[i]}</p>}
+                  </div>
                 )}
               </div>
             ))}

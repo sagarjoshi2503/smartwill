@@ -46,6 +46,7 @@
     { "source": "/openapi.json", "destination": { "service": "api" } },
     { "source": "/chat", "destination": { "service": "chatbot" } },
     { "source": "/chat/healthz", "destination": { "service": "chatbot" } },
+    { "source": "/chat/feedback", "destination": { "service": "chatbot" } },
     { "source": "/(.*)", "destination": { "service": "web" } }
   ]
 }

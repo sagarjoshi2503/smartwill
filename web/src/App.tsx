@@ -781,6 +781,7 @@ export default function SmartWill() {
           // so no Will data from a previous session's answers can linger
           // in the transcript after that identity is no longer present.
           key={adminProfile ? `admin:${adminProfile.email}` : testatorAuthenticated ? `testator:${signup.email}` : "anon"}
+          email={adminProfile ? adminProfile.email : testatorAuthenticated ? signup.email : ""}
           onContactSupport={()=>setView("contactUs")}
         />
       )}
