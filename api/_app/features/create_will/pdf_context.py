@@ -168,11 +168,9 @@ def _national(d: dict, key: str = "nationality") -> str:
 
 
 def _age_display(value) -> str:
-    """"31 years" — every age printed in this document (testator, witnesses,
-    asset beneficiaries) goes through this one function, so the "years"
-    suffix can't silently go missing from one call site while present in
-    another. A blank age stays "___" (no unit on a blank line)."""
-    return f"{esc(value)} years" if value else "___"
+    """"31" — every age printed in this document (testator, witnesses, asset
+    beneficiaries) goes through this one function. A blank age stays "___"."""
+    return esc(value) if value else "___"
 
 
 def _id_type_label(id_type) -> str:
@@ -211,7 +209,9 @@ def _filled_residue(entries) -> list:
     ]
 
 
-def _render_asset_list(items: list, label: str, start_index: int = 1, numbered: "bool | None" = None) -> list:
+def _render_asset_list(
+    items: list, label: str, title: str, start_index: int = 1, numbered: "bool | None" = None,
+) -> list:
     if numbered is None:
         numbered = len(items) > 1
     lines = []
@@ -221,7 +221,7 @@ def _render_asset_list(items: list, label: str, start_index: int = 1, numbered: 
         lines.append(
             f"{prefix}{label}: {v(item, 'description')} Bequeathed to: {v(item, 'beneficiary')}, "
             f"age {_age_display(item.get('beneficiaryAge'))}, "
-            f"Relationship: {rel_of(item) or BLANK}, having {_id_type_label(id_type)} "
+            f"Relationship to {title}: {rel_of(item) or BLANK}, having {_id_type_label(id_type)} "
             f"Number: {_id_number_display(id_type, item.get('idNumber'))}."
         )
     return lines
@@ -232,7 +232,7 @@ def _witness_particular(index: int, w: dict) -> str:
     return (
         f"{letter}) {v(w, 'name')} {esc(w.get('parentRelation')) or 'son/daughter/wife'} of {v(w, 'parentName')}, "
         f"age {_age_display(w.get('age'))}, {esc(w.get('maritalStatus')) or 'unmarried/married'}, "
-        f"nationality {_national(w)}, occupation {occupation_of(w) or BLANK}, resident of {v(w, 'address')}, "
+        f"{_national(w)}, occupation {occupation_of(w) or BLANK}, resident of {v(w, 'address')}, "
         f"having PAN Number {v(w, 'pan')}, Aadhaar Number {v_aadhaar(w, 'aadhaarNumber')}"
     )
 
@@ -256,7 +256,7 @@ def _opening_clause(testator: dict, witnesses: list, execution_date_str: str) ->
         f"I, {v(testator, 'fullName')}, gender: {v(testator, 'gender')}, "
         f"PAN {v(testator, 'pan')}, Aadhaar Number {v_aadhaar(testator, 'aadhaarNumber')}, "
         f"{_testator_relation(testator)} of {v(testator, 'parentSpouseName')}, age {_age_display(testator.get('age'))}, "
-        f"{marital_status}, nationality {_national(testator)}, occupation {occupation_of(testator) or BLANK}, "
+        f"{marital_status}, {_national(testator)}, occupation {occupation_of(testator) or BLANK}, "
         f"resident of {v(testator, 'address')}"
     )
     if testator.get("maritalStatus") == "married":
@@ -272,7 +272,7 @@ def _opening_clause(testator: dict, witnesses: list, execution_date_str: str) ->
             f"and I have {son_count} son, namely, {son_join} and {daughter_count} daughter, namely, {daughter_join}"
         )
     witness_particulars = _witness_particulars_text(witnesses)
-    clause += f". And on {execution_date_str}, and in the presence of two following witnesses:<br/>{witness_particulars}make my last and final WILL."
+    clause += f". And on {execution_date_str}, and in the presence of two following witnesses:<br/>{witness_particulars}make my last and final will."
     return clause
 
 
@@ -284,8 +284,8 @@ def _residue_clause(entries: list) -> str:
         suffix = "; " if i < len(entries) - 1 else "."
         parts.append(
             f"{rel_of(entry) or BLANK}, {v(entry, 'name')}, age {_age_display(entry.get('age'))}, "
-            f"nationality {_national(entry)}, "
-            f"occupation {occupation_of(entry) or BLANK}, Residential Address: {v(entry, 'address')}, "
+            f"{_national(entry)}, "
+            f"occupation {occupation_of(entry) or BLANK}, resident of {v(entry, 'address')}, "
             f"having {_id_type_label(id_type)} "
             f"Number: {_id_number_display(id_type, entry.get('idNumber'))}{suffix}"
         )
@@ -308,7 +308,7 @@ def _executor_appointment_clause(executor: dict) -> str:
         f"I appoint {v(executor, 'name')}, age {_age_display(executor.get('age'))}, "
         f"Relationship to Testator: {v(executor, 'relation')}, "
         f"Occupation: {occupation_of(executor) or BLANK}, "
-        f"Residential Address: {v(executor, 'address')}, having {_id_type_label(executor.get('idType')) or ''} "
+        f"resident of {v(executor, 'address')}, having {_id_type_label(executor.get('idType')) or ''} "
         f"Number: {_id_number_display(executor.get('idType'), executor.get('idNumber'))}."
     )
 
@@ -317,7 +317,7 @@ def _guardian_appointment_clause(guardian: dict) -> str:
     return (
         f"I appoint {v(guardian, 'name')}, age {_age_display(guardian.get('age'))}, "
         f"Relation to Testator: {v(guardian, 'relation')}, "
-        f"Occupation: {occupation_of(guardian) or BLANK}, Residential Address: {v(guardian, 'address')}, "
+        f"Occupation: {occupation_of(guardian) or BLANK}, resident of {v(guardian, 'address')}, "
         f"having {_id_type_label(guardian.get('idType')) or ''} "
         f"Number: {_id_number_display(guardian.get('idType'), guardian.get('idNumber'))}."
     )
@@ -382,10 +382,13 @@ def build_pdf_context(will: dict) -> dict:
     # restarting its own (1), (2) — matches every other numbered section,
     # which has only a single category and so never showed this bug.
     immovable_numbered = (len(house_flat) + len(land_plot) + len(commercial_property)) > 1
-    house_flat_lines = _render_asset_list(house_flat, ASSET_LABEL_HOUSE_FLAT, 1, immovable_numbered)
-    land_plot_lines = _render_asset_list(land_plot, ASSET_LABEL_LAND_PLOT, len(house_flat) + 1, immovable_numbered)
+    house_flat_lines = _render_asset_list(house_flat, ASSET_LABEL_HOUSE_FLAT, title, 1, immovable_numbered)
+    land_plot_lines = _render_asset_list(
+        land_plot, ASSET_LABEL_LAND_PLOT, title, len(house_flat) + 1, immovable_numbered,
+    )
     commercial_property_lines = _render_asset_list(
-        commercial_property, ASSET_LABEL_COMMERCIAL_PROPERTY, len(house_flat) + len(land_plot) + 1, immovable_numbered,
+        commercial_property, ASSET_LABEL_COMMERCIAL_PROPERTY, title,
+        len(house_flat) + len(land_plot) + 1, immovable_numbered,
     )
 
     return {
@@ -419,10 +422,10 @@ def build_pdf_context(will: dict) -> dict:
         "house_flat_lines": house_flat_lines,
         "land_plot_lines": land_plot_lines,
         "commercial_property_lines": commercial_property_lines,
-        "vehicle_lines": _render_asset_list(vehicle, ASSET_LABEL_VEHICLE),
-        "jewellery_lines": _render_asset_list(jewellery, ASSET_LABEL_JEWELLERY),
-        "social_media_digital_lines": _render_asset_list(social_media_digital, ASSET_LABEL_SOCIAL_MEDIA_DIGITAL),
-        "intellectual_property_lines": _render_asset_list(intellectual_property, ASSET_LABEL_INTELLECTUAL_PROPERTY),
+        "vehicle_lines": _render_asset_list(vehicle, ASSET_LABEL_VEHICLE, title),
+        "jewellery_lines": _render_asset_list(jewellery, ASSET_LABEL_JEWELLERY, title),
+        "social_media_digital_lines": _render_asset_list(social_media_digital, ASSET_LABEL_SOCIAL_MEDIA_DIGITAL, title),
+        "intellectual_property_lines": _render_asset_list(intellectual_property, ASSET_LABEL_INTELLECTUAL_PROPERTY, title),
         "has_residue": bool(all_india_residue),
         "residue_clause": _residue_clause(all_india_residue),
         "special_instructions": special_instructions,
