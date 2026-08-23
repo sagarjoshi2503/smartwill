@@ -3,16 +3,54 @@ from functools import lru_cache
 from fastapi import Depends
 from pymongo import MongoClient
 from pymongo.database import Database
+from pymongo.errors import PyMongoError
 
 from _app.core.config import Settings, get_settings
 from _app.core.exceptions import AppError
-from _app.shared.constants import HTTP_SERVER_ERROR, MONGODB_NOT_CONFIGURED
+from _app.core.logging import get_logger
+from _app.shared.constants import (
+    FLD_TESTATOR_EMAIL, FLD_UPDATED_AT, FLD_WILL_ID, HTTP_SERVER_ERROR, INDEX_ENSURE_TIMEOUT_MS,
+    MONGODB_NOT_CONFIGURED, WILL_COLLECTION_NAME,
+)
+
+logger = get_logger(__name__)
 
 
 @lru_cache
 def _get_client(mongodb_uri: str) -> MongoClient:
     """Cached across warm serverless invocations instead of reconnecting per request."""
     return MongoClient(mongodb_uri)
+
+
+@lru_cache
+def _ensure_indexes(mongodb_uri: str, db_name: str) -> None:
+    """Runs at most once per (uri, db_name) per warm process, same caching
+    idea as _get_client — even a no-op create_index() call is a network
+    round trip to Atlas, so this must not run on every request.
+
+    Without these, find_will_by_id (used by every "view/edit a Will" page,
+    both testator and admin) and find_wills_by_testator_email_since (My
+    Wills) both fall back to a full collection scan of `will` — there was
+    never an index on willId or testatorEmail at all. The earlier fix in
+    create_will/repository.py and admin_dashboard/repository.py (a
+    projection limiting which fields the list views pull over the wire)
+    only cut the per-document payload size; it didn't touch the cost of
+    finding the matching document(s) in the first place, so the same
+    "slow to load" symptom always comes back once the collection grows
+    past whatever size Mongo can still brute-force-scan quickly.
+
+    Uses its own short-timeout client rather than _get_client(mongodb_uri)
+    — an unreachable/misconfigured Mongo here must fail fast and get out of
+    the way of the actual request (index creation is best-effort; a missing
+    index just means the next query is slow, not broken) rather than block
+    every request behind PyMongo's default ~30s server-selection timeout.
+    """
+    try:
+        db = MongoClient(mongodb_uri, serverSelectionTimeoutMS=INDEX_ENSURE_TIMEOUT_MS)[db_name]
+        db[WILL_COLLECTION_NAME].create_index(FLD_WILL_ID, unique=True)
+        db[WILL_COLLECTION_NAME].create_index([(FLD_TESTATOR_EMAIL, 1), (FLD_UPDATED_AT, -1)])
+    except PyMongoError:
+        logger.warning("Could not ensure `will` collection indexes", exc_info=True)
 
 
 def get_db(settings: Settings = Depends(get_settings)) -> Database:
@@ -22,4 +60,5 @@ def get_db(settings: Settings = Depends(get_settings)) -> Database:
     either dependency independently via app.dependency_overrides."""
     if not settings.mongodb_uri:
         raise AppError(HTTP_SERVER_ERROR, MONGODB_NOT_CONFIGURED)
+    _ensure_indexes(settings.mongodb_uri, settings.db_name)
     return _get_client(settings.mongodb_uri)[settings.db_name]

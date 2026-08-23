@@ -21,6 +21,11 @@ LOGIN_COLLECTION_NAME = "login"
 WILL_COLLECTION_NAME = "will"
 ADMINWILL_COLLECTION_NAME = "adminwill"
 GIFTVOUCHER_COLLECTION_NAME = "giftvoucher"
+# Bounded server-selection timeout for the one-off index-creation check in
+# core/db.py — deliberately short so an unreachable Mongo can't stall a
+# request behind PyMongo's much longer default timeout (index creation is
+# best-effort, not required for the request to succeed).
+INDEX_ENSURE_TIMEOUT_MS = 3000
 
 # --- Will status values ---
 STATUS_DRAFT = "Draft"
