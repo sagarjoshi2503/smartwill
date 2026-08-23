@@ -52,9 +52,16 @@ TOOL_GET_WILL = "get_will"
 TOOL_LIST_ADMIN_WILLS = "list_admin_wills"
 TOOL_ADMIN_GET_WILL = "admin_get_will"
 
-# --- rag/ tool (not an MCP tool — doesn't come from session.list_tools(),
-# see tools.py's RAG_TOOL_SCHEMA and main.py's _execute_tool()) ---
+# --- rag/ tools (not MCP tools — don't come from session.list_tools(),
+# see tools.py's RAG_TOOL_SCHEMA/FAQ_TOOL_SCHEMA and main.py's
+# _execute_tool()) ---
 TOOL_SEARCH_WILLS = "search_wills"
+# Public FAQ search — offered to every role, including anonymous (None),
+# since FAQ content isn't scoped to a signed-in testator and isn't gated by
+# the use-rag-or-mcp flag (that flag only toggles between two
+# implementations of Will-content search; FAQ search has no MCP
+# equivalent to fall back to).
+TOOL_SEARCH_FAQ = "search_faq"
 
 # --- Message-role literals (Claude Messages API / this service's own wire shape) ---
 MSG_ROLE_USER = "user"
@@ -80,11 +87,14 @@ SYSTEM_PROMPT = (
     "Will (e.g. what it says, who's mentioned, which Will covers a particular "
     "asset or instruction) rather than a specific Will you already know the ID "
     "of, use the search tool to find relevant Wills by meaning or keyword instead "
-    "of guessing. You can only ever look things up — you have no "
-    "way to create, edit, delete, or pay for a Will, and no way to sign anyone up "
-    "or log anyone in. If asked to do any of those, explain that this assistant "
-    "can only answer questions and that the action has to be done in the app "
-    "itself. Keep answers concise."
+    "of guessing. For general questions about Wills, Goa succession law, Trusts, "
+    "or Living Wills — the kind of thing covered in the site's FAQ — use the FAQ "
+    "search tool rather than answering from your own general knowledge, so the "
+    "answer matches SmartWill's actual published position. You can only ever "
+    "look things up — you have no way to create, edit, delete, or pay for a "
+    "Will, and no way to sign anyone up or log anyone in. If asked to do any of "
+    "those, explain that this assistant can only answer questions and that the "
+    "action has to be done in the app itself. Keep answers concise."
 )
 UNAVAILABLE_REPLY = "SmartWill Assistant isn't available right now."
 REFUSAL_REPLY = "I'm not able to help with that."

@@ -10,13 +10,21 @@ see, choose, or hallucinate a token.
 
 from constants import (
     FLD_TOKEN, ROLE_ADMIN, ROLE_TESTATOR, TOOL_ADMIN_GET_WILL, TOOL_GET_CONTACT_INFO, TOOL_GET_WILL,
-    TOOL_HEALTH_CHECK, TOOL_LIST_ADMIN_WILLS, TOOL_LIST_MY_WILLS, TOOL_SEARCH_WILLS,
+    TOOL_HEALTH_CHECK, TOOL_LIST_ADMIN_WILLS, TOOL_LIST_MY_WILLS, TOOL_SEARCH_FAQ, TOOL_SEARCH_WILLS,
 )
 
+# TOOL_SEARCH_FAQ is in every role's set, including None (anonymous) — FAQ
+# content is public site copy, unlike every other tool here.
 ROLE_TOOL_WHITELIST: dict[str | None, set[str]] = {
-    None: {TOOL_HEALTH_CHECK, TOOL_GET_CONTACT_INFO},
-    ROLE_TESTATOR: {TOOL_HEALTH_CHECK, TOOL_GET_CONTACT_INFO, TOOL_LIST_MY_WILLS, TOOL_GET_WILL, TOOL_SEARCH_WILLS},
-    ROLE_ADMIN: {TOOL_HEALTH_CHECK, TOOL_GET_CONTACT_INFO, TOOL_LIST_ADMIN_WILLS, TOOL_ADMIN_GET_WILL, TOOL_SEARCH_WILLS},
+    None: {TOOL_HEALTH_CHECK, TOOL_GET_CONTACT_INFO, TOOL_SEARCH_FAQ},
+    ROLE_TESTATOR: {
+        TOOL_HEALTH_CHECK, TOOL_GET_CONTACT_INFO, TOOL_LIST_MY_WILLS, TOOL_GET_WILL, TOOL_SEARCH_WILLS,
+        TOOL_SEARCH_FAQ,
+    },
+    ROLE_ADMIN: {
+        TOOL_HEALTH_CHECK, TOOL_GET_CONTACT_INFO, TOOL_LIST_ADMIN_WILLS, TOOL_ADMIN_GET_WILL, TOOL_SEARCH_WILLS,
+        TOOL_SEARCH_FAQ,
+    },
 }
 
 # Tools (MCP or not) whose call signature includes a `token` parameter that
@@ -53,6 +61,33 @@ RAG_TOOL_SCHEMA = {
 
 def rag_tool_for_role(role: str | None) -> list[dict]:
     return [RAG_TOOL_SCHEMA] if TOOL_SEARCH_WILLS in allowed_tool_names(role) else []
+
+
+# Unlike RAG_TOOL_SCHEMA, this isn't gated behind the use-rag-or-mcp flag in
+# main.py — that flag only picks between two *implementations* of Will
+# search (rag vs mcp); FAQ search has no MCP equivalent to fall back to, so
+# it's offered to every role whenever the role's whitelist includes it.
+FAQ_TOOL_SCHEMA = {
+    "name": TOOL_SEARCH_FAQ,
+    "description": (
+        "Hybrid (keyword + semantic) search over SmartWill's published FAQ — "
+        "use this for general questions about Wills, Goa succession law, Trusts, "
+        "Succession Services, NRI/cross-border succession, or Living Wills, "
+        "rather than answering from general knowledge."
+    ),
+    "input_schema": {
+        "type": "object",
+        "properties": {
+            "query": {"type": "string", "description": "What to search for, in plain language."},
+            "limit": {"type": "integer", "description": "Max results to return.", "default": 5},
+        },
+        "required": ["query"],
+    },
+}
+
+
+def faq_tool_for_role(role: str | None) -> list[dict]:
+    return [FAQ_TOOL_SCHEMA] if TOOL_SEARCH_FAQ in allowed_tool_names(role) else []
 
 
 def allowed_tool_names(role: str | None) -> set[str]:

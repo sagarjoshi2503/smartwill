@@ -12,12 +12,12 @@ from constants import (
     CORS_ALLOW_HEADERS, CORS_ALLOW_METHODS, DEFAULT_HOST, DEFAULT_PORT, DEFAULT_RETRIEVAL_MODE,
     ENV_CORS_ALLOW_ORIGINS, ERR_CORS_ALLOW_ORIGINS_REQUIRED, FLAG_USE_RAG_OR_MCP, FLD_TOKEN, INCOMPLETE_REPLY,
     MAX_TOKENS, MAX_TOOL_ITERATIONS, MODEL, MSG_ROLE_ASSISTANT, MSG_ROLE_USER, REFUSAL_REPLY, RETRIEVAL_MODE_RAG,
-    STOP_REASON_REFUSAL, STOP_REASON_TOOL_USE, SYSTEM_PROMPT, TOOL_SEARCH_WILLS, UNAVAILABLE_REPLY,
-    err_tool_not_available, err_tool_result,
+    STOP_REASON_REFUSAL, STOP_REASON_TOOL_USE, SYSTEM_PROMPT, TOOL_SEARCH_FAQ, TOOL_SEARCH_WILLS,
+    UNAVAILABLE_REPLY, err_tool_not_available, err_tool_result,
 )
 from feature_flags import get_flag_value
 from mcp_client import open_session
-from tools import TOOLS_REQUIRING_TOKEN, allowed_tool_names, claude_tools_for_role, rag_tool_for_role
+from tools import TOOLS_REQUIRING_TOKEN, allowed_tool_names, claude_tools_for_role, faq_tool_for_role, rag_tool_for_role
 
 logger = logging.getLogger("smartwill-chatbot")
 
@@ -114,6 +114,16 @@ async def _execute_tool(
             return err_tool_result(str(exc))
         return json.dumps(data)
 
+    if name == TOOL_SEARCH_FAQ:
+        # Also not an MCP tool, and — unlike search_wills — never needs a
+        # token: rag/'s /faq-search endpoint is unauthenticated (public FAQ
+        # content), so there's no retrieval_mode gate or token to inject.
+        try:
+            data = await rag_client.faq_search(call_args.get("query", ""), limit=call_args.get("limit", 5))
+        except Exception as exc:
+            return err_tool_result(str(exc))
+        return json.dumps(data)
+
     result = await session.call_tool(name, call_args)
     text = "\n".join(block.text for block in result.content if block.type == "text")
     return err_tool_result(text) if result.is_error else text
@@ -129,7 +139,8 @@ async def chat(body: ChatRequest) -> ChatResponse:
         async with open_session() as session:
             mcp_tools = (await session.list_tools()).tools
             rag_tools = rag_tool_for_role(body.role) if retrieval_mode == RETRIEVAL_MODE_RAG else []
-            claude_tools = claude_tools_for_role(mcp_tools, body.role) + rag_tools
+            faq_tools = faq_tool_for_role(body.role)
+            claude_tools = claude_tools_for_role(mcp_tools, body.role) + rag_tools + faq_tools
 
             for _ in range(MAX_TOOL_ITERATIONS):
                 response = client.messages.create(

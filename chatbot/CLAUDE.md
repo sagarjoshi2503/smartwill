@@ -28,15 +28,22 @@ mcp_client.py                  open_session() — one MCP ClientSession per
                              env var (AKS ConfigMap, local Docker) or a
                              Vercel service binding (which only ever
                              injects a bare base URL, never a full path)
-rag_client.py                   search() — a plain HTTP POST to smartwill-rag
-                             (see rag/CLAUDE.md), not an MCP call. rag/
-                             isn't an MCP server (it's one hybrid-search
-                             endpoint, not a menu of tools), so its tool
-                             schema is hand-defined in tools.py's
-                             RAG_TOOL_SCHEMA instead of coming from
-                             session.list_tools() — main.py's
-                             _execute_tool() branches on the tool name to
-                             route to this instead of session.call_tool()
+rag_client.py                   search()/faq_search() — plain HTTP POSTs to
+                             smartwill-rag (see rag/CLAUDE.md), not MCP
+                             calls. rag/ isn't an MCP server (it exposes
+                             two hybrid-search endpoints, not a menu of
+                             tools), so their tool schemas are hand-defined
+                             in tools.py's RAG_TOOL_SCHEMA/FAQ_TOOL_SCHEMA
+                             instead of coming from session.list_tools() —
+                             main.py's _execute_tool() branches on the
+                             tool name to route to these instead of
+                             session.call_tool(). search_faq differs from
+                             search_wills in two ways: it's offered to
+                             every role including anonymous (no
+                             "use-rag-or-mcp" flag gate — FAQ content has
+                             no MCP equivalent to fall back to), and it
+                             calls rag/'s unauthenticated /faq-search, so
+                             no token is injected for it.
 constants.py                   Central constants — model config, tool/role
                              names, CORS, copy strings. Env-var defaults
                              exist ONLY for the server's own listen
@@ -84,6 +91,6 @@ name) — never a default baked into the code.
 cd chatbot
 .venv-chatbot/Scripts/python.exe -m pytest tests -q
 ```
-19 tests as of this writing. `tests/conftest.py` sets dummy
+37 tests as of this writing. `tests/conftest.py` sets dummy
 `ANTHROPIC_API_KEY`/`MCP_SERVER_URL`/`CHATBOT_CORS_ALLOW_ORIGINS` before
 import, since all three are required with no default at runtime.

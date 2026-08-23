@@ -1,5 +1,6 @@
 from types import SimpleNamespace
 
+from constants import TOOL_SEARCH_FAQ
 from tools import RAG_TOOL_SCHEMA, TOOL_SEARCH_WILLS, allowed_tool_names, claude_tools_for_role, rag_tool_for_role
 
 
@@ -33,23 +34,23 @@ MCP_TOOLS = [
 # --- allowed_tool_names ---
 
 def test_anonymous_role_gets_read_only_public_tools():
-    assert allowed_tool_names(None) == {"health_check", "get_contact_info"}
+    assert allowed_tool_names(None) == {"health_check", "get_contact_info", TOOL_SEARCH_FAQ}
 
 
 def test_testator_role_gets_own_wills_tools():
     assert allowed_tool_names("testator") == {
-        "health_check", "get_contact_info", "list_my_wills", "get_will", TOOL_SEARCH_WILLS,
+        "health_check", "get_contact_info", "list_my_wills", "get_will", TOOL_SEARCH_WILLS, TOOL_SEARCH_FAQ,
     }
 
 
 def test_admin_role_gets_admin_wills_tools():
     assert allowed_tool_names("admin") == {
-        "health_check", "get_contact_info", "list_admin_wills", "admin_get_will", TOOL_SEARCH_WILLS,
+        "health_check", "get_contact_info", "list_admin_wills", "admin_get_will", TOOL_SEARCH_WILLS, TOOL_SEARCH_FAQ,
     }
 
 
 def test_unknown_role_falls_back_to_anonymous():
-    assert allowed_tool_names("not-a-real-role") == {"health_check", "get_contact_info"}
+    assert allowed_tool_names("not-a-real-role") == {"health_check", "get_contact_info", TOOL_SEARCH_FAQ}
 
 
 # --- claude_tools_for_role: whitelist filtering ---

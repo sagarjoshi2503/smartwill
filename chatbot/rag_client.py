@@ -27,3 +27,13 @@ async def search(query: str, token: str, limit: int = 5) -> dict:
         )
     response.raise_for_status()
     return response.json()
+
+
+async def faq_search(query: str, limit: int = 5) -> dict:
+    """Same shape as search() above, but hits rag/'s unauthenticated
+    /faq-search endpoint — no token, since FAQ content isn't scoped to a
+    signed-in user (see rag/main.py's faq_search_endpoint)."""
+    async with httpx.AsyncClient(base_url=RAG_SERVICE_URL, timeout=RAG_SEARCH_TIMEOUT_SECONDS) as client:
+        response = await client.post("/faq-search", json={"query": query, "limit": limit})
+    response.raise_for_status()
+    return response.json()

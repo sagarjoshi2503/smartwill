@@ -127,7 +127,7 @@ def test_anonymous_request_only_offers_public_tools_to_claude(monkeypatch, clien
     client.post("/chat", json={"messages": [{"role": "user", "content": "hi"}]})
 
     offered = {t["name"] for t in fake_messages.calls[0]["tools"]}
-    assert offered == {"health_check", "get_contact_info"}
+    assert offered == {"health_check", "get_contact_info", "search_faq"}
 
 
 # --- tool use: token injection ---
@@ -245,6 +245,73 @@ def test_chat_search_wills_failure_reports_error_without_500(monkeypatch, client
         "/chat",
         json={"messages": [{"role": "user", "content": "x"}], "token": "real-jwt", "role": "testator"},
     )
+
+    assert res.status_code == 200
+    second_call_messages = fake_messages.calls[1]["messages"]
+    tool_result = second_call_messages[-1]["content"][0]
+    assert "Error" in tool_result["content"]
+
+
+# --- tool use: search_faq routes to rag_client, unauthenticated, no flag gate ---
+
+def test_chat_search_faq_calls_rag_client_without_token(monkeypatch, client):
+    session = FakeSession()
+    patch_session(monkeypatch, session)
+
+    async def fake_faq_search(query, limit=5):
+        assert query == "how do I revoke a will"
+        return {"results": [{"question": "How do I revoke a will?", "answer": "...", "sectionTitle": "Wills", "score": 0.9}]}
+
+    monkeypatch.setattr(main.rag_client, "faq_search", fake_faq_search)
+    fake_messages = FakeMessagesApi([
+        FakeMessage("tool_use", [FakeToolUseBlock("tu_1", "search_faq", {"query": "how do I revoke a will"})]),
+        FakeMessage("end_turn", [FakeTextBlock("Here's how.")]),
+    ])
+    monkeypatch.setattr(main.client, "messages", fake_messages)
+
+    res = client.post("/chat", json={"messages": [{"role": "user", "content": "how do I revoke a will"}]})
+
+    assert res.status_code == 200
+    assert res.json() == {"reply": "Here's how.", "unavailable": False, "retrieval_mode": "mcp"}
+    assert session.call_tool_calls == []  # never went through the MCP session
+
+
+def test_chat_search_faq_available_to_anonymous_regardless_of_retrieval_mode(monkeypatch, client):
+    # Unlike search_wills, search_faq has no MCP equivalent, so it isn't
+    # gated by the "use-rag-or-mcp" flag — it's offered to every role,
+    # including anonymous, in either retrieval mode.
+    session = FakeSession()
+    patch_session(monkeypatch, session)
+    patch_retrieval_mode(monkeypatch, "mcp")
+
+    async def fake_faq_search(query, limit=5):
+        return {"results": []}
+
+    monkeypatch.setattr(main.rag_client, "faq_search", fake_faq_search)
+    fake_messages = FakeMessagesApi([FakeMessage("end_turn", [FakeTextBlock("hi")])])
+    monkeypatch.setattr(main.client, "messages", fake_messages)
+
+    client.post("/chat", json={"messages": [{"role": "user", "content": "hi"}]})
+
+    offered = {t["name"] for t in fake_messages.calls[0]["tools"]}
+    assert "search_faq" in offered
+
+
+def test_chat_search_faq_failure_reports_error_without_500(monkeypatch, client):
+    session = FakeSession()
+    patch_session(monkeypatch, session)
+
+    async def failing_faq_search(query, limit=5):
+        raise ConnectionError("smartwill-rag: connection refused")
+
+    monkeypatch.setattr(main.rag_client, "faq_search", failing_faq_search)
+    fake_messages = FakeMessagesApi([
+        FakeMessage("tool_use", [FakeToolUseBlock("tu_1", "search_faq", {"query": "x"})]),
+        FakeMessage("end_turn", [FakeTextBlock("Search isn't working right now.")]),
+    ])
+    monkeypatch.setattr(main.client, "messages", fake_messages)
+
+    res = client.post("/chat", json={"messages": [{"role": "user", "content": "x"}]})
 
     assert res.status_code == 200
     second_call_messages = fake_messages.calls[1]["messages"]

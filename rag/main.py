@@ -10,6 +10,8 @@ from pydantic import BaseModel
 from auth import AuthError, verify_token
 from constants import DEFAULT_SEARCH_LIMIT, HEADER_AUTHORIZATION, SYNC_INTERVAL_SECONDS
 from db import get_db
+from faq_indexer import sync_faq_once
+from faq_search import faq_search as run_faq_search
 from indexer import sync_once
 from search import hybrid_search
 
@@ -36,6 +38,15 @@ async def _sync_loop() -> None:
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     task = asyncio.create_task(_sync_loop())
+    # FAQ content is a static file bundled with this deploy (see
+    # faq_data.py), not something another service can change at runtime —
+    # index it once at startup rather than adding it to the polling loop
+    # above, which exists specifically to pick up other services' writes.
+    try:
+        count = await asyncio.to_thread(sync_faq_once, get_db())
+        logger.info("Indexed %d FAQ item(s)", count)
+    except Exception:
+        logger.warning("FAQ indexing failed", exc_info=True)
     yield
     task.cancel()
 
@@ -61,6 +72,22 @@ class SearchResponse(BaseModel):
     results: list[SearchResult]
 
 
+class FaqSearchRequest(BaseModel):
+    query: str
+    limit: int = DEFAULT_SEARCH_LIMIT
+
+
+class FaqSearchResult(BaseModel):
+    question: str
+    answer: str
+    sectionTitle: str
+    score: float
+
+
+class FaqSearchResponse(BaseModel):
+    results: list[FaqSearchResult]
+
+
 @app.get("/healthz")
 def healthz():
     return {"status": "ok"}
@@ -78,6 +105,18 @@ def search(body: SearchRequest, request: Request):
 
     results = hybrid_search(get_db(), body.query, role, email, body.limit)
     return SearchResponse(results=results)
+
+
+# Deliberately unauthenticated, unlike /search above — FAQ content is public
+# site copy (see faq_data.py's docstring), not scoped to any signed-in
+# testator, so there's no token to verify and no ownership to filter by.
+@app.post("/faq-search", response_model=FaqSearchResponse)
+def faq_search_endpoint(body: FaqSearchRequest):
+    if not body.query.strip():
+        return FaqSearchResponse(results=[])
+
+    results = run_faq_search(get_db(), body.query, body.limit)
+    return FaqSearchResponse(results=results)
 
 
 if __name__ == "__main__":

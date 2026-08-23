@@ -25,6 +25,10 @@ WILL_COLLECTION_NAME = "will"
 # New collection this service owns — every other collection in this project
 # is owned by exactly one service's writes, and this one is no different.
 CHUNKS_COLLECTION_NAME = "rag_will_chunks"
+# Second, independent collection — FAQ content (see faq_data.py) is public
+# site copy, not per-testator Will data, so it's never ownership-filtered
+# and needs none of rag_will_chunks' testatorEmail/status/willType fields.
+FAQ_CHUNKS_COLLECTION_NAME = "rag_faq_chunks"
 
 # --- Will document field names (subset actually read by indexer.py —
 # mirrors the relevant slice of api/_app/shared/constants.py's FLD_* names) ---
@@ -49,6 +53,13 @@ FLD_DATA = "data"
 # --- rag_will_chunks document field names ---
 CHUNK_FLD_TEXT = "text"
 CHUNK_FLD_EMBEDDING = "embedding"
+
+# --- rag_faq_chunks document field names ---
+FAQ_FLD_CHUNK_ID = "chunkId"
+FAQ_FLD_SECTION_ID = "sectionId"
+FAQ_FLD_SECTION_TITLE = "sectionTitle"
+FAQ_FLD_QUESTION = "question"
+FAQ_FLD_ANSWER = "answer"
 
 # --- JWT (same algorithm/claims as api/_app/core/jwt_auth.py, verified
 # locally rather than imported — see auth.py) ---

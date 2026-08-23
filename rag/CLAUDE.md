@@ -45,17 +45,45 @@ search.py                hybrid_search() — the one module to replace once
                      search + a brute-force Python cosine scan for
                      semantic search, combined via Reciprocal Rank Fusion
                      (the same algorithm $rankFusion implements).
+faq_data.py               Plain-text Python port of web/src/data/faqData.tsx's
+                     FAQ_SECTIONS. Kept independent per this repo's "no
+                     shared code" rule (see below) — when the FAQ page's
+                     wording changes, update both files by hand; there's
+                     no build step that keeps them in sync.
+faq_indexer.py             build_faq_chunks()/sync_faq_once() — the FAQ
+                     equivalent of indexer.py, but runs once at startup
+                     (see main.py's lifespan) rather than on the polling
+                     loop, since the source is a static bundled file with
+                     nothing to poll for changes.
+faq_search.py              faq_search() — the FAQ equivalent of
+                     hybrid_search(), minus ownership filtering (FAQ
+                     content is public site copy). Reuses search.py's
+                     _reciprocal_rank_fusion() rather than a second RRF
+                     implementation in this service.
 constants.py              Central constants — env var names, Mongo
                      collection/field names, JWT claim names, RRF/search
                      tuning knobs.
 tests/                    pytest — RRF fusion, ownership filtering, JWT
-                     verification, and build_searchable_text(), all
-                     exercised as plain functions/mongomock rather than a
-                     real Mongo Atlas connection (mongomock doesn't
-                     support `$text`, so keyword-search tests fake the
-                     Mongo layer directly instead — see conftest.py).
+                     verification, build_searchable_text(), and the FAQ
+                     indexer/search modules, all exercised as plain
+                     functions/mongomock rather than a real Mongo Atlas
+                     connection (mongomock doesn't support `$text`, so
+                     keyword-search tests fake the Mongo layer directly
+                     instead — see conftest.py).
 Dockerfile
 ```
+
+## FAQ search (`/faq-search`)
+
+Alongside `/search` (Will-content search, scoped to a testator's own
+Wills), this service also indexes the static FAQ page content
+(`faq_data.py`, a hand-ported copy of `web/src/data/faqData.tsx`) into a
+separate `rag_faq_chunks` collection and exposes `POST /faq-search`. Unlike
+`/search`, this endpoint is **deliberately unauthenticated** — FAQ content
+is public site copy, not scoped to any user, so there's no token to verify
+and no ownership to filter by. Indexing happens once at startup
+(`sync_faq_once()`, not the polling loop) since the source is a bundled
+file, not a live collection other services write to.
 
 ## Why M0-tier design, and the upgrade path
 
