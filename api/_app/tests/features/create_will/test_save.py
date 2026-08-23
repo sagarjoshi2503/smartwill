@@ -70,12 +70,15 @@ def test_save_strips_id_numbers_before_persisting(client, fake_db):
     assert doc["will"]["witnesses"][0]["name"] == "Wit One"
 
 
-def test_save_strips_all_india_asset_and_residue_ids_before_persisting(client, fake_db):
+def test_save_strips_all_india_residue_ids_before_persisting(client, fake_db):
     payload = {
         "will": {
             "testator": {"fullName": "Jane Doe"},
+            # Asset items carry no ID of their own (see redact_id_numbers'
+            # docstring) — their beneficiary's PAN/Aadhaar isn't redacted
+            # either, so both fields must survive untouched.
             "allIndiaAssets": {
-                "houseFlat": [{"description": "Flat 1", "beneficiary": "Bob", "relation": "Son", "idType": "PAN Card", "idNumber": "HHHHH8888H"}],
+                "houseFlat": [{"description": "Flat 1", "beneficiary": "Bob"}],
                 "vehicle": [],
             },
             "allIndiaResidue": [{"relation": "Brother", "name": "Sam", "idNumber": "555566667777"}],
@@ -88,12 +91,8 @@ def test_save_strips_all_india_asset_and_residue_ids_before_persisting(client, f
     assert res.status_code == 201
     doc = fake_db["will"].find_one({"willId": res.json()["willId"]})
     house = doc["will"]["allIndiaAssets"]["houseFlat"][0]
-    assert house["idNumber"] == ""
-    # Non-ID fields must survive redaction untouched.
     assert house["description"] == "Flat 1"
     assert house["beneficiary"] == "Bob"
-    assert house["relation"] == "Son"
-    assert house["idType"] == "PAN Card"
     assert doc["will"]["allIndiaAssets"]["vehicle"] == []
     assert doc["will"]["allIndiaResidue"][0]["idNumber"] == ""
     assert doc["will"]["allIndiaResidue"][0]["name"] == "Sam"

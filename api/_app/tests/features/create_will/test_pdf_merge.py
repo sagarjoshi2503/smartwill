@@ -33,18 +33,13 @@ def test_merges_testator_executor_guardian_id_fields():
     assert merged["residualIdNumber"] == "GGGGG7777G"
 
 
-def test_merges_witnesses_and_all_india_assets_and_residue_by_index():
+def test_merges_witnesses_and_residue_by_index():
     will_data = {
         "witnesses": [{"name": "Wit One", "aadhaarNumber": ""}, {"name": "Wit Two", "aadhaarNumber": ""}],
-        "allIndiaAssets": {
-            "houseFlat": [{"description": "Flat 1", "idNumber": ""}],
-            "vehicle": [],
-        },
         "allIndiaResidue": [{"name": "Res One", "idNumber": ""}],
     }
     id_fields = {
         "witnesses": [{"aadhaarNumber": "111111111111"}, {"aadhaarNumber": "222222222222"}],
-        "allIndiaAssets": {"houseFlat": [{"idNumber": "HHHHH8888H"}]},
         "allIndiaResidue": [{"idNumber": "JJJJJ9999J"}],
     }
 
@@ -53,9 +48,6 @@ def test_merges_witnesses_and_all_india_assets_and_residue_by_index():
     assert merged["witnesses"][0]["aadhaarNumber"] == "111111111111"
     assert merged["witnesses"][1]["aadhaarNumber"] == "222222222222"
     assert merged["witnesses"][0]["name"] == "Wit One"  # untouched
-    assert merged["allIndiaAssets"]["houseFlat"][0]["idNumber"] == "HHHHH8888H"
-    assert merged["allIndiaAssets"]["houseFlat"][0]["description"] == "Flat 1"  # untouched
-    assert merged["allIndiaAssets"]["vehicle"] == []
     assert merged["allIndiaResidue"][0]["idNumber"] == "JJJJJ9999J"
 
 

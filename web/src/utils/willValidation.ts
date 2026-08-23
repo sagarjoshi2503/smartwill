@@ -72,7 +72,7 @@ export function getMissingIdFields(will: WillState, willType: WillType, skipVali
     return missing;
   }
 
-  const { testator, executor, guardian, witnesses, allIndiaAssets, allIndiaResidue, residualIdNumber } = will;
+  const { testator, executor, guardian, witnesses, allIndiaResidue, residualIdNumber } = will;
 
   if (!testator.pan.trim()) missing.push("Testator PAN Number");
   if (!testator.aadhaarNumber.trim()) missing.push("Testator Aadhaar Number");
@@ -104,7 +104,9 @@ export function getMissingIdFields(will: WillState, willType: WillType, skipVali
   });
 
   if (willType === "allindia") {
-    missingAssetIdFields(allIndiaAssets, missing);
+    // Asset items no longer carry their own age/relation/ID fields — the
+    // Beneficiary record they point to (via BeneficiarySelect) already
+    // supplies those, and that record's own completeness isn't gated here.
     allIndiaResidue.forEach((entry, i) => {
       const inUse = entry.relation.trim() || entry.name.trim();
       if (inUse && !entry.idNumber.trim()) {

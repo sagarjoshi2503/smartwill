@@ -41,19 +41,11 @@ import type { RazorpaySuccessResponse } from "../../types/razorpay";
 // (not an inline closure) so it keeps its own "other mode" state across
 // re-renders instead of remounting and losing focus on every keystroke.
 function BeneficiarySelect({value,beneficiaryNames,onChange,className}:{value: string; beneficiaryNames: string[]; onChange: (v: string)=>void; className: string}){
-  const [otherMode,setOtherMode]=useState(()=>!!value && !beneficiaryNames.includes(value));
   return(
-    <>
-      <select value={otherMode?"__other__":value} onChange={e=>{
-        if(e.target.value==="__other__"){ setOtherMode(true); onChange(""); }
-        else { setOtherMode(false); onChange(e.target.value); }
-      }} className={className}>
-        <option value="">Bequeathed to — Select...</option>
-        {beneficiaryNames.map(n=><option key={n} value={n}>{n}</option>)}
-        <option value="__other__">Other / Not listed above</option>
-      </select>
-      {otherMode&&<input value={value} onChange={e=>onChange(e.target.value)} className={className+" mt-2"} placeholder="Enter recipient's full name"/>}
-    </>
+    <select value={value} onChange={e=>onChange(e.target.value)} className={className}>
+      <option value="">Bequeathed to — Select...</option>
+      {beneficiaryNames.map(n=><option key={n} value={n}>{n}</option>)}
+    </select>
   );
 }
 
@@ -547,7 +539,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
             type AllIndiaKey = keyof WillState["allIndiaAssets"];
             const addItem=(key: AllIndiaKey)=>setWill(p=>({...p, allIndiaAssets:{...p.allIndiaAssets, [key]:[...p.allIndiaAssets[key],{description:"",beneficiary:"",beneficiaryAge:"",relation:"",relationOther:"",idType:"Aadhaar Card",idNumber:""}]}}));
             const removeItem=(key: AllIndiaKey, idx: number)=>setWill(p=>({...p, allIndiaAssets:{...p.allIndiaAssets, [key]:p.allIndiaAssets[key].filter((_,j)=>j!==idx)}}));
-            const setItem=(key: AllIndiaKey, idx: number, field: "description"|"beneficiary"|"beneficiaryAge"|"relation"|"relationOther"|"idType"|"idNumber", value: string)=>
+            const setItem=(key: AllIndiaKey, idx: number, field: "description"|"beneficiary", value: string)=>
               setWill(p=>({...p, allIndiaAssets:{...p.allIndiaAssets, [key]:p.allIndiaAssets[key].map((item,j)=>j===idx?{...item,[field]:value}:item)}}));
             const Category=({itemKey,label,descLabel,placeholder}:{itemKey: AllIndiaKey; label: string; descLabel: string; placeholder: string})=>(
               <div>
@@ -561,33 +553,12 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                       </div>
                       {will.allIndiaAssets[itemKey].length>1&&<button onClick={()=>removeItem(itemKey,idx)} className="text-red-400 hover:text-red-500 shrink-0 mt-6"><Trash2 size={14}/></button>}
                     </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mt-2.5 mb-2.5">
-                      <div>
-                        <label className={LC}>Bequeathed To (Name of Person)</label>
-                        <BeneficiarySelect value={item.beneficiary} beneficiaryNames={will.beneficiaries.filter(b=>b.name.trim()).map(b=>b.name)}
-                          onChange={v=>setItem(itemKey,idx,"beneficiary",v)} className={IC+" appearance-none"}/>
-                      </div>
-                      <div><label className={LC}>Age</label>
-                        <input type="number" min={MIN_AGE} max={MAX_AGE} maxLength={MAX_AGE_DIGITS} value={item.beneficiaryAge} onChange={e=>setItem(itemKey,idx,"beneficiaryAge",e.target.value)} className={IC} placeholder="Age"/></div>
+                    <div className="mt-2.5">
+                      <label className={LC}>Bequeathed To (Name of Person)</label>
+                      <BeneficiarySelect value={item.beneficiary} beneficiaryNames={will.beneficiaries.filter(b=>b.name.trim()).map(b=>b.name)}
+                        onChange={v=>setItem(itemKey,idx,"beneficiary",v)} className={IC+" appearance-none"}/>
+                      <p className="text-slate-500 text-[11px] mt-1">Age, relationship, and ID details for this person come from the Beneficiaries step.</p>
                     </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-                      <div><label className={LC}>Relationship</label>
-                        <select value={item.relation} onChange={e=>setItem(itemKey,idx,"relation",e.target.value)} className={IC+" appearance-none"}>
-                          <option value="">Select...</option>
-                          {NONGOAN_RELATIONSHIP_OPTIONS.map(r=><option key={r}>{r}</option>)}
-                        </select>
-                      </div>
-                      <div><label className={LC}>{LBL_ID_TYPE}</label>
-                        <select value={item.idType} onChange={e=>setItem(itemKey,idx,"idType",e.target.value)} className={IC+" appearance-none"}>
-                          {ID_TYPES.map(t=><option key={t}>{t}</option>)}
-                        </select>
-                      </div>
-                      <div><label className={LC}>{LBL_ID_NUMBER}</label><input value={item.idNumber} onChange={e=>setItem(itemKey,idx,"idNumber",e.target.value)} onBlur={e=>handleIdBlur(item.idType,e.target.value,v=>setItem(itemKey,idx,"idNumber",v))} disabled={idFieldsLocked} className={idInputCls(IC)} placeholder="ID number" title={idInputTitle(TIP_NO_ID_SAVED)}/></div>
-                    </div>
-                    {item.relation==="Other"&&(
-                      <div className="mt-2.5"><label className={LC}>Please specify relationship</label>
-                        <input value={item.relationOther} onChange={e=>setItem(itemKey,idx,"relationOther",e.target.value)} maxLength={MAX_LEN_RELATION_OTHER} className={IC}/></div>
-                    )}
                   </div>
                 ))}
                 <button onClick={()=>addItem(itemKey)} className="text-xs text-brand hover:text-brand-dark font-semibold flex items-center gap-1"><Plus size={12}/>Add another {label}</button>

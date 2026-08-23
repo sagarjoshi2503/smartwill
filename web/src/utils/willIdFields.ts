@@ -31,15 +31,6 @@ export function extractIdFields(will: WillState) {
     },
     residualIdNumber: will.residualIdNumber,
     witnesses: will.witnesses.map(w => ({ pan: w.pan, aadhaarNumber: w.aadhaarNumber })),
-    allIndiaAssets: {
-      houseFlat: will.allIndiaAssets.houseFlat.map(it => ({ idNumber: it.idNumber })),
-      landPlot: will.allIndiaAssets.landPlot.map(it => ({ idNumber: it.idNumber })),
-      commercialProperty: will.allIndiaAssets.commercialProperty.map(it => ({ idNumber: it.idNumber })),
-      vehicle: will.allIndiaAssets.vehicle.map(it => ({ idNumber: it.idNumber })),
-      jewellery: will.allIndiaAssets.jewellery.map(it => ({ idNumber: it.idNumber })),
-      socialMediaDigital: will.allIndiaAssets.socialMediaDigital.map(it => ({ idNumber: it.idNumber })),
-      intellectualProperty: will.allIndiaAssets.intellectualProperty.map(it => ({ idNumber: it.idNumber })),
-    },
     allIndiaResidue: will.allIndiaResidue.map(entry => ({ idNumber: entry.idNumber })),
   };
 }

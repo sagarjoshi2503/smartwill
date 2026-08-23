@@ -216,20 +216,36 @@ def _filled_residue(entries) -> list:
     ]
 
 
+def _find_beneficiary(beneficiaries: list, name) -> dict:
+    """Asset items only carry a beneficiary *name* now (see
+    web/src/features/create-will/WizardForms.tsx's BeneficiarySelect,
+    restricted to existing Beneficiaries — no free-text "Other" escape
+    hatch anymore) — their age/relationship/PAN/Aadhaar come from here,
+    not from a second copy kept on the asset item itself."""
+    name = str(name or "").strip()
+    if not name:
+        return {}
+    for b in beneficiaries or []:
+        if isinstance(b, dict) and str(b.get("name") or "").strip() == name:
+            return b
+    return {}
+
+
 def _render_asset_list(
-    items: list, label: str, title: str, start_index: int = 1, numbered: "bool | None" = None,
+    items: list, label: str, title: str, beneficiaries: list, start_index: int = 1,
+    numbered: "bool | None" = None,
 ) -> list:
     if numbered is None:
         numbered = len(items) > 1
     lines = []
     for i, item in enumerate(items):
         prefix = f"{start_index + i} " if numbered else ""
-        id_type = item.get("idType") or "Aadhaar Card"
+        ben = _find_beneficiary(beneficiaries, item.get("beneficiary"))
         lines.append(
             f"{prefix}{label}: {v(item, 'description')} Bequeathed to: {v(item, 'beneficiary')}, "
-            f"age {_age_display(item.get('beneficiaryAge'))}, "
-            f"Relationship to {title}: {rel_of(item) or BLANK}, having {_id_type_label(id_type)} "
-            f"Number: {_id_number_display(id_type, item.get('idNumber'))}."
+            f"age {_age_display(ben.get('age'))}, "
+            f"Relationship to {title}: {esc(ben.get('relation')) or BLANK}, "
+            f"having PAN {v(ben, 'pan')}, Aadhaar Number {v_aadhaar(ben, 'aadhaarNumber')}."
         )
     return lines
 
@@ -337,6 +353,7 @@ def build_pdf_context(will: dict) -> dict:
     all_india_assets = will.get("allIndiaAssets") or {}
     all_india_residue = _filled_residue(will.get("allIndiaResidue"))
     witnesses = will.get("witnesses") or []
+    beneficiaries = will.get("beneficiaries") or []
 
     if testator.get("signDay") and testator.get("signMonth") and testator.get("signYear"):
         execution_date_str = (
@@ -389,12 +406,14 @@ def build_pdf_context(will: dict) -> dict:
     # restarting its own (1), (2) — matches every other numbered section,
     # which has only a single category and so never showed this bug.
     immovable_numbered = (len(house_flat) + len(land_plot) + len(commercial_property)) > 1
-    house_flat_lines = _render_asset_list(house_flat, ASSET_LABEL_HOUSE_FLAT, title, 1, immovable_numbered)
+    house_flat_lines = _render_asset_list(
+        house_flat, ASSET_LABEL_HOUSE_FLAT, title, beneficiaries, 1, immovable_numbered,
+    )
     land_plot_lines = _render_asset_list(
-        land_plot, ASSET_LABEL_LAND_PLOT, title, len(house_flat) + 1, immovable_numbered,
+        land_plot, ASSET_LABEL_LAND_PLOT, title, beneficiaries, len(house_flat) + 1, immovable_numbered,
     )
     commercial_property_lines = _render_asset_list(
-        commercial_property, ASSET_LABEL_COMMERCIAL_PROPERTY, title,
+        commercial_property, ASSET_LABEL_COMMERCIAL_PROPERTY, title, beneficiaries,
         len(house_flat) + len(land_plot) + 1, immovable_numbered,
     )
 
@@ -429,10 +448,14 @@ def build_pdf_context(will: dict) -> dict:
         "house_flat_lines": house_flat_lines,
         "land_plot_lines": land_plot_lines,
         "commercial_property_lines": commercial_property_lines,
-        "vehicle_lines": _render_asset_list(vehicle, ASSET_LABEL_VEHICLE, title),
-        "jewellery_lines": _render_asset_list(jewellery, ASSET_LABEL_JEWELLERY, title),
-        "social_media_digital_lines": _render_asset_list(social_media_digital, ASSET_LABEL_SOCIAL_MEDIA_DIGITAL, title),
-        "intellectual_property_lines": _render_asset_list(intellectual_property, ASSET_LABEL_INTELLECTUAL_PROPERTY, title),
+        "vehicle_lines": _render_asset_list(vehicle, ASSET_LABEL_VEHICLE, title, beneficiaries),
+        "jewellery_lines": _render_asset_list(jewellery, ASSET_LABEL_JEWELLERY, title, beneficiaries),
+        "social_media_digital_lines": _render_asset_list(
+            social_media_digital, ASSET_LABEL_SOCIAL_MEDIA_DIGITAL, title, beneficiaries,
+        ),
+        "intellectual_property_lines": _render_asset_list(
+            intellectual_property, ASSET_LABEL_INTELLECTUAL_PROPERTY, title, beneficiaries,
+        ),
         "has_residue": bool(all_india_residue),
         "residue_clause": _residue_clause(all_india_residue),
         "special_instructions": special_instructions,

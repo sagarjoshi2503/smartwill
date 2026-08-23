@@ -1,6 +1,6 @@
 from _app.core.exceptions import AppError
 from _app.shared.constants import (
-    FLD_AADHAAR_NUMBER, FLD_ALL_INDIA_ASSETS, FLD_ALL_INDIA_RESIDUE, FLD_EXECUTOR, FLD_GUARDIAN,
+    FLD_AADHAAR_NUMBER, FLD_ALL_INDIA_RESIDUE, FLD_EXECUTOR, FLD_GUARDIAN,
     FLD_ID_NUMBER, FLD_JOINT_ID, FLD_PAN, FLD_RESIDUAL_ID, FLD_SPOUSE_AADHAAR_NUMBER, FLD_SPOUSE_PAN,
     FLD_SUB_ID, FLD_TESTATOR, FLD_WITNESSES, HTTP_BAD_REQUEST, ID_FIELDS_LENGTH_MISMATCH,
 )
@@ -28,16 +28,6 @@ def _merge_list(items, source_items, fields: tuple):
         _merge_fields(item, source_items[i], fields) if i < len(source_items) else item
         for i, item in enumerate(items)
     ]
-
-
-def _merge_asset_categories(assets, source_assets, fields: tuple = (FLD_ID_NUMBER,)):
-    if not isinstance(assets, dict):
-        return assets
-    source_assets = source_assets if isinstance(source_assets, dict) else {}
-    return {
-        category: _merge_list(items, source_assets.get(category), fields)
-        for category, items in assets.items()
-    }
 
 
 def merge_id_fields(will_data: dict, id_fields: dict) -> dict:
@@ -78,10 +68,6 @@ def merge_id_fields(will_data: dict, id_fields: dict) -> dict:
     if isinstance(merged.get(FLD_WITNESSES), list):
         merged[FLD_WITNESSES] = _merge_list(
             merged[FLD_WITNESSES], id_fields.get(FLD_WITNESSES), (FLD_PAN, FLD_AADHAAR_NUMBER),
-        )
-    if isinstance(merged.get(FLD_ALL_INDIA_ASSETS), dict):
-        merged[FLD_ALL_INDIA_ASSETS] = _merge_asset_categories(
-            merged[FLD_ALL_INDIA_ASSETS], id_fields.get(FLD_ALL_INDIA_ASSETS),
         )
     if isinstance(merged.get(FLD_ALL_INDIA_RESIDUE), list):
         merged[FLD_ALL_INDIA_RESIDUE] = _merge_list(

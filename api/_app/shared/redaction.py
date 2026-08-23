@@ -1,5 +1,5 @@
 from _app.shared.constants import (
-    FLD_AADHAAR_NUMBER, FLD_ALL_INDIA_ASSETS, FLD_ALL_INDIA_RESIDUE, FLD_EXECUTOR, FLD_GOAN_ASSETS,
+    FLD_AADHAAR_NUMBER, FLD_ALL_INDIA_RESIDUE, FLD_EXECUTOR, FLD_GOAN_ASSETS,
     FLD_GOAN_DEED_WITNESSES, FLD_GOAN_RESIDUE, FLD_GOAN_SPOUSE, FLD_GOAN_TESTATOR, FLD_GOAN_WITNESSES,
     FLD_GUARDIAN, FLD_ID_NUMBER, FLD_JOINT_ID, FLD_PAN, FLD_RESIDUAL_ID, FLD_SPOUSE_AADHAAR_NUMBER,
     FLD_SPOUSE_PAN, FLD_SUB_ID, FLD_TESTATOR, FLD_WITNESSES,
@@ -45,8 +45,11 @@ def redact_id_numbers(will_data: dict) -> dict:
         redacted[FLD_RESIDUAL_ID] = ""
     if isinstance(redacted.get(FLD_WITNESSES), list):
         redacted[FLD_WITNESSES] = _strip_list(redacted[FLD_WITNESSES], (FLD_PAN, FLD_AADHAAR_NUMBER))
-    if isinstance(redacted.get(FLD_ALL_INDIA_ASSETS), dict):
-        redacted[FLD_ALL_INDIA_ASSETS] = _strip_asset_categories(redacted[FLD_ALL_INDIA_ASSETS])
+    # allIndiaAssets carries no ID number of its own anymore — each asset
+    # item just points at a Beneficiary (by name), whose own pan/
+    # aadhaarNumber this function deliberately does NOT redact (see
+    # web/src/utils/willIdFields.ts's extractIdFields, which has no
+    # beneficiaries entry either — nothing to merge back for them).
     if isinstance(redacted.get(FLD_ALL_INDIA_RESIDUE), list):
         redacted[FLD_ALL_INDIA_RESIDUE] = _strip_list(redacted[FLD_ALL_INDIA_RESIDUE], (FLD_ID_NUMBER,))
 
