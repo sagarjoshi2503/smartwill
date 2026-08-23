@@ -133,6 +133,14 @@ export default function SmartWill() {
   // in" check, so document generation can be tested without typing
   // PAN/Aadhaar/etc. into every field first.
   const skipIdFieldsValidation = useFlag(FLAGS.skipIdFieldsValidation);
+  // Whether a paid submission goes to admin review (PendingReview, the
+  // existing/safe behavior) or is marked Completed immediately, skipping
+  // review — gated behind "enable-admin-review". Defaults to true (review
+  // stays on) so an unreachable flags service never silently skips legal
+  // review — matches the backend's own default in create_will/service.py's
+  // FLAG_ENABLE_ADMIN_REVIEW check, which is the actual enforcement point;
+  // this only decides what status the frontend *asks* for.
+  const adminReviewEnabled = useFlag(FLAGS.adminReview, true);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   // ServicesView's "Got a query?" buttons deep-link into a specific FaqView
   // accordion section — mirrors how onHome/onServices already thread view
@@ -723,6 +731,7 @@ export default function SmartWill() {
                 adminComments={activeAdminComments}
                 amount={totalPrice}
                 paymentEnabled={razorpayEnabled}
+                adminReviewFlagEnabled={adminReviewEnabled}
                 onSaved={(willId,status)=>{
                   setEditingWillId(willId);
                   if(status===STATUS_PENDING_REVIEW) setTimeout(()=>setView("myWills"), WIZARD_REDIRECT_MS);

@@ -78,9 +78,10 @@ interface WizardFormsProps {
   willStatus?: string | null;
   amount?: number;
   paymentEnabled?: boolean;
+  adminReviewFlagEnabled?: boolean;
 }
 
-export default function WizardForms({step,will,setWill,willType,setWillType,hideWillTypeStep,addBene,removeBene,updateBene,addAsset,removeAsset,updateAssetData,updateAssetAlloc,allocTotal,assetAdded,onNext,onPrev,onGenerate,willId,onSaved,adminReview,adminComplete,testatorEmailEditable,viewOnly,adminComments,willStatus,amount,paymentEnabled}: WizardFormsProps){
+export default function WizardForms({step,will,setWill,willType,setWillType,hideWillTypeStep,addBene,removeBene,updateBene,addAsset,removeAsset,updateAssetData,updateAssetAlloc,allocTotal,assetAdded,onNext,onPrev,onGenerate,willId,onSaved,adminReview,adminComplete,testatorEmailEditable,viewOnly,adminComments,willStatus,amount,paymentEnabled,adminReviewFlagEnabled}: WizardFormsProps){
   const IC="w-full apv-input rounded-lg px-3.5 py-2.5 text-slate-900 placeholder:text-slate-500 text-sm focus:outline-none transition";
   const LC="block text-[13px] font-semibold text-slate-900 mb-1.5";
   const set=(path: string, v: string | boolean)=>setWill(p=>{
@@ -137,20 +138,34 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
   // set in App.tsx) and a publishable key is configured. The Will is saved as
   // Draft first; the checkout modal opens on top of it; only once the payment
   // is created, opened, and its signature verified server-side does the Will
-  // get re-saved as PendingReview (which is what actually notifies the
-  // admin). If the modal is dismissed, the payment fails, or verification
-  // fails, the Will simply stays Draft and the same Submit button is right
-  // there to retry — no navigation ever happened. When the flag is disabled,
-  // no payment option is shown at all — submission goes straight to
-  // PendingReview, exactly as if Razorpay were never configured.
+  // get re-saved — as PendingReview (notifies the admin) or, when the
+  // "enable-admin-review" flag is off, straight to Completed, skipping
+  // review entirely (see skipsAdminReview below). If the modal is dismissed,
+  // the payment fails, or verification fails, the Will simply stays Draft
+  // and the same Submit button is right there to retry — no navigation ever
+  // happened. When "use-razorpay" is disabled, no payment option is shown
+  // at all — submission goes straight to PendingReview, exactly as if
+  // Razorpay were never configured (not gated by "enable-admin-review",
+  // since no payment happens in that path).
   const isPlainTestatorSubmit = !adminReview && !adminComplete;
   const gateBehindPayment = isPlainTestatorSubmit && !!RAZORPAY_KEY_ID && !!paymentEnabled;
+
+  // "enable-admin-review" Vercel Flag (adminReviewFlagEnabled, set in
+  // App.tsx) — defaults to treating an unset/unfetched value as enabled
+  // (the safe, existing behavior), same fail-safe default as the backend's
+  // own is_flag_enabled(..., default=True) check in create_will/service.py,
+  // which is what actually enforces this (this is only what the frontend asks for).
+  const skipsAdminReview = adminReviewFlagEnabled === false;
 
   const submitForReview = async (savedWillId: string) => {
     const res = await authFetch(ROLE_TESTATOR, API_WILL_SAVE, {
       method: "POST",
       headers: { [HEADER_CONTENT_TYPE]: CONTENT_TYPE_JSON },
-      body: JSON.stringify({ will, testatorEmail: will.testator.email, status: STATUS_PENDING_REVIEW, willId: savedWillId, willType }),
+      body: JSON.stringify({
+        will, testatorEmail: will.testator.email,
+        status: skipsAdminReview ? STATUS_COMPLETED : STATUS_PENDING_REVIEW,
+        willId: savedWillId, willType,
+      }),
     });
     const isJson = res.headers.get(HEADER_CONTENT_TYPE)?.includes(CONTENT_TYPE_JSON);
     const data = isJson ? await res.json() : null;
@@ -1184,7 +1199,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
           {submitStatus==="error"&&<p className="text-red-500 text-xs text-center">{submitError}</p>}
           {submitStatus==="done"&&(
             <p className="text-emerald-500 text-xs text-center">
-              {(adminReview||adminComplete)?"Review completed.":"Will submitted for review."}
+              {(adminReview||adminComplete)?"Review completed.":(gateBehindPayment&&skipsAdminReview)?"Will completed.":"Will submitted for review."}
             </p>
           )}
           <button onClick={onPrev} className="w-full text-slate-500 hover:text-white text-sm py-2 transition-colors">← Back</button>

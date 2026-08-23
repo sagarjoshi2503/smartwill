@@ -10,6 +10,7 @@ export const FLAGS = {
   livePreview: "enable-live-preview",
   showBuildNr: "show-build-nr",
   skipIdFieldsValidation: "skip-idfields-validation",
+  adminReview: "enable-admin-review",
 } as const;
 
 export type FlagKey = typeof FLAGS[keyof typeof FLAGS];

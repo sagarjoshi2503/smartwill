@@ -283,6 +283,80 @@ def test_save_does_not_create_adminwill_entry_for_draft(client, fake_db):
     assert fake_db["adminwill"].count_documents({}) == 0
 
 
+# --- Completed status (skip-admin-review path, gated by is_flag_enabled +
+# the Will's own paymentStatus — see service.py's FLAG_ENABLE_ADMIN_REVIEW) ---
+
+def _paid_draft(fake_db, client) -> str:
+    will_id = client.post(URL, headers=AUTH, json={**VALID_PAYLOAD, "status": "Draft"}).json()["willId"]
+    fake_db["will"].update_one({"willId": will_id}, {"$set": {"paymentStatus": PaymentStatus.PAID.value}})
+    return will_id
+
+
+def test_save_allows_completed_status_when_flag_disabled_and_will_already_paid(client, fake_db, monkeypatch):
+    monkeypatch.setattr(will_service, "is_flag_enabled", lambda key, default: False)
+    will_id = _paid_draft(fake_db, client)
+
+    res = client.post(URL, headers=AUTH, json={**VALID_PAYLOAD, "status": "Completed", "willId": will_id})
+
+    assert res.status_code == 201
+    assert res.json()["status"] == "Completed"
+    assert fake_db["will"].find_one({"willId": will_id})["status"] == "Completed"
+
+
+def test_save_rejects_completed_status_when_admin_review_flag_still_enabled(client, fake_db, monkeypatch):
+    monkeypatch.setattr(will_service, "is_flag_enabled", lambda key, default: True)
+    will_id = _paid_draft(fake_db, client)
+
+    res = client.post(URL, headers=AUTH, json={**VALID_PAYLOAD, "status": "Completed", "willId": will_id})
+
+    assert res.status_code == 400
+    assert fake_db["will"].find_one({"willId": will_id})["status"] == "Draft"
+
+
+def test_save_rejects_completed_status_when_will_is_not_actually_paid(client, fake_db, monkeypatch):
+    # Flag disabled, but this Will's paymentStatus was never flipped to Paid
+    # (e.g. a client trying to skip payment entirely) — still rejected.
+    monkeypatch.setattr(will_service, "is_flag_enabled", lambda key, default: False)
+    will_id = client.post(URL, headers=AUTH, json={**VALID_PAYLOAD, "status": "Draft"}).json()["willId"]
+
+    res = client.post(URL, headers=AUTH, json={**VALID_PAYLOAD, "status": "Completed", "willId": will_id})
+
+    assert res.status_code == 400
+    assert fake_db["will"].find_one({"willId": will_id})["status"] == "Draft"
+
+
+def test_save_rejects_completed_status_on_a_brand_new_will_with_no_prior_payment(client, monkeypatch):
+    monkeypatch.setattr(will_service, "is_flag_enabled", lambda key, default: False)
+
+    res = client.post(URL, headers=AUTH, json={**VALID_PAYLOAD, "status": "Completed"})
+
+    assert res.status_code == 400
+
+
+def test_save_completed_status_does_not_notify_admin_or_create_adminwill_entry(client, fake_db, monkeypatch):
+    monkeypatch.setattr(will_service, "is_flag_enabled", lambda key, default: False)
+    calls = []
+    monkeypatch.setattr(will_service.email, "send_email", lambda *a, **k: calls.append(1))
+    will_id = _paid_draft(fake_db, client)
+
+    res = client.post(URL, headers=AUTH, json={**VALID_PAYLOAD, "status": "Completed", "willId": will_id})
+
+    assert res.status_code == 201
+    assert calls == []
+    assert fake_db["adminwill"].count_documents({"willId": will_id}) == 0
+
+
+def test_save_admin_review_flag_defaults_to_enabled_when_unevaluable(client, fake_db):
+    # No monkeypatch on is_flag_enabled — matches the real function's
+    # behavior with no VERCEL_URL set (local/test env): it returns the
+    # caller's `default`, which service.py passes as True.
+    will_id = _paid_draft(fake_db, client)
+
+    res = client.post(URL, headers=AUTH, json={**VALID_PAYLOAD, "status": "Completed", "willId": will_id})
+
+    assert res.status_code == 400
+
+
 # --- negative scenarios ---
 
 def test_save_rejects_empty_body(client):

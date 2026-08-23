@@ -14,16 +14,27 @@ from _app.shared.constants import (
     FLD_ADMIN_COMMENTS, FLD_ADMIN_EMAIL, FLD_ASSIGNED_AT, FLD_CREATED_AT, FLD_CREATED_BY, FLD_FULL_LEGAL_NAME,
     FLD_FULL_NAME, FLD_PAYMENT_AMOUNT, FLD_PAYMENT_STATUS, FLD_STATUS, FLD_TESTATOR, FLD_TESTATOR_EMAIL,
     FLD_UPDATED_AT, FLD_WILL, FLD_WILL_ID, FLD_WILL_TYPE, HTTP_BAD_REQUEST, HTTP_FORBIDDEN, HTTP_NOT_FOUND,
-    BAD_TESTATOR_EMAIL, BAD_WILL_STATUS, BAD_WILL_TYPE, PDF_UNSUPPORTED_WILL_TYPE, STATUS_DRAFT,
-    STATUS_PENDING_REVIEW, WILL_VISIBLE_DAYS,
+    BAD_TESTATOR_EMAIL, BAD_WILL_STATUS, BAD_WILL_TYPE, PDF_UNSUPPORTED_WILL_TYPE, STATUS_COMPLETED,
+    STATUS_DRAFT, STATUS_PENDING_REVIEW, WILL_VISIBLE_DAYS,
     UNKNOWN_NAME, WILL_ACCESS_DENIED, WILL_REQUIRED, WILL_LOCKED, WILL_NOT_FOUND, SUBMIT_SUBJECT_TMPL,
 )
+from _app.shared.feature_flags import is_flag_enabled
 from _app.shared.redaction import redact_id_numbers
 from _app.shared.enums import PaymentStatus, WillType
 from _app.shared.validators import escape_html, is_valid_email, normalize_email
 
-ALLOWED_STATUSES = {STATUS_DRAFT, STATUS_PENDING_REVIEW}
+# STATUS_COMPLETED is only reachable via the testator's own save path when a
+# testator submission skips admin review entirely (see the FLAG_ENABLE_ADMIN_REVIEW
+# check below) — it's still gated at submission time, not a free-for-all status
+# a testator can just declare.
+ALLOWED_STATUSES = {STATUS_DRAFT, STATUS_PENDING_REVIEW, STATUS_COMPLETED}
 ALLOWED_WILL_TYPES = {t.value for t in WillType}
+
+# Vercel Flag key — see flags/CLAUDE.md. Defaults to enabled (the existing,
+# safe behavior: every paid submission goes to admin review) so an
+# unreachable flags service (local dev, AKS) never silently skips legal
+# review just because the flag couldn't be evaluated.
+FLAG_ENABLE_ADMIN_REVIEW = "enable-admin-review"
 
 
 def save_will(db: Database, body: dict, settings: Settings, testator_email: str) -> dict:
@@ -75,6 +86,18 @@ def save_will(db: Database, body: dict, settings: Settings, testator_email: str)
         created_by = testator_email
         payment_status = PaymentStatus.NOT_PAID.value
         payment_amount = None
+
+    # A testator can only skip straight to Completed (bypassing admin
+    # review) when the "enable-admin-review" flag is off AND this Will's
+    # payment already verified as Paid (set server-side by the payments/
+    # gift-voucher flows, never trusted from the client body) — otherwise
+    # this is treated the same as any other invalid status value. This is
+    # the actual enforcement point; the frontend's own flag check only
+    # decides which status it *asks* for.
+    if status == STATUS_COMPLETED:
+        admin_review_enabled = is_flag_enabled(FLAG_ENABLE_ADMIN_REVIEW, default=True)
+        if admin_review_enabled or payment_status != PaymentStatus.PAID.value:
+            raise AppError(HTTP_BAD_REQUEST, BAD_WILL_STATUS)
 
     # paymentStatus/paymentAmount are only ever changed by the payments
     # verification flow (see _app/features/payments), never trusted from the
