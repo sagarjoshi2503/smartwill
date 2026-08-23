@@ -1,5 +1,6 @@
 from _app.features.create_will.pdf_context import (
-    build_pdf_context, date_ddmmyyyy, number_to_words, occupation_of, ordinal, rel_of, year_in_words,
+    _format_aadhaar, _id_number_display, build_pdf_context, date_ddmmyyyy, number_to_words, occupation_of,
+    ordinal, rel_of, v_aadhaar, year_in_words,
 )
 
 
@@ -167,3 +168,40 @@ def test_special_characters_are_xml_escaped_in_composed_clauses():
     ctx = build_pdf_context(will)
     assert "M&amp;M &lt;Corp&gt;" in ctx["opening_clause"]
     assert "<Corp>" not in ctx["opening_clause"]
+
+
+# --- Aadhaar number formatting (printed unmasked on the generated document) ---
+
+def test_format_aadhaar_spaces_a_clean_12_digit_value_in_groups_of_4():
+    assert _format_aadhaar("111122223333") == "1111 2222 3333"
+
+
+def test_format_aadhaar_strips_existing_spaces_and_hyphens_before_counting_digits():
+    assert _format_aadhaar("1111-2222-3333") == "1111 2222 3333"
+    assert _format_aadhaar("1111 2222 3333") == "1111 2222 3333"
+
+
+def test_format_aadhaar_leaves_a_non_12_digit_value_as_is():
+    assert _format_aadhaar("11112222") == "11112222"
+    assert _format_aadhaar("1111222233334") == "1111222233334"
+
+
+def test_format_aadhaar_escapes_non_numeric_input_instead_of_reformatting():
+    assert _format_aadhaar("not-a-number") == "not-a-number"
+
+
+def test_v_aadhaar_falls_back_to_blank_placeholder_when_missing():
+    assert v_aadhaar({}, "aadhaarNumber") == "_______________________"
+    assert v_aadhaar({"aadhaarNumber": ""}, "aadhaarNumber") == "_______________________"
+    assert v_aadhaar({"aadhaarNumber": "444455556666"}, "aadhaarNumber") == "4444 5555 6666"
+
+
+def test_id_number_display_formats_aadhaar_type_but_not_others():
+    assert _id_number_display("Aadhaar Card", "777788889999") == "7777 8888 9999"
+    assert _id_number_display("PAN Card", "ABCDE1234F") == "ABCDE1234F"
+    assert _id_number_display("Passport", "A1234567") == "A1234567"
+
+
+def test_id_number_display_blank_when_value_missing():
+    assert _id_number_display("Aadhaar Card", "") == "_______________________"
+    assert _id_number_display("Aadhaar Card", None) == "_______________________"

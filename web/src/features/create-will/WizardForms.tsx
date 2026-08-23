@@ -23,7 +23,7 @@ import GoanTestatorStep from "./steps/GoanTestatorStep";
 import {
   API_WILL_SAVE, API_ADMIN_SAVE, API_PAYMENTS_CREATE_ORDER, API_PAYMENTS_VERIFY, API_PAYMENTS_MARK_FAILED,
   API_GIFT_VOUCHER_VERIFY, API_GIFT_VOUCHER_REDEEM,
-  apiPathComplete,
+  apiPathComplete, CONTENT_TYPE_JSON, HEADER_CONTENT_TYPE,
   LBL_FULL_NAME, LBL_ID_TYPE, LBL_ID_NUMBER, LBL_ADDRESS,
   TIP_NO_ID_SAVED, TIP_ID_LOCKED, MSG_VIEW_ONLY, MSG_SAVING,
   BTN_COMPLETE_REVIEW, BTN_SUBMIT_REVIEW,
@@ -149,10 +149,10 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
   const submitForReview = async (savedWillId: string) => {
     const res = await authFetch(ROLE_TESTATOR, API_WILL_SAVE, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { [HEADER_CONTENT_TYPE]: CONTENT_TYPE_JSON },
       body: JSON.stringify({ will, testatorEmail: will.testator.email, status: STATUS_PENDING_REVIEW, willId: savedWillId, willType }),
     });
-    const isJson = res.headers.get("content-type")?.includes("application/json");
+    const isJson = res.headers.get(HEADER_CONTENT_TYPE)?.includes(CONTENT_TYPE_JSON);
     const data = isJson ? await res.json() : null;
     if(!res.ok) throw new Error(data?.error || "Payment succeeded, but your Will could not be submitted. Please contact support.");
     setSubmitStatus("done");
@@ -165,7 +165,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
     // genuine (failed/cancelled) attempt.
     authFetch(ROLE_TESTATOR, API_PAYMENTS_MARK_FAILED, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { [HEADER_CONTENT_TYPE]: CONTENT_TYPE_JSON },
       body: JSON.stringify({ willId: savedWillId }),
     }).catch(() => {});
   };
@@ -174,10 +174,10 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
     try {
       const res = await authFetch(ROLE_TESTATOR, API_PAYMENTS_VERIFY, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { [HEADER_CONTENT_TYPE]: CONTENT_TYPE_JSON },
         body: JSON.stringify({ ...response, willId: savedWillId, amount: orderAmount }),
       });
-      const isJson = res.headers.get("content-type")?.includes("application/json");
+      const isJson = res.headers.get(HEADER_CONTENT_TYPE)?.includes(CONTENT_TYPE_JSON);
       const data = isJson ? await res.json() : null;
       if(!res.ok || !data?.verified) throw new Error(data?.error || "Payment could not be verified.");
       await submitForReview(savedWillId);
@@ -228,19 +228,19 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
     try {
       const verifyRes = await authFetch(ROLE_TESTATOR, API_GIFT_VOUCHER_VERIFY, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { [HEADER_CONTENT_TYPE]: CONTENT_TYPE_JSON },
         body: JSON.stringify({ code: giftCode.trim() }),
       });
-      const verifyIsJson = verifyRes.headers.get("content-type")?.includes("application/json");
+      const verifyIsJson = verifyRes.headers.get(HEADER_CONTENT_TYPE)?.includes(CONTENT_TYPE_JSON);
       const verifyData = verifyIsJson ? await verifyRes.json() : null;
       if(!verifyRes.ok || !verifyData?.found) throw new Error(verifyData?.error || "That gift/coupon code wasn't found.");
 
       const redeemRes = await authFetch(ROLE_TESTATOR, API_GIFT_VOUCHER_REDEEM, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { [HEADER_CONTENT_TYPE]: CONTENT_TYPE_JSON },
         body: JSON.stringify({ code: giftCode.trim(), willId: savedWillId }),
       });
-      const redeemIsJson = redeemRes.headers.get("content-type")?.includes("application/json");
+      const redeemIsJson = redeemRes.headers.get(HEADER_CONTENT_TYPE)?.includes(CONTENT_TYPE_JSON);
       const redeemData = redeemIsJson ? await redeemRes.json() : null;
       if(!redeemRes.ok) throw new Error(redeemData?.error || "This code could not be redeemed.");
 
@@ -260,25 +260,25 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
       const res = adminReview && willId
         ? await authFetch(ROLE_ADMIN, apiPathComplete(willId), {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: { [HEADER_CONTENT_TYPE]: CONTENT_TYPE_JSON },
             body: JSON.stringify({ will, willType }),
           })
         : adminComplete
         ? await authFetch(ROLE_ADMIN, API_ADMIN_SAVE, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: { [HEADER_CONTENT_TYPE]: CONTENT_TYPE_JSON },
             body: JSON.stringify({ will, testatorEmail: will.testator.email, status: STATUS_COMPLETED, willId, willType }),
           })
         : await authFetch(ROLE_TESTATOR, API_WILL_SAVE, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: { [HEADER_CONTENT_TYPE]: CONTENT_TYPE_JSON },
             body: JSON.stringify({
               will, testatorEmail: will.testator.email,
               status: gateBehindPayment ? STATUS_DRAFT : STATUS_PENDING_REVIEW,
               willId, willType,
             }),
           });
-      const isJson = res.headers.get("content-type")?.includes("application/json");
+      const isJson = res.headers.get(HEADER_CONTENT_TYPE)?.includes(CONTENT_TYPE_JSON);
       const data = isJson ? await res.json() : null;
       if(!res.ok) throw new Error(data?.error || `Could not save the Will (server returned ${res.status}).`);
 
@@ -290,10 +290,10 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
       if(gateBehindPayment) {
         const orderRes = await authFetch(ROLE_TESTATOR, API_PAYMENTS_CREATE_ORDER, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { [HEADER_CONTENT_TYPE]: CONTENT_TYPE_JSON },
           body: JSON.stringify({ amount: Math.round((amount||0)*100), receipt: data.willId }),
         });
-        const orderIsJson = orderRes.headers.get("content-type")?.includes("application/json");
+        const orderIsJson = orderRes.headers.get(HEADER_CONTENT_TYPE)?.includes(CONTENT_TYPE_JSON);
         const orderData = orderIsJson ? await orderRes.json() : null;
         if(!orderRes.ok) throw new Error(orderData?.error || "Could not start payment.");
         openCheckout(data.willId, orderData);

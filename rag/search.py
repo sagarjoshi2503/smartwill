@@ -16,7 +16,8 @@ from pymongo.database import Database
 
 from constants import (
     CHUNK_FLD_EMBEDDING, CHUNK_FLD_TEXT, CHUNKS_COLLECTION_NAME, FLD_STATUS, FLD_TESTATOR_EMAIL,
-    FLD_WILL_ID, FLD_WILL_TYPE, MAX_SEARCH_LIMIT, ROLE_ADMIN, RRF_K,
+    FLD_WILL_ID, FLD_WILL_TYPE, MAX_SEARCH_LIMIT, MIN_SEARCH_POOL_SIZE, ROLE_ADMIN, RRF_K,
+    SEARCH_POOL_MULTIPLIER,
 )
 from embeddings import embed_query
 
@@ -87,7 +88,7 @@ def _reciprocal_rank_fusion(ranked_lists: list[list[str]], k: int = RRF_K) -> li
 
 def hybrid_search(db: Database, query: str, role: str, email: str, limit: int) -> list[dict]:
     limit = max(1, min(limit, MAX_SEARCH_LIMIT))
-    pool_size = max(limit * 4, 20)
+    pool_size = max(limit * SEARCH_POOL_MULTIPLIER, MIN_SEARCH_POOL_SIZE)
 
     keyword_ranked = _keyword_search(db, query, role, email, pool_size)
     vector_ranked = _vector_search(db, query, role, email, pool_size)

@@ -160,6 +160,32 @@ def test_verify_payment_maps_fields_to_razorpay_snake_case(fake_call):
     }
 
 
+# --- gift vouchers ---
+
+def test_verify_voucher_sends_code(fake_call):
+    run(server.verify_voucher(code="GIFT-1234"))
+
+    assert fake_call.last["method"] == "POST"
+    assert fake_call.last["path"] == "/api/gift-voucher/verify"
+    assert fake_call.last["json_body"] == {"code": "GIFT-1234"}
+    assert fake_call.last["token"] is None
+
+
+def test_admin_list_vouchers_without_search(fake_call):
+    run(server.admin_list_vouchers(token="tkn"))
+
+    assert fake_call.last["method"] == "GET"
+    assert fake_call.last["path"] == "/api/gift-voucher/admin/list"
+    assert fake_call.last["token"] == "tkn"
+
+
+def test_admin_list_vouchers_with_search_appends_query_string(fake_call):
+    run(server.admin_list_vouchers(token="tkn", search="jane@example.com"))
+
+    assert fake_call.last["path"] == "/api/gift-voucher/admin/list?search=jane%40example.com"
+    assert fake_call.last["token"] == "tkn"
+
+
 # --- error propagation: an ApiError raised by client.call surfaces to the caller ---
 
 def test_tool_propagates_api_error(monkeypatch):

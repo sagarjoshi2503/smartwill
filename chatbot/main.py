@@ -10,10 +10,11 @@ from pydantic import BaseModel
 import rag_client
 from constants import (
     CORS_ALLOW_HEADERS, CORS_ALLOW_METHODS, DEFAULT_HOST, DEFAULT_PORT, DEFAULT_RETRIEVAL_MODE,
-    ENV_CORS_ALLOW_ORIGINS, ERR_CORS_ALLOW_ORIGINS_REQUIRED, FLAG_USE_RAG_OR_MCP, FLD_TOKEN, INCOMPLETE_REPLY,
-    MAX_TOKENS, MAX_TOOL_ITERATIONS, MODEL, MSG_ROLE_ASSISTANT, MSG_ROLE_USER, REFUSAL_REPLY, RETRIEVAL_MODE_RAG,
-    STOP_REASON_REFUSAL, STOP_REASON_TOOL_USE, SYSTEM_PROMPT, TOOL_SEARCH_FAQ, TOOL_SEARCH_WILLS,
-    UNAVAILABLE_REPLY, err_tool_not_available, err_tool_result,
+    DEFAULT_SEARCH_LIMIT, ENV_CORS_ALLOW_ORIGINS, ERR_CORS_ALLOW_ORIGINS_REQUIRED, FLAG_USE_RAG_OR_MCP,
+    FLD_LIMIT, FLD_QUERY, FLD_TOKEN, INCOMPLETE_REPLY, MAX_TOKENS, MAX_TOOL_ITERATIONS, MODEL,
+    MSG_ROLE_ASSISTANT, MSG_ROLE_USER, REFUSAL_REPLY, RETRIEVAL_MODE_RAG, STOP_REASON_REFUSAL,
+    STOP_REASON_TOOL_USE, SYSTEM_PROMPT, TOOL_SEARCH_FAQ, TOOL_SEARCH_WILLS, UNAVAILABLE_REPLY,
+    err_tool_not_available, err_tool_result,
 )
 from feature_flags import get_flag_value
 from mcp_client import open_session
@@ -108,7 +109,8 @@ async def _execute_tool(
         # every other tool.
         try:
             data = await rag_client.search(
-                call_args.get("query", ""), token=call_args[FLD_TOKEN], limit=call_args.get("limit", 5),
+                call_args.get(FLD_QUERY, ""), token=call_args[FLD_TOKEN],
+                limit=call_args.get(FLD_LIMIT, DEFAULT_SEARCH_LIMIT),
             )
         except Exception as exc:
             return err_tool_result(str(exc))
@@ -119,7 +121,9 @@ async def _execute_tool(
         # token: rag/'s /faq-search endpoint is unauthenticated (public FAQ
         # content), so there's no retrieval_mode gate or token to inject.
         try:
-            data = await rag_client.faq_search(call_args.get("query", ""), limit=call_args.get("limit", 5))
+            data = await rag_client.faq_search(
+                call_args.get(FLD_QUERY, ""), limit=call_args.get(FLD_LIMIT, DEFAULT_SEARCH_LIMIT),
+            )
         except Exception as exc:
             return err_tool_result(str(exc))
         return json.dumps(data)

@@ -1,7 +1,10 @@
 import { useState } from "react";
 import { Gift, Copy, Download } from "lucide-react";
 import { apiUrl } from "../utils/apiBase";
-import { API_GIFT_VOUCHER_ORDER, API_GIFT_VOUCHER_PURCHASE, API_GIFT_VOUCHER_VERIFY, RAZORPAY_KEY_ID } from "../constants";
+import {
+  API_GIFT_VOUCHER_ORDER, API_GIFT_VOUCHER_PURCHASE, API_GIFT_VOUCHER_VERIFY, CONTENT_TYPE_JSON,
+  HEADER_CONTENT_TYPE, RAZORPAY_KEY_ID,
+} from "../constants";
 import { PLANS } from "../data/plans";
 import type { RazorpaySuccessResponse } from "../types/razorpay";
 
@@ -38,10 +41,10 @@ export default function GiftAWillForm(){
     try {
       const res = await fetch(apiUrl(API_GIFT_VOUCHER_VERIFY), {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { [HEADER_CONTENT_TYPE]: CONTENT_TYPE_JSON },
         body: JSON.stringify({ code: coupon.trim() }),
       });
-      const isJson = res.headers.get("content-type")?.includes("application/json");
+      const isJson = res.headers.get(HEADER_CONTENT_TYPE)?.includes(CONTENT_TYPE_JSON);
       const data = isJson ? await res.json() : null;
       setCouponMsg(res.ok && data?.found ? "Code recognized." : "That code wasn't found.");
     } catch {
@@ -60,7 +63,7 @@ export default function GiftAWillForm(){
     try {
       const res = await fetch(apiUrl(API_GIFT_VOUCHER_PURCHASE), {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { [HEADER_CONTENT_TYPE]: CONTENT_TYPE_JSON },
         body: JSON.stringify({
           razorpayOrderId: response.razorpay_order_id,
           paymentId: response.razorpay_payment_id,
@@ -69,7 +72,7 @@ export default function GiftAWillForm(){
           message: message || undefined,
         }),
       });
-      const isJson = res.headers.get("content-type")?.includes("application/json");
+      const isJson = res.headers.get(HEADER_CONTENT_TYPE)?.includes(CONTENT_TYPE_JSON);
       const data = isJson ? await res.json() : null;
       if(!res.ok || !data?.code) throw new Error(data?.error || "Payment succeeded, but the voucher could not be created. Please contact support.");
       setSuccessCode(data.code);
@@ -90,14 +93,14 @@ export default function GiftAWillForm(){
     try {
       const orderRes = await fetch(apiUrl(API_GIFT_VOUCHER_ORDER), {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { [HEADER_CONTENT_TYPE]: CONTENT_TYPE_JSON },
         // Razorpay's Orders API takes the amount in paise, not rupees — the
         // `amount` state here is rupees (₹4,999 etc., same as GIFT_PLANS and
         // the voucher's stored amount below), so it must be converted here,
         // same as the main Will-payment flow does in WizardForms.tsx.
         body: JSON.stringify({ amount: Math.round(amount * 100), planLabel }),
       });
-      const orderIsJson = orderRes.headers.get("content-type")?.includes("application/json");
+      const orderIsJson = orderRes.headers.get(HEADER_CONTENT_TYPE)?.includes(CONTENT_TYPE_JSON);
       const order = orderIsJson ? await orderRes.json() : null;
       if(!orderRes.ok || !order?.orderId) throw new Error(order?.error || "Could not start the gift purchase.");
 

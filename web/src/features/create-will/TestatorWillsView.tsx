@@ -2,9 +2,9 @@ import { useEffect, useState } from "react";
 import { FileText, FileStack, Plus, Edit3, Eye, Trash2, Clock } from "lucide-react";
 import { authFetch } from "../../utils/apiBase";
 import {
-  API_MY_WILLS, apiPathWill, CONFIRM_DELETE_WILL, ERR_LOAD_WILL,
-  ERR_DELETE_WILL, STATUS_DRAFT, STATUS_PENDING_REVIEW, STATUS_COMPLETED, STATUS_LBL, WILL_VISIBLE_DAYS,
-  ROLE_TESTATOR,
+  API_MY_WILLS, apiPathWill, CONFIRM_DELETE_WILL, CONTENT_TYPE_JSON, ERR_LOAD_WILL,
+  ERR_DELETE_WILL, HEADER_CONTENT_TYPE, STATUS_DRAFT, STATUS_PENDING_REVIEW, STATUS_COMPLETED, STATUS_LBL,
+  WILL_VISIBLE_DAYS, ROLE_TESTATOR,
 } from "../../constants";
 import { WILL_TYPE_LBL_SHORT } from "../../data/willTypes";
 import Pagination, { PAGE_SIZE } from "../../components/shared/Pagination";
@@ -46,7 +46,7 @@ export default function TestatorWillsView({email,onCreateNew,onEditWill,onViewWi
 
   const fetchWill = async (willId: string): Promise<{ will: WillState; willType: WillType; status: TestatorWill["status"]; adminComments?: string }> => {
     const res = await authFetch(ROLE_TESTATOR, apiPathWill(willId));
-    const isJson = res.headers.get("content-type")?.includes("application/json");
+    const isJson = res.headers.get(HEADER_CONTENT_TYPE)?.includes(CONTENT_TYPE_JSON);
     const data = isJson ? await res.json() : null;
     if(!res.ok) throw new Error(data?.error || `Could not load this Will (server returned ${res.status}).`);
     return {
@@ -84,7 +84,7 @@ export default function TestatorWillsView({email,onCreateNew,onEditWill,onViewWi
     setBusyId(willId); setActionError("");
     try {
       const res = await authFetch(ROLE_TESTATOR, apiPathWill(willId), { method: "DELETE" });
-      const isJson = res.headers.get("content-type")?.includes("application/json");
+      const isJson = res.headers.get(HEADER_CONTENT_TYPE)?.includes(CONTENT_TYPE_JSON);
       const data = isJson ? await res.json() : null;
       if(!res.ok) throw new Error(data?.error || `Could not delete this Will (server returned ${res.status}).`);
       setWills(p=>p.filter(w=>w.willId!==willId));
@@ -101,7 +101,7 @@ export default function TestatorWillsView({email,onCreateNew,onEditWill,onViewWi
       setStatus("loading"); setError("");
       try {
         const res = await authFetch(ROLE_TESTATOR, API_MY_WILLS);
-        const isJson = res.headers.get("content-type")?.includes("application/json");
+        const isJson = res.headers.get(HEADER_CONTENT_TYPE)?.includes(CONTENT_TYPE_JSON);
         const data = isJson ? await res.json() : null;
         if(!res.ok) throw new Error(data?.error || `Could not load your Wills (server returned ${res.status}).`);
         if(cancelled) return;

@@ -78,6 +78,18 @@ CORS_ALLOW_HEADERS = ["Content-Type", "Authorization"]
 # --- Schema field name stripped/injected around the token security pattern ---
 FLD_TOKEN = "token"
 
+# --- rag/ tool-call argument field names + default limit (search_wills,
+# search_faq — both share this shape) ---
+FLD_QUERY = "query"
+FLD_LIMIT = "limit"
+DEFAULT_SEARCH_LIMIT = 5
+
+# --- rag_client.py's outbound HTTP request shape ---
+HEADER_AUTHORIZATION = "Authorization"
+BEARER_PREFIX = "Bearer "
+PATH_SEARCH_WILLS = "/search"
+PATH_SEARCH_FAQ = "/faq-search"
+
 # --- Copy ---
 SYSTEM_PROMPT = (
     "You are the SmartWill assistant, embedded in the SmartWill web app. "

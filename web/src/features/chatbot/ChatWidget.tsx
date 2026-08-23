@@ -3,9 +3,9 @@ import { MessageCircle, X, Send, LifeBuoy, Trash2 } from "lucide-react";
 import { chatbotUrl } from "../../utils/chatbotBase";
 import { getAuthToken } from "../../utils/auth";
 import {
-  ARIA_CLEAR_CHAT, ARIA_OPEN_CHAT, BTN_CONTACT_SUPPORT, CHATBOT_CHAT, LBL_CHAT_ASSISTANT_TITLE,
-  LBL_RETRIEVAL_MODE_MCP, LBL_RETRIEVAL_MODE_RAG, MSG_CHAT_EMPTY_STATE, MSG_CHAT_THINKING, MSG_CHAT_UNAVAILABLE,
-  PH_CHAT_QUESTION, RETRIEVAL_MODE_RAG, ROLE_ADMIN, ROLE_TESTATOR,
+  ARIA_CLEAR_CHAT, ARIA_OPEN_CHAT, BTN_CONTACT_SUPPORT, CHATBOT_CHAT, CONTENT_TYPE_JSON, HEADER_CONTENT_TYPE,
+  LBL_CHAT_ASSISTANT_TITLE, LBL_RETRIEVAL_MODE_MCP, LBL_RETRIEVAL_MODE_RAG, MSG_CHAT_EMPTY_STATE,
+  MSG_CHAT_THINKING, MSG_CHAT_UNAVAILABLE, PH_CHAT_QUESTION, RETRIEVAL_MODE_RAG, ROLE_ADMIN, ROLE_TESTATOR,
 } from "../../constants";
 
 type ChatMessage = { role: "user" | "assistant"; content: string; retrievalMode?: string };
@@ -46,10 +46,10 @@ export default function ChatWidget({ onContactSupport }: { onContactSupport: () 
       const { token, role } = currentAuth();
       const res = await fetch(chatbotUrl(CHATBOT_CHAT), {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { [HEADER_CONTENT_TYPE]: CONTENT_TYPE_JSON },
         body: JSON.stringify({ messages: nextMessages, token, role }),
       });
-      const isJson = res.headers.get("content-type")?.includes("application/json");
+      const isJson = res.headers.get(HEADER_CONTENT_TYPE)?.includes(CONTENT_TYPE_JSON);
       const data = isJson ? await res.json() : null;
       if (!res.ok) {
         // A non-2xx here means the chatbot service itself is unreachable

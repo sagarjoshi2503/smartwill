@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Building2, Phone, Mail, MessageSquare } from "lucide-react";
 import { apiUrl } from "../utils/apiBase";
-import { API_CONTACT_SEND, API_CONTACT_INFO } from "../constants";
+import { API_CONTACT_SEND, API_CONTACT_INFO, CONTENT_TYPE_JSON, HEADER_CONTENT_TYPE } from "../constants";
 
 // Fallback shown until GET /api/contact-us/info resolves (and if it ever
 // fails) — kept in sync with the Settings defaults in api/_app/core/config.py
@@ -40,10 +40,10 @@ export default function ContactUsView(){
     try {
       const res = await fetch(apiUrl(API_CONTACT_SEND), {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { [HEADER_CONTENT_TYPE]: CONTENT_TYPE_JSON },
         body: JSON.stringify({ name: `${firstName} ${lastName}`.trim(), email, subject: "Contact Us enquiry", message: phone ? `Phone: ${phone}\n\n${message}` : message }),
       });
-      const isJson = res.headers.get("content-type")?.includes("application/json");
+      const isJson = res.headers.get(HEADER_CONTENT_TYPE)?.includes(CONTENT_TYPE_JSON);
       const data = isJson ? await res.json() : null;
       if(!res.ok) throw new Error(data?.error || `Could not send your enquiry (server returned ${res.status}).`);
       setStatus("done");

@@ -3,10 +3,10 @@ import { User, Phone, Mail, MapPin, Check } from "lucide-react";
 import { STATES } from "../../data/options";
 import { apiUrl } from "../../utils/apiBase";
 import {
-  API_OTP_REQUEST, COUNTRY_CODE_PREFIX, EMAIL_REGEX, ERR_SEND_OTP, HEADING_SIGNUP, LBL_EMAIL, LBL_LEGAL_NAME,
-  LBL_MOBILE, LBL_PRIVACY_POLICY, LBL_STATE, LBL_TERMS_OF_SERVICE, MSG_SENDING_OTP, PH_EMAIL_DELIVERY,
-  PH_FULL_NAME, PH_MOBILE, PHONE_MASK, PHONE_MASK_DIGITS, PHONE_MIN_DIGITS, SUB_SIGNUP, TERMS_AGREE_JOINER,
-  TERMS_AGREE_PREFIX,
+  API_OTP_REQUEST, CONTENT_TYPE_JSON, COUNTRY_CODE_PREFIX, EMAIL_REGEX, ERR_SEND_OTP, HEADER_CONTENT_TYPE,
+  HEADING_SIGNUP, LBL_EMAIL, LBL_LEGAL_NAME, LBL_MOBILE, LBL_PRIVACY_POLICY, LBL_STATE, LBL_TERMS_OF_SERVICE,
+  MSG_SENDING_OTP, PH_EMAIL_DELIVERY, PH_FULL_NAME, PH_MOBILE, PHONE_MASK, PHONE_MASK_DIGITS, PHONE_MIN_DIGITS,
+  SUB_SIGNUP, TERMS_AGREE_JOINER, TERMS_AGREE_PREFIX,
 } from "../../constants";
 import type { SignupState } from "../../types";
 
@@ -28,10 +28,10 @@ export default function SignupView({signup,setSignup,onNext}:{
     try {
       const res = await fetch(apiUrl(API_OTP_REQUEST), {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { [HEADER_CONTENT_TYPE]: CONTENT_TYPE_JSON },
         body: JSON.stringify({ phone: signup.phone }),
       });
-      const isJson = res.headers.get("content-type")?.includes("application/json");
+      const isJson = res.headers.get(HEADER_CONTENT_TYPE)?.includes(CONTENT_TYPE_JSON);
       const data = isJson ? await res.json() : null;
       if(!res.ok) throw new Error(data?.error || `Could not send OTP (server returned ${res.status}).`);
       onNext();

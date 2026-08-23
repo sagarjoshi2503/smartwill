@@ -4,7 +4,10 @@ import BrandMark from "../../components/shared/BrandMark";
 import { apiUrl } from "../../utils/apiBase";
 import { setAuthToken } from "../../utils/auth";
 import { encodePassword } from "../../utils/encode";
-import { API_ADMIN_LOGIN, EMAIL_REGEX, LBL_EMAIL_ADDR, LBL_PASSWORD, PH_LAWFIRM_EMAIL, ROLE_ADMIN } from "../../constants";
+import {
+  API_ADMIN_LOGIN, CONTENT_TYPE_JSON, EMAIL_REGEX, HEADER_CONTENT_TYPE, LBL_EMAIL_ADDR, LBL_PASSWORD,
+  PH_LAWFIRM_EMAIL, ROLE_ADMIN,
+} from "../../constants";
 import type { AdminProfile } from "../../types";
 
 export default function AdminLoginView({onLogin,onBack,onSignup,signupEnabled}:{
@@ -29,10 +32,10 @@ export default function AdminLoginView({onLogin,onBack,onSignup,signupEnabled}:{
     try {
       const res = await fetch(apiUrl(API_ADMIN_LOGIN), {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { [HEADER_CONTENT_TYPE]: CONTENT_TYPE_JSON },
         body: JSON.stringify({ email, password: encodePassword(password) }),
       });
-      const isJson = res.headers.get("content-type")?.includes("application/json");
+      const isJson = res.headers.get(HEADER_CONTENT_TYPE)?.includes(CONTENT_TYPE_JSON);
       const data = isJson ? await res.json() : null;
       if(!res.ok) throw new Error(data?.error || `Login failed (server returned ${res.status}).`);
       setAuthToken(ROLE_ADMIN, data.token);

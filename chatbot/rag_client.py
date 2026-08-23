@@ -7,7 +7,10 @@ import os
 
 import httpx
 
-from constants import ERR_RAG_SERVICE_URL_REQUIRED, RAG_SEARCH_TIMEOUT_SECONDS
+from constants import (
+    BEARER_PREFIX, ERR_RAG_SERVICE_URL_REQUIRED, FLD_LIMIT, FLD_QUERY, HEADER_AUTHORIZATION, PATH_SEARCH_FAQ,
+    PATH_SEARCH_WILLS, RAG_SEARCH_TIMEOUT_SECONDS,
+)
 
 if not os.environ.get("RAG_SERVICE_URL"):
     raise RuntimeError(ERR_RAG_SERVICE_URL_REQUIRED)
@@ -21,9 +24,9 @@ async def search(query: str, token: str, limit: int = 5) -> dict:
     tool-call failures are handled."""
     async with httpx.AsyncClient(base_url=RAG_SERVICE_URL, timeout=RAG_SEARCH_TIMEOUT_SECONDS) as client:
         response = await client.post(
-            "/search",
-            json={"query": query, "limit": limit},
-            headers={"Authorization": f"Bearer {token}"},
+            PATH_SEARCH_WILLS,
+            json={FLD_QUERY: query, FLD_LIMIT: limit},
+            headers={HEADER_AUTHORIZATION: f"{BEARER_PREFIX}{token}"},
         )
     response.raise_for_status()
     return response.json()
@@ -34,6 +37,6 @@ async def faq_search(query: str, limit: int = 5) -> dict:
     /faq-search endpoint — no token, since FAQ content isn't scoped to a
     signed-in user (see rag/main.py's faq_search_endpoint)."""
     async with httpx.AsyncClient(base_url=RAG_SERVICE_URL, timeout=RAG_SEARCH_TIMEOUT_SECONDS) as client:
-        response = await client.post("/faq-search", json={"query": query, "limit": limit})
+        response = await client.post(PATH_SEARCH_FAQ, json={FLD_QUERY: query, FLD_LIMIT: limit})
     response.raise_for_status()
     return response.json()

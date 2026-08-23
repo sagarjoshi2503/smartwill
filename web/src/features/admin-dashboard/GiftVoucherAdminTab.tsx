@@ -1,7 +1,10 @@
 import { useState } from "react";
 import { Search, Sparkles } from "lucide-react";
 import { authFetch } from "../../utils/apiBase";
-import { ROLE_ADMIN, API_GIFT_VOUCHER_ADMIN_GENERATE, API_GIFT_VOUCHER_ADMIN_LIST, API_GIFT_VOUCHER_VERIFY } from "../../constants";
+import {
+  ROLE_ADMIN, API_GIFT_VOUCHER_ADMIN_GENERATE, API_GIFT_VOUCHER_ADMIN_LIST, API_GIFT_VOUCHER_VERIFY,
+  CONTENT_TYPE_JSON, HEADER_CONTENT_TYPE,
+} from "../../constants";
 import { PLANS } from "../../data/plans";
 
 // Mirrors the theme's Voucher Admin modal (api/Data/Entire Site theme.html
@@ -73,14 +76,14 @@ export default function GiftVoucherAdminTab(){
       const planLabel = GEN_PLANS.find(p=>p.amount===genAmount)?.label || "WILL";
       const res = await authFetch(ROLE_ADMIN, API_GIFT_VOUCHER_ADMIN_GENERATE, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { [HEADER_CONTENT_TYPE]: CONTENT_TYPE_JSON },
         body: JSON.stringify({
           planLabel, amount: genAmount, qty: genQty,
           buyerName, buyerEmail, recipientName, recipientEmail,
           message: genMsg, validityMonths,
         }),
       });
-      const isJson = res.headers.get("content-type")?.includes("application/json");
+      const isJson = res.headers.get(HEADER_CONTENT_TYPE)?.includes(CONTENT_TYPE_JSON);
       const data = isJson ? await res.json() : null;
       if(!res.ok) throw new Error(data?.error || `Could not generate voucher codes (server returned ${res.status}).`);
       setGenCodes(data?.codes || (Array.isArray(data) ? data : []));
@@ -101,7 +104,7 @@ export default function GiftVoucherAdminTab(){
     setListStatus("loading"); setListError("");
     try {
       const res = await authFetch(ROLE_ADMIN, `${API_GIFT_VOUCHER_ADMIN_LIST}?search=${encodeURIComponent(q)}`);
-      const isJson = res.headers.get("content-type")?.includes("application/json");
+      const isJson = res.headers.get(HEADER_CONTENT_TYPE)?.includes(CONTENT_TYPE_JSON);
       const data = isJson ? await res.json() : null;
       if(!res.ok) throw new Error(data?.error || `Could not load voucher codes (server returned ${res.status}).`);
       setCodes(data?.vouchers || data?.codes || (Array.isArray(data) ? data : []));
@@ -124,10 +127,10 @@ export default function GiftVoucherAdminTab(){
     try {
       const res = await authFetch(ROLE_ADMIN, API_GIFT_VOUCHER_VERIFY, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { [HEADER_CONTENT_TYPE]: CONTENT_TYPE_JSON },
         body: JSON.stringify({ code: verifyCode.trim() }),
       });
-      const isJson = res.headers.get("content-type")?.includes("application/json");
+      const isJson = res.headers.get(HEADER_CONTENT_TYPE)?.includes(CONTENT_TYPE_JSON);
       const data = isJson ? await res.json() : null;
       if(!res.ok) throw new Error(data?.error || "Could not check this code.");
       if(!data?.found) { setVerifyError("Code not found."); setVerifyStatus("error"); return; }

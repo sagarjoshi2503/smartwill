@@ -114,7 +114,9 @@ constant — always go through these build-time values.
 ```
 cd web
 npx tsc --noEmit          # type-check
-npx vitest run             # 64 tests as of this writing
+npx vitest run             # 82 tests as of this writing (3 pre-existing failures in
+                           # willValidation.test.ts/GiftAWillForm.test.tsx predate this
+                           # writing — see those files before assuming a change caused them)
 npm run build              # tsc + vite build, closest to what CI/ACR do
 ```
 

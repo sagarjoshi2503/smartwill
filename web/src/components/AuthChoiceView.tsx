@@ -4,7 +4,7 @@ import BrandMark from "./shared/BrandMark";
 import GoogleSignInButton from "../features/user-signin-gmail/GoogleSignInButton";
 import { apiUrl } from "../utils/apiBase";
 import { setAuthToken } from "../utils/auth";
-import { API_GOOGLE, ROLE_TESTATOR } from "../constants";
+import { API_GOOGLE, CONTENT_TYPE_JSON, HEADER_CONTENT_TYPE, ROLE_TESTATOR } from "../constants";
 import type { GoogleProfile } from "../types";
 
 export default function AuthChoiceView({onGoogleSuccess,onPhone,onBack}:{
@@ -20,10 +20,10 @@ export default function AuthChoiceView({onGoogleSuccess,onPhone,onBack}:{
     try {
       const res = await fetch(apiUrl(API_GOOGLE), {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { [HEADER_CONTENT_TYPE]: CONTENT_TYPE_JSON },
         body: JSON.stringify({ idToken }),
       });
-      const isJson = res.headers.get("content-type")?.includes("application/json");
+      const isJson = res.headers.get(HEADER_CONTENT_TYPE)?.includes(CONTENT_TYPE_JSON);
       if (!isJson) {
         throw new Error(
           res.status === 404

@@ -17,6 +17,12 @@ export const ROLE_TESTATOR = "testator" as const;
 // --- Routes ---
 export const ADMIN_PATH = "/admin";
 
+// --- HTTP headers — every raw fetch() call across the app sends/reads
+// these two literals; Headers.get()/set() are case-insensitive, so the
+// same constant is used for both directions. ---
+export const HEADER_CONTENT_TYPE = "Content-Type";
+export const CONTENT_TYPE_JSON = "application/json";
+
 // --- Wizard textbox validation limits — every input bound to one of these
 // field kinds (Spouse Name, Address, Age, Nationality, "specify Other"
 // occupation/relation) across every wizard step reads its maxLength/min/max

@@ -38,7 +38,7 @@ import { trackPageview } from "./utils/analytics";
 import { FLAGS } from "./flags";
 import useFlag from "./hooks/useFlag";
 import {
-  ADMIN_PATH, API_WILL_SAVE, apiPathSendBack, apiPathWillPdf,
+  ADMIN_PATH, API_WILL_SAVE, apiPathSendBack, apiPathWillPdf, CONTENT_TYPE_JSON, HEADER_CONTENT_TYPE,
   OTP_LENGTH, STATUS_DRAFT, STATUS_PENDING_REVIEW, STATUS_COMPLETED,
   SEND_BACK_REDIRECT_MS, DRAFT_RESET_MS, WIZARD_REDIRECT_MS, ANNEX_PDF_URL_REVOKE_MS,
   MSG_VIEW_ONLY, MSG_SAVING, BTN_SAVE_AS_DRAFT, ROLE_ADMIN, ROLE_TESTATOR,
@@ -349,10 +349,10 @@ export default function SmartWill() {
     try {
       const res = await authFetch(ROLE_ADMIN, apiPathSendBack(editingWillId), {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { [HEADER_CONTENT_TYPE]: CONTENT_TYPE_JSON },
         body: JSON.stringify({ comments: sendBackComments }),
       });
-      const isJson = res.headers.get("content-type")?.includes("application/json");
+      const isJson = res.headers.get(HEADER_CONTENT_TYPE)?.includes(CONTENT_TYPE_JSON);
       const data = isJson ? await res.json() : null;
       if(!res.ok) throw new Error(data?.error || errSendBackTmpl(res.status));
       setSendBackOpen(false);
@@ -424,10 +424,10 @@ export default function SmartWill() {
   const saveDraftAndGetWillId = async (): Promise<string> => {
     const res = await authFetch(ROLE_TESTATOR, API_WILL_SAVE, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { [HEADER_CONTENT_TYPE]: CONTENT_TYPE_JSON },
       body: JSON.stringify({ will, testatorEmail: will.testator.email, status: STATUS_DRAFT, willId: editingWillId, willType }),
     });
-    const isJson = res.headers.get("content-type")?.includes("application/json");
+    const isJson = res.headers.get(HEADER_CONTENT_TYPE)?.includes(CONTENT_TYPE_JSON);
     const data = isJson ? await res.json() : null;
     if(!res.ok) throw new Error(data?.error || errSaveDraftTmpl(res.status));
     setEditingWillId(data.willId);
@@ -465,11 +465,11 @@ export default function SmartWill() {
     const willId = await saveDraftAndGetWillId();
     const res = await authFetch(ROLE_TESTATOR, apiPathWillPdf(willId), {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { [HEADER_CONTENT_TYPE]: CONTENT_TYPE_JSON },
       body: JSON.stringify({ idFields: extractIdFields(will) }),
     });
     if(!res.ok) {
-      const isJson = res.headers.get("content-type")?.includes("application/json");
+      const isJson = res.headers.get(HEADER_CONTENT_TYPE)?.includes(CONTENT_TYPE_JSON);
       const data = isJson ? await res.json() : null;
       throw new Error(data?.error || ERR_GENERATE_PDF);
     }

@@ -4,8 +4,8 @@ import BrandMark from "../../components/shared/BrandMark";
 import { apiUrl } from "../../utils/apiBase";
 import { setAuthToken } from "../../utils/auth";
 import {
-  API_ADMIN_SIGNUP, EMAIL_REGEX, LBL_EMAIL_ADDR, LBL_FULL_NAME, LBL_PASSWORD,
-  MIN_PASSWORD_LENGTH, PH_LAWFIRM_EMAIL, BTN_CREATE_ACCOUNT, ROLE_ADMIN,
+  API_ADMIN_SIGNUP, CONTENT_TYPE_JSON, EMAIL_REGEX, HEADER_CONTENT_TYPE, LBL_EMAIL_ADDR, LBL_FULL_NAME,
+  LBL_PASSWORD, MIN_PASSWORD_LENGTH, PH_LAWFIRM_EMAIL, BTN_CREATE_ACCOUNT, ROLE_ADMIN,
 } from "../../constants";
 import type { AdminProfile } from "../../types";
 
@@ -36,10 +36,10 @@ export default function AdminSignupView({onSignup,onBack,onGoToLogin}:{
     try {
       const res = await fetch(apiUrl(API_ADMIN_SIGNUP), {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { [HEADER_CONTENT_TYPE]: CONTENT_TYPE_JSON },
         body: JSON.stringify({ fullName: fullName.trim(), email, password }),
       });
-      const isJson = res.headers.get("content-type")?.includes("application/json");
+      const isJson = res.headers.get(HEADER_CONTENT_TYPE)?.includes(CONTENT_TYPE_JSON);
       const data = isJson ? await res.json() : null;
       if(!res.ok){
         if(res.status===409) setAlreadySignedUp(true);

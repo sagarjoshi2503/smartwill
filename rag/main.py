@@ -8,7 +8,7 @@ from fastapi import FastAPI, HTTPException, Request
 from pydantic import BaseModel
 
 from auth import AuthError, verify_token
-from constants import DEFAULT_SEARCH_LIMIT, HEADER_AUTHORIZATION, SYNC_INTERVAL_SECONDS
+from constants import DEFAULT_SEARCH_LIMIT, HEADER_AUTHORIZATION, HTTP_UNAUTHORIZED, SYNC_INTERVAL_SECONDS
 from db import get_db
 from faq_indexer import sync_faq_once
 from faq_search import faq_search as run_faq_search
@@ -98,7 +98,7 @@ def search(body: SearchRequest, request: Request):
     try:
         email, role = verify_token(request.headers.get(HEADER_AUTHORIZATION))
     except AuthError as exc:
-        raise HTTPException(status_code=401, detail=str(exc)) from exc
+        raise HTTPException(status_code=HTTP_UNAUTHORIZED, detail=str(exc)) from exc
 
     if not body.query.strip():
         return SearchResponse(results=[])

@@ -82,6 +82,13 @@ VOYAGE_MODEL = "voyage-4-lite"
 RRF_K = 60
 DEFAULT_SEARCH_LIMIT = 5
 MAX_SEARCH_LIMIT = 20
+# Candidate pool fed into RRF from each of keyword/vector search — wider
+# than the final result limit so fusion has enough overlap to work with.
+SEARCH_POOL_MULTIPLIER = 4
+MIN_SEARCH_POOL_SIZE = 20
+
+# --- HTTP status codes (bearer-token verification failure) ---
+HTTP_UNAUTHORIZED = 401
 
 # --- Background indexer ---
 SYNC_INTERVAL_SECONDS = 120

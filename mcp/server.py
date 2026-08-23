@@ -7,6 +7,7 @@ admin_signup, google_sign_in, or verify_otp.
 """
 
 import os
+from urllib.parse import urlencode
 
 from mcp.server import MCPServer
 
@@ -16,11 +17,12 @@ from client import call, encode_password
 from constants import (
     DEFAULT_MCP_HOST, DEFAULT_MCP_PORT, FLD_AMOUNT, FLD_CODE, FLD_COMMENTS, FLD_CURRENCY, FLD_EMAIL,
     FLD_FULL_NAME, FLD_ID_TOKEN, FLD_MESSAGE, FLD_NAME, FLD_PASSWORD, FLD_PHONE, FLD_RAZORPAY_ORDER_ID,
-    FLD_RAZORPAY_PAYMENT_ID, FLD_RAZORPAY_SIGNATURE, FLD_RECEIPT, FLD_STATUS, FLD_SUBJECT, FLD_TESTATOR_EMAIL,
-    FLD_WILL, FLD_WILL_ID, FLD_WILL_TYPE, METHOD_DELETE, METHOD_GET, METHOD_POST, PATH_ADMIN_LOGIN,
-    PATH_ADMIN_SAVE_WILL, PATH_ADMIN_SIGNUP, PATH_ADMIN_WILLS, PATH_CONTACT_INFO, PATH_CONTACT_SEND,
-    PATH_CREATE_PAYMENT_ORDER, PATH_GOOGLE_SIGN_IN, PATH_HEALTHZ, PATH_MARK_PAYMENT_FAILED, PATH_MY_WILLS,
-    PATH_OTP_REQUEST, PATH_OTP_VERIFY, PATH_VERIFY_PAYMENT, PATH_WILL_SAVE, STREAMABLE_HTTP_PATH,
+    FLD_RAZORPAY_PAYMENT_ID, FLD_RAZORPAY_SIGNATURE, FLD_RECEIPT, FLD_SEARCH, FLD_STATUS, FLD_SUBJECT,
+    FLD_TESTATOR_EMAIL, FLD_WILL, FLD_WILL_ID, FLD_WILL_TYPE, METHOD_DELETE, METHOD_GET, METHOD_POST,
+    PATH_ADMIN_LOGIN, PATH_ADMIN_SAVE_WILL, PATH_ADMIN_SIGNUP, PATH_ADMIN_WILLS, PATH_CONTACT_INFO,
+    PATH_CONTACT_SEND, PATH_CREATE_PAYMENT_ORDER, PATH_GOOGLE_SIGN_IN, PATH_HEALTHZ, PATH_MARK_PAYMENT_FAILED,
+    PATH_MY_WILLS, PATH_OTP_REQUEST, PATH_OTP_VERIFY, PATH_VERIFY_PAYMENT, PATH_VOUCHER_ADMIN_LIST,
+    PATH_VOUCHER_VERIFY, PATH_WILL_SAVE, STREAMABLE_HTTP_PATH,
     path_admin_will, path_admin_will_complete, path_admin_will_send_back, path_will,
 )
 
@@ -221,6 +223,26 @@ async def admin_send_back_will(token: str, will_id: str, comments: str) -> dict:
 async def admin_delete_will(token: str, will_id: str) -> dict:
     """Delete any Will (admin reviewer action)."""
     return await call(METHOD_DELETE, path_admin_will(will_id), token=token)
+
+
+# --- Gift Vouchers ---
+
+@mcp.tool()
+async def verify_voucher(code: str) -> dict:
+    """Look up a Gift a Will voucher code's status (public). Returns
+    {found, code, status, planLabel, amount, expiresAt} — found:false rather
+    than a 404 when the code doesn't exist."""
+    return await call(METHOD_POST, PATH_VOUCHER_VERIFY, json_body={FLD_CODE: code})
+
+
+@mcp.tool()
+async def admin_list_vouchers(token: str, search: str | None = None) -> dict:
+    """Admin lists all gift vouchers, optionally filtered by a search term
+    (matches code/recipient/purchaser). Returns {vouchers: [...]}."""
+    path = PATH_VOUCHER_ADMIN_LIST
+    if search:
+        path = f"{path}?{urlencode({FLD_SEARCH: search})}"
+    return await call(METHOD_GET, path, token=token)
 
 
 # ASGI app for platforms that run this as a plain HTTP service instead of via

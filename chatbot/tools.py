@@ -9,8 +9,9 @@ see, choose, or hallucinate a token.
 """
 
 from constants import (
-    FLD_TOKEN, ROLE_ADMIN, ROLE_TESTATOR, TOOL_ADMIN_GET_WILL, TOOL_GET_CONTACT_INFO, TOOL_GET_WILL,
-    TOOL_HEALTH_CHECK, TOOL_LIST_ADMIN_WILLS, TOOL_LIST_MY_WILLS, TOOL_SEARCH_FAQ, TOOL_SEARCH_WILLS,
+    DEFAULT_SEARCH_LIMIT, FLD_LIMIT, FLD_QUERY, FLD_TOKEN, ROLE_ADMIN, ROLE_TESTATOR, TOOL_ADMIN_GET_WILL,
+    TOOL_GET_CONTACT_INFO, TOOL_GET_WILL, TOOL_HEALTH_CHECK, TOOL_LIST_ADMIN_WILLS, TOOL_LIST_MY_WILLS,
+    TOOL_SEARCH_FAQ, TOOL_SEARCH_WILLS,
 )
 
 # TOOL_SEARCH_FAQ is in every role's set, including None (anonymous) — FAQ
@@ -51,10 +52,10 @@ RAG_TOOL_SCHEMA = {
     "input_schema": {
         "type": "object",
         "properties": {
-            "query": {"type": "string", "description": "What to search for, in plain language."},
-            "limit": {"type": "integer", "description": "Max results to return.", "default": 5},
+            FLD_QUERY: {"type": "string", "description": "What to search for, in plain language."},
+            FLD_LIMIT: {"type": "integer", "description": "Max results to return.", "default": DEFAULT_SEARCH_LIMIT},
         },
-        "required": ["query"],
+        "required": [FLD_QUERY],
     },
 }
 
@@ -78,10 +79,10 @@ FAQ_TOOL_SCHEMA = {
     "input_schema": {
         "type": "object",
         "properties": {
-            "query": {"type": "string", "description": "What to search for, in plain language."},
-            "limit": {"type": "integer", "description": "Max results to return.", "default": 5},
+            FLD_QUERY: {"type": "string", "description": "What to search for, in plain language."},
+            FLD_LIMIT: {"type": "integer", "description": "Max results to return.", "default": DEFAULT_SEARCH_LIMIT},
         },
-        "required": ["query"],
+        "required": [FLD_QUERY],
     },
 }
 

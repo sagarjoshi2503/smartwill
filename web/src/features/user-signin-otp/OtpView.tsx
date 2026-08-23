@@ -4,7 +4,8 @@ import type { MutableRefObject } from "react";
 import { apiUrl } from "../../utils/apiBase";
 import { setAuthToken } from "../../utils/auth";
 import {
-  API_OTP_VERIFY, COUNTRY_CODE_PREFIX, ERR_VERIFY_OTP, MSG_VERIFYING_OTP, PHONE_MASK_DIGITS, ROLE_TESTATOR,
+  API_OTP_VERIFY, CONTENT_TYPE_JSON, COUNTRY_CODE_PREFIX, ERR_VERIFY_OTP, HEADER_CONTENT_TYPE,
+  MSG_VERIFYING_OTP, PHONE_MASK_DIGITS, ROLE_TESTATOR,
 } from "../../constants";
 
 export default function OtpView({otp,handleOtp,otpRefs,phone,email,onNext}:{
@@ -24,10 +25,10 @@ export default function OtpView({otp,handleOtp,otpRefs,phone,email,onNext}:{
     try {
       const res = await fetch(apiUrl(API_OTP_VERIFY), {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { [HEADER_CONTENT_TYPE]: CONTENT_TYPE_JSON },
         body: JSON.stringify({ phone, code: otp.join(""), email }),
       });
-      const isJson = res.headers.get("content-type")?.includes("application/json");
+      const isJson = res.headers.get(HEADER_CONTENT_TYPE)?.includes(CONTENT_TYPE_JSON);
       const data = isJson ? await res.json() : null;
       if(!res.ok) throw new Error(data?.error || `Could not verify OTP (server returned ${res.status}).`);
       setAuthToken(ROLE_TESTATOR, data.token);

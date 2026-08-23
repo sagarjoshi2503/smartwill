@@ -2,9 +2,10 @@
 
 ## What this is
 
-An MCP (Model Context Protocol) server wrapping every `api/` endpoint as a
-tool — 21 tools total, one per backend route (health, auth, contact-us,
-testator wills, payments, admin wills). Built with the official `mcp` SDK
+An MCP (Model Context Protocol) server wrapping every read-only `api/`
+endpoint as a tool — 23 tools total, one per backend route (health, auth,
+contact-us, testator wills, payments, admin wills, gift vouchers). Built
+with the official `mcp` SDK
 (`MCPServer` class — this SDK version renamed `FastMCP`, don't look for
 that class name). Streamable-HTTP transport. Used exclusively by
 `chatbot/` (see that folder's `CLAUDE.md`) — no other consumer.
@@ -12,7 +13,7 @@ that class name). Streamable-HTTP transport. Used exclusively by
 ## Layout
 
 ```
-server.py                    All 21 @mcp.tool() definitions + the module-level
+server.py                    All 23 @mcp.tool() definitions + the module-level
                              `app` export (see "Deployment" below)
 client.py                     Thin async HTTP client (call()) that every tool
                              uses to reach api/ — base URL from API_BASE_URL
@@ -74,5 +75,5 @@ Same rule as every other service in this repo: `mcp/` never imports from
 cd mcp
 .venv-mcp/Scripts/python.exe -m pytest tests -q
 ```
-31 tests as of this writing. `tests/conftest.py` sets a dummy `API_BASE_URL`
+34 tests as of this writing. `tests/conftest.py` sets a dummy `API_BASE_URL`
 before import, since `client.py` now requires it with no default.

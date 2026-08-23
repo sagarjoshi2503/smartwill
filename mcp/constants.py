@@ -43,6 +43,8 @@ PATH_VERIFY_PAYMENT = "/api/payments/verify"
 PATH_MARK_PAYMENT_FAILED = "/api/payments/mark-failed"
 PATH_ADMIN_SAVE_WILL = "/api/will/admin/save"
 PATH_ADMIN_WILLS = "/api/will/admin-wills"
+PATH_VOUCHER_VERIFY = "/api/gift-voucher/verify"
+PATH_VOUCHER_ADMIN_LIST = "/api/gift-voucher/admin/list"
 
 
 def path_will(will_id: str) -> str:
@@ -83,3 +85,4 @@ FLD_RAZORPAY_ORDER_ID = "razorpay_order_id"
 FLD_RAZORPAY_PAYMENT_ID = "razorpay_payment_id"
 FLD_RAZORPAY_SIGNATURE = "razorpay_signature"
 FLD_COMMENTS = "comments"
+FLD_SEARCH = "search"

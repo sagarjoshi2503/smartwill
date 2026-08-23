@@ -12,7 +12,8 @@ from pymongo.database import Database
 
 from constants import (
     CHUNK_FLD_EMBEDDING, FAQ_CHUNKS_COLLECTION_NAME, FAQ_FLD_ANSWER, FAQ_FLD_CHUNK_ID,
-    FAQ_FLD_QUESTION, FAQ_FLD_SECTION_TITLE, MAX_SEARCH_LIMIT,
+    FAQ_FLD_QUESTION, FAQ_FLD_SECTION_TITLE, MAX_SEARCH_LIMIT, MIN_SEARCH_POOL_SIZE,
+    SEARCH_POOL_MULTIPLIER,
 )
 from embeddings import embed_query
 from search import _reciprocal_rank_fusion
@@ -51,7 +52,7 @@ def _vector_search(db: Database, query: str, pool_size: int) -> list[str]:
 
 def faq_search(db: Database, query: str, limit: int) -> list[dict]:
     limit = max(1, min(limit, MAX_SEARCH_LIMIT))
-    pool_size = max(limit * 4, 20)
+    pool_size = max(limit * SEARCH_POOL_MULTIPLIER, MIN_SEARCH_POOL_SIZE)
 
     keyword_ranked = _keyword_search(db, query, pool_size)
     vector_ranked = _vector_search(db, query, pool_size)
