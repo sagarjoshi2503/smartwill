@@ -244,7 +244,7 @@ def _render_asset_list(
         lines.append(
             f"{prefix}{label}: {v(item, 'description')} Bequeathed to: {v(item, 'beneficiary')}, "
             f"age {_age_display(ben.get('age'))}, "
-            f"Relationship to {title}: {esc(ben.get('relation')) or BLANK}, "
+            f"Relation to {title}: {esc(ben.get('relation')) or BLANK}, "
             f"having PAN {v(ben, 'pan')}, Aadhaar Number {v_aadhaar(ben, 'aadhaarNumber')}."
         )
     return lines
@@ -320,7 +320,7 @@ def _residue_clause(entries: list) -> str:
     )
 
 
-def _executor_appointment_clause(executor: dict) -> str:
+def _executor_appointment_clause(executor: dict, title: str) -> str:
     if executor.get("executorType") == "org":
         return (
             f"I appoint Organization / Entity Name: {v(executor, 'orgName')}, with Authorized Representative / "
@@ -329,17 +329,17 @@ def _executor_appointment_clause(executor: dict) -> str:
         )
     return (
         f"I appoint {v(executor, 'name')}, age {_age_display(executor.get('age'))}, "
-        f"Relationship to Testator: {v(executor, 'relation')}, "
+        f"Relation to {title}: {v(executor, 'relation')}, "
         f"Occupation: {occupation_of(executor) or BLANK}, "
         f"resident of {v(executor, 'address')}, having {_id_type_label(executor.get('idType')) or ''} "
         f"Number: {_id_number_display(executor.get('idType'), executor.get('idNumber'))}."
     )
 
 
-def _guardian_appointment_clause(guardian: dict) -> str:
+def _guardian_appointment_clause(guardian: dict, title: str) -> str:
     return (
         f"I appoint {v(guardian, 'name')}, age {_age_display(guardian.get('age'))}, "
-        f"Relation to Testator: {v(guardian, 'relation')}, "
+        f"Relation to {title}: {v(guardian, 'relation')}, "
         f"Occupation: {occupation_of(guardian) or BLANK}, resident of {v(guardian, 'address')}, "
         f"having {_id_type_label(guardian.get('idType')) or ''} "
         f"Number: {_id_number_display(guardian.get('idType'), guardian.get('idNumber'))}."
@@ -465,7 +465,7 @@ def build_pdf_context(will: dict) -> dict:
         "witnesses": [{"name": v(w, "name")} for w in witnesses],
         "show_executor": bool(executor.get("wantsExecutor")),
         "executor_type": executor_type,
-        "executor_appointment_clause": _executor_appointment_clause(executor),
+        "executor_appointment_clause": _executor_appointment_clause(executor, title),
         "executor_consent_who": (
             "the Authorized Representative of the Organization mentioned"
             if executor_type == "org" else "the Executor of the Organization mentioned"
@@ -473,6 +473,6 @@ def build_pdf_context(will: dict) -> dict:
         "executor_label_suffix": " / Representative" if executor_type == "org" else "",
         "executor_consent_name": v(executor, "orgRepName") if executor_type == "org" else v(executor, "name"),
         "show_guardian": bool(guardian.get("hasMinors")),
-        "guardian_appointment_clause": _guardian_appointment_clause(guardian),
+        "guardian_appointment_clause": _guardian_appointment_clause(guardian, title),
         "guardian_name": v(guardian, "name"),
     }
