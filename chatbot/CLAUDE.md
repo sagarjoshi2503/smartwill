@@ -96,7 +96,11 @@ anonymous visitor), same trust level as `contact_us`'s public endpoints in
 `answer`, `responsedatetime` (server-set), and `notlikedreason` — forced to
 `""` for a thumbs-up regardless of what the client sends, and required
 (1–150 chars, trimmed) for a thumbs-down. See `constants.py`'s
-`FEEDBACK_COLLECTION_NAME`/`FLD_*`/`MAX_LEN_NOT_LIKED_REASON`.
+`FEEDBACK_COLLECTION_NAME`/`FLD_*`/`MAX_LEN_NOT_LIKED_REASON`. Read (never
+written) by `api/`'s own `chatbot_feedback` feature — the Admin Portal's
+"Chatbot Feedback" grid, behind the `enable-chatbotfeedback-ui` flag —
+which connects to the same MongoDB database independently, not through
+this service.
 
 ## No hardcoded cross-environment URLs
 

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Users, Plus, Edit3, Trash2, Clock, CheckCircle2, Gift } from "lucide-react";
+import { Users, Plus, Edit3, Trash2, Clock, CheckCircle2, Gift, MessageSquare } from "lucide-react";
 import { authFetch } from "../../utils/apiBase";
 import { fmt } from "../../utils/format";
 import {
@@ -7,9 +7,12 @@ import {
   ERR_LOAD_WILL, ERR_DELETE_WILL, HEADER_CONTENT_TYPE, STATUS_DRAFT, STATUS_PENDING_REVIEW, STATUS_COMPLETED,
   STATUS_LBL, ROLE_ADMIN,
 } from "../../constants";
+import { FLAGS } from "../../flags";
+import useFlag from "../../hooks/useFlag";
 import { WILL_TYPE_LBL_SHORT } from "../../data/willTypes";
 import Pagination, { PAGE_SIZE } from "../../components/shared/Pagination";
 import GiftVoucherAdminTab from "./GiftVoucherAdminTab";
+import ChatbotFeedbackAdminTab from "./ChatbotFeedbackAdminTab";
 import type { AdminClient, AdminProfile, WillState, WillType } from "../../types";
 
 const STATUS_STYLE: Record<AdminClient["status"], string> = {
@@ -43,8 +46,9 @@ export default function AdminPortal({admin,onCreateWill,onReviewWill}:{
   const [reviewingId,setReviewingId]=useState<string|null>(null);
   const [reviewError,setReviewError]=useState("");
   const [statusFilter,setStatusFilter]=useState<"All"|AdminClient["status"]>("All");
-  const [mainTab,setMainTab]=useState<"wills"|"vouchers">("wills");
+  const [mainTab,setMainTab]=useState<"wills"|"vouchers"|"feedback">("wills");
   const [page,setPage]=useState(1);
+  const chatbotFeedbackUiEnabled = useFlag(FLAGS.chatbotFeedbackUi);
 
   const pendingReviewCount = clients.filter(c=>c.status===STATUS_PENDING_REVIEW).length;
   const completedCount = clients.filter(c=>c.status===STATUS_COMPLETED).length;
@@ -130,6 +134,9 @@ export default function AdminPortal({admin,onCreateWill,onReviewWill}:{
           {([
             {v:"wills", label:"Client Wills", icon:<Users size={13}/>},
             {v:"vouchers", label:"Gift Vouchers", icon:<Gift size={13}/>},
+            ...(chatbotFeedbackUiEnabled
+              ? [{v:"feedback", label:"Chatbot Feedback", icon:<MessageSquare size={13}/>}] as const
+              : []),
           ] as const).map(t=>(
             <button key={t.v} onClick={()=>setMainTab(t.v)}
               className={`flex items-center gap-1.5 text-sm font-semibold px-4 py-2 rounded-full border transition-colors ${mainTab===t.v?"bg-brand text-white border-brand":"bg-white text-slate-600 border-slate-200 hover:border-slate-300"}`}>
@@ -138,7 +145,7 @@ export default function AdminPortal({admin,onCreateWill,onReviewWill}:{
           ))}
         </div>
 
-        {mainTab==="vouchers" ? <GiftVoucherAdminTab/> : (<>
+        {mainTab==="vouchers" ? <GiftVoucherAdminTab/> : mainTab==="feedback" ? <ChatbotFeedbackAdminTab/> : (<>
         <div className="flex flex-wrap gap-4 mb-6">
           <div className="bg-white border border-slate-200 rounded-xl p-4 w-fit">
             <div className="text-slate-600 mb-2"><Users size={17}/></div>

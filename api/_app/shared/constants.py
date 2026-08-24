@@ -21,6 +21,11 @@ LOGIN_COLLECTION_NAME = "login"
 WILL_COLLECTION_NAME = "will"
 ADMINWILL_COLLECTION_NAME = "adminwill"
 GIFTVOUCHER_COLLECTION_NAME = "giftvoucher"
+# Written by chatbot/'s POST /chat/feedback (see chatbot/db.py,
+# chatbot/constants.py's FEEDBACK_COLLECTION_NAME — same literal value,
+# independently declared per this repo's "no shared code" rule) — api/ only
+# ever reads it, for the admin feedback grid.
+CHATBOTRESPONSES_COLLECTION_NAME = "chatbotresponses"
 # Bounded server-selection timeout for the one-off index-creation check in
 # core/db.py — deliberately short so an unreachable Mongo can't stall a
 # request behind PyMongo's much longer default timeout (index creation is
@@ -232,6 +237,16 @@ FLD_VOUCHERS = "vouchers"
 FLD_SEARCH = "search"
 FLD_RAZORPAY_ORDER_ID_CAMEL = "razorpayOrderId"
 FLD_PAYMENT_ID = "paymentId"
+
+# --- chatbotresponses fields — exact literal values chatbot/constants.py
+# writes (FLD_EMAIL there, but named FLD_EMAIL_ID here since FLD_EMAIL above
+# already means something else in this file) ---
+FLD_EMAIL_ID = "emailid"
+FLD_QUESTION = "question"
+FLD_ANSWER = "answer"
+FLD_RESPONSE_DATETIME = "responsedatetime"
+FLD_NOT_LIKED_REASON = "notlikedreason"
+FLD_FEEDBACK = "feedback"
 FLD_SIGNATURE = "signature"
 
 # --- HTTP headers ---

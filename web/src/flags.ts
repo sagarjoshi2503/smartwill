@@ -11,6 +11,7 @@ export const FLAGS = {
   showBuildNr: "show-build-nr",
   skipIdFieldsValidation: "skip-idfields-validation",
   adminReview: "enable-admin-review",
+  chatbotFeedbackUi: "enable-chatbotfeedback-ui",
 } as const;
 
 export type FlagKey = typeof FLAGS[keyof typeof FLAGS];

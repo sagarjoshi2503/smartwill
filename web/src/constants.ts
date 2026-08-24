@@ -68,6 +68,7 @@ export const API_GIFT_VOUCHER_VERIFY = "/api/gift-voucher/verify";
 export const API_GIFT_VOUCHER_REDEEM = "/api/gift-voucher/redeem";
 export const API_GIFT_VOUCHER_ADMIN_GENERATE = "/api/gift-voucher/admin/generate";
 export const API_GIFT_VOUCHER_ADMIN_LIST = "/api/gift-voucher/admin/list";
+export const API_CHATBOT_FEEDBACK_ADMIN_LIST = "/api/chatbot-feedback/admin/list";
 
 // --- Chatbot (pass to utils/chatbotBase's chatbotUrl(), a separate service — see chatbot/.env.example) ---
 export const CHATBOT_CHAT = "/chat";

@@ -37,7 +37,11 @@ _app/
   features/<name>/            One folder per feature (admin_dashboard,
                              admin_signin, admin_signup, create_will,
                              contact_us, payments, user_signin_gmail,
-                             user_signin_otp), each with
+                             user_signin_otp, gift_voucher,
+                             chatbot_feedback — the last one only reads a
+                             collection chatbot/ writes, via its own
+                             independent MONGODB_URI, see chatbot/CLAUDE.md),
+                             each with
                              router.py + service.py + repository.py +
                              schemas.py — routers own HTTP concerns only,
                              services own business logic, repositories own
@@ -102,7 +106,7 @@ this has been enforced deliberately across the whole repo.
 cd api
 .venv-api/Scripts/python.exe -m pytest _app/tests -q   # Windows venv used in this repo
 ```
-272 tests as of this writing. `_app/tests/conftest.py`'s `configured_settings`
+279 tests as of this writing. `_app/tests/conftest.py`'s `configured_settings`
 fixture constructs `Settings(...)` directly for tests that need specific
 values; other fields still resolve from `.env.local` since pydantic-settings
 merges explicit kwargs with the env file.
