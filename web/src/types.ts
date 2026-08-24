@@ -170,6 +170,7 @@ export interface AllIndiaResidueEntry {
   relationOther: string;
   name: string;
   age: string;
+  maritalStatus: string;
   nationality: string;
   occupation: string;
   occupationOther: string;

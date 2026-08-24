@@ -73,7 +73,7 @@ export const DEFAULT_WILL: WillState = {
   // Residuary beneficiaries for the All India Will format (relationship,
   // name, nationality, occupation, ID proof — more than one allowed) — only
   // used when willType==="allindia".
-  allIndiaResidue:[{relation:"",relationOther:"",name:"",age:"",nationality:"",occupation:"",occupationOther:"",address:"",idType:"Aadhaar Card",idNumber:""}],
+  allIndiaResidue:[{relation:"",relationOther:"",name:"",age:"",maritalStatus:"",nationality:"",occupation:"",occupationOther:"",address:"",idType:"Aadhaar Card",idNumber:""}],
   // Goan Will format — only used/shown when willType==="goan". nationality
   // defaults to "Indian" to match the reference form (still fully editable).
   goanTestator: newGoanPerson(),

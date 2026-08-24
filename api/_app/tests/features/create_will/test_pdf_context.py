@@ -1,5 +1,5 @@
 from _app.features.create_will.pdf_context import (
-    _format_aadhaar, _id_number_display, build_pdf_context, date_ddmmyyyy, number_to_words, occupation_of,
+    BLANK, _format_aadhaar, _id_number_display, build_pdf_context, date_ddmmyyyy, number_to_words, occupation_of,
     ordinal, rel_of, v_aadhaar, year_in_words,
 )
 
@@ -156,6 +156,81 @@ def test_title_resolution_by_gender():
     assert build_pdf_context(_will(testator={"fullName": "Jane", "gender": "male", "maritalStatus": "unmarried", "sonNames": [], "daughterNames": []}))["title"] == "Testator"
     assert build_pdf_context(_will(testator={"fullName": "Jane", "gender": "female", "maritalStatus": "unmarried", "sonNames": [], "daughterNames": []}))["title"] == "Testatrix"
     assert build_pdf_context(_will(testator={"fullName": "Jane", "maritalStatus": "unmarried", "sonNames": [], "daughterNames": []}))["title"] == "Testator/Testatrix"
+
+
+# --- asset bequest lines: beneficiary marital status + address ---
+
+def test_asset_line_includes_beneficiary_marital_status_and_address():
+    will = _will(
+        beneficiaries=[{
+            "name": "Bob", "age": "40", "maritalStatus": "Married", "relation": "Son",
+            "address": "123 Main St", "pan": "ABCDE1234F", "aadhaarNumber": "111122223333",
+        }],
+    )
+    will["allIndiaAssets"]["vehicle"] = [{"description": "Car 1", "beneficiary": "Bob"}]
+    ctx = build_pdf_context(will)
+    line = ctx["vehicle_lines"][0]
+    assert "age 40, Married," in line
+    assert "resident of 123 Main St" in line
+    assert "Relation to Testator/Testatrix: Son" in line
+
+
+def test_asset_line_falls_back_to_blank_when_beneficiary_marital_status_missing():
+    will = _will(beneficiaries=[{"name": "Bob"}])
+    will["allIndiaAssets"]["vehicle"] = [{"description": "Car 1", "beneficiary": "Bob"}]
+    ctx = build_pdf_context(will)
+    assert f", {BLANK}," in "".join(ctx["vehicle_lines"])
+
+
+# --- residue clause: marital status + "Relation to Testator:" label ---
+
+def test_residue_clause_includes_marital_status_and_relation_label():
+    will = _will(
+        testator={"fullName": "Jane", "gender": "male", "maritalStatus": "unmarried", "sonNames": [], "daughterNames": []},
+        allIndiaResidue=[{
+            "name": "Sam", "age": "35", "maritalStatus": "Widowed", "relation": "Brother",
+            "nationality": "Indian", "occupation": "Business", "address": "456 Park Ave",
+            "idType": "PAN Card", "idNumber": "SAMPN1234E",
+        }],
+    )
+    clause = build_pdf_context(will)["residue_clause"]
+    assert "Sam, age 35, Widowed, Relation to Testator: Brother" in clause
+
+
+def test_residue_clause_multiple_entries_each_carry_relation_label():
+    will = _will(
+        allIndiaResidue=[
+            {"name": "Sam", "age": "35", "maritalStatus": "Widowed", "relation": "Brother", "idType": "PAN Card", "idNumber": "A"},
+            {"name": "Amy", "age": "30", "maritalStatus": "Married", "relation": "Sister", "idType": "PAN Card", "idNumber": "B"},
+        ],
+    )
+    clause = build_pdf_context(will)["residue_clause"]
+    assert "Relation to Testator/Testatrix: Brother" in clause
+    assert "Relation to Testator/Testatrix: Sister" in clause
+
+
+# --- Special Non-Asset Instructions: fixed lead-in sentence (template-level) ---
+
+def test_special_instructions_context_value_unchanged_lead_in_lives_in_template():
+    # The fixed lead-in sentence ("I hereby direct my Executor and family
+    # members...") is static boilerplate added directly in
+    # all_india_will.yaml.j2, not composed here — this just confirms the
+    # context still passes through the testator's free text untouched.
+    ctx = build_pdf_context(_will(specialInstructions="Please look after my dog."))
+    assert ctx["special_instructions"] == "Please look after my dog."
+
+
+# --- opening clause: spouse Aadhaar-before-PAN order/wording ---
+
+def test_opening_clause_spouse_aadhaar_before_pan():
+    will = _will(testator={
+        "fullName": "Jane", "maritalStatus": "married", "sonNames": [], "daughterNames": [],
+        "spouseName": "John", "spousePan": "SPOUS1234E", "spouseAadhaarNumber": "444455556666",
+    })
+    clause = build_pdf_context(will)["opening_clause"]
+    aadhaar_pos = clause.index("Aadhaar Number 4444 5555 6666")
+    pan_pos = clause.index("PAN Number SPOUS1234E")
+    assert aadhaar_pos < pan_pos
 
 
 # --- XML-escaping of user-supplied text (ReportLab's Paragraph parses a

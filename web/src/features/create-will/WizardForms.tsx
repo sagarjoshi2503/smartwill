@@ -869,7 +869,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
             <FormBlock title="Section V — Rest & Residue Clause">
               <p className="text-slate-500 text-xs mb-3 leading-relaxed">Even with careful planning, it's possible to miss mentioning an asset in this Will, or to acquire something new after signing it. A residuary clause is a safety net for exactly this. Any such asset should go to the following (more than one beneficiary shares equally):</p>
               {will.allIndiaResidue.map((entry,idx)=>{
-                const setEntry=(field: "relation"|"relationOther"|"name"|"age"|"nationality"|"occupation"|"occupationOther"|"address"|"idType"|"idNumber", value: string)=>
+                const setEntry=(field: "relation"|"relationOther"|"name"|"age"|"maritalStatus"|"nationality"|"occupation"|"occupationOther"|"address"|"idType"|"idNumber", value: string)=>
                   setWill(p=>({...p, allIndiaResidue:p.allIndiaResidue.map((e,j)=>j===idx?{...e,[field]:value}:e)}));
                 return(
                   <div key={idx} className="bg-slate-50 border border-slate-200 rounded-xl p-3 mb-2.5">
@@ -888,12 +888,18 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                           {NONGOAN_RELATIONSHIP_OPTIONS.map(r=><option key={r}>{r}</option>)}
                         </select>
                       </div>
-                      <div><label className={LC}>Nationality</label><input value={entry.nationality} onChange={e=>setEntry("nationality",e.target.value)} maxLength={MAX_LEN_NATIONALITY} className={IC} placeholder="e.g. Indian"/></div>
+                      <div><label className={LC}>Marital Status</label>
+                        <select value={entry.maritalStatus} onChange={e=>setEntry("maritalStatus",e.target.value)} className={IC+" appearance-none"}>
+                          <option value="">Select...</option>
+                          <option>Married</option><option>Unmarried</option><option>Widowed</option><option>Divorced</option>
+                        </select>
+                      </div>
                     </div>
                     {entry.relation==="Other"&&(
                       <div className="mb-2.5"><label className={LC}>Please specify relationship</label>
                         <input value={entry.relationOther} onChange={e=>setEntry("relationOther",e.target.value)} maxLength={MAX_LEN_RELATION_OTHER} className={IC}/></div>
                     )}
+                    <div className="mb-2.5"><label className={LC}>Nationality</label><input value={entry.nationality} onChange={e=>setEntry("nationality",e.target.value)} maxLength={MAX_LEN_NATIONALITY} className={IC} placeholder="e.g. Indian"/></div>
                     <div className="mb-2.5"><label className={LC}>Occupation</label>
                       <select value={entry.occupation} onChange={e=>setEntry("occupation",e.target.value)} className={IC+" appearance-none"}>
                         <option value="">Select...</option>
@@ -917,7 +923,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                   </div>
                 );
               })}
-              <button onClick={()=>setWill(p=>({...p, allIndiaResidue:[...p.allIndiaResidue,{relation:"",relationOther:"",name:"",age:"",nationality:"",occupation:"",occupationOther:"",address:"",idType:"Aadhaar Card",idNumber:""}]}))}
+              <button onClick={()=>setWill(p=>({...p, allIndiaResidue:[...p.allIndiaResidue,{relation:"",relationOther:"",name:"",age:"",maritalStatus:"",nationality:"",occupation:"",occupationOther:"",address:"",idType:"Aadhaar Card",idNumber:""}]}))}
                 className="text-xs text-brand hover:text-brand-dark font-semibold flex items-center gap-1"><Plus size={12}/>Add another beneficiary</button>
             </FormBlock>
           ):willType==="goan"?(

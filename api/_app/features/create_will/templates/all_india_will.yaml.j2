@@ -106,6 +106,8 @@
 - type: subheading
   text: {{ (letter_special_instructions ~ ". " ~ section_title_special_instructions ~ ":") | yamlstr }}
 - type: paragraph
+  text: {{ "I hereby direct my Executor and family members to carry out the following personal requests:" | yamlstr }}
+- type: paragraph
   text: {{ special_instructions | yamlstr }}
 {% endif %}
 - type: paragraph

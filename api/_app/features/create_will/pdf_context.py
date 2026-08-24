@@ -243,8 +243,9 @@ def _render_asset_list(
         ben = _find_beneficiary(beneficiaries, item.get("beneficiary"))
         lines.append(
             f"{prefix}{label}: {v(item, 'description')} Bequeathed to: {v(item, 'beneficiary')}, "
-            f"age {_age_display(ben.get('age'))}, "
+            f"age {_age_display(ben.get('age'))}, {esc(ben.get('maritalStatus')) or BLANK}, "
             f"Relation to {title}: {esc(ben.get('relation')) or BLANK}, "
+            f"resident of {v(ben, 'address')}, "
             f"having PAN {v(ben, 'pan')}, Aadhaar Number {v_aadhaar(ben, 'aadhaarNumber')}."
         )
     return lines
@@ -290,8 +291,9 @@ def _opening_clause(testator: dict, witnesses: list, execution_date_str: str) ->
         son_join = esc(", ".join(son_names)) or BLANK
         daughter_join = esc(", ".join(daughter_names)) or BLANK
         clause += (
-            f", I am married to {v(testator, 'spouseName')}, having PAN {v(testator, 'spousePan')}, "
-            f"Aadhaar Number {v_aadhaar(testator, 'spouseAadhaarNumber')} "
+            f", I am married to {v(testator, 'spouseName')}, "
+            f"having Aadhaar Number {v_aadhaar(testator, 'spouseAadhaarNumber')}, "
+            f"PAN Number {v(testator, 'spousePan')} "
             f"and I have {son_count} son, namely, {son_join} and {daughter_count} daughter, namely, {daughter_join}"
         )
     witness_particulars = _witness_particulars_text(witnesses)
@@ -299,15 +301,16 @@ def _opening_clause(testator: dict, witnesses: list, execution_date_str: str) ->
     return clause
 
 
-def _residue_clause(entries: list) -> str:
+def _residue_clause(entries: list, title: str) -> str:
     prefix = "the following, in equal shares: " if len(entries) > 1 else ""
     parts = []
     for i, entry in enumerate(entries):
         id_type = entry.get("idType") or "Aadhaar Card"
         suffix = "; " if i < len(entries) - 1 else "."
         parts.append(
-            f"{rel_of(entry) or BLANK}, {v(entry, 'name')}, age {_age_display(entry.get('age'))}, "
-            f"{_national(entry)}, "
+            f"{v(entry, 'name')}, age {_age_display(entry.get('age'))}, "
+            f"{esc(entry.get('maritalStatus')) or BLANK}, "
+            f"Relation to {title}: {rel_of(entry) or BLANK}, {_national(entry)}, "
             f"occupation {occupation_of(entry) or BLANK}, resident of {v(entry, 'address')}, "
             f"having {_id_type_label(id_type)} "
             f"Number: {_id_number_display(id_type, entry.get('idNumber'))}{suffix}"
@@ -457,7 +460,7 @@ def build_pdf_context(will: dict) -> dict:
             intellectual_property, ASSET_LABEL_INTELLECTUAL_PROPERTY, title, beneficiaries,
         ),
         "has_residue": bool(all_india_residue),
-        "residue_clause": _residue_clause(all_india_residue),
+        "residue_clause": _residue_clause(all_india_residue, title),
         "special_instructions": special_instructions,
         "testator_full_name": v(testator, "fullName"),
         "testator_sign_place": v(testator, "signPlace"),
