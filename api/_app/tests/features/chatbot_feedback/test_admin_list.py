@@ -37,12 +37,23 @@ def test_admin_list_includes_every_field(client, fake_db, admin_auth_headers):
     assert item["emailid"] == "jane@example.com"
     assert item["question"] == "How do I revoke a will?"
     assert item["answer"] == "You can revoke it by..."
-    # mongomock round-trips datetimes as naive (strips tzinfo) — a real
-    # Mongo driver preserves it, but either way this just confirms the
-    # service layer calls .isoformat() rather than returning the raw
-    # datetime object (which FastAPI/pydantic couldn't serialize to `str`).
+    # pymongo (real driver too, not just mongomock) round-trips datetimes
+    # as naive (strips tzinfo) — this confirms the service layer both
+    # calls .isoformat() (rather than returning the raw datetime object,
+    # which FastAPI/pydantic couldn't serialize to `str`) and re-attaches
+    # UTC before doing so (see the explicit-offset test below).
     assert item["responsedatetime"].startswith("2026-01-15T10:30:00")
     assert item["notlikedreason"] == ""
+
+
+def test_admin_list_response_datetime_carries_an_explicit_utc_offset(client, fake_db, admin_auth_headers):
+    # Without this, a frontend `new Date(...)` on this string would be
+    # misread as local time instead of UTC (see service.py's _iso()).
+    _insert(fake_db)
+
+    res = client.get(URL, headers=admin_auth_headers())
+
+    assert res.json()["feedback"][0]["responsedatetime"].endswith("+00:00")
 
 
 def test_admin_list_sorted_most_recent_first(client, fake_db, admin_auth_headers):

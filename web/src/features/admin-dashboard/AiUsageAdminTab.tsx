@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Search, Download } from "lucide-react";
 import { authFetch } from "../../utils/apiBase";
+import { formatIST } from "../../utils/format";
 import { API_AI_USAGE_ADMIN_LIST, CONTENT_TYPE_JSON, HEADER_CONTENT_TYPE, ROLE_ADMIN } from "../../constants";
 
 interface AiUsageItem {
@@ -16,7 +17,7 @@ interface AiUsageItem {
   updateddate: string | null;
 }
 
-const CSV_COLUMNS: { key: keyof AiUsageItem; label: string }[] = [
+const CSV_COLUMNS: { key: keyof AiUsageItem; label: string; format?: (v: AiUsageItem[keyof AiUsageItem]) => string }[] = [
   { key: "emailid", label: "Email" },
   { key: "threadid", label: "Thread ID" },
   { key: "role", label: "Role" },
@@ -25,8 +26,11 @@ const CSV_COLUMNS: { key: keyof AiUsageItem; label: string }[] = [
   { key: "outputtokens", label: "Output Tokens" },
   { key: "requests", label: "Requests" },
   { key: "cost", label: "Cost (USD)" },
-  { key: "createddate", label: "Created" },
-  { key: "updateddate", label: "Updated" },
+  // Exported as IST too, matching what the grid itself shows — the raw
+  // value stored/returned is UTC (see api/_app/features/ai_usage/service.py's
+  // _iso()); only display (grid and CSV alike) converts to IST.
+  { key: "createddate", label: "Created (IST)", format: v=>formatIST(v as string | null) },
+  { key: "updateddate", label: "Updated (IST)", format: v=>formatIST(v as string | null) },
 ];
 
 // Quotes/escapes per RFC 4180 — only wraps a field in quotes (doubling any
@@ -40,7 +44,7 @@ const csvCell = (value: unknown): string => {
 const downloadCsv = (rows: AiUsageItem[]) => {
   const lines = [
     CSV_COLUMNS.map(c=>csvCell(c.label)).join(","),
-    ...rows.map(r=>CSV_COLUMNS.map(c=>csvCell(r[c.key])).join(",")),
+    ...rows.map(r=>CSV_COLUMNS.map(c=>csvCell(c.format ? c.format(r[c.key]) : r[c.key])).join(",")),
   ];
   const blob = new Blob([lines.join("\r\n")], { type: "text/csv;charset=utf-8;" });
   const url = URL.createObjectURL(blob);
@@ -100,7 +104,7 @@ export default function AiUsageAdminTab(){
           <div className="overflow-x-auto">
             <table className="w-full text-xs">
               <thead><tr className="border-b border-slate-200">
-                {["Email","Thread ID","Role","Model","Input Tokens","Output Tokens","Requests","Cost (USD)","Created","Updated"].map(h=>(
+                {["Email","Thread ID","Role","Model","Input Tokens","Output Tokens","Requests","Cost (USD)","Created (IST)","Updated (IST)"].map(h=>(
                   <th key={h} className="text-left px-2 py-2 font-bold text-slate-400 uppercase tracking-wide whitespace-nowrap">{h}</th>
                 ))}
               </tr></thead>
@@ -115,8 +119,8 @@ export default function AiUsageAdminTab(){
                     <td className="px-2 py-2 text-slate-600 whitespace-nowrap text-right">{r.outputtokens.toLocaleString("en-IN")}</td>
                     <td className="px-2 py-2 text-slate-600 whitespace-nowrap text-right">{r.requests.toLocaleString("en-IN")}</td>
                     <td className="px-2 py-2 text-slate-600 whitespace-nowrap text-right">${r.cost.toFixed(4)}</td>
-                    <td className="px-2 py-2 text-slate-500 whitespace-nowrap">{r.createddate ? new Date(r.createddate).toLocaleString() : "—"}</td>
-                    <td className="px-2 py-2 text-slate-500 whitespace-nowrap">{r.updateddate ? new Date(r.updateddate).toLocaleString() : "—"}</td>
+                    <td className="px-2 py-2 text-slate-500 whitespace-nowrap">{formatIST(r.createddate)}</td>
+                    <td className="px-2 py-2 text-slate-500 whitespace-nowrap">{formatIST(r.updateddate)}</td>
                   </tr>
                 ))}
               </tbody>

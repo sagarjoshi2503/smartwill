@@ -106,7 +106,7 @@ this has been enforced deliberately across the whole repo.
 cd api
 .venv-api/Scripts/python.exe -m pytest _app/tests -q   # Windows venv used in this repo
 ```
-292 tests as of this writing. `_app/tests/conftest.py`'s `configured_settings`
+294 tests as of this writing. `_app/tests/conftest.py`'s `configured_settings`
 fixture constructs `Settings(...)` directly for tests that need specific
 values; other fields still resolve from `.env.local` since pydantic-settings
 merges explicit kwargs with the env file.

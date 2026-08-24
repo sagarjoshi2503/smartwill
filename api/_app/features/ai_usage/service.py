@@ -1,3 +1,5 @@
+from datetime import timezone
+
 from pymongo.database import Database
 
 from _app.features.ai_usage import repository
@@ -8,7 +10,18 @@ from _app.shared.constants import (
 
 
 def _iso(value):
-    return value.isoformat() if value is not None and hasattr(value, "isoformat") else value
+    if value is None or not hasattr(value, "isoformat"):
+        return value
+    # pymongo returns naive datetimes (no tzinfo) even though every value
+    # this service reads was written as datetime.now(timezone.utc) on the
+    # writing side (chatbot/ai_usage.py) — attach UTC explicitly before
+    # formatting. Without this, the resulting string has no offset, and a
+    # frontend `new Date(...)` on it is interpreted as the browser's local
+    # time instead of UTC, silently corrupting any timezone conversion
+    # (e.g. the admin grid's IST display).
+    if value.tzinfo is None:
+        value = value.replace(tzinfo=timezone.utc)
+    return value.isoformat()
 
 
 def admin_list(db: Database, search: str | None = None) -> dict:

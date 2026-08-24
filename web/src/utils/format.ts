@@ -13,6 +13,23 @@ export const dateDDMMYYYY = (day: string | number, month: string, year: string |
 
 export const fmt = (n: number): string => "₹" + n.toLocaleString("en-IN");
 
+// Renders a UTC ISO datetime string (as stored in Mongo/returned by the
+// API — see api/_app/features/ai_usage/service.py's _iso()) as IST
+// (Asia/Kolkata), regardless of the viewer's own browser/OS timezone —
+// admin dashboard grids should show one consistent timezone for everyone,
+// not whatever timezone happens to be reading it. Storage stays UTC; only
+// display converts.
+export const formatIST = (isoUtc: string | null | undefined): string => {
+  if(!isoUtc) return "—";
+  const d = new Date(isoUtc);
+  if(Number.isNaN(d.getTime())) return "—";
+  return d.toLocaleString("en-IN", {
+    timeZone: "Asia/Kolkata",
+    day: "2-digit", month: "short", year: "numeric",
+    hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: true,
+  });
+};
+
 const now = new Date();
 export const today = { day: now.getDate(), month: MONTHS[now.getMonth()], year: now.getFullYear() };
 

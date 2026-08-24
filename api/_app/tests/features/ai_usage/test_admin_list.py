@@ -51,6 +51,20 @@ def test_admin_list_includes_every_field(client, fake_db, admin_auth_headers):
     assert item["updateddate"].startswith("2026-01-15T10:35:00")
 
 
+def test_admin_list_dates_carry_an_explicit_utc_offset(client, fake_db, admin_auth_headers):
+    # mongomock (and real pymongo) return naive datetimes even though the
+    # stored value is UTC — without an explicit "+00:00" suffix, a
+    # frontend `new Date(...)` on this string would be misread as local
+    # time instead of UTC (see service.py's _iso()).
+    _insert(fake_db)
+
+    res = client.get(URL, headers=admin_auth_headers())
+
+    item = res.json()["aiUsage"][0]
+    assert item["createddate"].endswith("+00:00")
+    assert item["updateddate"].endswith("+00:00")
+
+
 def test_admin_list_sorted_most_recently_updated_first(client, fake_db, admin_auth_headers):
     _insert(fake_db, emailid="older@example.com", threadid="t1", updateddate=datetime(2026, 1, 1, tzinfo=timezone.utc))
     _insert(fake_db, emailid="newer@example.com", threadid="t2", updateddate=datetime(2026, 1, 20, tzinfo=timezone.utc))
