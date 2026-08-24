@@ -44,10 +44,12 @@ class FakeAsyncClient:
 @pytest.fixture(autouse=True)
 def _clear_cache_and_patch(monkeypatch):
     feature_flags._cache.clear()
+    feature_flags._bool_cache.clear()
     monkeypatch.setattr(feature_flags.httpx, "AsyncClient", FakeAsyncClient)
     FakeAsyncClient.next_exception = None
     yield
     feature_flags._cache.clear()
+    feature_flags._bool_cache.clear()
 
 
 def test_returns_string_value_from_flags_service():
@@ -101,3 +103,49 @@ def test_cache_expires_after_ttl(monkeypatch):
 
     assert first == "rag"
     assert second == "mcp"
+
+
+# --- get_flag_enabled (plain boolean flags, e.g. "log-ai-usage") ---
+
+def test_get_flag_enabled_returns_true_when_flag_on():
+    FakeAsyncClient.next_response = FakeResponse({"enabled": True, "value": "true"})
+
+    result = asyncio.run(feature_flags.get_flag_enabled("log-ai-usage", default=False))
+
+    assert result is True
+    assert FakeAsyncClient.last_params == {"key": "log-ai-usage"}
+
+
+def test_get_flag_enabled_returns_false_when_flag_off():
+    FakeAsyncClient.next_response = FakeResponse({"enabled": False, "value": "false"})
+
+    result = asyncio.run(feature_flags.get_flag_enabled("log-ai-usage", default=True))
+
+    assert result is False
+
+
+def test_get_flag_enabled_falls_back_to_default_on_request_failure():
+    FakeAsyncClient.next_exception = ConnectionError("smartwill-flags unreachable")
+
+    result = asyncio.run(feature_flags.get_flag_enabled("log-ai-usage", default=False))
+
+    assert result is False
+
+
+def test_get_flag_enabled_falls_back_to_default_when_enabled_field_missing():
+    FakeAsyncClient.next_response = FakeResponse({"value": "true"})
+
+    result = asyncio.run(feature_flags.get_flag_enabled("log-ai-usage", default=False))
+
+    assert result is False
+
+
+def test_get_flag_enabled_and_get_flag_value_caches_are_independent():
+    FakeAsyncClient.next_response = FakeResponse({"enabled": True, "value": "rag"})
+    bool_result = asyncio.run(feature_flags.get_flag_enabled("use-rag-or-mcp", default=False))
+
+    FakeAsyncClient.next_response = FakeResponse({"enabled": False, "value": "mcp"})
+    str_result = asyncio.run(feature_flags.get_flag_value("use-rag-or-mcp", default="mcp"))
+
+    assert bool_result is True
+    assert str_result == "mcp"

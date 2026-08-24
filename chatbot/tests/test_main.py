@@ -26,9 +26,10 @@ class FakeToolUseBlock:
 
 
 class FakeMessage:
-    def __init__(self, stop_reason, content):
+    def __init__(self, stop_reason, content, input_tokens=10, output_tokens=5):
         self.stop_reason = stop_reason
         self.content = content
+        self.usage = SimpleNamespace(input_tokens=input_tokens, output_tokens=output_tokens)
 
 
 class FakeMessagesApi:
@@ -36,7 +37,7 @@ class FakeMessagesApi:
         self._responses = list(responses)
         self.calls = []
 
-    def create(self, **kwargs):
+    async def create(self, **kwargs):
         self.calls.append(kwargs)
         return self._responses.pop(0)
 
@@ -495,3 +496,153 @@ def test_chat_stops_after_max_tool_iterations(monkeypatch, client):
     assert res.status_code == 200
     assert len(fake_messages.calls) == 2
     assert "try rephrasing" in res.json()["reply"]
+
+
+# --- AI usage logging (POST /chat, behind "log-ai-usage") ---
+
+def _patch_log_ai_usage(monkeypatch):
+    calls = []
+
+    def fake_log_ai_usage(db, **kwargs):
+        calls.append(kwargs)
+
+    monkeypatch.setattr(main, "log_ai_usage", fake_log_ai_usage)
+    monkeypatch.setattr(main, "get_db", lambda: "fake-db")
+    return calls
+
+
+def test_chat_logs_usage_when_flag_enabled_and_thread_id_present(monkeypatch, client):
+    session = FakeSession()
+    patch_session(monkeypatch, session)
+    calls = _patch_log_ai_usage(monkeypatch)
+
+    async def fake_get_flag_enabled(key, *, default):
+        return key == "log-ai-usage"
+
+    monkeypatch.setattr(main, "get_flag_enabled", fake_get_flag_enabled)
+    fake_messages = FakeMessagesApi([FakeMessage("end_turn", [FakeTextBlock("hi")], input_tokens=42, output_tokens=7)])
+    monkeypatch.setattr(main.client, "messages", fake_messages)
+
+    res = client.post(
+        "/chat",
+        json={"messages": [{"role": "user", "content": "x"}], "email": "a@b.com", "role": "testator", "threadId": "t1"},
+    )
+
+    assert res.status_code == 200
+    assert len(calls) == 1
+    assert calls[0]["email"] == "a@b.com"
+    assert calls[0]["role"] == "testator"
+    assert calls[0]["thread_id"] == "t1"
+    assert calls[0]["input_tokens"] == 42
+    assert calls[0]["output_tokens"] == 7
+    assert calls[0]["requests"] == 1
+
+
+def test_chat_skips_logging_when_flag_disabled(monkeypatch, client):
+    session = FakeSession()
+    patch_session(monkeypatch, session)
+    calls = _patch_log_ai_usage(monkeypatch)
+
+    async def fake_get_flag_enabled(key, *, default):
+        return False
+
+    monkeypatch.setattr(main, "get_flag_enabled", fake_get_flag_enabled)
+    fake_messages = FakeMessagesApi([FakeMessage("end_turn", [FakeTextBlock("hi")])])
+    monkeypatch.setattr(main.client, "messages", fake_messages)
+
+    client.post("/chat", json={"messages": [{"role": "user", "content": "x"}], "threadId": "t1"})
+
+    assert calls == []
+
+
+def test_chat_skips_logging_when_thread_id_missing(monkeypatch, client):
+    session = FakeSession()
+    patch_session(monkeypatch, session)
+    calls = _patch_log_ai_usage(monkeypatch)
+
+    async def fake_get_flag_enabled(key, *, default):
+        return True
+
+    monkeypatch.setattr(main, "get_flag_enabled", fake_get_flag_enabled)
+    fake_messages = FakeMessagesApi([FakeMessage("end_turn", [FakeTextBlock("hi")])])
+    monkeypatch.setattr(main.client, "messages", fake_messages)
+
+    client.post("/chat", json={"messages": [{"role": "user", "content": "x"}]})
+
+    assert calls == []
+
+
+def test_chat_accumulates_usage_across_tool_iterations(monkeypatch, client):
+    session = FakeSession(call_tool_response=FakeCallResult("ok"))
+    patch_session(monkeypatch, session)
+    calls = _patch_log_ai_usage(monkeypatch)
+
+    async def fake_get_flag_enabled(key, *, default):
+        return True
+
+    monkeypatch.setattr(main, "get_flag_enabled", fake_get_flag_enabled)
+    fake_messages = FakeMessagesApi([
+        FakeMessage("tool_use", [FakeToolUseBlock("tu_1", "health_check", {})], input_tokens=10, output_tokens=5),
+        FakeMessage("end_turn", [FakeTextBlock("done")], input_tokens=20, output_tokens=8),
+    ])
+    monkeypatch.setattr(main.client, "messages", fake_messages)
+
+    client.post("/chat", json={"messages": [{"role": "user", "content": "x"}], "threadId": "t1"})
+
+    assert len(calls) == 1
+    assert calls[0]["input_tokens"] == 30
+    assert calls[0]["output_tokens"] == 13
+    assert calls[0]["requests"] == 2
+
+
+def test_chat_logs_usage_even_when_response_is_unavailable(monkeypatch, client):
+    # A partial failure (e.g. MCP dies mid-conversation) still means Claude
+    # already billed for whichever calls did complete before the failure.
+    session = FakeSession()
+    patch_session(monkeypatch, session)
+    calls = _patch_log_ai_usage(monkeypatch)
+
+    async def fake_get_flag_enabled(key, *, default):
+        return True
+
+    monkeypatch.setattr(main, "get_flag_enabled", fake_get_flag_enabled)
+
+    class FailingMessagesApi:
+        async def create(self, **kwargs):
+            return FakeMessage("tool_use", [FakeToolUseBlock("tu_1", "health_check", {})])
+
+    monkeypatch.setattr(main.client, "messages", FailingMessagesApi())
+
+    async def failing_call_tool(name, args):
+        raise ConnectionError("mcp down")
+
+    session.call_tool = failing_call_tool
+
+    res = client.post("/chat", json={"messages": [{"role": "user", "content": "x"}], "threadId": "t1"})
+
+    assert res.json()["unavailable"] is True
+    assert len(calls) == 1
+    assert calls[0]["requests"] == 1
+
+
+def test_chat_logging_failure_does_not_break_chat_response(monkeypatch, client):
+    session = FakeSession()
+    patch_session(monkeypatch, session)
+
+    def raising_log_ai_usage(db, **kwargs):
+        raise ConnectionError("mongo unreachable")
+
+    monkeypatch.setattr(main, "log_ai_usage", raising_log_ai_usage)
+    monkeypatch.setattr(main, "get_db", lambda: "fake-db")
+
+    async def fake_get_flag_enabled(key, *, default):
+        return True
+
+    monkeypatch.setattr(main, "get_flag_enabled", fake_get_flag_enabled)
+    fake_messages = FakeMessagesApi([FakeMessage("end_turn", [FakeTextBlock("hi")])])
+    monkeypatch.setattr(main.client, "messages", fake_messages)
+
+    res = client.post("/chat", json={"messages": [{"role": "user", "content": "x"}], "threadId": "t1"})
+
+    assert res.status_code == 200
+    assert res.json()["reply"] == "hi"

@@ -57,7 +57,7 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onDownloa
   const noTrailingPages = !showExecutor && !showGuardian;
 
   const SigLine = ({className}:{className?: string})=>(
-    <p className={`pdf-sig-line mb-0 ${className||""}`}>Testator's Signature: __________ Witness 1: ______ Witness 2: ______</p>
+    <p className={`pdf-sig-line mb-0 ${className||""}`}>Testator's/Testatrix's Signature: __________ Witness 1: ______ Witness 2: ______</p>
   );
 
   // Every page — including the last — gets this attestation line pinned to

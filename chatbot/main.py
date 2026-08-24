@@ -1,3 +1,4 @@
+import asyncio
 import json
 import logging
 import os
@@ -9,17 +10,18 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 import rag_client
+from ai_usage import log_ai_usage
 from constants import (
     CORS_ALLOW_HEADERS, CORS_ALLOW_METHODS, DEFAULT_HOST, DEFAULT_PORT, DEFAULT_RETRIEVAL_MODE,
     DEFAULT_SEARCH_LIMIT, ENV_CORS_ALLOW_ORIGINS, ERR_CORS_ALLOW_ORIGINS_REQUIRED, ERR_QUESTION_AND_ANSWER_REQUIRED,
-    ERR_REASON_REQUIRED, ERR_REASON_TOO_LONG, FEEDBACK_COLLECTION_NAME, FLAG_USE_RAG_OR_MCP, FLD_ANSWER, FLD_EMAIL,
-    FLD_LIMIT, FLD_NOT_LIKED_REASON, FLD_QUERY, FLD_QUESTION, FLD_RESPONSE_DATETIME, FLD_TOKEN, INCOMPLETE_REPLY,
-    MAX_LEN_NOT_LIKED_REASON, MAX_TOKENS, MAX_TOOL_ITERATIONS, MODEL, MSG_ROLE_ASSISTANT, MSG_ROLE_USER,
-    REFUSAL_REPLY, RETRIEVAL_MODE_RAG, STOP_REASON_REFUSAL, STOP_REASON_TOOL_USE, SYSTEM_PROMPT, TOOL_SEARCH_FAQ,
-    TOOL_SEARCH_WILLS, UNAVAILABLE_REPLY, err_tool_not_available, err_tool_result,
+    ERR_REASON_REQUIRED, ERR_REASON_TOO_LONG, FEEDBACK_COLLECTION_NAME, FLAG_LOG_AI_USAGE, FLAG_USE_RAG_OR_MCP,
+    FLD_ANSWER, FLD_EMAIL, FLD_LIMIT, FLD_NOT_LIKED_REASON, FLD_QUERY, FLD_QUESTION, FLD_RESPONSE_DATETIME,
+    FLD_TOKEN, INCOMPLETE_REPLY, MAX_LEN_NOT_LIKED_REASON, MAX_TOKENS, MAX_TOOL_ITERATIONS, MODEL, MSG_ROLE_ASSISTANT,
+    MSG_ROLE_USER, REFUSAL_REPLY, RETRIEVAL_MODE_RAG, STOP_REASON_REFUSAL, STOP_REASON_TOOL_USE, SYSTEM_PROMPT,
+    TOOL_SEARCH_FAQ, TOOL_SEARCH_WILLS, UNAVAILABLE_REPLY, err_tool_not_available, err_tool_result,
 )
 from db import get_db
-from feature_flags import get_flag_value
+from feature_flags import get_flag_enabled, get_flag_value
 from mcp_client import open_session
 from tools import TOOLS_REQUIRING_TOKEN, allowed_tool_names, claude_tools_for_role, faq_tool_for_role, rag_tool_for_role
 
@@ -45,7 +47,12 @@ app.add_middleware(
     allow_headers=CORS_ALLOW_HEADERS,
 )
 
-client = anthropic.Anthropic()
+# Async client, awaited below — client.messages.create() is a blocking
+# network call; the sync Anthropic() client would freeze this whole
+# service's event loop for the entire duration of every Claude API call
+# (often several seconds, more with multiple tool-use iterations), so no
+# other request — including /chat/healthz — could be served concurrently.
+client = anthropic.AsyncAnthropic()
 
 
 # vercel.json only rewrites "/chat" to this service — nothing else routes
@@ -68,6 +75,15 @@ class ChatRequest(BaseModel):
     messages: list[ChatMessage]
     token: str | None = None
     role: str | None = None
+    # The signed-in user's email if known, "" for an anonymous visitor —
+    # same trust level as ChatFeedbackRequest.email below (no JWT decoding
+    # here, just what the frontend already knows). Used only to key
+    # aiusages rows (see ai_usage.py) when "log-ai-usage" is on.
+    email: str | None = None
+    # One conversation in the chat widget (reset on Clear Chat / remount —
+    # see ChatWidget.tsx) — the key aiusages accumulates against, so a
+    # 10-message conversation lands as one growing row, not ten.
+    threadId: str | None = None
 
 
 class ChatResponse(BaseModel):
@@ -184,11 +200,43 @@ async def _execute_tool(
     return err_tool_result(text) if result.is_error else text
 
 
+async def _log_usage_if_enabled(body: ChatRequest, usage: dict) -> None:
+    if usage["requests"] == 0:
+        return
+    try:
+        if not await get_flag_enabled(FLAG_LOG_AI_USAGE, default=False):
+            return
+        thread_id = (body.threadId or "").strip()
+        if not thread_id:
+            return
+        # log_ai_usage() uses pymongo (blocking) — must run off the event
+        # loop, same reasoning as switching to AsyncAnthropic above: this
+        # function is itself async, so a direct synchronous Mongo call here
+        # would freeze every other in-flight request for its duration.
+        await asyncio.to_thread(
+            log_ai_usage,
+            get_db(),
+            email=(body.email or "").strip(),
+            role=body.role,
+            thread_id=thread_id,
+            model=MODEL,
+            input_tokens=usage["input_tokens"],
+            output_tokens=usage["output_tokens"],
+            requests=usage["requests"],
+        )
+    except Exception:
+        # Best-effort, same philosophy as every other flag/logging call in
+        # this service — a usage-logging failure must never surface to the
+        # user or affect the actual chat reply.
+        logger.warning("Could not log AI usage", exc_info=True)
+
+
 @app.post("/chat", response_model=ChatResponse)
 async def chat(body: ChatRequest) -> ChatResponse:
     messages: list[dict] = [{"role": m.role, "content": m.content} for m in body.messages]
 
     retrieval_mode = await get_flag_value(FLAG_USE_RAG_OR_MCP, default=DEFAULT_RETRIEVAL_MODE)
+    usage = {"input_tokens": 0, "output_tokens": 0, "requests": 0}
 
     try:
         async with open_session() as session:
@@ -198,13 +246,16 @@ async def chat(body: ChatRequest) -> ChatResponse:
             claude_tools = claude_tools_for_role(mcp_tools, body.role) + rag_tools + faq_tools
 
             for _ in range(MAX_TOOL_ITERATIONS):
-                response = client.messages.create(
+                response = await client.messages.create(
                     model=MODEL,
                     max_tokens=MAX_TOKENS,
                     system=SYSTEM_PROMPT,
                     tools=claude_tools,
                     messages=messages,
                 )
+                usage["input_tokens"] += response.usage.input_tokens
+                usage["output_tokens"] += response.usage.output_tokens
+                usage["requests"] += 1
 
                 if response.stop_reason == STOP_REASON_REFUSAL:
                     return ChatResponse(reply=REFUSAL_REPLY, retrieval_mode=retrieval_mode)
@@ -233,6 +284,14 @@ async def chat(body: ChatRequest) -> ChatResponse:
         # Either way, the assistant can't do anything useful right now.
         logger.warning("Chat request failed", exc_info=True)
         return ChatResponse(reply=UNAVAILABLE_REPLY, unavailable=True, retrieval_mode=retrieval_mode)
+    finally:
+        # Runs on every exit path above (each of the three returns inside
+        # the try, the except's return, and falling through to the
+        # INCOMPLETE_REPLY return below) — usage is only ever non-zero if
+        # at least one client.messages.create() call actually completed,
+        # and Anthropic bills for that call regardless of what SmartWill
+        # does with the result afterward, so it's logged unconditionally.
+        await _log_usage_if_enabled(body, usage)
 
     return ChatResponse(reply=INCOMPLETE_REPLY, retrieval_mode=retrieval_mode)
 

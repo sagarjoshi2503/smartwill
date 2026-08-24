@@ -249,6 +249,20 @@ FLD_NOT_LIKED_REASON = "notlikedreason"
 FLD_FEEDBACK = "feedback"
 FLD_SIGNATURE = "signature"
 
+# --- aiusages fields — exact literal values chatbot/constants.py writes
+# (see chatbot/ai_usage.py); api/ only ever reads this collection. ---
+AI_USAGE_COLLECTION_NAME = "aiusages"
+FLD_INPUT_TOKENS = "inputtokens"
+FLD_OUTPUT_TOKENS = "outputtokens"
+FLD_COST = "cost"
+FLD_REQUESTS = "requests"
+FLD_MODEL_NAME = "modelname"
+FLD_THREAD_ID = "threadid"
+FLD_CREATED_DATE = "createddate"
+FLD_UPDATED_DATE = "updateddate"
+FLD_ROLE = "role"
+FLD_AI_USAGE = "aiUsage"
+
 # --- HTTP headers ---
 HEADER_AUTHORIZATION = "Authorization"
 BEARER_PREFIX = "Bearer "

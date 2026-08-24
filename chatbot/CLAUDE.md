@@ -47,9 +47,23 @@ rag_client.py                   search()/faq_search() — plain HTTP POSTs to
 db.py                          MongoClient/get_db — same lru_cache'd-client
                              pattern as api/_app/core/db.py and rag/db.py,
                              duplicated locally. This service is otherwise
-                             stateless; the only thing it persists itself
-                             is the chatbotresponses feedback collection
-                             (below), via its own independent MONGODB_URI.
+                             stateless; the only things it persists itself
+                             are the chatbotresponses feedback collection
+                             and the aiusages collection (both below), via
+                             its own independent MONGODB_URI. Index
+                             creation (a unique index on aiusages'
+                             (emailid, threadid)) runs on a background
+                             thread from get_db(), never synchronously —
+                             see the function's own docstring for the
+                             exact bug in api/'s db.py this avoids
+                             repeating (a blocking index-ensure call on
+                             every cold serverless request).
+ai_usage.py                    log_ai_usage() — writes/upserts one row per
+                             (emailid, threadid) into aiusages, gated
+                             behind the "log-ai-usage" flag (see main.py's
+                             chat()). Synchronous (pymongo) — the caller
+                             must run it via asyncio.to_thread(), never
+                             call it directly from an async def.
 constants.py                   Central constants — model config, tool/role
                              names, CORS, copy strings. Env-var defaults
                              exist ONLY for the server's own listen
@@ -82,6 +96,34 @@ health+contact; `testator`: + own Wills; `admin`: + admin Wills) — there is
 no tool that can create, edit, delete, or pay for anything. If a task ever
 calls for the assistant to take a write action, that's a significant
 security-model change, not a routine tool addition — flag it explicitly.
+
+## AI usage logging (aiusages collection)
+
+Behind the "log-ai-usage" flag (checked via `feature_flags.py`'s
+`get_flag_enabled()` — a plain boolean variant of `get_flag_value()`, own
+cache), `chat()` accumulates `input_tokens`/`output_tokens`/`requests`
+across every `client.messages.create()` call made during one `/chat`
+request (there can be several — up to `MAX_TOOL_ITERATIONS` — if the model
+makes multiple tool calls before its final answer), then logs the totals
+in a `finally` block so it runs on every exit path (normal reply, refusal,
+`UNAVAILABLE_REPLY` after an exception, or exhausting the iteration limit)
+— Anthropic bills for a completed API call regardless of what SmartWill
+does with the result afterward, so a mid-conversation failure still gets
+logged for whatever calls did complete.
+
+Keyed by `(emailid, threadid)` — `threadid` is a UUID the frontend
+generates per open conversation (`ChatWidget.tsx`'s `threadId`, reset on
+Clear Chat or on remount) and sends with every `/chat` call, so a single
+back-and-forth conversation accumulates into one growing row via `$inc`,
+not one row per message. `cost` is computed from `constants.py`'s
+`MODEL_PRICING_USD_PER_TOKEN` table — **placeholder figures based on
+historical Opus-tier pricing; verify against
+https://www.anthropic.com/pricing before treating `cost` as accurate**.
+
+Distinct from "show-ai-usage" (web/-only, gates the admin grid that reads
+this collection — see `web/src/flags.ts` and `api/_app/features/ai_usage`)
+— one flag controls whether chatbot/ writes the data, the other controls
+whether the admin UI can see it; either can be on/off independently.
 
 ## Answer feedback (POST /chat/feedback)
 
@@ -116,7 +158,7 @@ name) — never a default baked into the code.
 cd chatbot
 .venv-chatbot/Scripts/python.exe -m pytest tests -q
 ```
-46 tests as of this writing. `tests/conftest.py` sets dummy
+68 tests as of this writing. `tests/conftest.py` sets dummy
 `ANTHROPIC_API_KEY`/`MCP_SERVER_URL`/`CHATBOT_CORS_ALLOW_ORIGINS`/
 `MONGODB_URI` before import, since all four are required with no default
 at runtime.

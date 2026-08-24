@@ -25,6 +25,7 @@ if not os.environ.get("FLAGS_SERVICE_URL"):
 FLAGS_SERVICE_URL = os.environ["FLAGS_SERVICE_URL"].rstrip("/")
 
 _cache: dict[str, tuple[str, float]] = {}
+_bool_cache: dict[str, tuple[bool, float]] = {}
 
 
 async def get_flag_value(key: str, *, default: str) -> str:
@@ -47,4 +48,29 @@ async def get_flag_value(key: str, *, default: str) -> str:
         result = default
 
     _cache[key] = (result, now)
+    return result
+
+
+async def get_flag_enabled(key: str, *, default: bool) -> bool:
+    """Plain on/off variant of get_flag_value(), for flags that are a
+    simple toggle (e.g. "log-ai-usage") rather than a multi-valued flag
+    like "use-rag-or-mcp". Reads the same response's `enabled` boolean
+    instead of its `value` string. Own cache (separate from get_flag_value's
+    string cache) since the two read different fields off the same shape."""
+    cached = _bool_cache.get(key)
+    now = time.monotonic()
+    if cached is not None and now - cached[1] < FLAGS_CACHE_TTL_SECONDS:
+        return cached[0]
+
+    try:
+        async with httpx.AsyncClient(timeout=FLAGS_TIMEOUT_SECONDS) as client:
+            response = await client.get(FLAGS_SERVICE_URL, params={"key": key})
+        response.raise_for_status()
+        value = response.json().get("enabled")
+        result = bool(value) if isinstance(value, bool) else default
+    except Exception:
+        logger.warning("Could not evaluate flag %r, using default=%r", key, default, exc_info=True)
+        result = default
+
+    _bool_cache[key] = (result, now)
     return result

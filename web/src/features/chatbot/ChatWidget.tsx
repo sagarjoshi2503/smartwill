@@ -46,6 +46,13 @@ export default function ChatWidget({ onContactSupport, email }: { onContactSuppo
   const [reasonText, setReasonText] = useState("");
   const [reasonError, setReasonError] = useState("");
 
+  // One conversation = one thread — sent with every /chat request so
+  // chatbot/'s aiusages logging (behind "log-ai-usage") accumulates the
+  // whole conversation into a single row instead of one per message. Reset
+  // on Clear Chat (a deliberate new conversation) and naturally reset on
+  // remount too, since App.tsx keys this component by who's signed in.
+  const [threadId, setThreadId] = useState(() => crypto.randomUUID());
+
   const handleSend = async () => {
     const text = input.trim();
     if (!text || sending) return;
@@ -61,7 +68,7 @@ export default function ChatWidget({ onContactSupport, email }: { onContactSuppo
       const res = await fetch(chatbotUrl(CHATBOT_CHAT), {
         method: "POST",
         headers: { [HEADER_CONTENT_TYPE]: CONTENT_TYPE_JSON },
-        body: JSON.stringify({ messages: nextMessages, token, role }),
+        body: JSON.stringify({ messages: nextMessages, token, role, email: email || "", threadId }),
       });
       const isJson = res.headers.get(HEADER_CONTENT_TYPE)?.includes(CONTENT_TYPE_JSON);
       const data = isJson ? await res.json() : null;
@@ -94,6 +101,7 @@ export default function ChatWidget({ onContactSupport, email }: { onContactSuppo
     setReasonPromptIndex(null);
     setReasonText("");
     setReasonError("");
+    setThreadId(crypto.randomUUID());
   };
 
   const submitFeedback = async (index: number, liked: boolean, reason?: string) => {

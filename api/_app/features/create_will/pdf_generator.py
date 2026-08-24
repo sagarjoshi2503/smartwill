@@ -31,7 +31,7 @@ _MARGIN = 25.4 * mm
 # reserved for the per-page signature footer, so body content never
 # collides with it.
 _FOOTER_RESERVE = 10 * mm
-_FOOTER_TEXT = "Testator's Signature: __________ Witness 1: ______ Witness 2: ______"
+_FOOTER_TEXT = "Testator's/Testatrix's Signature: __________ Witness 1: ______ Witness 2: ______"
 
 # Single font spec for the entire document — no bold anywhere, including
 # the per-page signature footer, which uses this exact font/size (not its

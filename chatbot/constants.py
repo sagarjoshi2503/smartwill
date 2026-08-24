@@ -100,6 +100,48 @@ ERR_QUESTION_AND_ANSWER_REQUIRED = "question and answer are required"
 ERR_REASON_REQUIRED = "reason is required for a thumbs-down"
 ERR_REASON_TOO_LONG = f"reason must be {MAX_LEN_NOT_LIKED_REASON} characters or fewer"
 
+# --- aiusages collection (POST /chat, gated behind the "log-ai-usage"
+# flag) — one row per (emailid, threadid) pair, updated in place as a
+# conversation thread grows across multiple /chat turns (see ai_usage.py).
+# Not an LLM tool call either — this is server-side bookkeeping around the
+# Claude API call itself. ---
+AI_USAGE_COLLECTION_NAME = "aiusages"
+FLD_INPUT_TOKENS = "inputtokens"
+FLD_OUTPUT_TOKENS = "outputtokens"
+FLD_COST = "cost"
+FLD_REQUESTS = "requests"
+FLD_MODEL_NAME = "modelname"
+FLD_THREAD_ID = "threadid"
+FLD_CREATED_DATE = "createddate"
+FLD_UPDATED_DATE = "updateddate"
+FLD_ROLE = "role"
+
+# "log-ai-usage" (server-side, gates whether chatbot/ writes to aiusages at
+# all) is distinct from "show-ai-usage" (web/-only — gates the admin grid
+# that reads it; see web/src/flags.ts). Defaults OFF: unlike the review/
+# payment-safety flags elsewhere in this project, logging usage data is a
+# net-new data-collection behavior, so it stays opt-in until explicitly
+# turned on rather than fail-open.
+FLAG_LOG_AI_USAGE = "log-ai-usage"
+
+# USD per single token (not per million) — derived from Anthropic's
+# published per-model pricing. These are placeholder figures based on
+# historical Opus-tier pricing; VERIFY AND UPDATE against
+# https://www.anthropic.com/pricing before treating `cost` as accurate for
+# real accounting/billing purposes — Anthropic can and does change prices,
+# and "claude-opus-5" specifically should be confirmed against the current
+# pricing page rather than assumed to match older Opus generations.
+MODEL_PRICING_USD_PER_TOKEN: dict[str, dict[str, float]] = {
+    "claude-opus-5": {"input": 15 / 1_000_000, "output": 75 / 1_000_000},
+    "claude-sonnet-5": {"input": 3 / 1_000_000, "output": 15 / 1_000_000},
+    "claude-fable-5": {"input": 3 / 1_000_000, "output": 15 / 1_000_000},
+    "claude-haiku-4-5-20251001": {"input": 0.80 / 1_000_000, "output": 4 / 1_000_000},
+}
+# Falls back to Opus-tier pricing (the model this service actually uses,
+# MODEL above) for any model name not in the table above, rather than
+# silently recording a cost of zero.
+DEFAULT_MODEL_PRICING_USD_PER_TOKEN = MODEL_PRICING_USD_PER_TOKEN["claude-opus-5"]
+
 # --- rag/ tool-call argument field names + default limit (search_wills,
 # search_faq — both share this shape) ---
 FLD_QUERY = "query"
