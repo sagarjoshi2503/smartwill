@@ -1,3 +1,4 @@
+import threading
 from functools import lru_cache
 
 from fastapi import Depends
@@ -60,5 +61,18 @@ def get_db(settings: Settings = Depends(get_settings)) -> Database:
     either dependency independently via app.dependency_overrides."""
     if not settings.mongodb_uri:
         raise AppError(HTTP_SERVER_ERROR, MONGODB_NOT_CONFIGURED)
-    _ensure_indexes(settings.mongodb_uri, settings.db_name)
+    # Fire-and-forget: _ensure_indexes' own @lru_cache only de-dupes work
+    # within one warm process, but on Vercel serverless a process is often
+    # cold-started per request rather than staying warm — calling this
+    # synchronously here previously meant most requests blocked on a brand
+    # new Mongo connection + two create_index() round-trips before the
+    # actual query even started, which is exactly backwards for a "make
+    # requests faster" fix. Spawning a thread costs microseconds (no I/O),
+    # so this never adds latency to the response regardless of whether the
+    # process is warm or cold; index creation happens in the background and
+    # simply hasn't landed yet for the very first query or two after a cold
+    # start, same as before this existed.
+    threading.Thread(
+        target=_ensure_indexes, args=(settings.mongodb_uri, settings.db_name), daemon=True,
+    ).start()
     return _get_client(settings.mongodb_uri)[settings.db_name]

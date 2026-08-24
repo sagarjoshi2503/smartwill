@@ -1,3 +1,5 @@
+import threading
+
 import mongomock
 import pytest
 from pymongo.database import Database
@@ -71,10 +73,27 @@ def test_ensure_indexes_swallows_pymongo_errors_without_raising(monkeypatch):
     _ensure_indexes.cache_clear()
 
 
-def test_get_db_calls_ensure_indexes(monkeypatch):
+def test_get_db_calls_ensure_indexes_in_background_without_blocking(monkeypatch):
+    # get_db() must not wait on _ensure_indexes — it launches it on a
+    # background thread (see get_db's own comment: on Vercel, a cold
+    # process previously paid for a full Mongo round-trip on every request
+    # before this changed). Confirmed here two ways: get_db() returns before
+    # the background call completes (release_ensure gates it), and the call
+    # does eventually happen with the right args once released.
     calls = []
-    monkeypatch.setattr(db_module, "_ensure_indexes", lambda uri, name: calls.append((uri, name)))
+    release_ensure = threading.Event()
+    done = threading.Event()
+
+    def fake_ensure(uri, name):
+        release_ensure.wait(timeout=2)
+        calls.append((uri, name))
+        done.set()
+
+    monkeypatch.setattr(db_module, "_ensure_indexes", fake_ensure)
 
     get_db(settings=Settings(mongodb_uri="mongodb://fake", db_name="smartwill-dev"))
+    assert calls == []  # get_db() returned without waiting for _ensure_indexes
 
+    release_ensure.set()
+    assert done.wait(timeout=2)
     assert calls == [("mongodb://fake", "smartwill-dev")]
