@@ -24,7 +24,7 @@ ERROR_RESPONSES = {
     summary="Create a Razorpay order for Standard Checkout",
 )
 async def create_order(
-    request: Request, settings: Settings = Depends(get_settings),
+    request: Request, db: Database = Depends(get_db), settings: Settings = Depends(get_settings),
     testator_email: str = Depends(get_current_testator),
 ):
     try:
@@ -33,7 +33,7 @@ async def create_order(
         body = {}
     if not isinstance(body, dict):
         body = {}
-    return service.create_order(body, settings)
+    return service.create_order(db, body, settings, testator_email)
 
 
 @router.post(

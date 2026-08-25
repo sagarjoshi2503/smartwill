@@ -1,6 +1,5 @@
 import hashlib
 import hmac
-import uuid
 
 import requests
 from pymongo.database import Database
@@ -13,11 +12,11 @@ from _app.features.create_will.repository import find_will_by_id
 from _app.features.payments import repository
 from _app.shared.constants import (
     FLD_AMOUNT, FLD_CURRENCY, FLD_ORDER_ID, FLD_PAYMENT_STATUS, FLD_RAZORPAY_ORDER_ID, FLD_RAZORPAY_PAYMENT_ID,
-    FLD_RAZORPAY_SIGNATURE, FLD_RECEIPT, FLD_TESTATOR_EMAIL, FLD_VERIFIED, FLD_WILL_ID, HTTP_BAD_REQUEST,
-    HTTP_FORBIDDEN, HTTP_NOT_FOUND, HTTP_SERVER_ERROR, HTTP_UNAUTHORIZED, RAZORPAY_AUTH_FAILED,
+    FLD_RAZORPAY_SIGNATURE, FLD_RECEIPT, FLD_TESTATOR_EMAIL, FLD_VERIFIED, FLD_WILL_ID, FLD_WILL_TYPE,
+    HTTP_BAD_REQUEST, HTTP_FORBIDDEN, HTTP_NOT_FOUND, HTTP_SERVER_ERROR, HTTP_UNAUTHORIZED, RAZORPAY_AUTH_FAILED,
     RAZORPAY_DEFAULT_CURRENCY, RAZORPAY_INVALID_AMOUNT, RAZORPAY_MIN_AMOUNT_PAISE, RAZORPAY_MISSING_FIELDS,
-    RAZORPAY_NOT_CONFIGURED, RAZORPAY_ORDER_FAILED, RAZORPAY_ORDERS_URL, RAZORPAY_SIGNATURE_INVALID,
-    RAZORPAY_TIMEOUT_SEC, RAZORPAY_WILL_ID_REQUIRED, WILL_ACCESS_DENIED, WILL_NOT_FOUND,
+    RAZORPAY_NOT_CONFIGURED, RAZORPAY_ORDER_FAILED, RAZORPAY_ORDERS_URL, RAZORPAY_PLAN_MIN_AMOUNT_PAISE,
+    RAZORPAY_SIGNATURE_INVALID, RAZORPAY_TIMEOUT_SEC, RAZORPAY_WILL_ID_REQUIRED, WILL_ACCESS_DENIED, WILL_NOT_FOUND,
 )
 from _app.shared.enums import PaymentStatus
 from _app.shared.validators import normalize_email
@@ -25,7 +24,16 @@ from _app.shared.validators import normalize_email
 logger = get_logger(__name__)
 
 
-def create_order(body: dict, settings: Settings) -> dict:
+def _assert_owns_will(db: Database, will_id: str, testator_email: str) -> dict:
+    document = find_will_by_id(db, will_id)
+    if not document:
+        raise AppError(HTTP_NOT_FOUND, WILL_NOT_FOUND)
+    if normalize_email(document.get(FLD_TESTATOR_EMAIL)) != normalize_email(testator_email):
+        raise AppError(HTTP_FORBIDDEN, WILL_ACCESS_DENIED)
+    return document
+
+
+def create_order(db: Database, body: dict, settings: Settings, testator_email: str) -> dict:
     if not settings.razorpay_key_id or not settings.razorpay_key_secret:
         raise AppError(HTTP_SERVER_ERROR, RAZORPAY_NOT_CONFIGURED)
 
@@ -33,8 +41,25 @@ def create_order(body: dict, settings: Settings) -> dict:
     if isinstance(amount, bool) or not isinstance(amount, (int, float)) or amount < RAZORPAY_MIN_AMOUNT_PAISE:
         raise AppError(HTTP_BAD_REQUEST, RAZORPAY_INVALID_AMOUNT)
 
+    # The client-supplied amount is only ever the *starting point* — the
+    # receipt is required to be the willId being paid for (the frontend's
+    # one call site already sends this), so the real minimum price for
+    # that Will's own type can be looked up and enforced server-side.
+    # Without this, a testator could request an order for any amount
+    # above the bare RAZORPAY_MIN_AMOUNT_PAISE floor (₹1) regardless of
+    # what the Will actually costs.
+    will_id = (body.get(FLD_RECEIPT) or "").strip()
+    if not will_id:
+        raise AppError(HTTP_BAD_REQUEST, RAZORPAY_WILL_ID_REQUIRED)
+    will_document = _assert_owns_will(db, will_id, testator_email)
+
+    will_type = will_document.get(FLD_WILL_TYPE)
+    min_amount = RAZORPAY_PLAN_MIN_AMOUNT_PAISE.get(will_type)
+    if min_amount is None or amount < min_amount:
+        raise AppError(HTTP_BAD_REQUEST, RAZORPAY_INVALID_AMOUNT)
+
     currency = body.get(FLD_CURRENCY) or RAZORPAY_DEFAULT_CURRENCY
-    receipt = body.get(FLD_RECEIPT) or str(uuid.uuid4())
+    receipt = will_id
 
     try:
         response = requests.post(
@@ -55,14 +80,6 @@ def create_order(body: dict, settings: Settings) -> dict:
 
     order = response.json()
     return {FLD_ORDER_ID: order["id"], FLD_AMOUNT: order[FLD_AMOUNT], FLD_CURRENCY: order[FLD_CURRENCY]}
-
-
-def _assert_owns_will(db: Database, will_id: str, testator_email: str) -> None:
-    document = find_will_by_id(db, will_id)
-    if not document:
-        raise AppError(HTTP_NOT_FOUND, WILL_NOT_FOUND)
-    if normalize_email(document.get(FLD_TESTATOR_EMAIL)) != normalize_email(testator_email):
-        raise AppError(HTTP_FORBIDDEN, WILL_ACCESS_DENIED)
 
 
 def verify_payment(db: Database, body: dict, settings: Settings, testator_email: str) -> dict:

@@ -15,8 +15,9 @@ from _app.features.user_signin_otp import repository
 from _app.shared import sms
 from _app.shared.constants import (
     BAD_TESTATOR_EMAIL, FLD_CODE, FLD_EMAIL, FLD_EXPIRES_IN_SECONDS, FLD_PHONE, FLD_TOKEN, FLD_VERIFIED,
-    HTTP_BAD_REQUEST, INVALID_OTP, BAD_PHONE, OTP_COUNTRY_CODE, OTP_EXPIRED, OTP_LENGTH, OTP_MAX_ATTEMPTS,
-    OTP_MISSING, OTP_PHONE_MIN, OTP_SMS_TMPL, OTP_TOO_MANY_ATTEMPTS, OTP_TTL_SECONDS, ROLE_TESTATOR,
+    HTTP_BAD_REQUEST, HTTP_TOO_MANY_REQUESTS, INVALID_OTP, BAD_PHONE, OTP_COUNTRY_CODE, OTP_EXPIRED, OTP_LENGTH,
+    OTP_MAX_ATTEMPTS, OTP_MISSING, OTP_PHONE_MIN, OTP_REQUESTED_TOO_SOON, OTP_RESEND_COOLDOWN_SECONDS,
+    OTP_SMS_TMPL, OTP_TOO_MANY_ATTEMPTS, OTP_TTL_SECONDS, ROLE_TESTATOR,
 )
 from _app.shared.validators import is_valid_email, normalize_email
 
@@ -30,9 +31,18 @@ def request_otp(body: dict, settings: Settings) -> dict:
     if len(phone) < OTP_PHONE_MIN:
         raise AppError(HTTP_BAD_REQUEST, BAD_PHONE)
 
+    now = datetime.now(timezone.utc)
+    elapsed = repository.seconds_since_last_request(phone, now)
+    if elapsed is not None and elapsed < OTP_RESEND_COOLDOWN_SECONDS:
+        # Unauthenticated endpoint that triggers a real SMS send per call —
+        # without this, one phone number (or, since it's unauthenticated,
+        # any phone number an attacker names) could be spammed with
+        # unlimited OTP requests with no cooldown at all.
+        raise AppError(HTTP_TOO_MANY_REQUESTS, OTP_REQUESTED_TOO_SOON)
+
     code = "".join(str(random.randint(0, 9)) for _ in range(OTP_LENGTH))
-    expires_at = datetime.now(timezone.utc) + timedelta(seconds=OTP_TTL_SECONDS)
-    repository.save_otp(phone, code, expires_at)
+    expires_at = now + timedelta(seconds=OTP_TTL_SECONDS)
+    repository.save_otp(phone, code, expires_at, now)
 
     sms.send_sms(settings, to=f"{OTP_COUNTRY_CODE}{phone}", body=OTP_SMS_TMPL.format(code=code))
 

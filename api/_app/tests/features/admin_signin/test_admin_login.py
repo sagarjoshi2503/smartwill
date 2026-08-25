@@ -76,6 +76,45 @@ def test_login_rejects_malformed_base64_password(client):
     assert res.json() == {"error": constants.MALFORMED_CREDENTIALS}
 
 
+# --- brute-force lockout (the actual pentest finding being fixed) ---
+
+def test_login_locks_out_after_max_failed_attempts(client, fake_db):
+    seed_admin(fake_db)
+    for _ in range(constants.ADMIN_LOGIN_MAX_ATTEMPTS):
+        res = client.post(URL, json={"email": "jane@lawfirm.com", "password": encode("wrongpassword")})
+        assert res.status_code == 401
+
+    # The next attempt is rejected as locked out, even with the *correct*
+    # password — confirms the lockout actually blocks the account, not
+    # just repeats the same wrong-password response.
+    res = client.post(URL, json={"email": "jane@lawfirm.com", "password": encode(PASSWORD)})
+    assert res.status_code == 429
+    assert res.json() == {"error": constants.ADMIN_LOGIN_LOCKED_OUT}
+
+
+def test_login_lockout_also_applies_to_unknown_emails(client):
+    # Deliberately: an attacker probing a nonexistent email must also get
+    # throttled, so a 429-vs-401 response difference never becomes a new
+    # user-enumeration signal.
+    for _ in range(constants.ADMIN_LOGIN_MAX_ATTEMPTS):
+        res = client.post(URL, json={"email": "nobody@lawfirm.com", "password": encode("whatever")})
+        assert res.status_code == 401
+
+    res = client.post(URL, json={"email": "nobody@lawfirm.com", "password": encode("whatever")})
+    assert res.status_code == 429
+
+
+def test_login_lockout_is_scoped_to_one_email(client, fake_db):
+    seed_admin(fake_db, email="jane@lawfirm.com")
+    seed_admin(fake_db, email="bob@lawfirm.com")
+    for _ in range(constants.ADMIN_LOGIN_MAX_ATTEMPTS):
+        client.post(URL, json={"email": "jane@lawfirm.com", "password": encode("wrongpassword")})
+
+    # A different admin's account must be unaffected by jane's lockout.
+    res = client.post(URL, json={"email": "bob@lawfirm.com", "password": encode(PASSWORD)})
+    assert res.status_code == 200
+
+
 def test_login_returns_500_when_mongodb_uri_missing():
     app.dependency_overrides[get_settings] = lambda: Settings(mongodb_uri=None)
     try:

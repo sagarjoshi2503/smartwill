@@ -9,6 +9,7 @@ HTTP_UNAUTHORIZED = 401
 HTTP_FORBIDDEN = 403
 HTTP_NOT_FOUND = 404
 HTTP_CONFLICT = 409
+HTTP_TOO_MANY_REQUESTS = 429
 HTTP_SERVER_ERROR = 500
 
 # --- App metadata ---
@@ -47,6 +48,18 @@ OTP_COUNTRY_CODE = "+91"
 # Max wrong-code guesses allowed against a single requested OTP before it's
 # invalidated and a fresh one must be requested (mitigates brute force).
 OTP_MAX_ATTEMPTS = 5
+# Minimum gap between two OTP requests for the same phone number — this
+# endpoint is unauthenticated and triggers a real SMS send per call, so
+# without a cooldown any phone number could be spammed with unlimited
+# requests (SMS-bombing / Twilio cost exhaustion).
+OTP_RESEND_COOLDOWN_SECONDS = 60
+
+# Admin login brute-force protection — mirrors the OTP flow's own
+# OTP_MAX_ATTEMPTS/lockout shape. In-process only (see admin_signin/
+# repository.py), same caveat as the OTP store.
+ADMIN_LOGIN_MAX_ATTEMPTS = 5
+ADMIN_LOGIN_WINDOW_SECONDS = 15 * 60
+ADMIN_LOGIN_LOCKOUT_SECONDS = 15 * 60
 # Approximate days-per-month used to compute a gift voucher's expiry —
 # see gift_voucher/service.py's _build_voucher_document.
 GIFT_VOUCHER_DAYS_PER_MONTH = 30
@@ -60,6 +73,20 @@ ROLE_TESTATOR = "testator"
 # --- CORS ---
 CORS_ALLOW_METHODS = ["GET", "POST", "DELETE", "OPTIONS"]
 CORS_ALLOW_HEADERS = ["Content-Type", "Authorization"]
+
+# --- Hardening response headers (see core/middleware.py's add_security_headers) ---
+# Deliberately does NOT include a Content-Security-Policy — this API's own
+# /docs and /redoc (FastAPI's Swagger/ReDoc UIs) load external JS/CSS and
+# render real HTML, so a blanket CSP here would break them; the actual
+# pentest finding only named the two headers below.
+HEADER_X_CONTENT_TYPE_OPTIONS = "X-Content-Type-Options"
+HEADER_X_FRAME_OPTIONS = "X-Frame-Options"
+HEADER_REFERRER_POLICY = "Referrer-Policy"
+SECURITY_HEADER_VALUES = {
+    HEADER_X_CONTENT_TYPE_OPTIONS: "nosniff",
+    HEADER_X_FRAME_OPTIONS: "DENY",
+    HEADER_REFERRER_POLICY: "no-referrer",
+}
 
 # --- Email (Resend) ---
 RESEND_API_URL = "https://api.resend.com/emails"
@@ -75,6 +102,19 @@ RAZORPAY_ORDERS_URL = "https://api.razorpay.com/v1/orders"
 RAZORPAY_TIMEOUT_SEC = 10
 RAZORPAY_MIN_AMOUNT_PAISE = 100
 RAZORPAY_DEFAULT_CURRENCY = "INR"
+# Authoritative minimum price per Will type, in paise — mirrors
+# web/src/data/plans.tsx's PLANS[].price (rupees ×100), independently
+# declared per this repo's "no shared code" rule. create_order() validates
+# a testator's requested `amount` against the will_id's own willType here
+# rather than trusting the client-supplied amount outright — the client
+# may still legitimately request *more* than this (paid add-ons aren't
+# tracked server-side yet), just never less than the base plan price.
+RAZORPAY_PLAN_MIN_AMOUNT_PAISE = {
+    "allindia": 4999 * 100,
+    "goan": 6999 * 100,
+    "customwill": 24999 * 100,
+    "successiondeed": 9999 * 100,
+}
 
 # --- Gift Vouchers ("Gift a Will") ---
 GIFT_VOUCHER_CODE_PREFIX = "FL-GIFT-"
@@ -110,6 +150,9 @@ OTP_MISSING = "Request an OTP before attempting to verify it."
 OTP_EXPIRED = "This OTP has expired. Please request a new one."
 INVALID_OTP = "The OTP you entered is incorrect."
 OTP_TOO_MANY_ATTEMPTS = "Too many incorrect attempts. Please request a new OTP."
+OTP_REQUESTED_TOO_SOON = "An OTP was already sent recently. Please wait a minute before requesting another."
+
+ADMIN_LOGIN_LOCKED_OUT = "Too many failed login attempts. Please try again in a few minutes."
 
 MISSING_AUTH_TOKEN = "Missing or invalid Authorization header."
 INVALID_AUTH_TOKEN = "Invalid or expired session. Please log in again."

@@ -59,6 +59,42 @@ def test_verify_otp_rejects_invalid_email(client):
     assert res.json() == {"error": constants.BAD_TESTATOR_EMAIL}
 
 
+def test_request_otp_enforces_resend_cooldown(client):
+    first = client.post(REQUEST_URL, json={"phone": "9876543210"})
+    assert first.status_code == 200
+
+    second = client.post(REQUEST_URL, json={"phone": "9876543210"})
+    assert second.status_code == 429
+    assert second.json() == {"error": constants.OTP_REQUESTED_TOO_SOON}
+
+
+def test_request_otp_cooldown_is_scoped_to_one_phone_number(client):
+    first = client.post(REQUEST_URL, json={"phone": "9876543210"})
+    assert first.status_code == 200
+
+    other_phone = client.post(REQUEST_URL, json={"phone": "9111111111"})
+    assert other_phone.status_code == 200
+
+
+def test_request_otp_cooldown_does_not_block_a_fresh_request_once_elapsed(client):
+    from datetime import timedelta
+
+    from _app.features.user_signin_otp import repository as otp_repository
+
+    first = client.post(REQUEST_URL, json={"phone": "9876543210"})
+    assert first.status_code == 200
+
+    # Simulate the cooldown window having fully elapsed rather than
+    # sleeping in the test — back-date the recorded request timestamp.
+    recorded_at = otp_repository._last_requested_at["9876543210"]
+    otp_repository._last_requested_at["9876543210"] = recorded_at - timedelta(
+        seconds=constants.OTP_RESEND_COOLDOWN_SECONDS + 1,
+    )
+
+    second = client.post(REQUEST_URL, json={"phone": "9876543210"})
+    assert second.status_code == 200
+
+
 def test_verify_otp_locks_out_after_max_attempts(client):
     client.post(REQUEST_URL, json={"phone": "9876543210"})
 

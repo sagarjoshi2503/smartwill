@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 
 from _app.core.exceptions import register_exception_handlers
-from _app.core.middleware import add_cors
+from _app.core.middleware import add_cors, add_security_headers
 from _app.features.admin_dashboard.router import router as admin_dashboard_router
 from _app.features.admin_signin.router import router as admin_signin_router
 from _app.features.admin_signup.router import router as admin_signup_router
@@ -18,6 +18,7 @@ from _app.shared.constants import APP_TITLE, APP_VERSION
 app = FastAPI(title=APP_TITLE, version=APP_VERSION)
 
 add_cors(app)
+add_security_headers(app)
 register_exception_handlers(app)
 
 app.include_router(admin_signin_router)

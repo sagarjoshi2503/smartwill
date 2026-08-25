@@ -9,9 +9,24 @@ from datetime import datetime
 # (code, expires_at, failed_attempts)
 _otps: dict[str, tuple[str, datetime, int]] = {}
 
+# Last time an OTP was actually issued for a phone number — enforces a
+# resend cooldown (see service.py's request_otp) independent of the OTP's
+# own TTL/attempt-count, so one phone number can't be spammed with fresh
+# codes (and fresh SMS sends) faster than a fixed interval apart. Same
+# in-process-only caveat as _otps above.
+_last_requested_at: dict[str, datetime] = {}
 
-def save_otp(phone: str, code: str, expires_at: datetime) -> None:
+
+def save_otp(phone: str, code: str, expires_at: datetime, requested_at: datetime) -> None:
     _otps[phone] = (code, expires_at, 0)
+    _last_requested_at[phone] = requested_at
+
+
+def seconds_since_last_request(phone: str, now: datetime) -> float | None:
+    """None if this phone has never requested an OTP before (so no cooldown
+    applies)."""
+    last = _last_requested_at.get(phone)
+    return None if last is None else (now - last).total_seconds()
 
 
 def get_otp(phone: str) -> tuple[str, datetime, int] | None:
