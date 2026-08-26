@@ -35,6 +35,7 @@ import { clearAuthToken } from "./utils/auth";
 import { getMissingIdFields } from "./utils/willValidation";
 import { extractIdFields } from "./utils/willIdFields";
 import { trackPageview } from "./utils/analytics";
+import { SEO_PAGES, PATH_TO_VIEW, applySeoMeta } from "./utils/seo";
 import { FLAGS } from "./flags";
 import useFlag from "./hooks/useFlag";
 import {
@@ -73,11 +74,17 @@ const SITE_NAV: {v: ViewName; label: string}[] = [
 const isSitePage = (v: ViewName) => SITE_NAV.some(item=>item.v===v);
 
 export default function SmartWill() {
-  // Deep-linking: loading /admin directly (typed in the address bar, or a
-  // bookmark) opens the Admin Portal login screen instead of the landing page.
-  const [view, setView] = useState<ViewName>(() =>
-    window.location.pathname===ADMIN_PATH ? "adminLogin" : "landing"
-  );
+  // Deep-linking: loading /admin, or one of the public marketing pages'
+  // own URLs (see utils/seo.ts's SEO_PAGES/PATH_TO_VIEW — /about, /services,
+  // /faq, /partner, /contact-us), directly (typed in the address bar, or a
+  // bookmark) opens that screen instead of always falling back to the
+  // landing page. Everything else (wizard, signup, admin sub-screens, ...)
+  // has no real URL of its own and always starts at the landing page.
+  const [view, setView] = useState<ViewName>(() => {
+    const path = window.location.pathname;
+    if(path===ADMIN_PATH) return "adminLogin";
+    return PATH_TO_VIEW[path] ?? "landing";
+  });
   const [selectedPlan, setSelectedPlan] = useState<Plan>(PLANS[0]);
   const [addons, setAddons] = useState<Record<string, boolean>>({});
   const [signup, setSignup] = useState<SignupState>({ name:"", phone:"", email:"", state:"", terms:false });
@@ -155,12 +162,22 @@ export default function SmartWill() {
 
   const totalPrice = selectedPlan.price + ADDONS.reduce((s,a) => addons[a.id] ? s+a.price : s, 0);
 
-  // Keep the URL in sync with admin-portal navigation so /admin is
-  // shareable/bookmarkable and the browser back/forward buttons work.
+  // Keep the URL in sync with navigation so /admin and the public marketing
+  // pages (/about, /services, /faq, /partner, /contact-us) are each
+  // shareable/bookmarkable/crawlable on their own URL, and the browser
+  // back/forward buttons work. Any other view (wizard, signup, admin
+  // sub-screens, ...) has no URL of its own and collapses back to "/".
   useEffect(() => {
-    const onAdminPath = window.location.pathname===ADMIN_PATH;
-    if(isAdminView(view) && !onAdminPath) window.history.pushState({}, "", ADMIN_PATH);
-    else if(!isAdminView(view) && onAdminPath) window.history.pushState({}, "", "/");
+    const path = isAdminView(view) ? ADMIN_PATH : (SEO_PAGES[view]?.path ?? "/");
+    if(window.location.pathname!==path) window.history.pushState({}, "", path);
+  }, [view]);
+
+  // Each public marketing page carries its own title/description/canonical/
+  // OG/Twitter tags (see utils/seo.ts) instead of every "page" reusing
+  // index.html's landing-page defaults — matters for search snippets and
+  // link-preview cards on /about, /faq, etc.
+  useEffect(() => {
+    applySeoMeta(view);
   }, [view]);
 
   // Send a virtual page view to GA on every in-app view change — this SPA
@@ -185,9 +202,11 @@ export default function SmartWill() {
 
   useEffect(() => {
     const onPopState = () => {
-      const onAdminPath = window.location.pathname===ADMIN_PATH;
+      const path = window.location.pathname;
+      if(path===ADMIN_PATH) { setView(v => isAdminView(v) ? v : "adminLogin"); return; }
+      const mapped = PATH_TO_VIEW[path];
       setView(v => {
-        if(onAdminPath) return isAdminView(v) ? v : "adminLogin";
+        if(mapped) return mapped;
         return isAdminView(v) ? "landing" : v;
       });
     };

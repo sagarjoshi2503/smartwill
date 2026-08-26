@@ -59,7 +59,7 @@ export default function ContactUsView(){
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-8">
           <div className="w-11 h-11 bg-[#4F9D33]/15 border border-[#4F9D33]/20 rounded-2xl flex items-center justify-center mx-auto mb-3"><MessageSquare size={18} className="text-brand"/></div>
-          <h2 className="text-3xl font-extrabold text-slate-900 serif">Contact Us</h2>
+          <h1 className="text-3xl font-extrabold text-slate-900 serif">Contact Us</h1>
           <p className="text-slate-600 text-sm mt-2">Have a Custom Will requirement or a question? Reach out and we'll get back to you.</p>
         </div>
         <div className="grid md:grid-cols-[1fr_1.3fr] gap-10">
