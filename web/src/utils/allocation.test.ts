@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { allocTotal, formatAllocCompact, formatAllocFull } from "./allocation";
 import type { AssetInstance, Beneficiary } from "../types";
 
-const blankBeneFields = { age: "", maritalStatus: "", occupation: "", occupationOther: "", address: "", pan: "", aadhaarNumber: "" };
+const blankBeneFields = { dateOfBirth: "", maritalStatus: "", occupation: "", occupationOther: "", address: "", pan: "", aadhaarNumber: "" };
 const BENEFICIARIES: Beneficiary[] = [
   { id: 1, name: "Priya Mehta", relation: "Daughter", ...blankBeneFields },
   { id: 2, name: "Rohan Mehta", relation: "Son", ...blankBeneFields },

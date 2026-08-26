@@ -31,7 +31,6 @@ _MARGIN = 25.4 * mm
 # reserved for the per-page signature footer, so body content never
 # collides with it.
 _FOOTER_RESERVE = 10 * mm
-_FOOTER_TEXT = "Testator's/Testatrix's Signature: __________ Witness 1: ______ Witness 2: ______"
 
 # Single font spec for the entire document — no bold anywhere, including
 # the per-page signature footer, which uses this exact font/size (not its
@@ -59,17 +58,24 @@ _STYLES = {
 }
 
 
-def _draw_signature_footer(canvas, doc) -> None:
-    """Runs automatically on every page ReportLab paginates to — this is
-    the real, server-side equivalent of the browser preview's CSS
-    `position:absolute;bottom:0` trick (AllIndiaWillDocument.tsx): the
-    testator/witness attestation line is a legal requirement on every
-    physical page, not just the final signature page. Uses the exact same
-    font/size/family as the rest of the document (_FONT_NAME/_FONT_SIZE)."""
-    canvas.saveState()
-    canvas.setFont(_FONT_NAME, _FONT_SIZE)
-    canvas.drawString(doc.leftMargin, doc.bottomMargin + 2 * mm, _FOOTER_TEXT)
-    canvas.restoreState()
+def _make_signature_footer(title: str):
+    """Returns a `doc.onPage` callback drawing the testator/witness
+    attestation line on every page ReportLab paginates to — this is the
+    real, server-side equivalent of the browser preview's CSS
+    `position:absolute;bottom:0` trick (AllIndiaWillDocument.tsx). `title`
+    is "Testator"/"Testatrix" (see pdf_context.py's build_pdf_context) so
+    the footer reads correctly for the testator's actual gender instead of
+    the old always-both "Testator's/Testatrix's" slash form. Uses the exact
+    same font/size/family as the rest of the document (_FONT_NAME/_FONT_SIZE)."""
+    footer_text = f"{title} Signature: __________ Witness 1: ______ Witness 2: ______"
+
+    def _draw(canvas, doc) -> None:
+        canvas.saveState()
+        canvas.setFont(_FONT_NAME, _FONT_SIZE)
+        canvas.drawString(doc.leftMargin, doc.bottomMargin + 2 * mm, footer_text)
+        canvas.restoreState()
+
+    return _draw
 
 
 def _build_story(blocks: list) -> list:
@@ -101,7 +107,9 @@ def generate_all_india_will_pdf(will_data: dict) -> bytes:
     )
     content_height = doc.height - _FOOTER_RESERVE
     frame = Frame(doc.leftMargin, doc.bottomMargin + _FOOTER_RESERVE, doc.width, content_height, id="body")
-    doc.addPageTemplates([PageTemplate(id="all-india-will", frames=[frame], onPage=_draw_signature_footer)])
+    doc.addPageTemplates([
+        PageTemplate(id="all-india-will", frames=[frame], onPage=_make_signature_footer(context["title"])),
+    ])
 
     doc.build(_build_story(blocks))
     return buffer.getvalue()

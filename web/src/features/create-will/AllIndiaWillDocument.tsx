@@ -57,7 +57,7 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onDownloa
   const noTrailingPages = !showExecutor && !showGuardian;
 
   const SigLine = ({className}:{className?: string})=>(
-    <p className={`pdf-sig-line mb-0 ${className||""}`}>Testator's/Testatrix's Signature: __________ Witness 1: ______ Witness 2: ______</p>
+    <p className={`pdf-sig-line mb-0 ${className||""}`}>{title} Signature: __________ Witness 1: ______ Witness 2: ______</p>
   );
 
   // Every page — including the last — gets this attestation line pinned to
@@ -280,7 +280,7 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onDownloa
                   </p>
                 ) : (
                   <p className="text-justify mb-5">
-                    I appoint <strong>{executor.name||blank}</strong>, having Relationship to Testator: <strong>{executor.relation||blank}</strong>, with Address: <strong>{executor.address||blank}</strong>, bearing {executor.idType} Number: <strong>{executor.idNumber||blank}</strong>.
+                    I appoint <strong>{executor.name||blank}</strong>, having Relation to {title}: <strong>{executor.relation||blank}</strong>, with Address: <strong>{executor.address||blank}</strong>, bearing {executor.idType} Number: <strong>{executor.idNumber||blank}</strong>.
                   </p>
                 )}
                 <p className="mb-1">The above executor shall dispose of the property and carry out the instructions as mentioned in this Will.</p>
@@ -289,8 +289,8 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onDownloa
                 <p className="mb-1">If any legal expenses are incurred in the recovery of the amount due, the executor shall be entitled to recover the said amount out of the funds belonging to me.</p>
                 <p className="mb-5">If my executor is unable or unwilling to act with respect to property subject to administration in another jurisdiction, my beneficiaries may appoint by a signed instrument any person or qualified corporation as ancillary administrator in that jurisdiction.</p>
                 <p className="mb-1">Place and Date: <strong>{blank}</strong></p>
-                <p className="mb-1">Name of the Testator: <strong>{testator.fullName||blank}</strong></p>
-                <p>Signature of the Testator: {blank}</p>
+                <p className="mb-1">Name of the {title}: <strong>{testator.fullName||blank}</strong></p>
+                <p>Signature of the {title}: {blank}</p>
               </Page>
               <Page isLast={!showGuardian}>
                 <h1 className="text-center text-lg font-bold uppercase mb-6">Executor's Consent</h1>
@@ -309,14 +309,14 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onDownloa
               <Page>
                 <h1 className="text-center text-lg font-bold uppercase mb-6">Appointment of Guardian for Minor Beneficiary</h1>
                 <p className="text-justify mb-5">
-                  I appoint <strong>{guardian.name||blank}</strong>, having Relation to Testator: <strong>{guardian.relation||blank}</strong>, with Address: <strong>{guardian.address||blank}</strong>, bearing {guardian.idType} Number: <strong>{guardian.idNumber||blank}</strong>.
+                  I appoint <strong>{guardian.name||blank}</strong>, having Relation to {title}: <strong>{guardian.relation||blank}</strong>, with Address: <strong>{guardian.address||blank}</strong>, bearing {guardian.idType} Number: <strong>{guardian.idNumber||blank}</strong>.
                 </p>
                 <p className="text-justify mb-5">
                   The above-appointed guardian shall have the care, custody, and management of any property or assets inherited by my minor beneficiaries under this Will until such beneficiaries attain the age of majority. The guardian shall act in the best fiduciary interests of the minors and may apply the income or principal of the inherited assets for their education, maintenance, and welfare as deemed necessary.
                 </p>
                 <p className="mb-1">Place and Date: <strong>{blank}</strong></p>
-                <p className="mb-1">Name of the Testator: <strong>{testator.fullName||blank}</strong></p>
-                <p>Signature of the Testator: {blank}</p>
+                <p className="mb-1">Name of the {title}: <strong>{testator.fullName||blank}</strong></p>
+                <p>Signature of the {title}: {blank}</p>
               </Page>
               <Page isLast>
                 <h1 className="text-center text-lg font-bold uppercase mb-6">Guardian's Consent</h1>

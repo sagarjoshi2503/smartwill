@@ -1,4 +1,4 @@
-import { ordinalInWords, yearInWords } from "../../utils/format";
+import { formatDOB, ordinalInWords, yearInWords } from "../../utils/format";
 import type { AllIndiaAssetItem, AllIndiaAssets, AllIndiaResidueEntry, Testator, Witness } from "../../types";
 
 // Single source of truth for the All India Will's wording/section logic on
@@ -49,7 +49,7 @@ export function sonDaughterNames(testator: Testator) {
 export function witnessParticulars(witnesses: Witness[]) {
   return witnesses.map((w, i) => (
     <span key={i}>
-      {String.fromCharCode(97 + i)}) <strong>{w.name || BLANK}</strong> {w.parentRelation || "son/daughter/wife"} of <strong>{w.parentName || BLANK}</strong>, aged <strong>{w.age || "___"}</strong>, {w.maritalStatus || "unmarried/married"} nationality <strong>{nationalityLabel(w.nationality)}</strong>, occupation <strong>{occupationOf(w) || BLANK}</strong>, resident of <strong>{w.address || BLANK}</strong>, bearing PAN Number <strong>{w.pan || BLANK}</strong>, Aadhaar Number <strong>{w.aadhaarNumber || BLANK}</strong>{i < witnesses.length - 1 ? "; " : " "}
+      {String.fromCharCode(97 + i)}) <strong>{w.name || BLANK}</strong> {w.parentRelation || "son/daughter/wife"} of <strong>{w.parentName || BLANK}</strong>, date of birth <strong>{formatDOB(w.dateOfBirth)}</strong>, {w.maritalStatus || "unmarried/married"} nationality <strong>{nationalityLabel(w.nationality)}</strong>, occupation <strong>{occupationOf(w) || BLANK}</strong>, resident of <strong>{w.address || BLANK}</strong>, bearing PAN Number <strong>{w.pan || BLANK}</strong>, Aadhaar Number <strong>{w.aadhaarNumber || BLANK}</strong>{i < witnesses.length - 1 ? "; " : " "}
     </span>
   ));
 }
@@ -60,7 +60,7 @@ export function openingClauseNodes(testator: Testator, witnesses: Witness[]) {
   const {sonNames, daughterNames} = sonDaughterNames(testator);
   return (
     <>
-      I, <strong>{testator.fullName || BLANK}</strong>, gender: <strong>{testator.gender || BLANK}</strong>, PAN <strong>{testator.pan || BLANK}</strong>, Aadhaar Number <strong>{testator.aadhaarNumber || BLANK}</strong>, {testator.relation} of <strong>{testator.parentSpouseName || BLANK}</strong>, aged <strong>{testator.age || "___"}</strong>, {testator.maritalStatus} nationality <strong>{nationalityLabel(testator.nationality)}</strong>, occupation <strong>{occupationOf(testator) || BLANK}</strong>, resident of <strong>{testator.address || BLANK}</strong>
+      I, <strong>{testator.fullName || BLANK}</strong>, gender: <strong>{testator.gender || BLANK}</strong>, PAN <strong>{testator.pan || BLANK}</strong>, Aadhaar Number <strong>{testator.aadhaarNumber || BLANK}</strong>, {testator.relation} of <strong>{testator.parentSpouseName || BLANK}</strong>, date of birth <strong>{formatDOB(testator.dateOfBirth)}</strong>, {testator.maritalStatus} nationality <strong>{nationalityLabel(testator.nationality)}</strong>, occupation <strong>{occupationOf(testator) || BLANK}</strong>, resident of <strong>{testator.address || BLANK}</strong>
       {testator.maritalStatus === "married" && (
         <>, I am married to <strong>{testator.spouseName || BLANK}</strong>, bearing PAN <strong>{testator.spousePan || BLANK}</strong>, Aadhaar Number <strong>{testator.spouseAadhaarNumber || BLANK}</strong> and I have {sonNames.length === 1 ? "one" : sonNames.length || "___"} son, namely, <strong>{sonNames.join(", ") || BLANK}</strong> and {daughterNames.length === 1 ? "one" : daughterNames.length || "___"} daughter, namely, <strong>{daughterNames.join(", ") || BLANK}</strong>
         </>

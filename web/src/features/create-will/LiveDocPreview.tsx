@@ -1,6 +1,7 @@
 import { Eye } from "lucide-react";
 import Clause from "../../components/shared/Clause";
 import { formatAllocCompact } from "../../utils/allocation";
+import { formatDOB } from "../../utils/format";
 import type { Beneficiary, WillState } from "../../types";
 
 export default function LiveDocPreview({will,residualBene}:{
@@ -24,7 +25,7 @@ export default function LiveDocPreview({will,residualBene}:{
           <div className="h-px w-16 bg-slate-700 mx-auto mb-0.5"/><div className="h-px w-10 bg-slate-500 mx-auto"/>
         </div>
         <Clause title="DECLARATION">
-          <p className="text-justify">I, <strong>{testator.fullName||"[Name]"}</strong>, having PAN <strong>{testator.pan||"[PAN]"}</strong>, Aadhaar No. <strong>{testator.aadhaarNumber||"[Aadhaar]"}</strong>, {testator.relation} of <strong>{testator.parentSpouseName||"[Parent]"}</strong>, aged <strong>{testator.age||"__"}</strong>, {testator.maritalStatus}, residing at <strong>{testator.address||"[Address]"}</strong>, India{testator.maritalStatus==="married"?<>, married to <strong>{testator.spouseName||"[Spouse]"}</strong></>:""}, hereby declare this to be my Last Will and Testament, revoking all prior Wills.</p>
+          <p className="text-justify">I, <strong>{testator.fullName||"[Name]"}</strong>, having PAN <strong>{testator.pan||"[PAN]"}</strong>, Aadhaar No. <strong>{testator.aadhaarNumber||"[Aadhaar]"}</strong>, {testator.relation} of <strong>{testator.parentSpouseName||"[Parent]"}</strong>, date of birth <strong>{formatDOB(testator.dateOfBirth)}</strong>, {testator.maritalStatus}, residing at <strong>{testator.address||"[Address]"}</strong>, India{testator.maritalStatus==="married"?<>, married to <strong>{testator.spouseName||"[Spouse]"}</strong></>:""}, hereby declare this to be my Last Will and Testament, revoking all prior Wills.</p>
         </Clause>
         <Clause title="EXECUTOR">
           {executor.wantsExecutor?(

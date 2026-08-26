@@ -29,7 +29,7 @@ import {
   BTN_COMPLETE_REVIEW, BTN_SUBMIT_REVIEW,
   STATUS_COMPLETED, STATUS_DRAFT, STATUS_PENDING_REVIEW,
   RAZORPAY_KEY_ID, ROLE_ADMIN, ROLE_TESTATOR, ID_POPUP_ERROR_MS,
-  MAX_LEN_ADDRESS, MIN_AGE, MAX_AGE, MAX_AGE_DIGITS, MAX_LEN_NATIONALITY, MAX_LEN_OCCUPATION_OTHER,
+  MAX_LEN_ADDRESS, MAX_LEN_NATIONALITY, MAX_LEN_OCCUPATION_OTHER,
   MAX_LEN_RELATION_OTHER,
 } from "../../constants";
 import type { AssetCatalogItem, AssetInstance, Beneficiary, WillState, WillType } from "../../types";
@@ -397,7 +397,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
           <FormBlock title="Primary Executor">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div><label className={LC}>Executor's Full Name</label><input value={will.executor.name} onChange={e=>set("executor.name",e.target.value)} className={IC}/></div>
-              <div><label className={LC}>Age (Years)</label><input type="number" min={MIN_AGE} max={MAX_AGE} maxLength={MAX_AGE_DIGITS} value={will.executor.age} onChange={e=>set("executor.age",e.target.value)} className={IC}/></div>
+              <div><label className={LC}>Date of Birth</label><input type="date" value={will.executor.dateOfBirth} onChange={e=>set("executor.dateOfBirth",e.target.value)} className={IC+" bg-white"}/></div>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div><label className={LC}>Relationship to You</label>
@@ -459,7 +459,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
               <FormBlock title="Main Guardian">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div><label className={LC}>{LBL_FULL_NAME}</label><input value={will.guardian.name} onChange={e=>set("guardian.name",e.target.value)} className={IC} placeholder="Guardian's name"/></div>
-                  <div><label className={LC}>Age (Years)</label><input type="number" min={MIN_AGE} max={MAX_AGE} maxLength={MAX_AGE_DIGITS} value={will.guardian.age} onChange={e=>set("guardian.age",e.target.value)} className={IC}/></div>
+                  <div><label className={LC}>Date of Birth</label><input type="date" value={will.guardian.dateOfBirth} onChange={e=>set("guardian.dateOfBirth",e.target.value)} className={IC+" bg-white"}/></div>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div><label className={LC}>Relation to Testator</label>
@@ -504,7 +504,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-2.5">
                   <div><label className={LC}>{LBL_FULL_NAME}</label><input value={b.name} onChange={e=>updateBene(b.id,"name",e.target.value)} className={IC} placeholder="Full name"/></div>
-                  <div><label className={LC}>Age (Years)</label><input type="number" min={MIN_AGE} max={MAX_AGE} maxLength={MAX_AGE_DIGITS} value={b.age||""} onChange={e=>updateBene(b.id,"age",e.target.value)} className={IC}/></div>
+                  <div><label className={LC}>Date of Birth</label><input type="date" value={b.dateOfBirth||""} onChange={e=>updateBene(b.id,"dateOfBirth",e.target.value)} className={IC+" bg-white"}/></div>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-2.5">
                   <div><label className={LC}>Relation</label>
@@ -869,7 +869,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
             <FormBlock title="Section V — Rest & Residue Clause">
               <p className="text-slate-500 text-xs mb-3 leading-relaxed">Even with careful planning, it's possible to miss mentioning an asset in this Will, or to acquire something new after signing it. A residuary clause is a safety net for exactly this. Any such asset should go to the following (more than one beneficiary shares equally):</p>
               {will.allIndiaResidue.map((entry,idx)=>{
-                const setEntry=(field: "relation"|"relationOther"|"name"|"age"|"maritalStatus"|"nationality"|"occupation"|"occupationOther"|"address"|"idType"|"idNumber", value: string)=>
+                const setEntry=(field: "relation"|"relationOther"|"name"|"dateOfBirth"|"maritalStatus"|"nationality"|"occupation"|"occupationOther"|"address"|"idType"|"idNumber", value: string)=>
                   setWill(p=>({...p, allIndiaResidue:p.allIndiaResidue.map((e,j)=>j===idx?{...e,[field]:value}:e)}));
                 return(
                   <div key={idx} className="bg-slate-50 border border-slate-200 rounded-xl p-3 mb-2.5">
@@ -879,7 +879,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-2.5">
                       <div><label className={LC}>Full Name</label><input value={entry.name} onChange={e=>setEntry("name",e.target.value)} className={IC}/></div>
-                      <div><label className={LC}>Age (Years)</label><input type="number" min={MIN_AGE} max={MAX_AGE} maxLength={MAX_AGE_DIGITS} value={entry.age} onChange={e=>setEntry("age",e.target.value)} className={IC}/></div>
+                      <div><label className={LC}>Date of Birth</label><input type="date" value={entry.dateOfBirth} onChange={e=>setEntry("dateOfBirth",e.target.value)} className={IC+" bg-white"}/></div>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-2.5">
                       <div><label className={LC}>Relationship</label>
@@ -923,7 +923,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                   </div>
                 );
               })}
-              <button onClick={()=>setWill(p=>({...p, allIndiaResidue:[...p.allIndiaResidue,{relation:"",relationOther:"",name:"",age:"",maritalStatus:"",nationality:"",occupation:"",occupationOther:"",address:"",idType:"Aadhaar Card",idNumber:""}]}))}
+              <button onClick={()=>setWill(p=>({...p, allIndiaResidue:[...p.allIndiaResidue,{relation:"",relationOther:"",name:"",dateOfBirth:"",maritalStatus:"",nationality:"",occupation:"",occupationOther:"",address:"",idType:"Aadhaar Card",idNumber:""}]}))}
                 className="text-xs text-brand hover:text-brand-dark font-semibold flex items-center gap-1"><Plus size={12}/>Add another beneficiary</button>
             </FormBlock>
           ):willType==="goan"?(
@@ -1008,7 +1008,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
               <>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                   <div><label className={LC}>Name</label><input value={w.name} onChange={e=>setW("name",e.target.value)} className={IC}/></div>
-                  <div><label className={LC}>Age (Years)</label><input type="number" min={MIN_AGE} max={MAX_AGE} maxLength={MAX_AGE_DIGITS} value={w.age} onChange={e=>setW("age",e.target.value)} className={IC}/></div>
+                  <div><label className={LC}>Date of Birth</label><input type="date" value={w.dateOfBirth} onChange={e=>setW("dateOfBirth",e.target.value)} className={IC+" bg-white"}/></div>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mt-2.5">
                   <div><label className={LC}>Relation</label>
@@ -1057,7 +1057,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                       </div>
                     );
                   })}
-                  <button onClick={()=>setWill(p=>({...p,goanWitnesses:[...p.goanWitnesses,{name:"",parentRelation:"s/o.",parentName:"",age:"",maritalStatus:"",occupation:"",address:"",pan:"",aadhaarNumber:""}]}))}
+                  <button onClick={()=>setWill(p=>({...p,goanWitnesses:[...p.goanWitnesses,{name:"",parentRelation:"s/o.",parentName:"",dateOfBirth:"",maritalStatus:"",occupation:"",address:"",pan:"",aadhaarNumber:""}]}))}
                     className="text-xs text-brand hover:text-brand-dark font-semibold flex items-center gap-1 mt-3"><Plus size={12}/>Add another witness</button>
                 </FormBlock>
 
@@ -1090,7 +1090,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                             </div>
                           );
                         })}
-                        <button onClick={()=>setWill(p=>({...p,goanDeedWitnesses:[...p.goanDeedWitnesses,{name:"",parentRelation:"s/o.",parentName:"",age:"",maritalStatus:"",occupation:"",address:"",pan:"",aadhaarNumber:""}]}))}
+                        <button onClick={()=>setWill(p=>({...p,goanDeedWitnesses:[...p.goanDeedWitnesses,{name:"",parentRelation:"s/o.",parentName:"",dateOfBirth:"",maritalStatus:"",occupation:"",address:"",pan:"",aadhaarNumber:""}]}))}
                           className="text-xs text-brand hover:text-brand-dark font-semibold flex items-center gap-1 mt-3"><Plus size={12}/>Add another witness for the Deed</button>
                       </>
                     )}
@@ -1110,8 +1110,8 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                     <div><label className={LC}>Name</label>
                       <input value={w.name} onChange={e=>setW("name",e.target.value)} className={IC}/>
                     </div>
-                    <div><label className={LC}>Age (Years)</label>
-                      <input type="number" min={MIN_AGE} max={MAX_AGE} maxLength={MAX_AGE_DIGITS} value={w.age} onChange={e=>setW("age",e.target.value)} className={IC}/>
+                    <div><label className={LC}>Date of Birth</label>
+                      <input type="date" value={w.dateOfBirth} onChange={e=>setW("dateOfBirth",e.target.value)} className={IC+" bg-white"}/>
                     </div>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mt-2.5">

@@ -1,5 +1,5 @@
 import { Eye } from "lucide-react";
-import { ordinal } from "../../utils/format";
+import { formatDOB, ordinal } from "../../utils/format";
 import type { WillState } from "../../types";
 import {
   BLANK as blank, occupationOf, nationalityLabel, renderAssetList, computeAssetSections,
@@ -20,6 +20,9 @@ export default function AllIndiaLiveDocPreview({will}:{
     ? <>{ordinal(testator.signDay)} day of {testator.signMonth}, {testator.signYear}</>
     : "____";
 
+  // Matches AllIndiaWillDocument.tsx's / pdf_context.py's gendered title.
+  const title = testator.gender==="male" ? "Testator" : testator.gender==="female" ? "Testatrix" : "Testator/Testatrix";
+
   const {
     houseFlat, landPlot, commercialProperty, vehicle, jewellery, socialMediaDigital, intellectualProperty,
     hasImmovable, hasVehicle, hasPersonal, hasSocialDigital, hasIntellectualProperty,
@@ -28,7 +31,7 @@ export default function AllIndiaLiveDocPreview({will}:{
   } = computeAssetSections(allIndiaAssets, Boolean(will.specialInstructions));
 
   const SectionSignatureLine = () => (
-    <p className="mb-3">Testator's Signature: __________ Witness 1: ______ Witness 2: ______</p>
+    <p className="mb-3">{title} Signature: __________ Witness 1: ______ Witness 2: ______</p>
   );
 
   return(
@@ -116,7 +119,7 @@ export default function AllIndiaLiveDocPreview({will}:{
         <p className="mb-1">Witnesses:</p>
         {witnesses.map((w,i)=>(
           <p key={i} className="text-justify mb-1">
-            {i+1}) <strong>{w.name||blank}</strong>, {w.parentRelation} of <strong>{w.parentName||blank}</strong>, Age: <strong>{w.age||"___"}</strong>, {w.maritalStatus}, nationality <strong>{nationalityLabel(w.nationality)}</strong>, occupation <strong>{occupationOf(w)||blank}</strong>, resident of <strong>{w.address||blank}</strong>, bearing PAN Number <strong>{w.pan||blank}</strong>, Aadhaar Number <strong>{w.aadhaarNumber||blank}</strong>
+            {i+1}) <strong>{w.name||blank}</strong>, {w.parentRelation} of <strong>{w.parentName||blank}</strong>, Date of Birth: <strong>{formatDOB(w.dateOfBirth)}</strong>, {w.maritalStatus}, nationality <strong>{nationalityLabel(w.nationality)}</strong>, occupation <strong>{occupationOf(w)||blank}</strong>, resident of <strong>{w.address||blank}</strong>, bearing PAN Number <strong>{w.pan||blank}</strong>, Aadhaar Number <strong>{w.aadhaarNumber||blank}</strong>
           </p>
         ))}
 

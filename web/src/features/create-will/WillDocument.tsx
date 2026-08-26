@@ -4,7 +4,7 @@ import { ChevronLeft, Printer, Download } from "lucide-react";
 import BrandMark from "../../components/shared/BrandMark";
 import WillSection from "../../components/shared/WillSection";
 import { formatAllocFull } from "../../utils/allocation";
-import { today } from "../../utils/format";
+import { formatDOB, today } from "../../utils/format";
 import type { AssetInstance, Beneficiary, WillState } from "../../types";
 
 export default function WillDocument({will,residualBene,onBack,onPrint,willDocRef}:{
@@ -16,6 +16,11 @@ export default function WillDocument({will,residualBene,onBack,onPrint,willDocRe
 }){
   const {testator,executor,guardian,beneficiaries,assets}=will;
   const formatAlloc=(asset: AssetInstance)=>formatAllocFull(asset,beneficiaries);
+
+  // Matches AllIndiaWillDocument.tsx's / pdf_context.py's gendered title —
+  // this document has no dedicated PDF template of its own, but should
+  // still read correctly once the testator has picked a Gender.
+  const title = testator.gender==="male" ? "Testator" : testator.gender==="female" ? "Testatrix" : "Testator/Testatrix";
 
   // The browser's print header uses document.title (Chrome's default "Print
   // headers and footers" option shows it top-left) — blank it out while this
@@ -82,7 +87,7 @@ export default function WillDocument({will,residualBene,onBack,onPrint,willDocRe
 
           {/* Opening */}
           <p className="text-justify mb-6 leading-loose">
-            I, <span className="underline">{testator.fullName||"_______________________"}</span>, having PAN <span>{testator.pan||"_______________________"}</span>, Aadhaar No. <span>{testator.aadhaarNumber||"_______________________"}</span>, {testator.relation} of <span>{testator.parentSpouseName||"_______________________"}</span>, aged about <span>{testator.age||"___"}</span> years, {testator.maritalStatus}, residing permanently at <span>{testator.address||"_______________________"}</span>
+            I, <span className="underline">{testator.fullName||"_______________________"}</span>, having PAN <span>{testator.pan||"_______________________"}</span>, Aadhaar No. <span>{testator.aadhaarNumber||"_______________________"}</span>, {testator.relation} of <span>{testator.parentSpouseName||"_______________________"}</span>, date of birth <span>{formatDOB(testator.dateOfBirth)}</span>, {testator.maritalStatus}, residing permanently at <span>{testator.address||"_______________________"}</span>
             {testator.maritalStatus==="married"&&(
               <>, I am married to <span>{testator.spouseName||"_______________________"}</span>, bearing Aadhaar No. <span>{testator.spouseAadhaarNumber||"_______________________"}</span>
                 {testator.sonNames.filter(Boolean).length>0&&<> and I have {testator.sonNames.filter(Boolean).length} son(s), namely <span>{testator.sonNames.filter(Boolean).join(", ")}</span></>}
@@ -243,8 +248,8 @@ export default function WillDocument({will,residualBene,onBack,onPrint,willDocRe
             <div className="mb-8">
               <div className="inline-block min-w-[280px]">
                 <div className="border-b-2 border-slate-800 pt-12 mb-1"/>
-                <p className="uppercase tracking-wide">{testator.fullName||"TESTATOR"}</p>
-                <p className="text-xs text-slate-500">Signature of the Testator</p>
+                <p className="uppercase tracking-wide">{testator.fullName||title.toUpperCase()}</p>
+                <p className="text-xs text-slate-500">Signature of the {title}</p>
               </div>
             </div>
 
@@ -256,7 +261,7 @@ export default function WillDocument({will,residualBene,onBack,onPrint,willDocRe
                 <div key={i}>
                   <div className="border-b-2 border-slate-700 pt-10 mb-1"/>
                   <p>{w.name||`Witness ${i+1}`}</p>
-                  <p className="text-xs text-slate-500 mt-0.5">{w.parentRelation} of {w.parentName||"_______"}, aged {w.age||"___"}, {w.maritalStatus}</p>
+                  <p className="text-xs text-slate-500 mt-0.5">{w.parentRelation} of {w.parentName||"_______"}, date of birth {formatDOB(w.dateOfBirth)}, {w.maritalStatus}</p>
                   <p className="text-xs text-slate-500 mt-0.5">{w.address||"Address:"}</p>
                   <p className="text-xs text-slate-500 mt-0.5">Aadhaar No. {w.aadhaarNumber||"_______________________"}</p>
                   <p className="text-xs text-slate-400 mt-1">Signature of Witness {i+1}</p>
@@ -271,7 +276,7 @@ export default function WillDocument({will,residualBene,onBack,onPrint,willDocRe
             <p className="text-xs text-slate-400 mt-1">Page 1 of 1 · {today.day} {today.month} {today.year}</p>
           </div>
 
-          <div className="print-sig-footer">Signature of the Testator/Testatrix _______________________</div>
+          <div className="print-sig-footer">Signature of the {title} _______________________</div>
         </div>
       </div>
     </div>

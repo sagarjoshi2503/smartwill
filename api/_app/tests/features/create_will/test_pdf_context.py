@@ -1,7 +1,22 @@
 from _app.features.create_will.pdf_context import (
-    BLANK, _format_aadhaar, _id_number_display, build_pdf_context, date_ddmmyyyy, number_to_words, occupation_of,
-    ordinal, rel_of, v_aadhaar, year_in_words,
+    BLANK, _dob_display, _format_aadhaar, _id_number_display, build_pdf_context, date_ddmmyyyy, number_to_words,
+    occupation_of, ordinal, rel_of, v_aadhaar, year_in_words,
 )
+
+
+# --- date of birth formatting ---
+
+def test_dob_display_formats_iso_date_as_ddmmyyyy():
+    assert _dob_display("1990-06-20") == "20/06/1990"
+
+
+def test_dob_display_blank_when_missing():
+    assert _dob_display(None) == "___"
+    assert _dob_display("") == "___"
+
+
+def test_dob_display_escapes_non_iso_input_instead_of_reformatting():
+    assert _dob_display("not-a-date") == "not-a-date"
 
 
 # --- ordinal / number-to-words / date formatting ---
@@ -163,14 +178,14 @@ def test_title_resolution_by_gender():
 def test_asset_line_includes_beneficiary_marital_status_and_address():
     will = _will(
         beneficiaries=[{
-            "name": "Bob", "age": "40", "maritalStatus": "Married", "relation": "Son",
+            "name": "Bob", "dateOfBirth": "1986-01-15", "maritalStatus": "Married", "relation": "Son",
             "address": "123 Main St", "pan": "ABCDE1234F", "aadhaarNumber": "111122223333",
         }],
     )
     will["allIndiaAssets"]["vehicle"] = [{"description": "Car 1", "beneficiary": "Bob"}]
     ctx = build_pdf_context(will)
     line = ctx["vehicle_lines"][0]
-    assert "age 40, Married," in line
+    assert "date of birth 15/01/1986, Married," in line
     assert "resident of 123 Main St" in line
     assert "Relation to Testator/Testatrix: Son" in line
 
@@ -188,20 +203,20 @@ def test_residue_clause_includes_marital_status_and_relation_label():
     will = _will(
         testator={"fullName": "Jane", "gender": "male", "maritalStatus": "unmarried", "sonNames": [], "daughterNames": []},
         allIndiaResidue=[{
-            "name": "Sam", "age": "35", "maritalStatus": "Widowed", "relation": "Brother",
+            "name": "Sam", "dateOfBirth": "1990-06-20", "maritalStatus": "Widowed", "relation": "Brother",
             "nationality": "Indian", "occupation": "Business", "address": "456 Park Ave",
             "idType": "PAN Card", "idNumber": "SAMPN1234E",
         }],
     )
     clause = build_pdf_context(will)["residue_clause"]
-    assert "Sam, age 35, Widowed, Relation to Testator: Brother" in clause
+    assert "Sam, date of birth 20/06/1990, Widowed, Relation to Testator: Brother" in clause
 
 
 def test_residue_clause_multiple_entries_each_carry_relation_label():
     will = _will(
         allIndiaResidue=[
-            {"name": "Sam", "age": "35", "maritalStatus": "Widowed", "relation": "Brother", "idType": "PAN Card", "idNumber": "A"},
-            {"name": "Amy", "age": "30", "maritalStatus": "Married", "relation": "Sister", "idType": "PAN Card", "idNumber": "B"},
+            {"name": "Sam", "dateOfBirth": "1990-06-20", "maritalStatus": "Widowed", "relation": "Brother", "idType": "PAN Card", "idNumber": "A"},
+            {"name": "Amy", "dateOfBirth": "1995-09-01", "maritalStatus": "Married", "relation": "Sister", "idType": "PAN Card", "idNumber": "B"},
         ],
     )
     clause = build_pdf_context(will)["residue_clause"]

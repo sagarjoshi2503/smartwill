@@ -24,14 +24,11 @@ export const HEADER_CONTENT_TYPE = "Content-Type";
 export const CONTENT_TYPE_JSON = "application/json";
 
 // --- Wizard textbox validation limits — every input bound to one of these
-// field kinds (Spouse Name, Address, Age, Nationality, "specify Other"
+// field kinds (Spouse Name, Address, Nationality, "specify Other"
 // occupation/relation) across every wizard step reads its maxLength/min/max
 // from here, so a limit only ever needs to change in one place. ---
 export const MAX_LEN_SPOUSE_NAME = 80;
 export const MAX_LEN_ADDRESS = 250;
-export const MIN_AGE = 0;
-export const MAX_AGE = 150;
-export const MAX_AGE_DIGITS = 3;
 export const MAX_LEN_NATIONALITY = 50;
 export const MAX_LEN_OCCUPATION_OTHER = 50;
 export const MAX_LEN_RELATION_OTHER = 80;

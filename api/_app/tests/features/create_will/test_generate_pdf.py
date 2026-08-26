@@ -123,3 +123,41 @@ def test_rejects_mismatched_id_fields_array_length(client, fake_db):
 def test_rejects_missing_auth_token(client):
     res = client.post(pdf_url("some-id"), json={"idFields": {}})
     assert res.status_code == 401
+
+
+# --- gendered signature footer (_make_signature_footer) ---
+
+class _FakeCanvas:
+    def __init__(self):
+        self.drawn = []
+
+    def saveState(self):
+        pass
+
+    def restoreState(self):
+        pass
+
+    def setFont(self, *_args):
+        pass
+
+    def drawString(self, _x, _y, text):
+        self.drawn.append(text)
+
+
+class _FakeDoc:
+    leftMargin = 0
+    bottomMargin = 0
+
+
+def test_signature_footer_uses_testator_for_male():
+    from _app.features.create_will.pdf_generator import _make_signature_footer
+    canvas = _FakeCanvas()
+    _make_signature_footer("Testator")(canvas, _FakeDoc())
+    assert canvas.drawn == ["Testator Signature: __________ Witness 1: ______ Witness 2: ______"]
+
+
+def test_signature_footer_uses_testatrix_for_female():
+    from _app.features.create_will.pdf_generator import _make_signature_footer
+    canvas = _FakeCanvas()
+    _make_signature_footer("Testatrix")(canvas, _FakeDoc())
+    assert canvas.drawn == ["Testatrix Signature: __________ Witness 1: ______ Witness 2: ______"]

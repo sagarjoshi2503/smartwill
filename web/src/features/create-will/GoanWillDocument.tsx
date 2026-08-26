@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import type { MutableRefObject, ReactNode } from "react";
 import { ChevronLeft, Printer, Download } from "lucide-react";
 import BrandMark from "../../components/shared/BrandMark";
+import { formatDOB } from "../../utils/format";
 import type { AllIndiaAssetItem, GoanPerson, WillState } from "../../types";
 
 const relOf = (it: {relation: string; relationOther: string}) => it.relation==="Other" ? it.relationOther : it.relation;
@@ -32,6 +33,7 @@ export default function GoanWillDocument({will,person,onBack,onPrint,willDocRef}
 
   const isMale = person.gender==="M";
   const title = person.gender==="F" ? "TESTATRIX" : "TESTATOR";
+  const titleCase = title==="TESTATRIX" ? "Testatrix" : "Testator";
   const subj = isMale ? "he" : "she";
   const obj = isMale ? "him" : "her";
   const poss = isMale ? "his" : "her";
@@ -55,7 +57,7 @@ export default function GoanWillDocument({will,person,onBack,onPrint,willDocRef}
   const Page = ({children,isLast}:{children: ReactNode; isLast?: boolean})=>(
     <section className={`pdf-page${isLast?"":" pdf-page-break"}`}>
       <div className="pdf-page-content">{children}</div>
-      <p className="pdf-sig-line pdf-sig-line-footer mb-0">Testator's Signature: __________ Witness 1: ______ Witness 2: ______</p>
+      <p className="pdf-sig-line pdf-sig-line-footer mb-0">{titleCase} Signature: __________ Witness 1: ______ Witness 2: ______</p>
     </section>
   );
 
@@ -139,7 +141,7 @@ export default function GoanWillDocument({will,person,onBack,onPrint,willDocRef}
             <h1 className="text-center text-2xl font-bold tracking-widest uppercase mb-6">Open Will</h1>
 
             <p className="text-justify mb-5">
-              On this <strong>{blank}</strong> day of <strong>{blank}</strong> of the year Two Thousand and <strong>{blank}</strong> at <strong>{blank}</strong> hours, in this Judicial Division of <strong>{blank}</strong> and in the Office of the Special Notary Public, situated at <strong>{blank}</strong>, before me, <strong>{blank}</strong>, Civil Registrar-Cum-Sub Registrar and Special Notary Ex-Officio, in the said Division and before the {witnessCountWord} suitable witnesses below mentioned and signed at the end, known to the party, was present <strong>{person.name||blank}</strong> {person.parentRelation} <strong>{person.parentName||blank}</strong>, aged about <strong>{person.age||"___"}</strong> years, <strong>{person.maritalStatus||blank}</strong>, <strong>{occupationOf(person)||blank}</strong>, <strong>{person.nationality?`${person.nationality} National`:blank}</strong>, holder of PAN Card bearing No. <strong>{person.pan||blank}</strong> and Aadhaar Card bearing No. <strong>{person.aadhaarNumber||blank}</strong>, resident of <strong>{person.address||blank}</strong>, hereinafter referred to as the "{title}", whose identity was verified by the guarantee of the said witnesses who are known to the party. And I and each of the said witnesses found {obj} in a sound disposing state of mind and free from any coercion or undue influence for which fact I do hereby vouch. And before the said witnesses, the '{title}' makes this present will and declares {poss} last wishes as follows:
+              On this <strong>{blank}</strong> day of <strong>{blank}</strong> of the year Two Thousand and <strong>{blank}</strong> at <strong>{blank}</strong> hours, in this Judicial Division of <strong>{blank}</strong> and in the Office of the Special Notary Public, situated at <strong>{blank}</strong>, before me, <strong>{blank}</strong>, Civil Registrar-Cum-Sub Registrar and Special Notary Ex-Officio, in the said Division and before the {witnessCountWord} suitable witnesses below mentioned and signed at the end, known to the party, was present <strong>{person.name||blank}</strong> {person.parentRelation} <strong>{person.parentName||blank}</strong>, date of birth <strong>{formatDOB(person.dateOfBirth)}</strong>, <strong>{person.maritalStatus||blank}</strong>, <strong>{occupationOf(person)||blank}</strong>, <strong>{person.nationality?`${person.nationality} National`:blank}</strong>, holder of PAN Card bearing No. <strong>{person.pan||blank}</strong> and Aadhaar Card bearing No. <strong>{person.aadhaarNumber||blank}</strong>, resident of <strong>{person.address||blank}</strong>, hereinafter referred to as the "{title}", whose identity was verified by the guarantee of the said witnesses who are known to the party. And I and each of the said witnesses found {obj} in a sound disposing state of mind and free from any coercion or undue influence for which fact I do hereby vouch. And before the said witnesses, the '{title}' makes this present will and declares {poss} last wishes as follows:
             </p>
 
             <p className="text-justify mb-5">
@@ -205,7 +207,7 @@ export default function GoanWillDocument({will,person,onBack,onPrint,willDocRef}
             <ol className="pl-5 mb-5 list-decimal">
               {goanWitnesses.map((w,i)=>(
                 <li key={i} className="mb-2.5">
-                  <strong>{w.name||blank}</strong>, {w.parentRelation} <strong>{w.parentName||blank}</strong>, aged about <strong>{w.age||"___"}</strong> years, <strong>{w.maritalStatus||blank}</strong>, <strong>{w.occupation||blank}</strong>, Indian National, resident of <strong>{w.address||blank}</strong>, having PAN Card No. <strong>{w.pan||blank}</strong> and Aadhaar Card No. <strong>{w.aadhaarNumber||blank}</strong>.
+                  <strong>{w.name||blank}</strong>, {w.parentRelation} <strong>{w.parentName||blank}</strong>, date of birth <strong>{formatDOB(w.dateOfBirth)}</strong>, <strong>{w.maritalStatus||blank}</strong>, <strong>{w.occupation||blank}</strong>, Indian National, resident of <strong>{w.address||blank}</strong>, having PAN Card No. <strong>{w.pan||blank}</strong> and Aadhaar Card No. <strong>{w.aadhaarNumber||blank}</strong>.
                 </li>
               ))}
             </ol>
@@ -217,16 +219,16 @@ export default function GoanWillDocument({will,person,onBack,onPrint,willDocRef}
             </p>
 
             <p className="text-justify mb-4">
-              {title==="TESTATRIX"?"Testatrix":"Testator"}/{title==="TESTATRIX"?"Testator":"Testatrix"} understands and approves the contents of document before signing and was not forced to do so by any person.
+              {titleCase} understands and approves the contents of document before signing and was not forced to do so by any person.
             </p>
 
             <div className="mb-2">
               <div className="inline-block min-w-[280px]">
                 <div className="border-b-2 border-slate-800 pt-6 mb-1"/>
-                <p className="mb-1">Signature of Testator/Testatrix</p>
+                <p className="mb-1">Signature of {titleCase}</p>
               </div>
             </div>
-            <p className="mb-1">Name of Testator/Testatrix: <strong>{person.name||blank}</strong></p>
+            <p className="mb-1">Name of {titleCase}: <strong>{person.name||blank}</strong></p>
             <p className="mb-1">Place: <strong>{blank}</strong></p>
             <p className="mb-4">Date: <strong>{blank}</strong></p>
 

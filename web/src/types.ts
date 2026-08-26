@@ -9,7 +9,7 @@ export interface Testator {
   relation: "son" | "daughter" | "wife" | "other" | "";
   relationOther: string;
   parentSpouseName: string;
-  age: string;
+  dateOfBirth: string;
   maritalStatus: "unmarried" | "married" | "widowed" | "divorced" | "";
   nationality: string;
   occupation: string;
@@ -31,7 +31,7 @@ export interface Executor {
   wantsExecutor: boolean;
   executorType: "individual" | "org";
   name: string;
-  age: string;
+  dateOfBirth: string;
   occupation: string;
   occupationOther: string;
   idType: string;
@@ -58,7 +58,7 @@ export interface Executor {
 export interface Guardian {
   hasMinors: boolean;
   name: string;
-  age: string;
+  dateOfBirth: string;
   relation: string;
   occupation: string;
   occupationOther: string;
@@ -76,7 +76,7 @@ export interface Beneficiary {
   id: number;
   name: string;
   relation: string;
-  age: string;
+  dateOfBirth: string;
   maritalStatus: string;
   occupation: string;
   occupationOther: string;
@@ -89,7 +89,7 @@ export interface Witness {
   name: string;
   parentRelation: "son" | "daughter" | "wife" | "";
   parentName: string;
-  age: string;
+  dateOfBirth: string;
   maritalStatus: "unmarried" | "married" | "widowed" | "divorced" | "";
   nationality: string;
   occupation: string;
@@ -169,7 +169,7 @@ export interface AllIndiaResidueEntry {
   relation: string;
   relationOther: string;
   name: string;
-  age: string;
+  dateOfBirth: string;
   maritalStatus: string;
   nationality: string;
   occupation: string;
@@ -189,7 +189,7 @@ export interface AllIndiaResidueEntry {
 export interface GoanPerson {
   name: string;
   gender: "M" | "F" | "";
-  age: string;
+  dateOfBirth: string;
   parentRelation: "son of" | "daughter of" | "wife of" | "husband of" | "";
   parentName: string;
   maritalStatus: "married" | "unmarried" | "widowed" | "divorced" | "";
@@ -211,7 +211,7 @@ export interface GoanWitness {
   name: string;
   parentRelation: "s/o." | "d/o." | "w/o." | "";
   parentName: string;
-  age: string;
+  dateOfBirth: string;
   maritalStatus: "Married" | "Unmarried" | "Widowed" | "Divorced" | "";
   occupation: string;
   address: string;

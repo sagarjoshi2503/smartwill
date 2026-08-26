@@ -2,12 +2,12 @@ import { today } from "../utils/format";
 import type { GoanPerson, GoanWitness, WillState } from "../types";
 
 const newGoanPerson = (): GoanPerson => ({
-  name:"", gender:"", age:"", parentRelation:"", parentName:"",
+  name:"", gender:"", dateOfBirth:"", parentRelation:"", parentName:"",
   maritalStatus:"", occupation:"", occupationOther:"", nationality:"Indian",
   pan:"", aadhaarNumber:"", address:"", alias:"",
 });
 const newGoanWitness = (): GoanWitness => ({
-  name:"", parentRelation:"", parentName:"", age:"", maritalStatus:"",
+  name:"", parentRelation:"", parentName:"", dateOfBirth:"", maritalStatus:"",
   occupation:"", address:"", pan:"", aadhaarNumber:"",
 });
 const newGoanAssetItem = () => ({description:"",beneficiary:"",beneficiaryAge:"",relation:"",relationOther:"",idType:"Aadhaar Card",idNumber:""});
@@ -22,7 +22,7 @@ export const DEFAULT_WILL: WillState = {
   testator: {
     email:"", fullName:"", gender:"", pan:"", aadhaarNumber:"",
     relation:"", relationOther:"", parentSpouseName:"",
-    age:"", maritalStatus:"", nationality:"", occupation:"", occupationOther:"",
+    dateOfBirth:"", maritalStatus:"", nationality:"", occupation:"", occupationOther:"",
     spouseName:"", spousePan:"", spouseAadhaarNumber:"",
     sonNames:[""], daughterNames:[""],
     address:"", country:"India",
@@ -36,7 +36,7 @@ export const DEFAULT_WILL: WillState = {
   executor: {
     wantsExecutor:false,
     executorType:"individual", // "individual" | "org"
-    name:"", age:"", occupation:"", occupationOther:"", idType:"Aadhaar Card", idNumber:"",
+    name:"", dateOfBirth:"", occupation:"", occupationOther:"", idType:"Aadhaar Card", idNumber:"",
     address:"",
     relation:"",
     orgName:"", orgRepName:"", orgRegNumber:"", orgAddress:"",
@@ -49,7 +49,7 @@ export const DEFAULT_WILL: WillState = {
   // Section III - Guardians
   guardian: {
     hasMinors:false,
-    name:"", age:"", relation:"", occupation:"", occupationOther:"",
+    name:"", dateOfBirth:"", relation:"", occupation:"", occupationOther:"",
     idType:"PAN Card", idNumber:"", address:"",
     hasSubstitute:false,
     subName:"", subIdType:"PAN Card", subIdNumber:"", subAddress:"",
@@ -73,7 +73,7 @@ export const DEFAULT_WILL: WillState = {
   // Residuary beneficiaries for the All India Will format (relationship,
   // name, nationality, occupation, ID proof — more than one allowed) — only
   // used when willType==="allindia".
-  allIndiaResidue:[{relation:"",relationOther:"",name:"",age:"",maritalStatus:"",nationality:"",occupation:"",occupationOther:"",address:"",idType:"Aadhaar Card",idNumber:""}],
+  allIndiaResidue:[{relation:"",relationOther:"",name:"",dateOfBirth:"",maritalStatus:"",nationality:"",occupation:"",occupationOther:"",address:"",idType:"Aadhaar Card",idNumber:""}],
   // Goan Will format — only used/shown when willType==="goan". nationality
   // defaults to "Indian" to match the reference form (still fully editable).
   goanTestator: newGoanPerson(),
@@ -99,11 +99,11 @@ export const DEFAULT_WILL: WillState = {
   specialInstructions:"",
   // Beneficiaries — always starts with one blank entry (a Will needs at
   // least one beneficiary), the user adds more via "+ Add Beneficiary"
-  beneficiaries:[{id:1, name:"", relation:"", age:"", maritalStatus:"", occupation:"", occupationOther:"", address:"", pan:"", aadhaarNumber:""}],
+  beneficiaries:[{id:1, name:"", relation:"", dateOfBirth:"", maritalStatus:"", occupation:"", occupationOther:"", address:"", pan:"", aadhaarNumber:""}],
   // Witnesses: the Indian Succession Act requires exactly two, so the two slots
   // stay (the UI has no "add witness" control), but with no fabricated identities
   witnesses:[
-    { name:"", parentRelation:"", parentName:"", age:"", maritalStatus:"", nationality:"", occupation:"", occupationOther:"", address:"", pan:"", aadhaarNumber:"" },
-    { name:"", parentRelation:"", parentName:"", age:"", maritalStatus:"", nationality:"", occupation:"", occupationOther:"", address:"", pan:"", aadhaarNumber:"" },
+    { name:"", parentRelation:"", parentName:"", dateOfBirth:"", maritalStatus:"", nationality:"", occupation:"", occupationOther:"", address:"", pan:"", aadhaarNumber:"" },
+    { name:"", parentRelation:"", parentName:"", dateOfBirth:"", maritalStatus:"", nationality:"", occupation:"", occupationOther:"", address:"", pan:"", aadhaarNumber:"" },
   ],
 };

@@ -148,9 +148,9 @@
 - type: paragraph
   text: {{ ("Place and Date: " ~ blank) | yamlstr }}
 - type: paragraph
-  text: {{ ("Name of the Testator: " ~ testator_full_name) | yamlstr }}
+  text: {{ ("Name of the " ~ title ~ ": " ~ testator_full_name) | yamlstr }}
 - type: paragraph
-  text: {{ ("Signature of the Testator: " ~ blank) | yamlstr }}
+  text: {{ ("Signature of the " ~ title ~ ": " ~ blank) | yamlstr }}
 - type: pagebreak
 - type: heading
   text: {{ heading_executor_consent | upper | yamlstr }}
@@ -174,9 +174,9 @@
 - type: paragraph
   text: {{ ("Place and Date: " ~ blank) | yamlstr }}
 - type: paragraph
-  text: {{ ("Name of the Testator: " ~ testator_full_name) | yamlstr }}
+  text: {{ ("Name of the " ~ title ~ ": " ~ testator_full_name) | yamlstr }}
 - type: paragraph
-  text: {{ ("Signature of the Testator: " ~ blank) | yamlstr }}
+  text: {{ ("Signature of the " ~ title ~ ": " ~ blank) | yamlstr }}
 - type: pagebreak
 - type: heading
   text: {{ heading_guardian_consent | upper | yamlstr }}

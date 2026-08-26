@@ -174,10 +174,19 @@ def _national(d: dict, key: str = "nationality") -> str:
     return f"{esc(value)} national" if value else BLANK
 
 
-def _age_display(value) -> str:
-    """"31" — every age printed in this document (testator, witnesses, asset
-    beneficiaries) goes through this one function. A blank age stays "___"."""
-    return esc(value) if value else "___"
+def _dob_display(value) -> str:
+    """"17/03/1990" — every Date of Birth printed in this document (testator,
+    witnesses, asset beneficiaries, executor, guardian, residuary entries)
+    goes through this one function. `value` is whatever a native
+    `<input type="date">` produced ("YYYY-MM-DD"); a blank/unset value stays
+    "___". Mirrors web/src/utils/format.ts's formatDOB()."""
+    if not value:
+        return "___"
+    match = re.match(r"^(\d{4})-(\d{2})-(\d{2})$", str(value))
+    if not match:
+        return esc(value)
+    y, m, d = match.groups()
+    return f"{d}/{m}/{y}"
 
 
 def _id_type_label(id_type) -> str:
@@ -243,7 +252,7 @@ def _render_asset_list(
         ben = _find_beneficiary(beneficiaries, item.get("beneficiary"))
         lines.append(
             f"{prefix}{label}: {v(item, 'description')} Bequeathed to: {v(item, 'beneficiary')}, "
-            f"age {_age_display(ben.get('age'))}, {esc(ben.get('maritalStatus')) or BLANK}, "
+            f"date of birth {_dob_display(ben.get('dateOfBirth'))}, {esc(ben.get('maritalStatus')) or BLANK}, "
             f"Relation to {title}: {esc(ben.get('relation')) or BLANK}, "
             f"resident of {v(ben, 'address')}, "
             f"having PAN {v(ben, 'pan')}, Aadhaar Number {v_aadhaar(ben, 'aadhaarNumber')}."
@@ -255,7 +264,7 @@ def _witness_particular(index: int, w: dict) -> str:
     letter = chr(97 + index)
     return (
         f"{letter}) {v(w, 'name')} {esc(w.get('parentRelation')) or 'son/daughter/wife'} of {v(w, 'parentName')}, "
-        f"age {_age_display(w.get('age'))}, {esc(w.get('maritalStatus')) or 'unmarried/married'}, "
+        f"date of birth {_dob_display(w.get('dateOfBirth'))}, {esc(w.get('maritalStatus')) or 'unmarried/married'}, "
         f"{_national(w)}, occupation {occupation_of(w) or BLANK}, resident of {v(w, 'address')}, "
         f"having PAN Number {v(w, 'pan')}, Aadhaar Number {v_aadhaar(w, 'aadhaarNumber')}"
     )
@@ -279,7 +288,8 @@ def _opening_clause(testator: dict, witnesses: list, execution_date_str: str) ->
     clause = (
         f"I, {v(testator, 'fullName')}, {_gender_display(testator)}, "
         f"having PAN {v(testator, 'pan')}, Aadhaar Number {v_aadhaar(testator, 'aadhaarNumber')}, "
-        f"{_testator_relation(testator)} of {v(testator, 'parentSpouseName')}, age {_age_display(testator.get('age'))}, "
+        f"{_testator_relation(testator)} of {v(testator, 'parentSpouseName')}, "
+        f"date of birth {_dob_display(testator.get('dateOfBirth'))}, "
         f"{marital_status}, {_national(testator)}, occupation {occupation_of(testator) or BLANK}, "
         f"resident of {v(testator, 'address')}"
     )
@@ -308,7 +318,7 @@ def _residue_clause(entries: list, title: str) -> str:
         id_type = entry.get("idType") or "Aadhaar Card"
         suffix = "; " if i < len(entries) - 1 else "."
         parts.append(
-            f"{v(entry, 'name')}, age {_age_display(entry.get('age'))}, "
+            f"{v(entry, 'name')}, date of birth {_dob_display(entry.get('dateOfBirth'))}, "
             f"{esc(entry.get('maritalStatus')) or BLANK}, "
             f"Relation to {title}: {rel_of(entry) or BLANK}, {_national(entry)}, "
             f"occupation {occupation_of(entry) or BLANK}, resident of {v(entry, 'address')}, "
@@ -331,7 +341,7 @@ def _executor_appointment_clause(executor: dict, title: str) -> str:
             f"{v(executor, 'orgRegNumber')}, and having Registered Office Address: {v(executor, 'orgAddress')}."
         )
     return (
-        f"I appoint {v(executor, 'name')}, age {_age_display(executor.get('age'))}, "
+        f"I appoint {v(executor, 'name')}, date of birth {_dob_display(executor.get('dateOfBirth'))}, "
         f"Relation to {title}: {v(executor, 'relation')}, "
         f"Occupation: {occupation_of(executor) or BLANK}, "
         f"resident of {v(executor, 'address')}, having {_id_type_label(executor.get('idType')) or ''} "
@@ -341,7 +351,7 @@ def _executor_appointment_clause(executor: dict, title: str) -> str:
 
 def _guardian_appointment_clause(guardian: dict, title: str) -> str:
     return (
-        f"I appoint {v(guardian, 'name')}, age {_age_display(guardian.get('age'))}, "
+        f"I appoint {v(guardian, 'name')}, date of birth {_dob_display(guardian.get('dateOfBirth'))}, "
         f"Relation to {title}: {v(guardian, 'relation')}, "
         f"Occupation: {occupation_of(guardian) or BLANK}, resident of {v(guardian, 'address')}, "
         f"having {_id_type_label(guardian.get('idType')) or ''} "

@@ -13,6 +13,20 @@ export const dateDDMMYYYY = (day: string | number, month: string, year: string |
 
 export const fmt = (n: number): string => "₹" + n.toLocaleString("en-IN");
 
+// "17/03/1990" — every Date of Birth printed in a generated Will (testator,
+// witnesses, beneficiaries, executor, guardian, residuary/Goan entries)
+// goes through this one function. `iso` is whatever a native
+// `<input type="date">` produces ("YYYY-MM-DD"); a blank/unset value stays
+// "___", matching the old age field's blank placeholder. Mirrors
+// api/_app/features/create_will/pdf_context.py's _dob_display().
+export const formatDOB = (iso: string): string => {
+  if(!iso) return "___";
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
+  if(!m) return iso;
+  const [, y, mo, d] = m;
+  return `${d}/${mo}/${y}`;
+};
+
 // Renders a UTC ISO datetime string (as stored in Mongo/returned by the
 // API — see api/_app/features/ai_usage/service.py's _iso()) as IST
 // (Asia/Kolkata), regardless of the viewer's own browser/OS timezone —
