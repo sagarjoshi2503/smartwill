@@ -24,7 +24,7 @@ export const ID_TYPES = ["Aadhaar Card","PAN Card","Passport","Driving Licence",
 // Occupation choices exactly as worded in the All India (Non-Goan) Will PDF
 // template's "occupation (retired/in service/business/profession/homemaker)"
 // blank — used for the testator, witnesses, and residuary beneficiaries.
-export const OCCUPATIONS = ["Retired","In Service","Business","Profession","Homemaker","Other"];
+export const OCCUPATIONS = ["Retired","In Service","Business","Profession","Homemaker","Student","Other"];
 
 // Relationship choices exactly as worded in the All India (Non-Goan) and
 // Goan Will PDF templates' "Relationship: Spouse / Son / Daughter / Other"
@@ -51,7 +51,7 @@ export const GOAN_MARITAL_STATUSES = ["married","unmarried","widowed","divorced"
 // Consent PDF templates' witness clause — "Service / Business /
 // Professional / Retired / Homemaker" — a different wordlist/order than
 // OCCUPATIONS above (which is for the testator/spouse, not witnesses).
-export const GOAN_WITNESS_OCCUPATIONS = ["Service","Business","Professional","Retired","Homemaker"];
+export const GOAN_WITNESS_OCCUPATIONS = ["Service","Business","Professional","Retired","Homemaker","Student"];
 
 export const MONTHS = [
   "January","February","March","April","May","June",
