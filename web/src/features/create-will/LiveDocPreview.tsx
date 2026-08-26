@@ -1,6 +1,7 @@
 import { Eye } from "lucide-react";
 import Clause from "../../components/shared/Clause";
 import { formatAllocCompact } from "../../utils/allocation";
+import { beneficiaryName, beneficiaryRelationLabel } from "../../utils/beneficiaryDisplay";
 import { formatDOB } from "../../utils/format";
 import type { Beneficiary, WillState } from "../../types";
 
@@ -44,11 +45,11 @@ export default function LiveDocPreview({will,residualBene}:{
           </Clause>
         )}
         <Clause title="BENEFICIARIES">
-          {beneficiaries.map((b,i)=><p key={b.id}>({i+1}) <strong>{b.name||"[Name]"}</strong> — {b.relation}</p>)}
+          {beneficiaries.map((b,i)=><p key={b.id}>({i+1}) <strong>{beneficiaryName(b)||"[Name]"}</strong> — {beneficiaryRelationLabel(b)}</p>)}
         </Clause>
         <Clause title="DISTRIBUTION">
           {will.distributionMode==="global"?(
-            <p>{will.globalMode==="equal"?"I direct that my entire estate be distributed equally among all named beneficiaries.":`I direct my estate be distributed by specified percentages: ${beneficiaries.map(b=>`${b.name||"[Name]"} — ${will.globalPercentages[b.id]||0}%`).join("; ")}.`}</p>
+            <p>{will.globalMode==="equal"?"I direct that my entire estate be distributed equally among all named beneficiaries.":`I direct my estate be distributed by specified percentages: ${beneficiaries.map(b=>`${beneficiaryName(b)||"[Name]"} — ${will.globalPercentages[b.id]||0}%`).join("; ")}.`}</p>
           ):(
             assets.length===0?<p className="text-slate-400 italic">No assets added yet.</p>:
             assets.map((a,i)=>(
@@ -59,7 +60,7 @@ export default function LiveDocPreview({will,residualBene}:{
           )}
         </Clause>
         <Clause title="REST & RESIDUE">
-          <p>All rest and residue of my estate shall vest absolutely in <strong>{residualBene?.name||"[Residual Beneficiary]"}</strong> ({residualBene?.relation||"[Relation]"}).</p>
+          <p>All rest and residue of my estate shall vest absolutely in <strong>{(residualBene&&beneficiaryName(residualBene))||"[Residual Beneficiary]"}</strong> ({(residualBene&&beneficiaryRelationLabel(residualBene))||"[Relation]"}).</p>
         </Clause>
         {will.specialInstructions&&(
           <Clause title="SPECIAL INSTRUCTIONS">

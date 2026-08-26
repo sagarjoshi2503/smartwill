@@ -135,6 +135,7 @@ export const TIP_ID_LOCKED = "ID fields are locked until your Will's review is c
 export const BTN_SAVE_AS_DRAFT = "Save as Draft";
 export const BTN_COMPLETE_REVIEW = "Save and Complete Review";
 export const BTN_SUBMIT_REVIEW = "Save and Submit for Review";
+export const BTN_MAKE_PAYMENT = "Save and Make Payment";
 export const BTN_CREATE_ACCOUNT = "Create Account";
 export const MSG_SAVING = "Saving…";
 

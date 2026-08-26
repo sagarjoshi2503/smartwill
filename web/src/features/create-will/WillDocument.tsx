@@ -4,6 +4,7 @@ import { ChevronLeft, Printer, Download } from "lucide-react";
 import BrandMark from "../../components/shared/BrandMark";
 import WillSection from "../../components/shared/WillSection";
 import { formatAllocFull } from "../../utils/allocation";
+import { beneficiaryName, beneficiaryRelationLabel } from "../../utils/beneficiaryDisplay";
 import { formatDOB, today } from "../../utils/format";
 import type { AssetInstance, Beneficiary, WillState } from "../../types";
 
@@ -145,9 +146,9 @@ export default function WillDocument({will,residualBene,onBack,onPrint,willDocRe
               <>
                 <p className="font-bold mb-2">MODE 1: GLOBAL DISTRIBUTION</p>
                 {will.globalMode==="equal"?(
-                  <p className="text-justify">I desire that all my personal assets, both movable and immovable, be distributed <strong>equally</strong> among all my named beneficiaries: {beneficiaries.map(b=>b.name||"[Name]").join(", ")}.</p>
+                  <p className="text-justify">I desire that all my personal assets, both movable and immovable, be distributed <strong>equally</strong> among all my named beneficiaries: {beneficiaries.map(b=>beneficiaryName(b)||"[Name]").join(", ")}.</p>
                 ):(
-                  <p className="text-justify">I desire that all my personal assets be distributed by the following specified percentages: <strong>{beneficiaries.map(b=>`${b.name||"[Name]"} (${b.relation}) — ${will.globalPercentages[b.id]||0}%`).join("; ")}</strong>.</p>
+                  <p className="text-justify">I desire that all my personal assets be distributed by the following specified percentages: <strong>{beneficiaries.map(b=>`${beneficiaryName(b)||"[Name]"} (${beneficiaryRelationLabel(b)}) — ${will.globalPercentages[b.id]||0}%`).join("; ")}</strong>.</p>
                 )}
               </>
             ):(
@@ -228,7 +229,7 @@ export default function WillDocument({will,residualBene,onBack,onPrint,willDocRe
 
           {/* SECTION V */}
           <WillSection num="V" title="REST AND RESIDUE CLAUSE (MANDATORY)">
-            <p className="text-justify">I hereby declare, direct, and devise that all the Rest and Residue of my estate, including any property or assets, both movable and immovable, which I may acquire after the execution of this Will, or which has been inadvertently omitted from this document, shall be given entirely to <strong>{residualBene?.name||"_______________________"}</strong> (Relationship: <strong>{residualBene?.relation||"_______"}</strong>), holding {will.residualIdType}: <strong>{will.residualIdNumber||"_______________________"}</strong>.</p>
+            <p className="text-justify">I hereby declare, direct, and devise that all the Rest and Residue of my estate, including any property or assets, both movable and immovable, which I may acquire after the execution of this Will, or which has been inadvertently omitted from this document, shall be given entirely to <strong>{(residualBene&&beneficiaryName(residualBene))||"_______________________"}</strong> (Relationship: <strong>{(residualBene&&beneficiaryRelationLabel(residualBene))||"_______"}</strong>), holding {will.residualIdType}: <strong>{will.residualIdNumber||"_______________________"}</strong>.</p>
           </WillSection>
 
           {/* SECTION VI */}

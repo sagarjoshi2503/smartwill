@@ -9,6 +9,7 @@ import {
 } from "../../../constants";
 import { IC, LC } from "./wizardStyles";
 import InfoTrigger from "../../../components/shared/InfoTrigger";
+import DateOfBirthInput from "../../../components/shared/DateOfBirthInput";
 import { WIZARD_HELP } from "../../../data/wizardHelp";
 import type { WillState } from "../../../types";
 
@@ -63,7 +64,7 @@ export default function TestatorStep({will,set,setWill,idFieldsLocked,idInputCls
         </div>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <div><label className={LC}>Date of Birth <span className="text-brand">*</span></label><input type="date" value={will.testator.dateOfBirth} onChange={e=>set("testator.dateOfBirth",e.target.value)} className={IC+" bg-white"}/></div>
+        <DateOfBirthInput label={<>Date of Birth <span className="text-brand">*</span></>} value={will.testator.dateOfBirth} onChange={v=>set("testator.dateOfBirth",v)} requireAdult/>
         <div>
           <label className={LC}>You are the <span className="text-brand">*</span></label>
           <select value={will.testator.relation} onChange={e=>set("testator.relation",e.target.value)} className={IC+" appearance-none"}>

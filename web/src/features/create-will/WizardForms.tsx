@@ -18,6 +18,8 @@ import Nav from "../../components/shared/Nav";
 import InfoTrigger from "../../components/shared/InfoTrigger";
 import { authFetch } from "../../utils/apiBase";
 import { normalizeIdOnBlur } from "../../utils/idValidation";
+import { beneficiaryName, beneficiaryLabel } from "../../utils/beneficiaryDisplay";
+import DateOfBirthInput from "../../components/shared/DateOfBirthInput";
 import TestatorStep from "./steps/TestatorStep";
 import GoanTestatorStep from "./steps/GoanTestatorStep";
 import {
@@ -26,7 +28,7 @@ import {
   apiPathComplete, CONTENT_TYPE_JSON, HEADER_CONTENT_TYPE,
   LBL_FULL_NAME, LBL_ID_TYPE, LBL_ID_NUMBER, LBL_ADDRESS,
   TIP_NO_ID_SAVED, TIP_ID_LOCKED, MSG_VIEW_ONLY, MSG_SAVING,
-  BTN_COMPLETE_REVIEW, BTN_SUBMIT_REVIEW,
+  BTN_COMPLETE_REVIEW, BTN_SUBMIT_REVIEW, BTN_MAKE_PAYMENT,
   STATUS_COMPLETED, STATUS_DRAFT, STATUS_PENDING_REVIEW,
   RAZORPAY_KEY_ID, ROLE_ADMIN, ROLE_TESTATOR, ID_POPUP_ERROR_MS,
   MAX_LEN_ADDRESS, MAX_LEN_NATIONALITY, MAX_LEN_OCCUPATION_OTHER,
@@ -397,7 +399,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
           <FormBlock title="Primary Executor">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div><label className={LC}>Executor's Full Name</label><input value={will.executor.name} onChange={e=>set("executor.name",e.target.value)} className={IC}/></div>
-              <div><label className={LC}>Date of Birth</label><input type="date" value={will.executor.dateOfBirth} onChange={e=>set("executor.dateOfBirth",e.target.value)} className={IC+" bg-white"}/></div>
+              <DateOfBirthInput label="Date of Birth" value={will.executor.dateOfBirth} onChange={v=>set("executor.dateOfBirth",v)} requireAdult/>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div><label className={LC}>Relationship to You</label>
@@ -459,7 +461,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
               <FormBlock title="Main Guardian">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div><label className={LC}>{LBL_FULL_NAME}</label><input value={will.guardian.name} onChange={e=>set("guardian.name",e.target.value)} className={IC} placeholder="Guardian's name"/></div>
-                  <div><label className={LC}>Date of Birth</label><input type="date" value={will.guardian.dateOfBirth} onChange={e=>set("guardian.dateOfBirth",e.target.value)} className={IC+" bg-white"}/></div>
+                  <DateOfBirthInput label="Date of Birth" value={will.guardian.dateOfBirth} onChange={v=>set("guardian.dateOfBirth",v)}/>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div><label className={LC}>Relation to Testator</label>
@@ -502,9 +504,35 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                   <span className="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Beneficiary {idx+1}</span>
                   {will.beneficiaries.length>1&&<button onClick={()=>removeBene(b.id)} className="text-red-500 hover:text-red-600"><Trash2 size={13}/></button>}
                 </div>
+                <div className="mb-2.5">
+                  <label className={LC}>Beneficiary Type</label>
+                  <div className="flex gap-3">
+                    {[{v:"individual",l:"Individual"},{v:"org",l:"Organization / Professional Entity"}].map(o=>(
+                      <label key={o.v}
+                        className={`flex-1 flex items-center gap-2 p-3 rounded-xl border cursor-pointer transition-all ${(b.beneficiaryType||"individual")===o.v?"border-[#4F9D33]/50 bg-[#4F9D33]/10":"border-slate-200 hover:border-slate-300"}`}>
+                        <input type="radio" name={`beneficiaryType-${b.id}`} className="sr-only peer" checked={(b.beneficiaryType||"individual")===o.v} onChange={()=>updateBene(b.id,"beneficiaryType",o.v)}/>
+                        <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all peer-focus-visible:ring-2 peer-focus-visible:ring-[#4F9D33] peer-focus-visible:ring-offset-2 ${(b.beneficiaryType||"individual")===o.v?"border-brand bg-brand":"border-slate-300"}`}>
+                          {(b.beneficiaryType||"individual")===o.v&&<div className="w-1.5 h-1.5 rounded-full bg-white"/>}
+                        </div>
+                        <span className="text-slate-700 text-xs font-semibold">{o.l}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+                {b.beneficiaryType==="org"?(
+                  <>
+                    <div className="mb-2.5"><label className={LC}>Organization / Entity Name</label><input value={b.orgName||""} onChange={e=>updateBene(b.id,"orgName",e.target.value)} className={IC} placeholder="e.g. ABC Foundation Trust"/></div>
+                    <div className="mb-2.5"><label className={LC}>Authorized Representative / Contact Person <span className="text-slate-400 normal-case font-normal">(Optional)</span></label><input value={b.orgRepName||""} onChange={e=>updateBene(b.id,"orgRepName",e.target.value)} className={IC}/></div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                      <div><label className={LC}>Registration / Tax ID Number <span className="text-slate-400 normal-case font-normal">(Optional)</span></label><input value={b.orgRegNumber||""} onChange={e=>updateBene(b.id,"orgRegNumber",e.target.value)} className={IC} placeholder="e.g. CIN, Registration No."/></div>
+                      <div><label className={LC}>Registered Office Address <span className="text-slate-400 normal-case font-normal">(Optional)</span></label><input value={b.orgAddress||""} onChange={e=>updateBene(b.id,"orgAddress",e.target.value)} maxLength={MAX_LEN_ADDRESS} className={IC}/></div>
+                    </div>
+                  </>
+                ):(
+                <>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-2.5">
                   <div><label className={LC}>{LBL_FULL_NAME}</label><input value={b.name} onChange={e=>updateBene(b.id,"name",e.target.value)} className={IC} placeholder="Full name"/></div>
-                  <div><label className={LC}>Date of Birth</label><input type="date" value={b.dateOfBirth||""} onChange={e=>updateBene(b.id,"dateOfBirth",e.target.value)} className={IC+" bg-white"}/></div>
+                  <DateOfBirthInput label="Date of Birth" value={b.dateOfBirth||""} onChange={v=>updateBene(b.id,"dateOfBirth",v)}/>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-2.5">
                   <div><label className={LC}>Relation</label>
@@ -536,6 +564,8 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                   <div><label className={LC}>PAN Card No.</label><input value={b.pan||""} onChange={e=>updateBene(b.id,"pan",e.target.value)} onBlur={e=>handleIdBlur("PAN Card",e.target.value,v=>updateBene(b.id,"pan",v))} disabled={idFieldsLocked} className={idInputCls(IC)} title={idInputTitle(TIP_NO_ID_SAVED)}/></div>
                   <div><label className={LC}>Aadhaar Card No.</label><input value={b.aadhaarNumber||""} onChange={e=>updateBene(b.id,"aadhaarNumber",e.target.value)} onBlur={e=>handleIdBlur("Aadhaar Card",e.target.value,v=>updateBene(b.id,"aadhaarNumber",v))} disabled={idFieldsLocked} className={idInputCls(IC)} title={idInputTitle(TIP_NO_ID_SAVED)}/></div>
                 </div>
+                </>
+                )}
               </div>
             ))}
           </div>
@@ -570,7 +600,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                     </div>
                     <div className="mt-2.5">
                       <label className={LC}>Bequeathed To (Name of Person)</label>
-                      <BeneficiarySelect value={item.beneficiary} beneficiaryNames={will.beneficiaries.filter(b=>b.name.trim()).map(b=>b.name)}
+                      <BeneficiarySelect value={item.beneficiary} beneficiaryNames={will.beneficiaries.map(beneficiaryName).filter(n=>n.trim())}
                         onChange={v=>setItem(itemKey,idx,"beneficiary",v)} className={IC+" appearance-none"}/>
                       <p className="text-slate-500 text-[11px] mt-1">Age, relationship, and ID details for this person come from the Beneficiaries step.</p>
                     </div>
@@ -631,7 +661,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                       <input value={item.description} onChange={e=>setItem(itemKey,idx,"description",e.target.value)} className={IC} placeholder={placeholder}/>
                       <div className="flex items-start gap-2">
                         <div className="flex-1">
-                          <BeneficiarySelect value={item.beneficiary} beneficiaryNames={will.beneficiaries.filter(b=>b.name.trim()).map(b=>b.name)}
+                          <BeneficiarySelect value={item.beneficiary} beneficiaryNames={will.beneficiaries.map(beneficiaryName).filter(n=>n.trim())}
                             onChange={v=>setItem(itemKey,idx,"beneficiary",v)} className={IC+" appearance-none"}/>
                         </div>
                         {will.goanAssets[itemKey].length>1&&<button onClick={()=>removeItem(itemKey,idx)} className="text-red-400 hover:text-red-500 shrink-0 mt-2.5"><Trash2 size={14}/></button>}
@@ -733,7 +763,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                   {will.beneficiaries.map(b=>(
                     <div key={b.id}>
                       <div className="flex items-center justify-between mb-1">
-                        <span className="text-slate-700 text-xs">{b.name||"Unnamed"} <span className="text-slate-500">({b.relation})</span></span>
+                        <span className="text-slate-700 text-xs">{beneficiaryLabel(b)}</span>
                         <span className="text-brand text-xs font-bold">{will.globalPercentages[b.id]||0}%</span>
                       </div>
                       <input type="range" min="0" max="100" value={will.globalPercentages[b.id]||0}
@@ -817,7 +847,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                               {will.beneficiaries.map(b=>(
                                 <div key={b.id}>
                                   <div className="flex justify-between mb-1">
-                                    <span className="text-slate-300 text-xs">{b.name||"Unnamed"} <span className="text-slate-500">({b.relation})</span></span>
+                                    <span className="text-slate-300 text-xs">{beneficiaryLabel(b)}</span>
                                     <span className={`text-xs font-bold ${c.text}`}>{asset.allocs[b.id]||0}%</span>
                                   </div>
                                   <input type="range" min="0" max="100" value={asset.allocs[b.id]||0}
@@ -839,7 +869,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                               <label className={LC}>Bequeathed entirely to</label>
                               <select value={asset.allocs.sole||""} onChange={e=>updateAssetAlloc(asset.uid,"sole",e.target.value)} className={IC+" appearance-none"}>
                                 <option value="">— Select Beneficiary —</option>
-                                {will.beneficiaries.map(b=><option key={b.id} value={String(b.id)}>{b.name||"Unnamed"} ({b.relation})</option>)}
+                                {will.beneficiaries.map(b=><option key={b.id} value={String(b.id)}>{beneficiaryLabel(b)}</option>)}
                               </select>
                             </div>
                           )}
@@ -879,7 +909,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-2.5">
                       <div><label className={LC}>Full Name</label><input value={entry.name} onChange={e=>setEntry("name",e.target.value)} className={IC}/></div>
-                      <div><label className={LC}>Date of Birth</label><input type="date" value={entry.dateOfBirth} onChange={e=>setEntry("dateOfBirth",e.target.value)} className={IC+" bg-white"}/></div>
+                      <DateOfBirthInput label="Date of Birth" value={entry.dateOfBirth} onChange={v=>setEntry("dateOfBirth",v)} requireAdult/>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-2.5">
                       <div><label className={LC}>Relationship</label>
@@ -972,7 +1002,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
               <p className="text-slate-400 text-xs mb-3 leading-relaxed">All property not specifically mentioned in this Will — including future acquisitions or inadvertently omitted assets — shall vest in the residual beneficiary.</p>
               <div><label className={LC}>Residual Beneficiary</label>
                 <select value={will.residualBeneId} onChange={e=>setWill(p=>({...p,residualBeneId:e.target.value}))} className={IC+" appearance-none"}>
-                  {will.beneficiaries.map(b=><option key={b.id} value={String(b.id)}>{b.name||"Unnamed"} ({b.relation})</option>)}
+                  {will.beneficiaries.map(b=><option key={b.id} value={String(b.id)}>{beneficiaryLabel(b)}</option>)}
                 </select>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-2.5">
@@ -1008,7 +1038,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
               <>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                   <div><label className={LC}>Name</label><input value={w.name} onChange={e=>setW("name",e.target.value)} className={IC}/></div>
-                  <div><label className={LC}>Date of Birth</label><input type="date" value={w.dateOfBirth} onChange={e=>setW("dateOfBirth",e.target.value)} className={IC+" bg-white"}/></div>
+                  <DateOfBirthInput label="Date of Birth" value={w.dateOfBirth} onChange={v=>setW("dateOfBirth",v)} requireAdult/>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mt-2.5">
                   <div><label className={LC}>Relation</label>
@@ -1110,9 +1140,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                     <div><label className={LC}>Name</label>
                       <input value={w.name} onChange={e=>setW("name",e.target.value)} className={IC}/>
                     </div>
-                    <div><label className={LC}>Date of Birth</label>
-                      <input type="date" value={w.dateOfBirth} onChange={e=>setW("dateOfBirth",e.target.value)} className={IC+" bg-white"}/>
-                    </div>
+                    <DateOfBirthInput label="Date of Birth" value={w.dateOfBirth} onChange={v=>setW("dateOfBirth",v)} requireAdult/>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mt-2.5">
                     <div><label className={LC}>Son / Daughter / Wife of</label>
@@ -1176,7 +1204,9 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
           )}
           {willType!=="allindia"&&willType!=="goan"&&(
             <div className="bg-[#4F9D33]/8 border border-[#4F9D33]/20 rounded-xl p-4 text-xs text-brand-dark">
-              All rest, residue and remainder of my estate shall vest absolutely in <strong>{will.beneficiaries.find(b=>String(b.id)===String(will.residualBeneId))?.name||"Selected Beneficiary"}</strong>.
+              {(()=>{const rb=will.beneficiaries.find(b=>String(b.id)===String(will.residualBeneId)); return(
+              <>All rest, residue and remainder of my estate shall vest absolutely in <strong>{(rb&&beneficiaryName(rb))||"Selected Beneficiary"}</strong>.</>
+              );})()}
             </div>
           )}
           {gateBehindPayment&&willStatus!==STATUS_COMPLETED&&!viewOnly&&(
@@ -1195,7 +1225,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
               <button onClick={handleSaveAndSubmit} disabled={submitStatus==="saving"||giftRedeemStatus==="checking"||viewOnly}
                 title={viewOnly?MSG_VIEW_ONLY:undefined}
                 className={`w-full font-bold py-3.5 rounded-xl text-sm transition-colors flex items-center justify-center gap-2 whitespace-nowrap ${submitStatus==="saving"||viewOnly?"bg-slate-700 text-slate-400 cursor-not-allowed":"bg-slate-800 hover:bg-slate-700 text-white"}`}>
-                <Send size={16} className="shrink-0"/>{submitStatus==="saving"?MSG_SAVING:(adminReview||adminComplete)?BTN_COMPLETE_REVIEW:BTN_SUBMIT_REVIEW}
+                <Send size={16} className="shrink-0"/>{submitStatus==="saving"?MSG_SAVING:(adminReview||adminComplete)?BTN_COMPLETE_REVIEW:skipsAdminReview?BTN_MAKE_PAYMENT:BTN_SUBMIT_REVIEW}
               </button>
             )}
             <button onClick={onGenerate} className="w-full bg-brand hover:bg-brand-dark text-[#ffffff] font-bold py-3.5 rounded-xl text-sm transition-colors flex items-center justify-center gap-2 whitespace-nowrap">

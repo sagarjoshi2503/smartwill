@@ -374,7 +374,7 @@ export default function SmartWill() {
   };
 
   // Beneficiary ops
-  const addBene = () => setWill(p=>({...p, beneficiaries:[...p.beneficiaries,{id:Date.now(),name:"",relation:"Son",dateOfBirth:"",maritalStatus:"",occupation:"",occupationOther:"",address:"",pan:"",aadhaarNumber:""}]}));
+  const addBene = () => setWill(p=>({...p, beneficiaries:[...p.beneficiaries,{id:Date.now(),beneficiaryType:"individual",name:"",relation:"Son",dateOfBirth:"",maritalStatus:"",occupation:"",occupationOther:"",address:"",pan:"",aadhaarNumber:"",orgName:"",orgRepName:"",orgRegNumber:"",orgAddress:""}]}));
   const removeBene = (id: number) => setWill(p=>({...p, beneficiaries:p.beneficiaries.filter(b=>b.id!==id)}));
   const updateBene = (id: number, k: keyof Beneficiary, v: string) => setWill(p=>({...p, beneficiaries:p.beneficiaries.map(b=>b.id===id?{...b,[k]:v}:b)}));
 

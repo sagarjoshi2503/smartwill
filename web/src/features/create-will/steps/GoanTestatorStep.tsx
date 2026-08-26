@@ -8,6 +8,7 @@ import {
   MAX_LEN_NATIONALITY, MAX_LEN_OCCUPATION_OTHER,
 } from "../../../constants";
 import { IC, LC } from "./wizardStyles";
+import DateOfBirthInput from "../../../components/shared/DateOfBirthInput";
 import type { WillState, GoanPerson } from "../../../types";
 
 export default function GoanTestatorStep({will,set,idFieldsLocked,idInputCls,idInputTitle,handleIdBlur,testatorEmailEditable,adminComments,onNext}:{
@@ -36,7 +37,7 @@ export default function GoanTestatorStep({will,set,idFieldsLocked,idInputCls,idI
             <option value="F">Female (Testatrix)</option>
           </select>
         </div>
-        <div><label className={LC}>Date of Birth</label><input type="date" value={person.dateOfBirth} onChange={e=>set(path+".dateOfBirth",e.target.value)} className={IC+" bg-white"}/></div>
+        <DateOfBirthInput label="Date of Birth" value={person.dateOfBirth} onChange={v=>set(path+".dateOfBirth",v)} requireAdult/>
       </div>
       <div className="grid grid-cols-3 gap-3">
         <div><label className={LC}>Relation</label>

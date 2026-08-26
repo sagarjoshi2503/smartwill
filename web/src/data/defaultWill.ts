@@ -99,7 +99,7 @@ export const DEFAULT_WILL: WillState = {
   specialInstructions:"",
   // Beneficiaries — always starts with one blank entry (a Will needs at
   // least one beneficiary), the user adds more via "+ Add Beneficiary"
-  beneficiaries:[{id:1, name:"", relation:"", dateOfBirth:"", maritalStatus:"", occupation:"", occupationOther:"", address:"", pan:"", aadhaarNumber:""}],
+  beneficiaries:[{id:1, beneficiaryType:"individual", name:"", relation:"", dateOfBirth:"", maritalStatus:"", occupation:"", occupationOther:"", address:"", pan:"", aadhaarNumber:"", orgName:"", orgRepName:"", orgRegNumber:"", orgAddress:""}],
   // Witnesses: the Indian Succession Act requires exactly two, so the two slots
   // stay (the UI has no "add witness" control), but with no fabricated identities
   witnesses:[

@@ -74,6 +74,7 @@ export interface Guardian {
 
 export interface Beneficiary {
   id: number;
+  beneficiaryType: "individual" | "org";
   name: string;
   relation: string;
   dateOfBirth: string;
@@ -83,6 +84,10 @@ export interface Beneficiary {
   address: string;
   pan: string;
   aadhaarNumber: string;
+  orgName: string;
+  orgRepName: string;
+  orgRegNumber: string;
+  orgAddress: string;
 }
 
 export interface Witness {
