@@ -2,10 +2,9 @@
 import { Phone } from "lucide-react";
 import type { MutableRefObject } from "react";
 import { apiUrl } from "../../utils/apiBase";
-import { setAuthToken } from "../../utils/auth";
 import {
   API_OTP_VERIFY, CONTENT_TYPE_JSON, COUNTRY_CODE_PREFIX, ERR_VERIFY_OTP, HEADER_CONTENT_TYPE,
-  MSG_VERIFYING_OTP, PHONE_MASK_DIGITS, ROLE_TESTATOR,
+  MSG_VERIFYING_OTP, PHONE_MASK_DIGITS,
 } from "../../constants";
 
 export default function OtpView({otp,handleOtp,otpRefs,phone,email,onNext}:{
@@ -31,7 +30,9 @@ export default function OtpView({otp,handleOtp,otpRefs,phone,email,onNext}:{
       const isJson = res.headers.get(HEADER_CONTENT_TYPE)?.includes(CONTENT_TYPE_JSON);
       const data = isJson ? await res.json() : null;
       if(!res.ok) throw new Error(data?.error || `Could not verify OTP (server returned ${res.status}).`);
-      setAuthToken(ROLE_TESTATOR, data.token);
+      // No session token yet — this only proved phone possession. The
+      // server has emailed a second code to `email`; onNext() advances to
+      // EmailOtpView, which is the step that actually issues the token.
       onNext();
     } catch (err) {
       setError(err instanceof Error ? err.message : ERR_VERIFY_OTP);

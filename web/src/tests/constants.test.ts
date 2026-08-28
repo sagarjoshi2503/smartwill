@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { apiPathAdminWill, apiPathComplete, apiPathSendBack, apiPathWill, STATUS_LBL } from "./constants";
-import { STATUS_COMPLETED, STATUS_DRAFT, STATUS_PENDING_REVIEW } from "./constants";
+import { apiPathAdminWill, apiPathComplete, apiPathSendBack, apiPathWill, STATUS_LBL } from "../constants";
+import { STATUS_COMPLETED, STATUS_DRAFT, STATUS_PENDING_REVIEW } from "../constants";
 
 describe("api path builders", () => {
   it("interpolate the will id into each path", () => {

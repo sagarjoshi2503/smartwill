@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { STATES, RELATIONS, ID_TYPES, MONTHS } from "./options";
-import { PLANS, ADDONS, PLAN_EXTRA_BOXES } from "./plans";
-import { ASSET_CATALOGUE, COLOR } from "./assetCatalogue";
-import { DEFAULT_WILL } from "./defaultWill";
+import { STATES, RELATIONS, ID_TYPES, MONTHS } from "../../data/options";
+import { PLANS, ADDONS, PLAN_EXTRA_BOXES } from "../../data/plans";
+import { ASSET_CATALOGUE, COLOR } from "../../data/assetCatalogue";
+import { DEFAULT_WILL } from "../../data/defaultWill";
 
 describe("options", () => {
   it("exposes non-empty dropdown option lists", () => {

@@ -1,8 +1,8 @@
 import { describe, expect, it, beforeEach } from "vitest";
 import {
   setAuthToken, getAuthToken, clearAuthToken, setAuthProfile, restoreSession,
-} from "./auth";
-import { ROLE_TESTATOR, ROLE_ADMIN } from "../constants";
+} from "../../utils/auth";
+import { ROLE_TESTATOR, ROLE_ADMIN } from "../../constants";
 
 // No real JWT library needed client-side — restoreSession only ever reads
 // the payload, never verifies the signature (that's the server's job on

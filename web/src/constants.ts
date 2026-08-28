@@ -53,6 +53,8 @@ export const API_ADMIN_WILLS = "/api/will/admin-wills";
 export const API_MY_WILLS = "/api/will/my-wills";
 export const API_OTP_REQUEST = "/api/auth/otp/request";
 export const API_OTP_VERIFY = "/api/auth/otp/verify";
+export const API_OTP_VERIFY_EMAIL = "/api/auth/otp/verify-email";
+export const API_AUTH_LOGOUT = "/api/auth/logout";
 export const API_CONTACT_SEND = "/api/contact-us/send";
 export const API_CONTACT_INFO = "/api/contact-us/info";
 export const apiPathWill = (willId: string): string => `/api/will/${willId}`;
@@ -147,6 +149,7 @@ export const ERR_GENERATE_PDF = "Could not generate the Will PDF. Please try aga
 export const ERR_DELETE_WILL = "Could not delete this Will.";
 export const ERR_SEND_OTP = "Could not send OTP.";
 export const ERR_VERIFY_OTP = "Could not verify OTP.";
+export const ERR_VERIFY_EMAIL_OTP = "Could not verify the email code.";
 export const MSG_SENDING_OTP = "Sending OTP…";
 export const MSG_VERIFYING_OTP = "Verifying…";
 

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { extractIdFields } from "./willIdFields";
-import { DEFAULT_WILL } from "../data/defaultWill";
-import type { WillState } from "../types";
+import { extractIdFields } from "../../utils/willIdFields";
+import { DEFAULT_WILL } from "../../data/defaultWill";
+import type { WillState } from "../../types";
 
 const WILL: WillState = {
   ...DEFAULT_WILL,

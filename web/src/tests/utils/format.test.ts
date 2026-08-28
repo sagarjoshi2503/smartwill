@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { fmt, formatIST, today } from "./format";
-import { MONTHS } from "../data/options";
+import { fmt, formatIST, today } from "../../utils/format";
+import { MONTHS } from "../../data/options";
 
 describe("fmt", () => {
   it("formats a positive amount with Indian digit grouping", () => {

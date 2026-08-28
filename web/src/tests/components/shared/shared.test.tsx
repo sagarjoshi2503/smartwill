@@ -1,11 +1,11 @@
 import { describe, expect, it, vi } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
-import Clause from "./Clause";
-import FormBlock from "./FormBlock";
-import Nav from "./Nav";
-import StepHeader from "./StepHeader";
-import Toggle from "./Toggle";
-import WillSection from "./WillSection";
+import Clause from "../../../components/shared/Clause";
+import FormBlock from "../../../components/shared/FormBlock";
+import Nav from "../../../components/shared/Nav";
+import StepHeader from "../../../components/shared/StepHeader";
+import Toggle from "../../../components/shared/Toggle";
+import WillSection from "../../../components/shared/WillSection";
 
 describe("Clause", () => {
   it("renders the title and children", () => {

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { allocTotal, formatAllocCompact, formatAllocFull } from "./allocation";
-import type { AssetInstance, Beneficiary } from "../types";
+import { allocTotal, formatAllocCompact, formatAllocFull } from "../../utils/allocation";
+import type { AssetInstance, Beneficiary } from "../../types";
 
 const blankBeneFields = { beneficiaryType: "individual" as const, dateOfBirth: "", maritalStatus: "", occupation: "", occupationOther: "", address: "", pan: "", aadhaarNumber: "", orgName: "", orgRepName: "", orgRegNumber: "", orgAddress: "" };
 const BENEFICIARIES: Beneficiary[] = [

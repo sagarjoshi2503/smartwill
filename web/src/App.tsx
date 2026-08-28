@@ -15,6 +15,7 @@ import ContactUsView from "./components/ContactUsView";
 import AuthChoiceView from "./components/AuthChoiceView";
 import SignupView from "./features/user-signin-otp/SignupView";
 import OtpView from "./features/user-signin-otp/OtpView";
+import EmailOtpView from "./features/user-signin-otp/EmailOtpView";
 import DisclaimerView from "./components/DisclaimerView";
 import WillInstructionsView from "./components/WillInstructionsView";
 import AdminLoginView from "./features/admin-signin/AdminLoginView";
@@ -30,8 +31,8 @@ import AllIndiaWillDocument from "./features/create-will/AllIndiaWillDocument";
 import GoanDocumentsView from "./features/create-will/GoanDocumentsView";
 import ChatWidget from "./features/chatbot/ChatWidget";
 import { allocTotal } from "./utils/allocation";
-import { authFetch } from "./utils/apiBase";
-import { clearAuthToken, restoreSession, setAuthProfile } from "./utils/auth";
+import { apiUrl, authFetch } from "./utils/apiBase";
+import { clearAuthToken, getAuthToken, restoreSession, setAuthProfile } from "./utils/auth";
 import { getMissingIdFields } from "./utils/willValidation";
 import { extractIdFields } from "./utils/willIdFields";
 import { trackPageview } from "./utils/analytics";
@@ -39,7 +40,7 @@ import { SEO_PAGES, PATH_TO_VIEW, applySeoMeta } from "./utils/seo";
 import { FLAGS } from "./flags";
 import useFlag from "./hooks/useFlag";
 import {
-  ADMIN_PATH, API_WILL_SAVE, apiPathSendBack, apiPathWillPdf, CONTENT_TYPE_JSON, HEADER_CONTENT_TYPE,
+  ADMIN_PATH, API_AUTH_LOGOUT, API_WILL_SAVE, apiPathSendBack, apiPathWillPdf, CONTENT_TYPE_JSON, HEADER_CONTENT_TYPE,
   OTP_LENGTH, STATUS_DRAFT, STATUS_PENDING_REVIEW, STATUS_COMPLETED,
   SEND_BACK_REDIRECT_MS, DRAFT_RESET_MS, WIZARD_REDIRECT_MS, ANNEX_PDF_URL_REVOKE_MS,
   MSG_VIEW_ONLY, MSG_SAVING, BTN_SAVE_AS_DRAFT, ROLE_ADMIN, ROLE_TESTATOR,
@@ -89,6 +90,7 @@ export default function SmartWill() {
   const [addons, setAddons] = useState<Record<string, boolean>>({});
   const [signup, setSignup] = useState<SignupState>({ name:"", phone:"", email:"", state:"", terms:false });
   const [otp, setOtp] = useState<string[]>(Array(OTP_LENGTH).fill(""));
+  const [emailOtp, setEmailOtp] = useState<string[]>(Array(OTP_LENGTH).fill(""));
   const [testatorAuthenticated, setTestatorAuthenticated] = useState(false);
   const [dchecks, setDchecks] = useState<DisclaimerChecks>({ nonMuslim:false, age:false, freeWill:false, legalAwareness:false, law:false, tool:false });
   const [wizardStep, setWizardStep] = useState(1);
@@ -158,6 +160,7 @@ export default function SmartWill() {
     setView("faq");
   }, []);
   const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const emailOtpRefs = useRef<(HTMLInputElement | null)[]>([]);
   const willDocRef = useRef<HTMLDivElement | null>(null);
 
   const totalPrice = selectedPlan.price + ADDONS.reduce((s,a) => addons[a.id] ? s+a.price : s, 0);
@@ -171,12 +174,28 @@ export default function SmartWill() {
   // deep link into a public marketing page (see the URL-sync effect below)
   // is left alone even when a session is restored.
   useEffect(() => {
+    // Captured before restoreSession() runs — it clears an expired token
+    // from storage as a side effect, so this is the only chance to still
+    // have it for the auto-logout ping below.
+    const rawTestatorToken = getAuthToken(ROLE_TESTATOR);
     const testator = restoreSession(ROLE_TESTATOR);
     if(testator) {
       setSignup(p=>({...p, name: testator.name || p.name, email: testator.email}));
       setWill(p=>({...p, testator: {...p.testator, fullName: testator.name || p.testator.fullName, email: testator.email}}));
       setTestatorAuthenticated(true);
       setView(v => v==="landing" ? "myWills" : v);
+    } else if(rawTestatorToken) {
+      // A token existed but restoreSession rejected it (expired/malformed)
+      // — "automatically logged out". Best-effort tell the backend too, so
+      // clientlogin's status reflects this rather than staying LoggedIn
+      // forever just because the browser never sent an explicit logout.
+      // The (expired-but-still-validly-signed) raw token has to be sent
+      // directly rather than via authFetch, since restoreSession already
+      // cleared it out of storage by this point.
+      fetch(apiUrl(API_AUTH_LOGOUT), {
+        method: "POST",
+        headers: { Authorization: `Bearer ${rawTestatorToken}` },
+      }).catch(() => {});
     }
     const admin = restoreSession(ROLE_ADMIN);
     if(admin) {
@@ -258,10 +277,15 @@ export default function SmartWill() {
   };
 
   const handleTestatorLogout = () => {
+    // Fire-and-forget, and BEFORE clearAuthToken — it needs the (still
+    // present) token to identify who's logging out. See client_login
+    // feature on the backend: marks clientlogin.loginStatus = LoggedOut.
+    authFetch(ROLE_TESTATOR, API_AUTH_LOGOUT, { method: "POST" }).catch(() => {});
     clearAuthToken(ROLE_TESTATOR);
     setTestatorAuthenticated(false);
     setSignup({ name:"", phone:"", email:"", state:"", terms:false });
     setOtp(Array(OTP_LENGTH).fill(""));
+    setEmailOtp(Array(OTP_LENGTH).fill(""));
     setWill(DEFAULT_WILL);
     setWillType("");
     setSkipWillTypeStep(false);
@@ -279,11 +303,26 @@ export default function SmartWill() {
     const n=[...otp]; n[i]=v; setOtp(n);
     if(v && i<OTP_LENGTH-1) otpRefs.current[i+1]?.focus();
   };
-  const handleOtpVerified = () => {
-    // The OTP-verify endpoint only ever returns a token (no name — testator
-    // identity isn't a stored server-side profile, see utils/auth.ts) so the
-    // name has to come from what was typed into the Signup step; persist it
-    // alongside the token so restoreSession() can recover it after a refresh.
+  // Phone OTP verified — no session yet. That step only proves phone
+  // possession; without also proving the testator controls the email they
+  // typed, anyone who owns a phone could type someone ELSE's email and be
+  // logged in as them (see api/_app/features/user_signin_otp/service.py's
+  // verify_email_otp for the fix this second step drives). Advance to the
+  // email code step rather than finalizing login here.
+  const handlePhoneOtpVerified = () => {
+    setEmailOtp(Array(OTP_LENGTH).fill(""));
+    setView("otpEmail");
+  };
+  const handleEmailOtp = (i: number, v: string) => {
+    if(!/^\d?$/.test(v)) return;
+    const n=[...emailOtp]; n[i]=v; setEmailOtp(n);
+    if(v && i<OTP_LENGTH-1) emailOtpRefs.current[i+1]?.focus();
+  };
+  const handleEmailOtpVerified = () => {
+    // The OTP-verify endpoints never return a name (no server-side testator
+    // profile exists — see utils/auth.ts) so the name has to come from what
+    // was typed into the Signup step; persist it alongside the token so
+    // restoreSession() can recover it after a refresh.
     setAuthProfile(ROLE_TESTATOR, { name: signup.name, email: signup.email });
     setWill(p=>({...p, testator: {...p.testator, fullName: signup.name, email: signup.email}}));
     setTestatorAuthenticated(true);
@@ -679,7 +718,8 @@ export default function SmartWill() {
       {view==="contactUs" && <ContactUsView/>}
       {view==="authChoice" && <AuthChoiceView onGoogleSuccess={handleGoogleSuccess} onPhone={()=>setView("signup")} onBack={()=>setView("landing")}/>}
       {view==="signup" && <SignupView signup={signup} setSignup={setSignup} onNext={()=>{setOtp(Array(OTP_LENGTH).fill("")); setView("otp");}}/>}
-      {view==="otp" && <OtpView otp={otp} handleOtp={handleOtp} otpRefs={otpRefs} phone={signup.phone} email={signup.email} onNext={handleOtpVerified}/>}
+      {view==="otp" && <OtpView otp={otp} handleOtp={handleOtp} otpRefs={otpRefs} phone={signup.phone} email={signup.email} onNext={handlePhoneOtpVerified}/>}
+      {view==="otpEmail" && <EmailOtpView emailOtp={emailOtp} handleEmailOtp={handleEmailOtp} emailOtpRefs={emailOtpRefs} phone={signup.phone} email={signup.email} onNext={handleEmailOtpVerified}/>}
       {view==="willTypeSelect" && <WillTypeSelectView onSelect={handleWillTypeChosen} onBack={()=>setView("myWills")}/>}
       {view==="willInstructions" && <WillInstructionsView onContinue={()=>setView("disclaimer")} onBack={()=>setView("willTypeSelect")}/>}
       {view==="disclaimer" && <DisclaimerView dchecks={dchecks} setDchecks={setDchecks} willType={willType} onAgree={()=>setView("wizard")} onBack={()=>setView("willInstructions")}/>}

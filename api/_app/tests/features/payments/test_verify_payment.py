@@ -222,6 +222,49 @@ def test_mark_failed_requires_will_id():
         app.dependency_overrides.clear()
 
 
+def test_mark_failed_falls_back_to_empty_body_on_malformed_json():
+    """Router-level defense: an unparseable request body must never crash
+    the endpoint — it degrades to `body = {}`, which then fails normal
+    validation (missing willId) rather than a 500."""
+    client = _client(db=mongomock.MongoClient().db["smartwill-dev"])
+    try:
+        res = client.post("/api/payments/mark-failed", headers=AUTH, content=b"not-json")
+        assert res.status_code == 400
+        assert res.json() == {"error": constants.RAZORPAY_WILL_ID_REQUIRED}
+    finally:
+        app.dependency_overrides.clear()
+
+
+def test_verify_falls_back_to_empty_body_on_malformed_json():
+    client = _client(razorpay_key_secret=SECRET)
+    try:
+        res = client.post(URL, headers=AUTH, content=b"not-json")
+        assert res.status_code == 400
+        assert res.json() == {"error": constants.RAZORPAY_MISSING_FIELDS}
+    finally:
+        app.dependency_overrides.clear()
+
+
+def test_mark_failed_falls_back_to_empty_body_when_json_is_not_an_object():
+    client = _client(db=mongomock.MongoClient().db["smartwill-dev"])
+    try:
+        res = client.post("/api/payments/mark-failed", headers=AUTH, json=[1, 2, 3])
+        assert res.status_code == 400
+        assert res.json() == {"error": constants.RAZORPAY_WILL_ID_REQUIRED}
+    finally:
+        app.dependency_overrides.clear()
+
+
+def test_verify_falls_back_to_empty_body_when_json_is_not_an_object():
+    client = _client(razorpay_key_secret=SECRET)
+    try:
+        res = client.post(URL, headers=AUTH, json=[1, 2, 3])
+        assert res.status_code == 400
+        assert res.json() == {"error": constants.RAZORPAY_MISSING_FIELDS}
+    finally:
+        app.dependency_overrides.clear()
+
+
 def test_mark_failed_rejects_missing_auth_token():
     client = _client(db=mongomock.MongoClient().db["smartwill-dev"])
     try:

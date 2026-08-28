@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { normalizeIdOnBlur } from "./idValidation";
+import { normalizeIdOnBlur } from "../../utils/idValidation";
 
 describe("normalizeIdOnBlur", () => {
   it("returns empty/no-error for a blank value regardless of ID type", () => {

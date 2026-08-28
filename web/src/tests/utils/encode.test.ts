@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { encodePassword } from "./encode";
+import { encodePassword } from "../../utils/encode";
 
 describe("encodePassword", () => {
   it("base64-encodes a simple ascii password", () => {

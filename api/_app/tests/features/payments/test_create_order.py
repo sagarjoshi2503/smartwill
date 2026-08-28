@@ -129,6 +129,33 @@ def test_create_order_rejects_missing_amount():
         app.dependency_overrides.clear()
 
 
+def test_create_order_falls_back_to_empty_body_on_malformed_json():
+    """Router-level defense: an unparseable request body must never crash
+    the endpoint — it degrades to `body = {}`, which then fails normal
+    validation (missing amount) rather than a 500."""
+    db = _fake_db()
+    client = _client(db, razorpay_key_id="rzp_test_x", razorpay_key_secret="secret123")
+    try:
+        res = client.post(URL, headers=AUTH, content=b"not-json")
+        assert res.status_code == 400
+        assert res.json() == {"error": constants.RAZORPAY_INVALID_AMOUNT}
+    finally:
+        app.dependency_overrides.clear()
+
+
+def test_create_order_falls_back_to_empty_body_when_json_is_not_an_object():
+    """Valid JSON that isn't a dict (e.g. a bare array) must also degrade
+    to `body = {}` rather than reaching service code with the wrong shape."""
+    db = _fake_db()
+    client = _client(db, razorpay_key_id="rzp_test_x", razorpay_key_secret="secret123")
+    try:
+        res = client.post(URL, headers=AUTH, json=[1, 2, 3])
+        assert res.status_code == 400
+        assert res.json() == {"error": constants.RAZORPAY_INVALID_AMOUNT}
+    finally:
+        app.dependency_overrides.clear()
+
+
 def test_create_order_returns_500_when_not_configured():
     db = _fake_db()
     will_id = _seed_will(db)

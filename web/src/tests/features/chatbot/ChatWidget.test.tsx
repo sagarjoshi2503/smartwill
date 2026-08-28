@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import ChatWidget from "./ChatWidget";
+import ChatWidget from "../../../features/chatbot/ChatWidget";
 
 const fakeChatResponse = (reply: string) =>
   ({

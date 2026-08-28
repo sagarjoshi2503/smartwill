@@ -31,9 +31,15 @@ export default defineConfig({
     setupFiles: ['./src/setupTests.ts'],
     coverage: {
       provider: 'v8',
-      reporter: ['text', 'html'],
+      reporter: ['text', 'html', 'json-summary'],
       include: ['src/**/*.{ts,tsx}'],
       exclude: ['src/**/*.test.{ts,tsx}', 'src/main.tsx', 'src/setupTests.ts'],
+      // Vitest skips generating a coverage report entirely if any test
+      // fails, by default — this repo has a handful of pre-existing
+      // failures (see web/CLAUDE.md) that predate and are unrelated to
+      // whatever's being worked on, so without this a coverage run gives
+      // no signal at all rather than a report with a caveat.
+      reportOnFailure: true,
     },
   },
 });

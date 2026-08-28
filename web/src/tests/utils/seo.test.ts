@@ -1,5 +1,5 @@
 import { describe, expect, it, beforeEach } from "vitest";
-import { SEO_PAGES, PATH_TO_VIEW, applySeoMeta } from "./seo";
+import { SEO_PAGES, PATH_TO_VIEW, applySeoMeta } from "../../utils/seo";
 
 // Mirrors the subset of index.html's <head> that applySeoMeta touches.
 const HEAD_HTML = `

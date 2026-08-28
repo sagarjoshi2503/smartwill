@@ -18,3 +18,8 @@ class VoucherStatus(str, Enum):
     ACTIVE = "Active"
     REDEEMED = "Redeemed"
     EXPIRED = "Expired"
+
+
+class ClientLoginStatus(str, Enum):
+    LOGGED_IN = "LoggedIn"
+    LOGGED_OUT = "LoggedOut"

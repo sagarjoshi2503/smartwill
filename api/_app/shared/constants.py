@@ -22,6 +22,11 @@ LOGIN_COLLECTION_NAME = "login"
 WILL_COLLECTION_NAME = "will"
 ADMINWILL_COLLECTION_NAME = "adminwill"
 GIFTVOUCHER_COLLECTION_NAME = "giftvoucher"
+# Testator/client login activity (Google + mobile OTP sign-in) — deliberately
+# separate from LOGIN_COLLECTION_NAME above, which holds ADMIN accounts
+# (email+password+hash); this collection has no password at all, just an
+# activity/contact record keyed by email. See features/client_login/.
+CLIENTLOGIN_COLLECTION_NAME = "clientlogin"
 # Written by chatbot/'s POST /chat/feedback (see chatbot/db.py,
 # chatbot/constants.py's FEEDBACK_COLLECTION_NAME — same literal value,
 # independently declared per this repo's "no shared code" rule) — api/ only
@@ -53,6 +58,17 @@ OTP_MAX_ATTEMPTS = 5
 # without a cooldown any phone number could be spammed with unlimited
 # requests (SMS-bombing / Twilio cost exhaustion).
 OTP_RESEND_COOLDOWN_SECONDS = 60
+
+# Second factor, required after the phone OTP: the phone OTP only proves
+# phone possession, never that the testator also controls the email address
+# they typed — without this, any real phone owner could type someone else's
+# email and be issued a valid session token for that email (see
+# user_signin_otp/service.py's verify_email_otp). Same shape as the phone
+# OTP's own constants above, deliberately kept separate so tuning one
+# (length/TTL/attempts) doesn't silently retune the other.
+EMAIL_OTP_LENGTH = 6
+EMAIL_OTP_TTL_SECONDS = 300
+EMAIL_OTP_MAX_ATTEMPTS = 5
 
 # Admin login brute-force protection — mirrors the OTP flow's own
 # OTP_MAX_ATTEMPTS/lockout shape. In-process only (see admin_signin/
@@ -96,6 +112,10 @@ DEFAULT_ADMIN_EMAIL = "admin@forwardlegacy.co.in"
 # --- SMS (Twilio) ---
 TWILIO_FROM_NUMBER = "+17154074664"
 OTP_SMS_TMPL = "Your SmartWill OTP is {code}. It expires in 5 minutes."
+
+# --- Email OTP (second factor after the phone OTP — see EMAIL_OTP_* above) ---
+EMAIL_OTP_SUBJECT = "Your Forward Legacy verification code"
+EMAIL_OTP_HTML_TMPL = "<p>Your Forward Legacy verification code is <strong>{code}</strong>. It expires in 5 minutes.</p>"
 
 # --- Payments (Razorpay Standard Checkout) ---
 RAZORPAY_ORDERS_URL = "https://api.razorpay.com/v1/orders"
@@ -151,6 +171,11 @@ OTP_EXPIRED = "This OTP has expired. Please request a new one."
 INVALID_OTP = "The OTP you entered is incorrect."
 OTP_TOO_MANY_ATTEMPTS = "Too many incorrect attempts. Please request a new OTP."
 OTP_REQUESTED_TOO_SOON = "An OTP was already sent recently. Please wait a minute before requesting another."
+
+EMAIL_OTP_MISSING = "Verify your mobile OTP first before verifying your email."
+EMAIL_OTP_EXPIRED = "This email verification code has expired. Please restart sign-in."
+INVALID_EMAIL_OTP = "The verification code you entered is incorrect."
+EMAIL_OTP_TOO_MANY_ATTEMPTS = "Too many incorrect attempts. Please restart sign-in."
 
 ADMIN_LOGIN_LOCKED_OUT = "Too many failed login attempts. Please try again in a few minutes."
 
@@ -240,6 +265,12 @@ FLD_GOAN_ASSETS = "goanAssets"
 FLD_GOAN_RESIDUE = "goanResidue"
 FLD_GOAN_WITNESSES = "goanWitnesses"
 FLD_GOAN_DEED_WITNESSES = "goanDeedWitnesses"
+
+# --- clientlogin collection (see features/client_login/) ---
+FLD_MOBILE_NUMBER = "mobileNumber"
+FLD_LAST_LOGIN_AT = "lastLoginAt"
+FLD_LOGIN_STATUS = "loginStatus"
+FLD_LOGGED_OUT = "loggedOut"
 FLD_ID_FIELDS = "idFields"
 FLD_AMOUNT = "amount"
 FLD_CURRENCY = "currency"

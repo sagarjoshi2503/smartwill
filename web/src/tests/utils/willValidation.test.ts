@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { getMissingIdFields } from "./willValidation";
-import { DEFAULT_WILL } from "../data/defaultWill";
-import type { WillState } from "../types";
+import { getMissingIdFields } from "../../utils/willValidation";
+import { DEFAULT_WILL } from "../../data/defaultWill";
+import type { WillState } from "../../types";
 
 const FILLED_WILL: WillState = {
   ...DEFAULT_WILL,
