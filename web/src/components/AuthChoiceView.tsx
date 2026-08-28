@@ -3,7 +3,7 @@ import { Phone, ArrowRight } from "lucide-react";
 import BrandMark from "./shared/BrandMark";
 import GoogleSignInButton from "../features/user-signin-gmail/GoogleSignInButton";
 import { apiUrl } from "../utils/apiBase";
-import { setAuthToken } from "../utils/auth";
+import { setAuthToken, setAuthProfile } from "../utils/auth";
 import { API_GOOGLE, CONTENT_TYPE_JSON, HEADER_CONTENT_TYPE, ROLE_TESTATOR } from "../constants";
 import type { GoogleProfile } from "../types";
 
@@ -34,6 +34,7 @@ export default function AuthChoiceView({onGoogleSuccess,onPhone,onBack}:{
       const data = await res.json();
       if(!res.ok) throw new Error(data?.error || "Google sign-in failed.");
       setAuthToken(ROLE_TESTATOR, data.token);
+      setAuthProfile(ROLE_TESTATOR, { name: data.name, email: data.email });
       setStatus("idle");
       onGoogleSuccess({ name: data.name, email: data.email });
     } catch (err) {

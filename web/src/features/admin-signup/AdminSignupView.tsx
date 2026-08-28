@@ -2,7 +2,7 @@ import { useState } from "react";
 import { User, Mail, Lock, UserPlus } from "lucide-react";
 import BrandMark from "../../components/shared/BrandMark";
 import { apiUrl } from "../../utils/apiBase";
-import { setAuthToken } from "../../utils/auth";
+import { setAuthToken, setAuthProfile } from "../../utils/auth";
 import {
   API_ADMIN_SIGNUP, CONTENT_TYPE_JSON, EMAIL_REGEX, HEADER_CONTENT_TYPE, LBL_EMAIL_ADDR, LBL_FULL_NAME,
   LBL_PASSWORD, MIN_PASSWORD_LENGTH, PH_LAWFIRM_EMAIL, BTN_CREATE_ACCOUNT, ROLE_ADMIN,
@@ -46,6 +46,7 @@ export default function AdminSignupView({onSignup,onBack,onGoToLogin}:{
         throw new Error(data?.error || `Signup failed (server returned ${res.status}).`);
       }
       setAuthToken(ROLE_ADMIN, data.token);
+      setAuthProfile(ROLE_ADMIN, { name: data.name, email: data.email });
       onSignup({ name: data.name, email: data.email });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Signup failed.");

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Mail, Lock, LogIn } from "lucide-react";
 import BrandMark from "../../components/shared/BrandMark";
 import { apiUrl } from "../../utils/apiBase";
-import { setAuthToken } from "../../utils/auth";
+import { setAuthToken, setAuthProfile } from "../../utils/auth";
 import { encodePassword } from "../../utils/encode";
 import {
   API_ADMIN_LOGIN, CONTENT_TYPE_JSON, EMAIL_REGEX, HEADER_CONTENT_TYPE, LBL_EMAIL_ADDR, LBL_PASSWORD,
@@ -39,6 +39,7 @@ export default function AdminLoginView({onLogin,onBack,onSignup,signupEnabled}:{
       const data = isJson ? await res.json() : null;
       if(!res.ok) throw new Error(data?.error || `Login failed (server returned ${res.status}).`);
       setAuthToken(ROLE_ADMIN, data.token);
+      setAuthProfile(ROLE_ADMIN, { name: data.name, email: data.email });
       onLogin({ name: data.name, email: data.email });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed.");

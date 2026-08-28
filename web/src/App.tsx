@@ -31,7 +31,7 @@ import GoanDocumentsView from "./features/create-will/GoanDocumentsView";
 import ChatWidget from "./features/chatbot/ChatWidget";
 import { allocTotal } from "./utils/allocation";
 import { authFetch } from "./utils/apiBase";
-import { clearAuthToken } from "./utils/auth";
+import { clearAuthToken, restoreSession, setAuthProfile } from "./utils/auth";
 import { getMissingIdFields } from "./utils/willValidation";
 import { extractIdFields } from "./utils/willIdFields";
 import { trackPageview } from "./utils/analytics";
@@ -162,6 +162,29 @@ export default function SmartWill() {
 
   const totalPrice = selectedPlan.price + ADDONS.reduce((s,a) => addons[a.id] ? s+a.price : s, 0);
 
+  // Restore a still-valid client/admin session on mount. Without this, a
+  // page refresh drops an already-logged-in testator/admin back to the
+  // login screen even though their JWT (in localStorage) is still good —
+  // testatorAuthenticated/adminProfile are plain in-memory React state and
+  // reset to their defaults on every remount, unlike the token itself. Only
+  // redirects away from the default landing/adminLogin screen — an explicit
+  // deep link into a public marketing page (see the URL-sync effect below)
+  // is left alone even when a session is restored.
+  useEffect(() => {
+    const testator = restoreSession(ROLE_TESTATOR);
+    if(testator) {
+      setSignup(p=>({...p, name: testator.name || p.name, email: testator.email}));
+      setWill(p=>({...p, testator: {...p.testator, fullName: testator.name || p.testator.fullName, email: testator.email}}));
+      setTestatorAuthenticated(true);
+      setView(v => v==="landing" ? "myWills" : v);
+    }
+    const admin = restoreSession(ROLE_ADMIN);
+    if(admin) {
+      setAdminProfile({ name: admin.name, email: admin.email });
+      setView(v => (v==="landing"||v==="adminLogin") ? "admin" : v);
+    }
+  }, []);
+
   // Keep the URL in sync with navigation so /admin and the public marketing
   // pages (/about, /services, /faq, /partner, /contact-us) are each
   // shareable/bookmarkable/crawlable on their own URL, and the browser
@@ -257,6 +280,11 @@ export default function SmartWill() {
     if(v && i<OTP_LENGTH-1) otpRefs.current[i+1]?.focus();
   };
   const handleOtpVerified = () => {
+    // The OTP-verify endpoint only ever returns a token (no name — testator
+    // identity isn't a stored server-side profile, see utils/auth.ts) so the
+    // name has to come from what was typed into the Signup step; persist it
+    // alongside the token so restoreSession() can recover it after a refresh.
+    setAuthProfile(ROLE_TESTATOR, { name: signup.name, email: signup.email });
     setWill(p=>({...p, testator: {...p.testator, fullName: signup.name, email: signup.email}}));
     setTestatorAuthenticated(true);
     setView("myWills");
