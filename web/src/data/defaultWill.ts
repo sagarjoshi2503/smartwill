@@ -38,7 +38,7 @@ export const DEFAULT_WILL: WillState = {
     executorType:"individual", // "individual" | "org"
     name:"", dateOfBirth:"", occupation:"", occupationOther:"", idType:"Aadhaar Card", idNumber:"",
     address:"",
-    relation:"",
+    relation:"", relationOther:"",
     orgName:"", orgRepName:"", orgRegNumber:"", orgAddress:"",
     hasJoint:false,
     jointName:"", jointIdType:"PAN Card", jointIdNumber:"", jointAddress:"",
@@ -49,7 +49,7 @@ export const DEFAULT_WILL: WillState = {
   // Section III - Guardians
   guardian: {
     hasMinors:false,
-    name:"", dateOfBirth:"", relation:"", occupation:"", occupationOther:"",
+    name:"", dateOfBirth:"", relation:"", relationOther:"", occupation:"", occupationOther:"",
     idType:"PAN Card", idNumber:"", address:"",
     hasSubstitute:false,
     subName:"", subIdType:"PAN Card", subIdNumber:"", subAddress:"",
@@ -73,7 +73,7 @@ export const DEFAULT_WILL: WillState = {
   // Residuary beneficiaries for the All India Will format (relationship,
   // name, nationality, occupation, ID proof — more than one allowed) — only
   // used when willType==="allindia".
-  allIndiaResidue:[{relation:"",relationOther:"",name:"",dateOfBirth:"",maritalStatus:"",nationality:"",occupation:"",occupationOther:"",address:"",idType:"Aadhaar Card",idNumber:""}],
+  allIndiaResidue:[{beneficiaryType:"individual",relation:"",relationOther:"",name:"",dateOfBirth:"",maritalStatus:"",nationality:"",occupation:"",occupationOther:"",address:"",idType:"Aadhaar Card",idNumber:"",orgName:"",orgRepName:"",orgRegNumber:"",orgAddress:""}],
   // Goan Will format — only used/shown when willType==="goan". nationality
   // defaults to "Indian" to match the reference form (still fully editable).
   goanTestator: newGoanPerson(),
@@ -99,7 +99,7 @@ export const DEFAULT_WILL: WillState = {
   specialInstructions:"",
   // Beneficiaries — always starts with one blank entry (a Will needs at
   // least one beneficiary), the user adds more via "+ Add Beneficiary"
-  beneficiaries:[{id:1, beneficiaryType:"individual", name:"", relation:"", dateOfBirth:"", maritalStatus:"", occupation:"", occupationOther:"", address:"", pan:"", aadhaarNumber:"", orgName:"", orgRepName:"", orgRegNumber:"", orgAddress:""}],
+  beneficiaries:[{id:1, beneficiaryType:"individual", name:"", relation:"", relationOther:"", dateOfBirth:"", maritalStatus:"", occupation:"", occupationOther:"", address:"", pan:"", aadhaarNumber:"", orgName:"", orgRepName:"", orgRegNumber:"", orgAddress:""}],
   // Witnesses: the Indian Succession Act requires exactly two, so the two slots
   // stay (the UI has no "add witness" control), but with no fabricated identities
   witnesses:[

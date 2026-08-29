@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { beneficiaryLabel, beneficiaryName, beneficiaryRelationLabel } from "../../utils/beneficiaryDisplay";
 import type { Beneficiary } from "../../types";
 
-const blankFields = { dateOfBirth: "", maritalStatus: "", occupation: "", occupationOther: "", address: "", pan: "", aadhaarNumber: "", orgName: "", orgRepName: "", orgRegNumber: "", orgAddress: "" };
+const blankFields = { relationOther: "", dateOfBirth: "", maritalStatus: "", occupation: "", occupationOther: "", address: "", pan: "", aadhaarNumber: "", orgName: "", orgRepName: "", orgRegNumber: "", orgAddress: "" };
 
 const individual: Beneficiary = { id: 1, beneficiaryType: "individual", name: "Priya Mehta", relation: "Daughter", ...blankFields };
 const org: Beneficiary = { id: 2, beneficiaryType: "org", name: "", relation: "", ...blankFields, orgName: "ABC Foundation Trust" };
@@ -24,6 +24,10 @@ describe("beneficiaryRelationLabel", () => {
   });
   it("returns \"Organization\" for an organization beneficiary regardless of relation", () => {
     expect(beneficiaryRelationLabel(org)).toBe("Organization");
+  });
+  it("returns relationOther when relation is \"Other\"", () => {
+    const cousin: Beneficiary = { ...individual, relation: "Other", relationOther: "Cousin" };
+    expect(beneficiaryRelationLabel(cousin)).toBe("Cousin");
   });
 });
 

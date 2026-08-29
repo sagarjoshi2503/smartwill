@@ -197,6 +197,22 @@ def test_asset_line_falls_back_to_blank_when_beneficiary_marital_status_missing(
     assert f", {BLANK}," in "".join(ctx["vehicle_lines"])
 
 
+def test_asset_line_uses_org_block_when_beneficiary_is_an_organization():
+    will = _will(
+        beneficiaries=[{
+            "beneficiaryType": "org", "orgName": "ABC Foundation Trust", "orgRepName": "Priya Mehta",
+            "orgRegNumber": "REG123", "orgAddress": "789 Trust Rd",
+        }],
+    )
+    will["allIndiaAssets"]["vehicle"] = [{"description": "Car 1", "beneficiary": "ABC Foundation Trust"}]
+    line = build_pdf_context(will)["vehicle_lines"][0]
+    assert "Bequeathed to: ABC Foundation Trust (Entity Name)" in line
+    assert "Authorized Representative: Priya Mehta" in line
+    assert "Registration / Tax ID Number: REG123" in line
+    assert "Registered Office Address: 789 Trust Rd" in line
+    assert "date of birth" not in line
+
+
 # --- residue clause: marital status + "Relation to Testator:" label ---
 
 def test_residue_clause_includes_marital_status_and_relation_label():
@@ -222,6 +238,21 @@ def test_residue_clause_multiple_entries_each_carry_relation_label():
     clause = build_pdf_context(will)["residue_clause"]
     assert "Relation to Testator/Testatrix: Brother" in clause
     assert "Relation to Testator/Testatrix: Sister" in clause
+
+
+def test_residue_clause_uses_org_block_when_beneficiary_is_an_organization():
+    will = _will(
+        allIndiaResidue=[{
+            "beneficiaryType": "org", "orgName": "XYZ Charitable Trust", "orgRepName": "Amit Rao",
+            "orgRegNumber": "REG999", "orgAddress": "12 Charity Lane",
+        }],
+    )
+    clause = build_pdf_context(will)["residue_clause"]
+    assert "XYZ Charitable Trust (Entity Name)" in clause
+    assert "Authorized Representative: Amit Rao" in clause
+    assert "Registration / Tax ID Number: REG999" in clause
+    assert "Registered Office Address: 12 Charity Lane" in clause
+    assert "date of birth" not in clause
 
 
 # --- Special Non-Asset Instructions: fixed lead-in sentence (template-level) ---

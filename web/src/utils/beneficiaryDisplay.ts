@@ -10,7 +10,7 @@ export const beneficiaryName = (b: Beneficiary): string =>
   b.beneficiaryType === "org" ? b.orgName : b.name;
 
 export const beneficiaryRelationLabel = (b: Beneficiary): string =>
-  b.beneficiaryType === "org" ? "Organization" : b.relation;
+  b.beneficiaryType === "org" ? "Organization" : b.relation === "Other" ? b.relationOther : b.relation;
 
 export const beneficiaryLabel = (b: Beneficiary): string =>
   `${beneficiaryName(b) || "Unnamed"} (${beneficiaryRelationLabel(b) || "—"})`;

@@ -108,8 +108,8 @@ export function getMissingIdFields(will: WillState, willType: WillType, skipVali
     // Beneficiary record they point to (via BeneficiarySelect) already
     // supplies those, and that record's own completeness isn't gated here.
     allIndiaResidue.forEach((entry, i) => {
-      const inUse = entry.relation.trim() || entry.name.trim();
-      if (inUse && !entry.idNumber.trim()) {
+      const inUse = entry.relation.trim() || entry.name.trim() || entry.orgName.trim();
+      if (inUse && entry.beneficiaryType !== "org" && !entry.idNumber.trim()) {
         const label = allIndiaResidue.length > 1 ? `Residuary Beneficiary #${i + 1}` : "Residuary Beneficiary";
         missing.push(`${label} ${entry.idType || "ID"} Number`);
       }

@@ -76,7 +76,11 @@ export function residueClauseNodes(entries: AllIndiaResidueEntry[]) {
     <>
       I hereby declare, direct, and devise that all the Rest and Residue of my estate, including any property or assets, both movable and immovable, which I may acquire after the execution of this Will, or which has been inadvertently omitted from this document, shall be given entirely to {entries.length > 1 && "the following, in equal shares: "}
       {entries.map((entry, i) => (
-        <span key={i}><strong>{relOf(entry) || BLANK}</strong>, <strong>{entry.name || BLANK}</strong>, nationality <strong>{nationalityLabel(entry.nationality)}</strong>, occupation <strong>{occupationOf(entry) || BLANK}</strong>, bearing {entry.idType || "Aadhaar Card"} Number: <strong>{entry.idNumber || BLANK}</strong>{i < entries.length - 1 ? "; " : "."}</span>
+        <span key={i}>{entry.beneficiaryType === "org" ? (
+          <><strong>{entry.orgName || BLANK}</strong> (Entity Name), Authorized Representative: <strong>{entry.orgRepName || BLANK}</strong>, Registration / Tax ID Number: <strong>{entry.orgRegNumber || BLANK}</strong>, Registered Office Address: <strong>{entry.orgAddress || BLANK}</strong></>
+        ) : (
+          <><strong>{relOf(entry) || BLANK}</strong>, <strong>{entry.name || BLANK}</strong>, nationality <strong>{nationalityLabel(entry.nationality)}</strong>, occupation <strong>{occupationOf(entry) || BLANK}</strong>, bearing {entry.idType || "Aadhaar Card"} Number: <strong>{entry.idNumber || BLANK}</strong></>
+        )}{i < entries.length - 1 ? "; " : "."}</span>
       ))}
     </>
   );

@@ -5,7 +5,7 @@ import BrandMark from "../../components/shared/BrandMark";
 import type { Beneficiary, WillState } from "../../types";
 import {
   BLANK as blank, renderAssetList, computeAssetSections, openingClauseNodes, residueClauseNodes,
-  executionDateStr,
+  executionDateStr, relOf,
 } from "./allIndiaWillShared";
 
 // Renders the Will exactly per the "WILL NONGOAN FORWARDLEGACY FORMAT.pdf"
@@ -280,7 +280,7 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onDownloa
                   </p>
                 ) : (
                   <p className="text-justify mb-5">
-                    I appoint <strong>{executor.name||blank}</strong>, having Relation to {title}: <strong>{executor.relation||blank}</strong>, with Address: <strong>{executor.address||blank}</strong>, bearing {executor.idType} Number: <strong>{executor.idNumber||blank}</strong>.
+                    I appoint <strong>{executor.name||blank}</strong>, having Relation to {title}: <strong>{relOf(executor)||blank}</strong>, with Address: <strong>{executor.address||blank}</strong>, bearing {executor.idType} Number: <strong>{executor.idNumber||blank}</strong>.
                   </p>
                 )}
                 <p className="mb-1">The above executor shall dispose of the property and carry out the instructions as mentioned in this Will.</p>
@@ -309,7 +309,7 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onDownloa
               <Page>
                 <h1 className="text-center text-lg font-bold uppercase mb-6">Appointment of Guardian for Minor Beneficiary</h1>
                 <p className="text-justify mb-5">
-                  I appoint <strong>{guardian.name||blank}</strong>, having Relation to {title}: <strong>{guardian.relation||blank}</strong>, with Address: <strong>{guardian.address||blank}</strong>, bearing {guardian.idType} Number: <strong>{guardian.idNumber||blank}</strong>.
+                  I appoint <strong>{guardian.name||blank}</strong>, having Relation to {title}: <strong>{relOf(guardian)||blank}</strong>, with Address: <strong>{guardian.address||blank}</strong>, bearing {guardian.idType} Number: <strong>{guardian.idNumber||blank}</strong>.
                 </p>
                 <p className="text-justify mb-5">
                   The above-appointed guardian shall have the care, custody, and management of any property or assets inherited by my minor beneficiaries under this Will until such beneficiaries attain the age of majority. The guardian shall act in the best fiduciary interests of the minors and may apply the income or principal of the inherited assets for their education, maintenance, and welfare as deemed necessary.

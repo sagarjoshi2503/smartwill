@@ -5,7 +5,10 @@ export const STATES = [
   "Telangana","Tripura","Uttar Pradesh","Uttarakhand","West Bengal",
 ];
 
-export const RELATIONS = ["Son","Daughter","Spouse","Father","Mother","Brother","Sister","Friend","Charity","Other"];
+export const RELATIONS = [
+  "Spouse","Son","Daughter","Father","Mother","Brother","Sister",
+  "Grandson","Granddaughter","Nephew","Niece","Friend","Charity","Other",
+];
 
 // The Testator's "You are the ___ of <Father / Spouse Name>" opening-clause
 // relation — value is what's stored/printed (testator.relation), label is

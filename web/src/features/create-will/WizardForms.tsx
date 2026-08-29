@@ -93,16 +93,9 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
   });
 
   // ID Number fields (Aadhaar/PAN/etc.) are never persisted to the database
-  // (see api/_app/shared/redaction.py), so they only ever exist transiently
-  // in the browser. For a plain testator (not an admin flow), these stay
-  // locked through both Draft and PendingReview — the Will's actual content
-  // (names, relations, addresses, assets) gets drafted and reviewed with no
-  // ID numbers in it at all — and only unlock once the admin marks it
-  // Completed, at which point the testator types them in fresh, right
-  // before generating/downloading the final signed document. Admin flows
-  // (adminReview/adminComplete) are never gated by this — an admin filling
-  // in a Will on a client's behalf needs full access regardless of status.
-  const idFieldsLocked = !adminReview && !adminComplete && willStatus!==STATUS_COMPLETED;
+  // (see api/_app/shared/redaction.py) — they only ever exist transiently in
+  // the browser — so they're editable throughout the wizard for every flow.
+  const idFieldsLocked = false;
   const idInputCls = (base: string) => base + (idFieldsLocked ? " opacity-60 cursor-not-allowed" : "");
   const idInputTitle = (fallback: string) => idFieldsLocked ? TIP_ID_LOCKED : fallback;
 
@@ -408,6 +401,10 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                   {RELATIONS.map(r=><option key={r}>{r}</option>)}
                 </select>
               </div>
+              {will.executor.relation==="Other"&&(
+                <div><label className={LC}>Please specify relationship</label>
+                  <input value={will.executor.relationOther} onChange={e=>set("executor.relationOther",e.target.value)} maxLength={MAX_LEN_RELATION_OTHER} className={IC}/></div>
+              )}
               <div><label className={LC}>Occupation</label>
                 <select value={will.executor.occupation} onChange={e=>set("executor.occupation",e.target.value)} className={IC+" appearance-none"}>
                   <option value="">Select...</option>
@@ -470,6 +467,10 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                       {RELATIONS.map(r=><option key={r}>{r}</option>)}
                     </select>
                   </div>
+                  {will.guardian.relation==="Other"&&(
+                    <div><label className={LC}>Please specify relationship</label>
+                      <input value={will.guardian.relationOther} onChange={e=>set("guardian.relationOther",e.target.value)} maxLength={MAX_LEN_RELATION_OTHER} className={IC}/></div>
+                  )}
                   <div><label className={LC}>Occupation</label>
                     <select value={will.guardian.occupation} onChange={e=>set("guardian.occupation",e.target.value)} className={IC+" appearance-none"}>
                       <option value="">Select...</option>
@@ -541,6 +542,10 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                       {RELATIONS.map(r=><option key={r}>{r}</option>)}
                     </select>
                   </div>
+                  {b.relation==="Other"&&(
+                    <div><label className={LC}>Please specify relationship</label>
+                      <input value={b.relationOther||""} onChange={e=>updateBene(b.id,"relationOther",e.target.value)} maxLength={MAX_LEN_RELATION_OTHER} className={IC}/></div>
+                  )}
                   <div><label className={LC}>Marital Status</label>
                     <select value={b.maritalStatus||""} onChange={e=>updateBene(b.id,"maritalStatus",e.target.value)} className={IC+" appearance-none"}>
                       <option value="">Select...</option>
@@ -899,7 +904,7 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
             <FormBlock title="Section V — Rest & Residue Clause">
               <p className="text-slate-500 text-xs mb-3 leading-relaxed">Even with careful planning, it's possible to miss mentioning an asset in this Will, or to acquire something new after signing it. A residuary clause is a safety net for exactly this. Any such asset should go to the following (more than one beneficiary shares equally):</p>
               {will.allIndiaResidue.map((entry,idx)=>{
-                const setEntry=(field: "relation"|"relationOther"|"name"|"dateOfBirth"|"maritalStatus"|"nationality"|"occupation"|"occupationOther"|"address"|"idType"|"idNumber", value: string)=>
+                const setEntry=(field: "relation"|"relationOther"|"name"|"dateOfBirth"|"maritalStatus"|"nationality"|"occupation"|"occupationOther"|"address"|"idType"|"idNumber"|"beneficiaryType"|"orgName"|"orgRepName"|"orgRegNumber"|"orgAddress", value: string)=>
                   setWill(p=>({...p, allIndiaResidue:p.allIndiaResidue.map((e,j)=>j===idx?{...e,[field]:value}:e)}));
                 return(
                   <div key={idx} className="bg-slate-50 border border-slate-200 rounded-xl p-3 mb-2.5">
@@ -907,6 +912,32 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                       <span className="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Residuary Beneficiary {idx+1}</span>
                       {will.allIndiaResidue.length>1&&<button onClick={()=>setWill(p=>({...p, allIndiaResidue:p.allIndiaResidue.filter((_,j)=>j!==idx)}))} className="text-red-400 hover:text-red-500 shrink-0"><Trash2 size={14}/></button>}
                     </div>
+                    <div className="mb-2.5">
+                      <label className={LC}>Beneficiary Type</label>
+                      <div className="flex gap-3">
+                        {[{v:"individual",l:"Individual"},{v:"org",l:"Organization / Professional Entity"}].map(o=>(
+                          <label key={o.v}
+                            className={`flex-1 flex items-center gap-2 p-3 rounded-xl border cursor-pointer transition-all ${(entry.beneficiaryType||"individual")===o.v?"border-[#4F9D33]/50 bg-[#4F9D33]/10":"border-slate-200 hover:border-slate-300"}`}>
+                            <input type="radio" name={`residueBeneficiaryType-${idx}`} className="sr-only peer" checked={(entry.beneficiaryType||"individual")===o.v} onChange={()=>setEntry("beneficiaryType",o.v)}/>
+                            <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all peer-focus-visible:ring-2 peer-focus-visible:ring-[#4F9D33] peer-focus-visible:ring-offset-2 ${(entry.beneficiaryType||"individual")===o.v?"border-brand bg-brand":"border-slate-300"}`}>
+                              {(entry.beneficiaryType||"individual")===o.v&&<div className="w-1.5 h-1.5 rounded-full bg-white"/>}
+                            </div>
+                            <span className="text-slate-700 text-xs font-semibold">{o.l}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                    {entry.beneficiaryType==="org"?(
+                      <>
+                        <div className="mb-2.5"><label className={LC}>Organization / Entity Name</label><input value={entry.orgName||""} onChange={e=>setEntry("orgName",e.target.value)} className={IC} placeholder="e.g. ABC Foundation Trust"/></div>
+                        <div className="mb-2.5"><label className={LC}>Authorized Representative / Contact Person <span className="text-slate-400 normal-case font-normal">(Optional)</span></label><input value={entry.orgRepName||""} onChange={e=>setEntry("orgRepName",e.target.value)} className={IC}/></div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                          <div><label className={LC}>Registration / Tax ID Number <span className="text-slate-400 normal-case font-normal">(Optional)</span></label><input value={entry.orgRegNumber||""} onChange={e=>setEntry("orgRegNumber",e.target.value)} className={IC} placeholder="e.g. CIN, Registration No."/></div>
+                          <div><label className={LC}>Registered Office Address <span className="text-slate-400 normal-case font-normal">(Optional)</span></label><input value={entry.orgAddress||""} onChange={e=>setEntry("orgAddress",e.target.value)} maxLength={MAX_LEN_ADDRESS} className={IC}/></div>
+                        </div>
+                      </>
+                    ):(
+                    <>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-2.5">
                       <div><label className={LC}>Full Name</label><input value={entry.name} onChange={e=>setEntry("name",e.target.value)} className={IC}/></div>
                       <DateOfBirthInput label="Date of Birth" value={entry.dateOfBirth} onChange={v=>setEntry("dateOfBirth",v)} requireAdult/>
@@ -950,10 +981,12 @@ export default function WizardForms({step,will,setWill,willType,setWillType,hide
                       </div>
                       <div><label className={LC}>{LBL_ID_NUMBER}</label><input value={entry.idNumber} onChange={e=>setEntry("idNumber",e.target.value)} onBlur={e=>handleIdBlur(entry.idType,e.target.value,v=>setEntry("idNumber",v))} disabled={idFieldsLocked} className={idInputCls(IC)} title={idInputTitle(TIP_NO_ID_SAVED)}/></div>
                     </div>
+                    </>
+                    )}
                   </div>
                 );
               })}
-              <button onClick={()=>setWill(p=>({...p, allIndiaResidue:[...p.allIndiaResidue,{relation:"",relationOther:"",name:"",dateOfBirth:"",maritalStatus:"",nationality:"",occupation:"",occupationOther:"",address:"",idType:"Aadhaar Card",idNumber:""}]}))}
+              <button onClick={()=>setWill(p=>({...p, allIndiaResidue:[...p.allIndiaResidue,{beneficiaryType:"individual",relation:"",relationOther:"",name:"",dateOfBirth:"",maritalStatus:"",nationality:"",occupation:"",occupationOther:"",address:"",idType:"Aadhaar Card",idNumber:"",orgName:"",orgRepName:"",orgRegNumber:"",orgAddress:""}]}))}
                 className="text-xs text-brand hover:text-brand-dark font-semibold flex items-center gap-1"><Plus size={12}/>Add another beneficiary</button>
             </FormBlock>
           ):willType==="goan"?(

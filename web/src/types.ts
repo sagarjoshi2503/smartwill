@@ -38,6 +38,7 @@ export interface Executor {
   idNumber: string;
   address: string;
   relation: string;
+  relationOther: string;
   orgName: string;
   orgRepName: string;
   orgRegNumber: string;
@@ -60,6 +61,7 @@ export interface Guardian {
   name: string;
   dateOfBirth: string;
   relation: string;
+  relationOther: string;
   occupation: string;
   occupationOther: string;
   idType: string;
@@ -77,6 +79,7 @@ export interface Beneficiary {
   beneficiaryType: "individual" | "org";
   name: string;
   relation: string;
+  relationOther: string;
   dateOfBirth: string;
   maritalStatus: string;
   occupation: string;
@@ -171,6 +174,7 @@ export interface AllIndiaAssets {
 // occupation, and an ID proof — independent of the app's generic
 // Beneficiary list.
 export interface AllIndiaResidueEntry {
+  beneficiaryType: "individual" | "org";
   relation: string;
   relationOther: string;
   name: string;
@@ -182,6 +186,10 @@ export interface AllIndiaResidueEntry {
   address: string;
   idType: string;
   idNumber: string;
+  orgName: string;
+  orgRepName: string;
+  orgRegNumber: string;
+  orgAddress: string;
 }
 
 // A full person record for the Goan Will format's notarial "Open Will" —

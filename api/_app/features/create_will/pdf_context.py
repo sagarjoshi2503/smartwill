@@ -220,13 +220,22 @@ def _filled(items) -> list:
 
 def _filled_residue(entries) -> list:
     """Mirrors web/src/utils/willValidation.ts's residue "in use" check
-    (relation or name filled in) — an untouched, still-blank residue row
-    (the wizard starts with one) shouldn't produce a Residuary Beneficiary
-    clause with nothing in it."""
+    (relation, name, or org name filled in) — an untouched, still-blank
+    residue row (the wizard starts with one) shouldn't produce a Residuary
+    Beneficiary clause with nothing in it."""
     return [
         e for e in (entries or [])
-        if isinstance(e, dict) and (str(e.get("relation") or "").strip() or str(e.get("name") or "").strip())
+        if isinstance(e, dict) and (
+            str(e.get("relation") or "").strip() or str(e.get("name") or "").strip()
+            or str(e.get("orgName") or "").strip()
+        )
     ]
+
+
+def _beneficiary_display_name(b: dict) -> str:
+    """Mirrors web/src/utils/beneficiaryDisplay.ts's beneficiaryName() — an
+    org beneficiary is identified by orgName, not the (blank) name field."""
+    return str((b.get("orgName") if b.get("beneficiaryType") == "org" else b.get("name")) or "").strip()
 
 
 def _find_beneficiary(beneficiaries: list, name) -> dict:
@@ -239,7 +248,7 @@ def _find_beneficiary(beneficiaries: list, name) -> dict:
     if not name:
         return {}
     for b in beneficiaries or []:
-        if isinstance(b, dict) and str(b.get("name") or "").strip() == name:
+        if isinstance(b, dict) and _beneficiary_display_name(b) == name:
             return b
     return {}
 
@@ -254,13 +263,21 @@ def _render_asset_list(
     for i, item in enumerate(items):
         prefix = f"{start_index + i} " if numbered else ""
         ben = _find_beneficiary(beneficiaries, item.get("beneficiary"))
-        lines.append(
-            f"{prefix}{label}: {v(item, 'description')} Bequeathed to: {v(item, 'beneficiary')}, "
-            f"date of birth {_dob_display(ben.get('dateOfBirth'))}, {esc(ben.get('maritalStatus')) or BLANK}, "
-            f"Relation to {title}: {esc(ben.get('relation')) or BLANK}, "
-            f"resident of {v(ben, 'address')}, "
-            f"having PAN {v(ben, 'pan')}, Aadhaar Number {v_aadhaar(ben, 'aadhaarNumber')}."
-        )
+        if ben.get("beneficiaryType") == "org":
+            lines.append(
+                f"{prefix}{label}: {v(item, 'description')} Bequeathed to: {v(ben, 'orgName')} (Entity Name), "
+                f"Authorized Representative: {v(ben, 'orgRepName')}, "
+                f"Registration / Tax ID Number: {v(ben, 'orgRegNumber')}, "
+                f"Registered Office Address: {v(ben, 'orgAddress')}."
+            )
+        else:
+            lines.append(
+                f"{prefix}{label}: {v(item, 'description')} Bequeathed to: {v(item, 'beneficiary')}, "
+                f"date of birth {_dob_display(ben.get('dateOfBirth'))}, {esc(ben.get('maritalStatus')) or BLANK}, "
+                f"Relation to {title}: {rel_of(ben) or BLANK}, "
+                f"resident of {v(ben, 'address')}, "
+                f"having PAN {v(ben, 'pan')}, Aadhaar Number {v_aadhaar(ben, 'aadhaarNumber')}."
+            )
     return lines
 
 
@@ -321,14 +338,22 @@ def _residue_clause(entries: list, title: str) -> str:
     for i, entry in enumerate(entries):
         id_type = entry.get("idType") or "Aadhaar Card"
         suffix = "; " if i < len(entries) - 1 else "."
-        parts.append(
-            f"{v(entry, 'name')}, date of birth {_dob_display(entry.get('dateOfBirth'))}, "
-            f"{esc(entry.get('maritalStatus')) or BLANK}, "
-            f"Relation to {title}: {rel_of(entry) or BLANK}, {_national(entry)}, "
-            f"occupation {occupation_of(entry) or BLANK}, resident of {v(entry, 'address')}, "
-            f"having {_id_type_label(id_type)} "
-            f"Number: {_id_number_display(id_type, entry.get('idNumber'))}{suffix}"
-        )
+        if entry.get("beneficiaryType") == "org":
+            parts.append(
+                f"{v(entry, 'orgName')} (Entity Name), "
+                f"Authorized Representative: {v(entry, 'orgRepName')}, "
+                f"Registration / Tax ID Number: {v(entry, 'orgRegNumber')}, "
+                f"Registered Office Address: {v(entry, 'orgAddress')}{suffix}"
+            )
+        else:
+            parts.append(
+                f"{v(entry, 'name')}, date of birth {_dob_display(entry.get('dateOfBirth'))}, "
+                f"{esc(entry.get('maritalStatus')) or BLANK}, "
+                f"Relation to {title}: {rel_of(entry) or BLANK}, {_national(entry)}, "
+                f"occupation {occupation_of(entry) or BLANK}, resident of {v(entry, 'address')}, "
+                f"having {_id_type_label(id_type)} "
+                f"Number: {_id_number_display(id_type, entry.get('idNumber'))}{suffix}"
+            )
     return (
         "I hereby declare, direct, and devise that all the Rest and Residue of my estate, including any "
         "property or assets, both movable and immovable, which I may acquire after the execution of this "
@@ -346,7 +371,7 @@ def _executor_appointment_clause(executor: dict, title: str) -> str:
         )
     return (
         f"I appoint {v(executor, 'name')}, date of birth {_dob_display(executor.get('dateOfBirth'))}, "
-        f"Relation to {title}: {v(executor, 'relation')}, "
+        f"Relation to {title}: {rel_of(executor) or BLANK}, "
         f"Occupation: {occupation_of(executor) or BLANK}, "
         f"resident of {v(executor, 'address')}, having {_id_type_label(executor.get('idType')) or ''} "
         f"Number: {_id_number_display(executor.get('idType'), executor.get('idNumber'))}."
@@ -356,7 +381,7 @@ def _executor_appointment_clause(executor: dict, title: str) -> str:
 def _guardian_appointment_clause(guardian: dict, title: str) -> str:
     return (
         f"I appoint {v(guardian, 'name')}, date of birth {_dob_display(guardian.get('dateOfBirth'))}, "
-        f"Relation to {title}: {v(guardian, 'relation')}, "
+        f"Relation to {title}: {rel_of(guardian) or BLANK}, "
         f"Occupation: {occupation_of(guardian) or BLANK}, resident of {v(guardian, 'address')}, "
         f"having {_id_type_label(guardian.get('idType')) or ''} "
         f"Number: {_id_number_display(guardian.get('idType'), guardian.get('idNumber'))}."
