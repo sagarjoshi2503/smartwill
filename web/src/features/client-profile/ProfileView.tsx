@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ChevronLeft, Mail, Phone, ShieldCheck } from "lucide-react";
 import { authFetch } from "../../utils/apiBase";
 import {
@@ -26,6 +26,7 @@ export default function ProfileView({onBack}:{onBack: () => void}){
   const [step,setStep]=useState<"enterNumber"|"enterCode">("enterNumber");
   const [newNumber,setNewNumber]=useState("");
   const [otp,setOtp]=useState<string[]>(Array(OTP_LENGTH).fill(""));
+  const otpRefs=useRef<(HTMLInputElement|null)[]>([]);
   const [busy,setBusy]=useState(false);
   const [formError,setFormError]=useState("");
   const [successMsg,setSuccessMsg]=useState("");
@@ -86,6 +87,7 @@ export default function ProfileView({onBack}:{onBack: () => void}){
   const handleOtpDigit=(i: number, v: string)=>{
     if(!/^\d?$/.test(v)) return;
     const next=[...otp]; next[i]=v; setOtp(next);
+    if(v && i<OTP_LENGTH-1) otpRefs.current[i+1]?.focus();
   };
 
   const handleVerify=async()=>{
@@ -158,7 +160,7 @@ export default function ProfileView({onBack}:{onBack: () => void}){
                       <p className="flex items-center gap-1.5 text-brand-dark text-xs"><ShieldCheck size={13}/>Code sent to {COUNTRY_CODE_PREFIX}{newNumber}</p>
                       <div className="flex justify-center gap-1.5">
                         {otp.map((d,i)=>(
-                          <input key={i} type="text" inputMode="numeric" maxLength={1} value={d}
+                          <input key={i} ref={el=>otpRefs.current[i]=el} type="text" inputMode="numeric" maxLength={1} value={d}
                             onChange={e=>handleOtpDigit(i,e.target.value)}
                             className="w-9 h-11 apv-input rounded-lg text-center text-slate-900 text-lg font-bold focus:outline-none"/>
                         ))}

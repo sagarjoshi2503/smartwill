@@ -3,7 +3,7 @@ import { FileText, FileStack, Plus, Edit3, Eye, Trash2, Clock } from "lucide-rea
 import { authFetch } from "../../utils/apiBase";
 import {
   API_MY_WILLS, apiPathWill, CONFIRM_DELETE_WILL, CONTENT_TYPE_JSON, ERR_LOAD_WILL,
-  ERR_DELETE_WILL, HEADER_CONTENT_TYPE, STATUS_DRAFT, STATUS_PENDING_REVIEW, STATUS_COMPLETED, STATUS_LBL,
+  ERR_DELETE_WILL, HEADER_CONTENT_TYPE, STATUS_DRAFT, STATUS_COMPLETED, STATUS_LBL,
   WILL_VISIBLE_DAYS, ROLE_TESTATOR,
 } from "../../constants";
 import { WILL_TYPE_LBL_SHORT } from "../../data/willTypes";
@@ -33,7 +33,6 @@ export default function TestatorWillsView({email,onCreateNew,onEditWill,onViewWi
   const [page,setPage]=useState(1);
 
   const draftCount = wills.filter(w=>w.status===STATUS_DRAFT).length;
-  const pendingReviewCount = wills.filter(w=>w.status===STATUS_PENDING_REVIEW).length;
   const completedCount = wills.filter(w=>w.status===STATUS_COMPLETED).length;
   const filteredWills = statusFilter==="All" ? wills : wills.filter(w=>w.status===statusFilter);
   const pagedWills = filteredWills.slice((page-1)*PAGE_SIZE, page*PAGE_SIZE);
@@ -142,7 +141,6 @@ export default function TestatorWillsView({email,onCreateNew,onEditWill,onViewWi
                 {([
                   {v:"All",label:"All",count:wills.length},
                   {v:STATUS_DRAFT,label:STATUS_LBL[STATUS_DRAFT],count:draftCount},
-                  {v:STATUS_PENDING_REVIEW,label:STATUS_LBL[STATUS_PENDING_REVIEW],count:pendingReviewCount},
                   {v:STATUS_COMPLETED,label:STATUS_LBL[STATUS_COMPLETED],count:completedCount},
                 ] as const).map(f=>(
                   <button key={f.v} onClick={()=>{setStatusFilter(f.v);setPage(1);}}
