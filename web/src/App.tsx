@@ -32,6 +32,7 @@ import AllIndiaWillDocument from "./features/create-will/AllIndiaWillDocument";
 import GoanDocumentsView from "./features/create-will/GoanDocumentsView";
 import ChatWidget from "./features/chatbot/ChatWidget";
 import { allocTotal } from "./utils/allocation";
+import { resolveSaveRedirect } from "./utils/saveRedirect";
 import { apiUrl, authFetch } from "./utils/apiBase";
 import { clearAuthToken, getAuthToken, restoreSession, setAuthProfile } from "./utils/auth";
 import { getMissingIdFields } from "./utils/willValidation";
@@ -828,8 +829,15 @@ export default function SmartWill() {
                 adminReviewFlagEnabled={adminReviewEnabled}
                 onSaved={(willId,status)=>{
                   setEditingWillId(willId);
-                  if(status===STATUS_PENDING_REVIEW) setTimeout(()=>setView("myWills"), WIZARD_REDIRECT_MS);
-                  if(status===STATUS_COMPLETED) setTimeout(()=>setView("admin"), WIZARD_REDIRECT_MS);
+                  // Keeps idFieldsLocked (see WizardForms) in sync with the
+                  // Will's real status within the same wizard session — without
+                  // this, a plain testator whose submission auto-completes
+                  // (STATUS_COMPLETED, "enable-admin-review" off) would stay
+                  // stuck with locked ID fields, since willStatus below was
+                  // never updated past whatever it was when the wizard opened.
+                  setAdminReviewStatus(status);
+                  const redirectTo = resolveSaveRedirect(status, adminReviewMode||adminCreateMode);
+                  if(redirectTo) setTimeout(()=>setView(redirectTo), WIZARD_REDIRECT_MS);
                 }}
               />
             </div>
