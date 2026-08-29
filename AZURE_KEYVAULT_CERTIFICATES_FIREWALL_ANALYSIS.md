@@ -1,4 +1,4 @@
-# SmartWill — Azure Infrastructure Costs + Vercel Comparison
+# ForwardLegacy — Azure Infrastructure Costs + Vercel Comparison
 
 **Analysis Date**: August 14, 2026  
 **Infrastructure Status**: AKS cluster deployed in Azure (rg-test-deletelater, centralindia region)  
@@ -126,7 +126,7 @@
 | **Application Gateway** | $0.25/hour + $0.08/hour/capacity unit | Min 2 capacity units | Required base cost |
 | **Total** | **$54–$300/month** | Depends on traffic | **$648–$3,600/year** |
 
-**Typical Configuration for SmartWill**:
+**Typical Configuration for ForwardLegacy**:
 - 2 capacity units = $0.25/hour + (2 × $0.08)/hour = **$0.41/hour**
 - Monthly: $0.41 × 730 = **$299.30/month** = **$3,591.60/year**
 
@@ -299,7 +299,7 @@ Internet
 ### **Azure NSG (Lightweight, No Cost)**
 
 ```yaml
-# Example rules for SmartWill
+# Example rules for ForwardLegacy
 
 - Inbound Rules:
   - Allow TCP:443 (HTTPS) from Internet
@@ -331,7 +331,7 @@ Internet
 
 ## Part 6: Secret Management Cost Deep Dive
 
-### **How SmartWill Uses Azure Key Vault Today**
+### **How ForwardLegacy Uses Azure Key Vault Today**
 
 ```
 6 Services × 2–3 secrets each = ~15–20 total secrets
@@ -390,7 +390,7 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: smartwill-ingress
+  name: forwardlegacy-ingress
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-prod
 spec:
@@ -398,7 +398,7 @@ spec:
   - hosts:
     - forwardlegacy.co.in
     - www.forwardlegacy.co.in
-    secretName: smartwill-tls
+    secretName: forwardlegacy-tls
   rules:
   - host: forwardlegacy.co.in
     http:
@@ -407,7 +407,7 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: smartwill-web
+            name: forwardlegacy-web
             port:
               number: 80
 ```
@@ -499,7 +499,7 @@ If you want 3-year certificates via DigiCert through Azure Key Vault:
 
 ## Part 9: Key Recommendations
 
-### **For Current SmartWill (Aug 2026)**
+### **For Current ForwardLegacy (Aug 2026)**
 
 | Recommendation | Rationale | Cost Impact |
 |---|---|---|

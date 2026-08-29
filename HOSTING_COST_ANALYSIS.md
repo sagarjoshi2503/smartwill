@@ -1,7 +1,7 @@
-# SmartWill — Complete Monthly & Annual Hosting Cost Analysis
+# ForwardLegacy — Complete Monthly & Annual Hosting Cost Analysis
 
 **Analysis Date**: August 14, 2026  
-**Project**: SmartWill Forward Legacy (forwardlegacy.co.in)  
+**Project**: Forward Legacy (forwardlegacy.co.in)  
 **Deployment Stack**: Vercel (primary), MongoDB Atlas, 3rd-party APIs
 
 ---
@@ -421,7 +421,7 @@ receipts) well past 3,000 Wills/month; see Scenario 5 below.
 - **Cost**: **$0/month**
 
 #### Optional: Commercial CA / EV Certificate
-- Only relevant if a paid Certificate Authority (e.g., DigiCert, GlobalSign) or Extended Validation (EV) cert is specifically required — not needed for SmartWill's stack, and EV's old "green bar" browser trust indicator is no longer shown by major browsers anyway
+- Only relevant if a paid Certificate Authority (e.g., DigiCert, GlobalSign) or Extended Validation (EV) cert is specifically required — not needed for ForwardLegacy's stack, and EV's old "green bar" browser trust indicator is no longer shown by major browsers anyway
 - **Typical cost if pursued**: $50–$300/year (DV/OV) or $150–$1,000+/year (EV, wildcard)
 
 **Estimated Cost**: **$0/month ($0/year)** — no SSL purchase required under the current or AKS deployment paths
@@ -693,4 +693,4 @@ To refine this estimate further, you'll need:
 ---
 
 **Last Updated**: August 16, 2026  
-**Prepared for**: SmartWill / Forward Legacy team
+**Prepared for**: Forward Legacy team

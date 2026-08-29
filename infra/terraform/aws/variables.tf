@@ -8,7 +8,7 @@ variable "tags" {
   description = "Tags applied to all resources."
   type        = map(string)
   default = {
-    project = "smartwill"
+    project = "forwardlegacy"
   }
 }
 
@@ -17,7 +17,7 @@ variable "tags" {
 variable "ecr_repository_names" {
   description = "Names of the ECR repositories to create (one per image)."
   type        = list(string)
-  default     = ["smartwill-api", "smartwill-web", "smartwill-mcp", "smartwill-chatbot", "smartwill-flags", "smartwill-rag"]
+  default     = ["forwardlegacy-api", "forwardlegacy-web", "forwardlegacy-mcp", "forwardlegacy-chatbot", "forwardlegacy-flags", "forwardlegacy-rag"]
 }
 
 # --- Networking (minimal VPC for EKS — public subnets only, no NAT gateway,

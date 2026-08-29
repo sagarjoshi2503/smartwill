@@ -1,10 +1,10 @@
-# chatbot/ — SmartWill Assistant backend
+# chatbot/ — ForwardLegacy Assistant backend
 
 ## What this is
 
 FastAPI service running a manual Claude tool-use loop (Anthropic Messages
 API, model `claude-opus-5`) against `mcp/`'s 21 tools, gated by a
-role-based read-only whitelist. Powers the "SmartWill Assistant" chat
+role-based read-only whitelist. Powers the "ForwardLegacy Assistant" chat
 widget in `web/`. Deployed three ways (Vercel Service, AKS, local Docker) —
 same source, env-var-only differences.
 
@@ -29,7 +29,7 @@ mcp_client.py                  open_session() — one MCP ClientSession per
                              Vercel service binding (which only ever
                              injects a bare base URL, never a full path)
 rag_client.py                   search()/faq_search() — plain HTTP POSTs to
-                             smartwill-rag (see rag/CLAUDE.md), not MCP
+                             forwardlegacy-rag (see rag/CLAUDE.md), not MCP
                              calls. rag/ isn't an MCP server (it exposes
                              two hybrid-search endpoints, not a menu of
                              tools), so their tool schemas are hand-defined
@@ -107,7 +107,7 @@ request (there can be several — up to `MAX_TOOL_ITERATIONS` — if the model
 makes multiple tool calls before its final answer), then logs the totals
 in a `finally` block so it runs on every exit path (normal reply, refusal,
 `UNAVAILABLE_REPLY` after an exception, or exhausting the iteration limit)
-— Anthropic bills for a completed API call regardless of what SmartWill
+— Anthropic bills for a completed API call regardless of what ForwardLegacy
 does with the result afterward, so a mid-conversation failure still gets
 logged for whatever calls did complete.
 

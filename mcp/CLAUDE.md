@@ -1,4 +1,4 @@
-# mcp/ — SmartWill MCP server
+# mcp/ — ForwardLegacy MCP server
 
 ## What this is
 

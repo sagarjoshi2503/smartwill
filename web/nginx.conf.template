@@ -8,7 +8,7 @@ server {
     # always fetch() this as a same-origin relative path (no VITE_*_BASE_URL
     # involved), matching how Vercel routes /api/flags to its own flags
     # service — so every deployment (Vercel, AKS, local Docker) needs this
-    # origin to itself resolve /api/flags to the smartwill-flags service.
+    # origin to itself resolve /api/flags to the forwardlegacy-flags service.
     # FLAGS_UPSTREAM is a plain container env var (e.g. "flags:8020" locally,
     # the ClusterIP service DNS name on AKS), substituted into this file at
     # container startup by the official nginx image's envsubst-templating

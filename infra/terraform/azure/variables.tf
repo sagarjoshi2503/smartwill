@@ -42,7 +42,7 @@ variable "tags" {
   description = "Tags applied to all resources."
   type        = map(string)
   default = {
-    project = "smartwill"
+    project = "forwardlegacy"
   }
 }
 

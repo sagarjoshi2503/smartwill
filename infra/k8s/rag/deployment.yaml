@@ -1,8 +1,8 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: smartwill-rag
-  namespace: smartwill-rag
+  name: forwardlegacy-rag
+  namespace: forwardlegacy-rag
 spec:
   replicas: 1
   # Recreate: the single small cluster node doesn't have spare CPU to run
@@ -11,24 +11,24 @@ spec:
     type: Recreate
   selector:
     matchLabels:
-      app: smartwill-rag
+      app: forwardlegacy-rag
   template:
     metadata:
       labels:
-        app: smartwill-rag
+        app: forwardlegacy-rag
     spec:
       containers:
-        - name: smartwill-rag
-          image: smartwillacr.azurecr.io/smartwill-rag:latest
+        - name: forwardlegacy-rag
+          image: smartwillacr.azurecr.io/forwardlegacy-rag:latest
           ports:
             - containerPort: 8030
           envFrom:
             - secretRef:
-                name: smartwill-rag-secrets
+                name: forwardlegacy-rag-secrets
           volumeMounts:
             # Not read by the app directly (it reads env vars), but mounting
             # this CSI volume is what triggers the SecretProviderClass's
-            # secretObjects sync into the smartwill-rag-secrets k8s Secret.
+            # secretObjects sync into the forwardlegacy-rag-secrets k8s Secret.
             - name: secrets-store
               mountPath: /mnt/secrets-store
               readOnly: true
@@ -57,4 +57,4 @@ spec:
             driver: secrets-store.csi.k8s.io
             readOnly: true
             volumeAttributes:
-              secretProviderClass: smartwill-rag-secrets
+              secretProviderClass: forwardlegacy-rag-secrets

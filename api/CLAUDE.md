@@ -1,8 +1,8 @@
-# api/ — SmartWill backend (FastAPI)
+# api/ — ForwardLegacy backend (FastAPI)
 
 ## What this is
 
-The one real, MongoDB-backed backend for SmartWill. FastAPI, feature-based
+The one real, MongoDB-backed backend for ForwardLegacy. FastAPI, feature-based
 structure under `_app/`. Deployed **three independent ways** — Vercel
 (serverless), AKS (container), local Docker/venv — from the exact same
 source, no environment-specific branching in the code itself. All
@@ -66,9 +66,9 @@ _app/
 
 | | Vercel | AKS | Local |
 |---|---|---|---|
-| How it runs | `index.py` as a Vercel Python Service (`vercel.json`'s `services.api`, entrypoint `index:app`) | `Dockerfile` → `smartwillacr.azurecr.io/smartwill-api` | `uvicorn _app.main:app` or the same Dockerfile via `docker-compose.yml` |
+| How it runs | `index.py` as a Vercel Python Service (`vercel.json`'s `services.api`, entrypoint `index:app`) | `Dockerfile` → `smartwillacr.azurecr.io/forwardlegacy-api` | `uvicorn _app.main:app` or the same Dockerfile via `docker-compose.yml` |
 | Public? | Yes, same domain as `web` via `/api/*` rewrite | Yes, own `LoadBalancer` | Yes, `localhost:8051` |
-| Secrets | Vercel project env vars | Azure Key Vault → Secrets Store CSI driver → `smartwill-secrets` k8s Secret (`infra/k8s/api/secret-provider-class.yaml`) | `.env.local` (gitignored) |
+| Secrets | Vercel project env vars | Azure Key Vault → Secrets Store CSI driver → `forwardlegacy-secrets` k8s Secret (`infra/k8s/api/secret-provider-class.yaml`) | `.env.local` (gitignored) |
 
 **No code path knows which of these three it's running under.** The only
 runtime-detectable difference is `VERCEL_URL` being set (used solely by

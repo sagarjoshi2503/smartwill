@@ -25,7 +25,7 @@ from feature_flags import get_flag_enabled, get_flag_value
 from mcp_client import open_session
 from tools import TOOLS_REQUIRING_TOKEN, allowed_tool_names, claude_tools_for_role, faq_tool_for_role, rag_tool_for_role
 
-logger = logging.getLogger("smartwill-chatbot")
+logger = logging.getLogger("forwardlegacy-chatbot")
 
 # Required — no default — so every environment (Vercel, AKS, local dev)
 # declares its own allowed origins explicitly (comma-separated) rather than
@@ -39,7 +39,7 @@ if not os.environ.get(ENV_CORS_ALLOW_ORIGINS):
     raise RuntimeError(ERR_CORS_ALLOW_ORIGINS_REQUIRED)
 CORS_ALLOW_ORIGINS = [o.strip() for o in os.environ[ENV_CORS_ALLOW_ORIGINS].split(",") if o.strip()]
 
-app = FastAPI(title="smartwill-chatbot")
+app = FastAPI(title="forwardlegacy-chatbot")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=CORS_ALLOW_ORIGINS,
@@ -89,7 +89,7 @@ class ChatRequest(BaseModel):
 class ChatResponse(BaseModel):
     reply: str
     # Set when the assistant couldn't complete the request because a
-    # downstream service (smartwill-mcp, or the Claude API itself) failed —
+    # downstream service (forwardlegacy-mcp, or the Claude API itself) failed —
     # the frontend renders a distinct "not available" state with a Contact
     # Support option instead of treating this like a normal reply.
     unavailable: bool = False
@@ -170,7 +170,7 @@ async def _execute_tool(
         # isn't "rag", but re-check here too rather than trusting that alone.
         if retrieval_mode != RETRIEVAL_MODE_RAG:
             return err_tool_not_available(name)
-        # Not an MCP tool — smartwill-rag isn't an MCP server, so this goes
+        # Not an MCP tool — forwardlegacy-rag isn't an MCP server, so this goes
         # straight to it over HTTP instead of session.call_tool(), but only
         # after the exact same whitelist/token-injection checks above as
         # every other tool.
@@ -277,7 +277,7 @@ async def chat(body: ChatRequest) -> ChatResponse:
 
                 messages.append({"role": MSG_ROLE_USER, "content": tool_results})
     except Exception:
-        # Covers smartwill-mcp being unreachable or returning a 4xx/5xx (the
+        # Covers forwardlegacy-mcp being unreachable or returning a 4xx/5xx (the
         # streamable-HTTP client raises on a bad connection/handshake, not a
         # clean is_error tool result — that case is already handled inside
         # _execute_tool without raising) as well as any Claude API failure.
@@ -289,7 +289,7 @@ async def chat(body: ChatRequest) -> ChatResponse:
         # the try, the except's return, and falling through to the
         # INCOMPLETE_REPLY return below) — usage is only ever non-zero if
         # at least one client.messages.create() call actually completed,
-        # and Anthropic bills for that call regardless of what SmartWill
+        # and Anthropic bills for that call regardless of what ForwardLegacy
         # does with the result afterward, so it's logged unconditionally.
         await _log_usage_if_enabled(body, usage)
 

@@ -1,8 +1,8 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: smartwill-flags
-  namespace: smartwill-flags
+  name: forwardlegacy-flags
+  namespace: forwardlegacy-flags
 spec:
   replicas: 1
   # Recreate: the single small cluster node doesn't have spare CPU to run
@@ -11,20 +11,20 @@ spec:
     type: Recreate
   selector:
     matchLabels:
-      app: smartwill-flags
+      app: forwardlegacy-flags
   template:
     metadata:
       labels:
-        app: smartwill-flags
+        app: forwardlegacy-flags
     spec:
       containers:
-        - name: smartwill-flags
-          image: smartwillacr.azurecr.io/smartwill-flags:latest
+        - name: forwardlegacy-flags
+          image: smartwillacr.azurecr.io/forwardlegacy-flags:latest
           ports:
             - containerPort: 8020
           envFrom:
             - secretRef:
-                name: smartwill-flags-secrets
+                name: forwardlegacy-flags-secrets
           volumeMounts:
             - name: secrets-store
               mountPath: /mnt/secrets-store

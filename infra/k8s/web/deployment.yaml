@@ -1,8 +1,8 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: smartwill-web
-  namespace: smartwill-web
+  name: forwardlegacy-web
+  namespace: forwardlegacy-web
 spec:
   replicas: 1
   # Recreate: the single small cluster node doesn't have spare CPU to run
@@ -11,25 +11,25 @@ spec:
     type: Recreate
   selector:
     matchLabels:
-      app: smartwill-web
+      app: forwardlegacy-web
   template:
     metadata:
       labels:
-        app: smartwill-web
+        app: forwardlegacy-web
     spec:
       containers:
-        - name: smartwill-web
-          image: smartwillacr.azurecr.io/smartwill-web:latest
+        - name: forwardlegacy-web
+          image: smartwillacr.azurecr.io/forwardlegacy-web:latest
           ports:
             - containerPort: 5174
           env:
             # Read by nginx at container start (envsubst templating — see
             # web/nginx.conf.template) to proxy the same-origin /api/flags
-            # path the frontend always calls to smartwill-flags' in-cluster
+            # path the frontend always calls to forwardlegacy-flags' in-cluster
             # DNS name — that Service has no public IP by design (see
             # infra/k8s/flags/service.yaml).
             - name: FLAGS_UPSTREAM
-              value: "smartwill-flags.smartwill-flags.svc.cluster.local"
+              value: "forwardlegacy-flags.forwardlegacy-flags.svc.cluster.local"
           resources:
             requests:
               cpu: 50m

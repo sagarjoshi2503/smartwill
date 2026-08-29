@@ -76,7 +76,7 @@ const SITE_NAV: {v: ViewName; label: string}[] = [
 ];
 const isSitePage = (v: ViewName) => SITE_NAV.some(item=>item.v===v);
 
-export default function SmartWill() {
+export default function ForwardLegacy() {
   // Deep-linking: loading /admin, or one of the public marketing pages'
   // own URLs (see utils/seo.ts's SEO_PAGES/PATH_TO_VIEW — /about, /services,
   // /faq, /partner, /contact-us), directly (typed in the address bar, or a

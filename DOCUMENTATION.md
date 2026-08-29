@@ -1,4 +1,4 @@
-# SmartWill — Codebase Documentation
+# ForwardLegacy — Codebase Documentation
 
 This file is a map, not a manual — each service owns the authoritative
 detail in its own `CLAUDE.md` (linked throughout). Read this first to
@@ -7,13 +7,13 @@ touching.
 
 ## 1. What this is
 
-SmartWill is an Indian online Will-drafting product: a signup flow (Google
+ForwardLegacy is an Indian online Will-drafting product: a signup flow (Google
 SSO or phone/OTP), a legal-disclaimer gate, a multi-step wizard that
 collects testator/executor/guardian/beneficiary/asset/residual-clause data
 across four Will types (All India, Goan, Succession Deed, Custom Will), and
 server-side generation of a formatted, print-ready legal document (PDF) for
 the two fully-templated types (All India, Goan). It also has an Admin
-Dashboard for reviewing submitted Wills and a "SmartWill Assistant" chat
+Dashboard for reviewing submitted Wills and a "ForwardLegacy Assistant" chat
 widget that can answer questions about a user's own Wills and about the
 site's FAQ content.
 
@@ -64,7 +64,7 @@ deployment config) runs identically from the same source in three places:
 
 | | Vercel | AKS | Local |
 |---|---|---|---|
-| How | Vercel Services (`vercel.json`), serverless/service bindings | `Dockerfile` → `smartwillacr.azurecr.io/smartwill-<service>` → `kubectl apply -f infra/k8s/<service>/` | `docker-compose.yml` or running each service's dev server directly |
+| How | Vercel Services (`vercel.json`), serverless/service bindings | `Dockerfile` → `smartwillacr.azurecr.io/forwardlegacy-<service>` → `kubectl apply -f infra/k8s/<service>/` | `docker-compose.yml` or running each service's dev server directly |
 | Secrets | Vercel project env vars | Azure Key Vault → Secrets Store CSI driver → k8s Secret | `.env.local` (gitignored) |
 
 No code path branches on which of the three it's running under — every
@@ -95,7 +95,7 @@ beneficiary lookups for asset bequests, etc.).
 
 ## 6. The chat widget / RAG / MCP stack
 
-`web/`'s "SmartWill Assistant" widget calls `chatbot/`, which runs a manual
+`web/`'s "ForwardLegacy Assistant" widget calls `chatbot/`, which runs a manual
 Claude tool-use loop. Claude never sees a bearer token — it's injected
 server-side after a hard role-based whitelist check (see
 `chatbot/CLAUDE.md`'s "The security pattern"). Two kinds of tools are

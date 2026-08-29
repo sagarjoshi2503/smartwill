@@ -1,12 +1,12 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: smartwill-chatbot
-  namespace: smartwill-chatbot
+  name: forwardlegacy-chatbot
+  namespace: forwardlegacy-chatbot
 spec:
   type: LoadBalancer
   selector:
-    app: smartwill-chatbot
+    app: forwardlegacy-chatbot
   ports:
     - port: 80
       targetPort: 8010

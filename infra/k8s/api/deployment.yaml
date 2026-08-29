@@ -1,8 +1,8 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: smartwill-api
-  namespace: smartwill-api
+  name: forwardlegacy-api
+  namespace: forwardlegacy-api
 spec:
   replicas: 1
   # Recreate (not the RollingUpdate default): the single small cluster node
@@ -13,26 +13,26 @@ spec:
     type: Recreate
   selector:
     matchLabels:
-      app: smartwill-api
+      app: forwardlegacy-api
   template:
     metadata:
       labels:
-        app: smartwill-api
+        app: forwardlegacy-api
     spec:
       containers:
-        - name: smartwill-api
-          image: smartwillacr.azurecr.io/smartwill-api:latest
+        - name: forwardlegacy-api
+          image: smartwillacr.azurecr.io/forwardlegacy-api:latest
           ports:
             - containerPort: 8051
           envFrom:
             - secretRef:
-                name: smartwill-secrets
+                name: forwardlegacy-secrets
             - configMapRef:
-                name: smartwill-api-config
+                name: forwardlegacy-api-config
           volumeMounts:
             # Not read by the app directly (it reads env vars), but mounting
             # this CSI volume is what triggers the SecretProviderClass's
-            # secretObjects sync into the smartwill-secrets k8s Secret above.
+            # secretObjects sync into the forwardlegacy-secrets k8s Secret above.
             - name: secrets-store
               mountPath: /mnt/secrets-store
               readOnly: true

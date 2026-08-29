@@ -15,12 +15,12 @@ def test_send_email_uses_resend_when_flag_enabled(monkeypatch):
     monkeypatch.setattr(
         "_app.shared.email.is_flag_enabled", lambda key, default: key == "use-resend-for-email",
     )
-    settings = Settings(resend_api_key="key123", resend_from_email="SmartWill <noreply@smartwill.app>")
+    settings = Settings(resend_api_key="key123", resend_from_email="ForwardLegacy <noreply@forwardlegacy.app>")
 
     email.send_email(settings, to="admin@example.com", subject="Subject", html="<p>Body</p>")
 
     assert captured["params"] == {
-        "from": "SmartWill <noreply@smartwill.app>",
+        "from": "ForwardLegacy <noreply@forwardlegacy.app>",
         "to": ["admin@example.com"],
         "subject": "Subject",
         "html": "<p>Body</p>",
@@ -42,7 +42,7 @@ def test_send_email_uses_sendgrid_when_flag_enabled(monkeypatch):
         "_app.shared.email.is_flag_enabled",
         lambda key, default: key == "use-sendgrid-for-email",
     )
-    settings = Settings(sendgrid_api_key="sg-key123", sendgrid_from_email="noreply@smartwill.app")
+    settings = Settings(sendgrid_api_key="sg-key123", sendgrid_from_email="noreply@forwardlegacy.app")
 
     email.send_email(settings, to="admin@example.com", subject="Subject", html="<p>Body</p>")
 

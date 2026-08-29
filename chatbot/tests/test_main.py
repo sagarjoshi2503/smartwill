@@ -109,13 +109,13 @@ def client():
 def test_chat_anonymous_returns_text_reply_without_calling_a_tool(monkeypatch, client):
     session = FakeSession()
     patch_session(monkeypatch, session)
-    fake_messages = FakeMessagesApi([FakeMessage("end_turn", [FakeTextBlock("SmartWill helps you draft a Will.")])])
+    fake_messages = FakeMessagesApi([FakeMessage("end_turn", [FakeTextBlock("ForwardLegacy helps you draft a Will.")])])
     monkeypatch.setattr(main.client, "messages", fake_messages)
 
-    res = client.post("/chat", json={"messages": [{"role": "user", "content": "What is SmartWill?"}]})
+    res = client.post("/chat", json={"messages": [{"role": "user", "content": "What is ForwardLegacy?"}]})
 
     assert res.status_code == 200
-    assert res.json() == {"reply": "SmartWill helps you draft a Will.", "unavailable": False, "retrieval_mode": "mcp"}
+    assert res.json() == {"reply": "ForwardLegacy helps you draft a Will.", "unavailable": False, "retrieval_mode": "mcp"}
     assert session.call_tool_calls == []
 
 
@@ -233,7 +233,7 @@ def test_chat_search_wills_failure_reports_error_without_500(monkeypatch, client
     patch_retrieval_mode(monkeypatch, "rag")
 
     async def failing_search(query, token, limit=5):
-        raise ConnectionError("smartwill-rag: connection refused")
+        raise ConnectionError("forwardlegacy-rag: connection refused")
 
     monkeypatch.setattr(main.rag_client, "search", failing_search)
     fake_messages = FakeMessagesApi([
@@ -303,7 +303,7 @@ def test_chat_search_faq_failure_reports_error_without_500(monkeypatch, client):
     patch_session(monkeypatch, session)
 
     async def failing_faq_search(query, limit=5):
-        raise ConnectionError("smartwill-rag: connection refused")
+        raise ConnectionError("forwardlegacy-rag: connection refused")
 
     monkeypatch.setattr(main.rag_client, "faq_search", failing_faq_search)
     fake_messages = FakeMessagesApi([
@@ -364,7 +364,7 @@ def test_testator_offered_search_wills_when_flag_is_rag(monkeypatch, client):
 def test_search_wills_refused_server_side_when_flag_is_mcp_even_if_requested(monkeypatch, client):
     # Defense in depth: even if a stale/cached tool list somehow still
     # offered search_wills, or Claude requests it anyway, the flag is
-    # re-checked before ever calling smartwill-rag.
+    # re-checked before ever calling forwardlegacy-rag.
     session = FakeSession()
     patch_session(monkeypatch, session)
     patch_retrieval_mode(monkeypatch, "mcp")
@@ -439,7 +439,7 @@ def test_chat_refuses_tool_outside_whitelist_even_if_requested(monkeypatch, clie
 def test_chat_returns_unavailable_when_mcp_session_fails_to_open(monkeypatch, client):
     @asynccontextmanager
     async def failing_open_session():
-        raise ConnectionError("smartwill-mcp: connection refused")
+        raise ConnectionError("forwardlegacy-mcp: connection refused")
         yield  # pragma: no cover - unreachable, satisfies generator syntax
 
     monkeypatch.setattr(main, "open_session", failing_open_session)

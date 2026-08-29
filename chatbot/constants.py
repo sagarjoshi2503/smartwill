@@ -27,15 +27,15 @@ ERR_MONGODB_URI_REQUIRED = "MONGODB_URI environment variable is required"
 # separate Vercel services sharing one flat project-level env var pool, so a
 # same-named key can't hold a different value per service.
 ENV_CORS_ALLOW_ORIGINS = "CHATBOT_CORS_ALLOW_ORIGINS"
-ERR_MCP_SERVER_URL_REQUIRED = "MCP_SERVER_URL environment variable is required (base URL of smartwill-mcp)"
+ERR_MCP_SERVER_URL_REQUIRED = "MCP_SERVER_URL environment variable is required (base URL of forwardlegacy-mcp)"
 ERR_CORS_ALLOW_ORIGINS_REQUIRED = f"{ENV_CORS_ALLOW_ORIGINS} environment variable is required (comma-separated origins)"
-ERR_RAG_SERVICE_URL_REQUIRED = "RAG_SERVICE_URL environment variable is required (base URL of smartwill-rag)"
-ERR_FLAGS_SERVICE_URL_REQUIRED = "FLAGS_SERVICE_URL environment variable is required (base URL of smartwill-flags)"
+ERR_RAG_SERVICE_URL_REQUIRED = "RAG_SERVICE_URL environment variable is required (base URL of forwardlegacy-rag)"
+ERR_FLAGS_SERVICE_URL_REQUIRED = "FLAGS_SERVICE_URL environment variable is required (base URL of forwardlegacy-flags)"
 
 # --- "use-rag-or-mcp" flag (see feature_flags.py) — picks which retrieval
 # path the assistant uses for Will-content questions. "mcp" is the
 # conservative default (pre-existing behavior, no search_wills tool
-# offered) so smartwill-rag issues can't affect anyone until this is
+# offered) so forwardlegacy-rag issues can't affect anyone until this is
 # explicitly flipped to "rag" in the flags dashboard. ---
 FLAG_USE_RAG_OR_MCP = "use-rag-or-mcp"
 RETRIEVAL_MODE_MCP = "mcp"
@@ -156,8 +156,8 @@ PATH_SEARCH_FAQ = "/faq-search"
 
 # --- Copy ---
 SYSTEM_PROMPT = (
-    "You are the SmartWill assistant, embedded in the SmartWill web app. "
-    "Answer questions about SmartWill (an India-focused Will-drafting service) and, "
+    "You are the ForwardLegacy assistant, embedded in the ForwardLegacy web app. "
+    "Answer questions about ForwardLegacy (an India-focused Will-drafting service) and, "
     "when a tool is available, look up the signed-in user's own Wills to answer "
     "questions about their status. When a question is about the *content* of a "
     "Will (e.g. what it says, who's mentioned, which Will covers a particular "
@@ -166,13 +166,13 @@ SYSTEM_PROMPT = (
     "of guessing. For general questions about Wills, Goa succession law, Trusts, "
     "or Living Wills — the kind of thing covered in the site's FAQ — use the FAQ "
     "search tool rather than answering from your own general knowledge, so the "
-    "answer matches SmartWill's actual published position. You can only ever "
+    "answer matches ForwardLegacy's actual published position. You can only ever "
     "look things up — you have no way to create, edit, delete, or pay for a "
     "Will, and no way to sign anyone up or log anyone in. If asked to do any of "
     "those, explain that this assistant can only answer questions and that the "
     "action has to be done in the app itself. Keep answers concise."
 )
-UNAVAILABLE_REPLY = "SmartWill Assistant isn't available right now."
+UNAVAILABLE_REPLY = "ForwardLegacy Assistant isn't available right now."
 REFUSAL_REPLY = "I'm not able to help with that."
 INCOMPLETE_REPLY = "I wasn't able to finish answering that — please try rephrasing."
 

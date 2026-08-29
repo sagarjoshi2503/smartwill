@@ -13,7 +13,7 @@ repackages each one as a labeled, describable "tool" that an AI model
 
 ## Why does this exist at all?
 
-The "SmartWill Assistant" chat widget on the website (`chatbot/`) needs
+The "ForwardLegacy Assistant" chat widget on the website (`chatbot/`) needs
 to actually **do things** for the user — look up their Wills, check
 contact info, and so on — not just talk about them. But you can't just
 hand an AI model your entire backend and let it call anything. Two
@@ -78,7 +78,7 @@ This is the heart of the service. At the top:
 
 ```python
 from mcp.server import MCPServer
-mcp = MCPServer("smartwill")
+mcp = MCPServer("forwardlegacy")
 ```
 
 This creates the MCP server object. Every tool is then just a normal
@@ -87,7 +87,7 @@ Python `async` function with an `@mcp.tool()` decorator on top:
 ```python
 @mcp.tool()
 async def health_check() -> dict:
-    """Check whether the smartwill-api backend is up."""
+    """Check whether the forwardlegacy-api backend is up."""
     return await call(METHOD_GET, PATH_HEALTHZ)
 ```
 

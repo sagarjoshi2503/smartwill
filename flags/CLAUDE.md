@@ -45,7 +45,7 @@ called directly by a browser. `web/`'s frontend always calls the
 same-origin, relative `/api/flags` path (see `web/CLAUDE.md`'s "The
 /api/flags proxy"), which each environment's frontend routes to this
 service — Vercel via a `vercel.json` rewrite, AKS/local via `web`'s nginx
-proxying to `smartwill-flags.smartwill-flags.svc.cluster.local` or
+proxying to `forwardlegacy-flags.forwardlegacy-flags.svc.cluster.local` or
 `flags:8020` respectively. `flags` itself has no public IP on AKS
 (`ClusterIP`) and no top-level Vercel rewrite of its own.
 

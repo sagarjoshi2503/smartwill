@@ -7,8 +7,8 @@ export interface StoredProfile {
   email: string;
 }
 
-const storageKey = (role: AuthRole): string => `smartwill_${role}_token`;
-const profileStorageKey = (role: AuthRole): string => `smartwill_${role}_profile`;
+const storageKey = (role: AuthRole): string => `forwardlegacy_${role}_token`;
+const profileStorageKey = (role: AuthRole): string => `forwardlegacy_${role}_profile`;
 
 export const setAuthToken = (role: AuthRole, token: string): void => {
   localStorage.setItem(storageKey(role), token);

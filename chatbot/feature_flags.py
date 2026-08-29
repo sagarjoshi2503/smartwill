@@ -4,7 +4,7 @@ api/_app/shared/feature_flags.py, extended to read flags.ts's raw string
 three-valued flag (`use-rag-or-mcp`: "mcp" | "rag"), not a toggle.
 
 Unlike api/'s version (which only evaluates on Vercel, via VERCEL_URL, and
-no-ops everywhere else), this talks to smartwill-flags directly over
+no-ops everywhere else), this talks to forwardlegacy-flags directly over
 FLAGS_SERVICE_URL — required, no default — so the flag actually works in
 every environment (Vercel, AKS, local Docker), matching how mcp_client.py/
 rag_client.py already reach their own dependencies everywhere.
@@ -18,7 +18,7 @@ import httpx
 
 from constants import ERR_FLAGS_SERVICE_URL_REQUIRED, FLAGS_CACHE_TTL_SECONDS, FLAGS_TIMEOUT_SECONDS
 
-logger = logging.getLogger("smartwill-chatbot")
+logger = logging.getLogger("forwardlegacy-chatbot")
 
 if not os.environ.get("FLAGS_SERVICE_URL"):
     raise RuntimeError(ERR_FLAGS_SERVICE_URL_REQUIRED)

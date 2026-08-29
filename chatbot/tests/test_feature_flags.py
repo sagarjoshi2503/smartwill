@@ -70,7 +70,7 @@ def test_falls_back_to_default_when_value_missing():
 
 
 def test_falls_back_to_default_on_request_failure():
-    FakeAsyncClient.next_exception = ConnectionError("smartwill-flags unreachable")
+    FakeAsyncClient.next_exception = ConnectionError("forwardlegacy-flags unreachable")
 
     result = asyncio.run(feature_flags.get_flag_value("use-rag-or-mcp", default="mcp"))
 
@@ -125,7 +125,7 @@ def test_get_flag_enabled_returns_false_when_flag_off():
 
 
 def test_get_flag_enabled_falls_back_to_default_on_request_failure():
-    FakeAsyncClient.next_exception = ConnectionError("smartwill-flags unreachable")
+    FakeAsyncClient.next_exception = ConnectionError("forwardlegacy-flags unreachable")
 
     result = asyncio.run(feature_flags.get_flag_enabled("log-ai-usage", default=False))
 

@@ -24,15 +24,15 @@ manual dispatch.
 
 Fetches AKS admin credentials for `smartwillcluster` and re-applies +
 rollout-restarts all four Deployments (see [`infra/k8s/`](../infra/k8s/)) in
-dependency order — `smartwill-api`, then `smartwill-mcp` (depends on api),
-then `smartwill-chatbot` (depends on mcp), then `smartwill-web` — so each
+dependency order — `forwardlegacy-api`, then `forwardlegacy-mcp` (depends on api),
+then `forwardlegacy-chatbot` (depends on mcp), then `forwardlegacy-web` — so each
 picks up the `:latest` image CI just pushed.
 
-`smartwill-mcp` has **no public IP** — its Service is `ClusterIP`, reachable
-only from `smartwill-chatbot` inside the cluster (see
+`forwardlegacy-mcp` has **no public IP** — its Service is `ClusterIP`, reachable
+only from `forwardlegacy-chatbot` inside the cluster (see
 [`infra/k8s/mcp/service.yaml`](../infra/k8s/mcp/service.yaml)). It exposes
 all 21 MCP tools with no auth of its own beyond whatever token a caller
-supplies; only `smartwill-chatbot`'s read-only tool whitelist should ever be
+supplies; only `forwardlegacy-chatbot`'s read-only tool whitelist should ever be
 able to reach it — a public IP would let anyone bypass that whitelist
 entirely (delete a Will, mark a payment, sign up an admin, etc.).
 
@@ -68,22 +68,22 @@ these are sensitive under the OIDC trust model above):
 | `AZURE_TENANT_ID` | `6414babb-0db4-4846-8b04-2b7ecc906077` |
 | `AZURE_SUBSCRIPTION_ID` | `13328e70-227c-4589-9c01-5a33a3cbe4ae` |
 | `VITE_GOOGLE_CLIENT_ID` | see `web/.env.local` |
-| `VITE_API_BASE_URL` | `smartwill-api`'s LoadBalancer external IP, e.g. `http://52.140.85.135` (see `infra/k8s/api/service.yaml`'s current `EXTERNAL-IP`) |
+| `VITE_API_BASE_URL` | `forwardlegacy-api`'s LoadBalancer external IP, e.g. `http://52.140.85.135` (see `infra/k8s/api/service.yaml`'s current `EXTERNAL-IP`) |
 | `VITE_RAZORPAY_KEY_ID` | see `web/.env.local` |
 | `VITE_GA_MEASUREMENT_ID` | see `web/.env.local` |
-| `VITE_CHATBOT_BASE_URL` | `smartwill-chatbot`'s LoadBalancer external IP, e.g. `http://4.224.64.236` (see `infra/k8s/chatbot/service.yaml`'s current `EXTERNAL-IP`) |
+| `VITE_CHATBOT_BASE_URL` | `forwardlegacy-chatbot`'s LoadBalancer external IP, e.g. `http://4.224.64.236` (see `infra/k8s/chatbot/service.yaml`'s current `EXTERNAL-IP`) |
 
-`ANTHROPIC_API_KEY` and `CORS_ALLOW_ORIGINS` for `smartwill-chatbot`, and
-`API_BASE_URL` for `smartwill-mcp`, are **not** GitHub variables — they're
+`ANTHROPIC_API_KEY` and `CORS_ALLOW_ORIGINS` for `forwardlegacy-chatbot`, and
+`API_BASE_URL` for `forwardlegacy-mcp`, are **not** GitHub variables — they're
 pulled at runtime from Azure Key Vault (`anthropic-api-key`,
 `cors-allow-origins`) or an in-cluster ConfigMap (`API_BASE_URL` points at
-`smartwill-api`'s in-cluster DNS name), same pattern as `smartwill-api`'s own
+`forwardlegacy-api`'s in-cluster DNS name), same pattern as `forwardlegacy-api`'s own
 secrets. See `infra/k8s/{mcp,chatbot}/secret-provider-class.yaml` and
 `configmap.yaml`.
 
 ### A note on the two LoadBalancer IPs that changed today
 
-Whenever `smartwill-api` or `smartwill-chatbot`'s Service is deleted and
+Whenever `forwardlegacy-api` or `forwardlegacy-chatbot`'s Service is deleted and
 recreated (not just a rollout restart — an actual delete), Azure assigns a
 **new** LoadBalancer IP. If that happens, update:
 
@@ -91,5 +91,5 @@ recreated (not just a rollout restart — an actual delete), Azure assigns a
 2. The corresponding Key Vault secrets (`vite-api-base-url`,
    `vite-chatbot-base-url`, `cors-allow-origins`) so future manual rebuilds
    stay correct too
-3. `smartwill-chatbot`'s `cors-allow-origins` Key Vault secret, if it was
-   `smartwill-web`'s IP that changed
+3. `forwardlegacy-chatbot`'s `cors-allow-origins` Key Vault secret, if it was
+   `forwardlegacy-web`'s IP that changed

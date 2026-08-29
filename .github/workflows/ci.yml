@@ -1,7 +1,7 @@
 name: CI
 
-# Builds and pushes smartwill-api / smartwill-web / smartwill-mcp /
-# smartwill-chatbot images to Azure Container Registry whenever their
+# Builds and pushes forwardlegacy-api / forwardlegacy-web / forwardlegacy-mcp /
+# forwardlegacy-chatbot images to Azure Container Registry whenever their
 # respective folder changes on main. See cicd/README.md for the full
 # explanation of this setup (why these files live under .github/workflows/
 # instead of cicd/, the Azure identity used, and the required repository
@@ -58,10 +58,10 @@ jobs:
       # az acr build runs the build inside ACR itself (Azure Container
       # Registry Tasks) — no local Docker daemon/login step needed on the
       # runner, and it authenticates via the azure/login session above.
-      - name: Build and push smartwill-api
+      - name: Build and push forwardlegacy-api
         run: |
           az acr build --registry smartwillacr \
-            --image smartwill-api:${{ github.sha }} --image smartwill-api:latest \
+            --image forwardlegacy-api:${{ github.sha }} --image forwardlegacy-api:latest \
             ./api
 
   build-web:
@@ -77,13 +77,13 @@ jobs:
           subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
       # Vite inlines these at build time, so they're passed as build-args —
       # same values used for the manual builds documented in web/.env.example.
-      # VITE_API_BASE_URL / VITE_CHATBOT_BASE_URL point at smartwill-api's
-      # and smartwill-chatbot's LoadBalancer IPs (see infra/k8s/{api,chatbot}/
+      # VITE_API_BASE_URL / VITE_CHATBOT_BASE_URL point at forwardlegacy-api's
+      # and forwardlegacy-chatbot's LoadBalancer IPs (see infra/k8s/{api,chatbot}/
       # service.yaml's current EXTERNAL-IP).
-      - name: Build and push smartwill-web
+      - name: Build and push forwardlegacy-web
         run: |
           az acr build --registry smartwillacr \
-            --image smartwill-web:${{ github.sha }} --image smartwill-web:latest \
+            --image forwardlegacy-web:${{ github.sha }} --image forwardlegacy-web:latest \
             --build-arg VITE_GOOGLE_CLIENT_ID="${{ vars.VITE_GOOGLE_CLIENT_ID }}" \
             --build-arg VITE_API_BASE_URL="${{ vars.VITE_API_BASE_URL }}" \
             --build-arg VITE_RAZORPAY_KEY_ID="${{ vars.VITE_RAZORPAY_KEY_ID }}" \
@@ -102,10 +102,10 @@ jobs:
           client-id: ${{ vars.AZURE_CLIENT_ID }}
           tenant-id: ${{ vars.AZURE_TENANT_ID }}
           subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
-      - name: Build and push smartwill-mcp
+      - name: Build and push forwardlegacy-mcp
         run: |
           az acr build --registry smartwillacr \
-            --image smartwill-mcp:${{ github.sha }} --image smartwill-mcp:latest \
+            --image forwardlegacy-mcp:${{ github.sha }} --image forwardlegacy-mcp:latest \
             ./mcp
 
   build-chatbot:
@@ -119,8 +119,8 @@ jobs:
           client-id: ${{ vars.AZURE_CLIENT_ID }}
           tenant-id: ${{ vars.AZURE_TENANT_ID }}
           subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
-      - name: Build and push smartwill-chatbot
+      - name: Build and push forwardlegacy-chatbot
         run: |
           az acr build --registry smartwillacr \
-            --image smartwill-chatbot:${{ github.sha }} --image smartwill-chatbot:latest \
+            --image forwardlegacy-chatbot:${{ github.sha }} --image forwardlegacy-chatbot:latest \
             ./chatbot

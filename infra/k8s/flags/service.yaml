@@ -1,17 +1,17 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: smartwill-flags
-  namespace: smartwill-flags
+  name: forwardlegacy-flags
+  namespace: forwardlegacy-flags
 spec:
-  # ClusterIP (not LoadBalancer): only smartwill-web's nginx proxies to this
+  # ClusterIP (not LoadBalancer): only forwardlegacy-web's nginx proxies to this
   # service (see web/nginx.conf.template's /api/flags location, resolved via
   # the FLAGS_UPSTREAM env var set on infra/k8s/web/deployment.yaml) — it's
   # never reached directly from the browser or the public internet. No
   # public IP.
   type: ClusterIP
   selector:
-    app: smartwill-flags
+    app: forwardlegacy-flags
   ports:
     - port: 80
       targetPort: 8020

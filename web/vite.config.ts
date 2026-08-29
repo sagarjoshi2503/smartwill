@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   // Relative base so the same build works both under a GitHub Pages sub-path
-  // (https://<user>.github.io/smartwill/) and at a host's domain root (Vercel).
+  // (https://<user>.github.io/forwardlegacy/) and at a host's domain root (Vercel).
   base: './',
   plugins: [react()],
   // Baked in once at `vite build` time (not per-request), so it identifies

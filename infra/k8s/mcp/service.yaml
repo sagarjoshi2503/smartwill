@@ -1,16 +1,16 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: smartwill-mcp
-  namespace: smartwill-mcp
+  name: forwardlegacy-mcp
+  namespace: forwardlegacy-mcp
 spec:
-  # ClusterIP (not LoadBalancer): smartwill-mcp exposes all 21 tools with no
+  # ClusterIP (not LoadBalancer): forwardlegacy-mcp exposes all 21 tools with no
   # auth of its own beyond whatever token a caller supplies — only
-  # smartwill-chatbot (which enforces the read-only tool whitelist) should
+  # forwardlegacy-chatbot (which enforces the read-only tool whitelist) should
   # ever reach it. No public IP.
   type: ClusterIP
   selector:
-    app: smartwill-mcp
+    app: forwardlegacy-mcp
   ports:
     - port: 8000
       targetPort: 8000

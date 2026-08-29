@@ -15,7 +15,7 @@ from faq_search import faq_search as run_faq_search
 from indexer import sync_once
 from search import hybrid_search
 
-logger = logging.getLogger("smartwill-rag")
+logger = logging.getLogger("forwardlegacy-rag")
 
 _checkpoint: datetime | None = None
 
@@ -51,7 +51,7 @@ async def lifespan(app: FastAPI):
     task.cancel()
 
 
-app = FastAPI(title="smartwill-rag", lifespan=lifespan)
+app = FastAPI(title="forwardlegacy-rag", lifespan=lifespan)
 
 
 class SearchRequest(BaseModel):

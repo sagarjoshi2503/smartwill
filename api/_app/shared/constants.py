@@ -13,7 +13,7 @@ HTTP_TOO_MANY_REQUESTS = 429
 HTTP_SERVER_ERROR = 500
 
 # --- App metadata ---
-APP_TITLE = "SmartWill API"
+APP_TITLE = "ForwardLegacy API"
 APP_VERSION = "1.0.0"
 
 # --- Database ---
@@ -115,7 +115,7 @@ DEFAULT_ADMIN_EMAIL = "admin@forwardlegacy.co.in"
 
 # --- SMS (Twilio) ---
 TWILIO_FROM_NUMBER = "+17154074664"
-OTP_SMS_TMPL = "Your SmartWill OTP is {code}. It expires in 5 minutes."
+OTP_SMS_TMPL = "Your ForwardLegacy OTP is {code}. It expires in 5 minutes."
 # Profile "change mobile number" flow (see client_login/service.py) — reuses
 # OTP_LENGTH/OTP_TTL_SECONDS/OTP_MAX_ATTEMPTS/OTP_COUNTRY_CODE and the phone
 # OTP flow's own error messages (identical meaning, no need for near-duplicate

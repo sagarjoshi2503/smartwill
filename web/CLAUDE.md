@@ -1,4 +1,4 @@
-# web/ — SmartWill frontend (React + Vite + TS)
+# web/ — ForwardLegacy frontend (React + Vite + TS)
 
 ## What this is
 

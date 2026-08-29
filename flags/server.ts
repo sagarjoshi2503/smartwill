@@ -23,5 +23,5 @@ const server = createServer(async (req, res) => {
 });
 
 server.listen(port, "0.0.0.0", () => {
-  console.log(`smartwill-flags listening on :${port}`);
+  console.log(`forwardlegacy-flags listening on :${port}`);
 });

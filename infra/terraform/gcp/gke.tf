@@ -73,7 +73,7 @@ resource "google_container_node_pool" "default" {
 }
 
 # --- Workload Identity binding: lets a k8s ServiceAccount named
-# smartwill-secrets-reader, created in each secret-consuming service's own
+# forwardlegacy-secrets-reader, created in each secret-consuming service's own
 # namespace (infra/k8s/<service>/), impersonate this GCP service account to
 # read Secret Manager. Only the services that actually mount secrets need
 # this — mirrors which of infra/k8s/*/ has a secret-provider-class.yaml
@@ -90,8 +90,8 @@ resource "google_project_iam_member" "secrets_reader_access" {
 }
 
 resource "google_service_account_iam_member" "secrets_reader_workload_identity" {
-  for_each           = toset(["smartwill-api", "smartwill-chatbot", "smartwill-flags", "smartwill-rag"])
+  for_each           = toset(["forwardlegacy-api", "forwardlegacy-chatbot", "forwardlegacy-flags", "forwardlegacy-rag"])
   service_account_id = google_service_account.secrets_reader.name
   role               = "roles/iam.workloadIdentityUser"
-  member             = "serviceAccount:${var.gcp_project_id}.svc.id.goog[${each.value}/smartwill-secrets-reader]"
+  member             = "serviceAccount:${var.gcp_project_id}.svc.id.goog[${each.value}/forwardlegacy-secrets-reader]"
 }

@@ -5,14 +5,14 @@ imports, even where a value happens to match one defined elsewhere."""
 # --- Env var defaults ---
 # Only the server's own listen address gets a default — it's not an
 # environment-specific base URL, just where this process binds locally.
-# API_BASE_URL (the actual base URL of the smartwill-api it calls) has no
+# API_BASE_URL (the actual base URL of the forwardlegacy-api it calls) has no
 # default: it's required, declared per-environment (Vercel service binding,
 # AKS ConfigMap, or .env.local for local dev) — see client.py.
 DEFAULT_MCP_HOST = "0.0.0.0"
 DEFAULT_MCP_PORT = "8000"
 CALL_TIMEOUT_SECONDS = 30.0
 
-ERR_API_BASE_URL_REQUIRED = "API_BASE_URL environment variable is required (base URL of smartwill-api)"
+ERR_API_BASE_URL_REQUIRED = "API_BASE_URL environment variable is required (base URL of forwardlegacy-api)"
 
 # --- Streamable-HTTP mount path (used both for the standalone/AKS run() and
 # the Vercel ASGI app export) ---

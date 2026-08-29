@@ -94,10 +94,10 @@ kubectl apply -f infra/k8s/<service>/
 
 # Force a redeploy after pushing a new :latest image (images are always
 # tagged :latest, so a plain re-apply doesn't trigger a re-pull)
-kubectl rollout restart deployment/smartwill-<service> -n smartwill-<service>
-kubectl rollout status deployment/smartwill-<service> -n smartwill-<service> --timeout=120s
+kubectl rollout restart deployment/forwardlegacy-<service> -n forwardlegacy-<service>
+kubectl rollout status deployment/forwardlegacy-<service> -n forwardlegacy-<service> --timeout=120s
 
 # Build+push an image (az acr build runs the build inside ACR itself — no
 # local Docker daemon or registry login needed)
-az acr build --registry smartwillacr --image smartwill-<service>:latest ./<service>
+az acr build --registry smartwillacr --image forwardlegacy-<service>:latest ./<service>
 ```

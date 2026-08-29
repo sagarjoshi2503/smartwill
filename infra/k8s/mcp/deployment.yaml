@@ -1,8 +1,8 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: smartwill-mcp
-  namespace: smartwill-mcp
+  name: forwardlegacy-mcp
+  namespace: forwardlegacy-mcp
 spec:
   replicas: 1
   # Recreate: the single small cluster node doesn't have spare CPU to run
@@ -11,20 +11,20 @@ spec:
     type: Recreate
   selector:
     matchLabels:
-      app: smartwill-mcp
+      app: forwardlegacy-mcp
   template:
     metadata:
       labels:
-        app: smartwill-mcp
+        app: forwardlegacy-mcp
     spec:
       containers:
-        - name: smartwill-mcp
-          image: smartwillacr.azurecr.io/smartwill-mcp:latest
+        - name: forwardlegacy-mcp
+          image: smartwillacr.azurecr.io/forwardlegacy-mcp:latest
           ports:
             - containerPort: 8000
           envFrom:
             - configMapRef:
-                name: smartwill-mcp-config
+                name: forwardlegacy-mcp-config
           resources:
             requests:
               cpu: 100m

@@ -1,4 +1,4 @@
-"""Thin async client for the smartwill-api FastAPI backend — the MCP-side
+"""Thin async client for the forwardlegacy-api FastAPI backend — the MCP-side
 equivalent of web/src/utils/apiBase.ts's authFetch()."""
 
 import base64

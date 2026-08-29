@@ -1,4 +1,4 @@
-"""Thin async client for the smartwill-rag hybrid-search service — the
+"""Thin async client for the forwardlegacy-rag hybrid-search service — the
 chatbot-side equivalent of mcp_client.py, but a plain HTTP POST instead of
 an MCP session, since rag/ isn't an MCP server (it exposes one search
 endpoint, not a menu of tools)."""

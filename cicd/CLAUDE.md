@@ -37,8 +37,8 @@ both, but trust this file over the README where they conflict.
 been built and pushed **manually**:
 
 ```
-az acr build --registry smartwillacr --image smartwill-<service>:latest ./<service>
-kubectl rollout restart deployment/smartwill-<service> -n smartwill-<service>
+az acr build --registry smartwillacr --image forwardlegacy-<service>:latest ./<service>
+kubectl rollout restart deployment/forwardlegacy-<service> -n forwardlegacy-<service>
 ```
 
 Don't assume a merge to `main` results in a live deployment — verify
@@ -62,7 +62,7 @@ change that's supposed to reach AKS or Vercel.
 2. Add a `build-flags` job to `ci.yml` (mirrors `build-mcp`'s shape — no
    build args needed, matching `flags/Dockerfile`) and a path filter entry
    for `flags/**`.
-3. Add a `Deploy smartwill-flags` step to `cd.yml` (mirrors the existing
+3. Add a `Deploy forwardlegacy-flags` step to `cd.yml` (mirrors the existing
    four, applying `infra/k8s/flags/`).
 4. Reconcile `ci.yml`'s `build-web` step's `--build-arg` list against
    `web/Dockerfile`'s current `ARG` list and the current GitHub repo

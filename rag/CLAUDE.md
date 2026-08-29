@@ -1,4 +1,4 @@
-# rag/ — SmartWill RAG (hybrid search) service
+# rag/ — ForwardLegacy RAG (hybrid search) service
 
 ## What this is
 

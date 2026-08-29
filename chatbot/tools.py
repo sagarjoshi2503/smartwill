@@ -71,7 +71,7 @@ def rag_tool_for_role(role: str | None) -> list[dict]:
 FAQ_TOOL_SCHEMA = {
     "name": TOOL_SEARCH_FAQ,
     "description": (
-        "Hybrid (keyword + semantic) search over SmartWill's published FAQ — "
+        "Hybrid (keyword + semantic) search over ForwardLegacy's published FAQ — "
         "use this for general questions about Wills, Goa succession law, Trusts, "
         "Succession Services, NRI/cross-border succession, or Living Wills, "
         "rather than answering from general knowledge."

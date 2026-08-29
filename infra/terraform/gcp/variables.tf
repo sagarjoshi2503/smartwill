@@ -13,16 +13,16 @@ variable "labels" {
   description = "Labels applied to all resources (GCP's equivalent of tags)."
   type        = map(string)
   default = {
-    project = "smartwill"
+    project = "forwardlegacy"
   }
 }
 
 # --- Artifact Registry ---
 
 variable "artifact_repository_name" {
-  description = "Name of the single Artifact Registry Docker repository (holds both images, distinguished by tag/path, e.g. smartwill-api, smartwill-web — unlike ECR's one-repo-per-image model)."
+  description = "Name of the single Artifact Registry Docker repository (holds both images, distinguished by tag/path, e.g. forwardlegacy-api, forwardlegacy-web — unlike ECR's one-repo-per-image model)."
   type        = string
-  default     = "smartwill"
+  default     = "forwardlegacy"
 }
 
 # --- Networking ---

@@ -1,12 +1,12 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: smartwill-web
-  namespace: smartwill-web
+  name: forwardlegacy-web
+  namespace: forwardlegacy-web
 spec:
   type: LoadBalancer
   selector:
-    app: smartwill-web
+    app: forwardlegacy-web
   ports:
     - port: 80
       targetPort: 5174

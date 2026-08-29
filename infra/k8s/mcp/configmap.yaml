@@ -1,10 +1,10 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: smartwill-mcp-config
-  namespace: smartwill-mcp
+  name: forwardlegacy-mcp-config
+  namespace: forwardlegacy-mcp
 data:
-  # In-cluster DNS to smartwill-api's Service (see infra/k8s/api/service.yaml)
+  # In-cluster DNS to forwardlegacy-api's Service (see infra/k8s/api/service.yaml)
   # — no need to round-trip through the public LoadBalancer IP since both
   # run in the same cluster.
-  API_BASE_URL: "http://smartwill-api.smartwill-api.svc.cluster.local"
+  API_BASE_URL: "http://forwardlegacy-api.forwardlegacy-api.svc.cluster.local"

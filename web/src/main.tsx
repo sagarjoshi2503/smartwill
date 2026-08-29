@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/react';
-import SmartWill from './App';
+import ForwardLegacy from './App';
 import { initAnalytics } from './utils/analytics';
 import './index.css';
 
@@ -18,7 +18,7 @@ const onVercel = import.meta.env.VITE_ENABLE_VERCEL_ANALYTICS === 'true';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <SmartWill />
+    <ForwardLegacy />
     {onVercel && <Analytics />}
     {onVercel && <SpeedInsights />}
   </React.StrictMode>

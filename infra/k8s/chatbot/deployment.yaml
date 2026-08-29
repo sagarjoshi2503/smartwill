@@ -1,8 +1,8 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: smartwill-chatbot
-  namespace: smartwill-chatbot
+  name: forwardlegacy-chatbot
+  namespace: forwardlegacy-chatbot
 spec:
   replicas: 1
   # Recreate: the single small cluster node doesn't have spare CPU to run
@@ -11,25 +11,25 @@ spec:
     type: Recreate
   selector:
     matchLabels:
-      app: smartwill-chatbot
+      app: forwardlegacy-chatbot
   template:
     metadata:
       labels:
-        app: smartwill-chatbot
+        app: forwardlegacy-chatbot
     spec:
       containers:
-        - name: smartwill-chatbot
-          image: smartwillacr.azurecr.io/smartwill-chatbot:latest
+        - name: forwardlegacy-chatbot
+          image: smartwillacr.azurecr.io/forwardlegacy-chatbot:latest
           ports:
             - containerPort: 8010
           envFrom:
             - secretRef:
-                name: smartwill-chatbot-secrets
+                name: forwardlegacy-chatbot-secrets
             - configMapRef:
-                name: smartwill-chatbot-config
+                name: forwardlegacy-chatbot-config
           volumeMounts:
             # Triggers the SecretProviderClass's secretObjects sync into the
-            # smartwill-chatbot-secrets k8s Secret above — same pattern as
+            # forwardlegacy-chatbot-secrets k8s Secret above — same pattern as
             # infra/k8s/api/deployment.yaml.
             - name: secrets-store
               mountPath: /mnt/secrets-store

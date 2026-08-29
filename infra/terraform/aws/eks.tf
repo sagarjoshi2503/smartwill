@@ -61,7 +61,7 @@ resource "aws_iam_role_policy_attachment" "eks_node_cni" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
 }
 
-# Lets nodes pull any of the smartwill-* images (api, web, mcp, chatbot,
+# Lets nodes pull any of the forwardlegacy-* images (api, web, mcp, chatbot,
 # flags, rag) from ECR — the AWS equivalent of the AKS kubelet identity's
 # "AcrPull" role assignment.
 resource "aws_iam_role_policy_attachment" "eks_node_ecr_read" {

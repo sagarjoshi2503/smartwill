@@ -1,4 +1,4 @@
-"""MCP server wrapping the smartwill-api FastAPI backend.
+"""MCP server wrapping the forwardlegacy-api FastAPI backend.
 
 One tool per backend endpoint (see api/_app/features/*/router.py). Tools that
 hit an authenticated endpoint take a `token` argument, forwarded as
@@ -29,14 +29,14 @@ from constants import (
 MCP_HOST = os.environ.get("MCP_HOST", DEFAULT_MCP_HOST)
 MCP_PORT = int(os.environ.get("MCP_PORT", DEFAULT_MCP_PORT))
 
-mcp = MCPServer("smartwill")
+mcp = MCPServer("forwardlegacy")
 
 
 # --- Health ---
 
 @mcp.tool()
 async def health_check() -> dict:
-    """Check whether the smartwill-api backend is up."""
+    """Check whether the forwardlegacy-api backend is up."""
     return await call(METHOD_GET, PATH_HEALTHZ)
 
 

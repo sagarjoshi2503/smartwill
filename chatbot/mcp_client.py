@@ -1,4 +1,4 @@
-"""Thin wrapper around an MCP ClientSession connected to smartwill-mcp
+"""Thin wrapper around an MCP ClientSession connected to forwardlegacy-mcp
 (streamable-HTTP transport, see mcp/server.py)."""
 
 import os
