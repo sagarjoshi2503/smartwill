@@ -276,7 +276,7 @@ export default function AllIndiaWillDocument({will,residualBene,onBack,onDownloa
                 <h1 className="text-center text-lg font-bold uppercase mb-6">Appointment of Executor for this Will</h1>
                 {executor.executorType==="org" ? (
                   <p className="text-justify mb-5">
-                    I appoint Organization / Entity Name: <strong>{executor.orgName||blank}</strong>, with Authorized Representative / Contact Person: <strong>{executor.orgRepName||blank}</strong>, bearing Registration / Tax ID Number: <strong>{executor.orgRegNumber||blank}</strong>, and having Registered Office Address: <strong>{executor.orgAddress||blank}</strong>.
+                    I appoint <strong>{executor.orgName||blank}</strong>, with Authorized Representative / Contact Person: <strong>{executor.orgRepName||blank}</strong>, bearing Registration / Tax ID Number: <strong>{executor.orgRegNumber||blank}</strong>, and having Registered Office Address: <strong>{executor.orgAddress||blank}</strong>.
                   </p>
                 ) : (
                   <p className="text-justify mb-5">

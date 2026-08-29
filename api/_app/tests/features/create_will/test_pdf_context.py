@@ -157,7 +157,8 @@ def test_show_executor_and_guardian_flags():
 
 def test_executor_org_vs_individual_clause():
     org = build_pdf_context(_will(executor={"wantsExecutor": True, "executorType": "org", "orgName": "Acme LLP"}))
-    assert "Organization / Entity Name: Acme LLP" in org["executor_appointment_clause"]
+    assert org["executor_appointment_clause"].startswith("I appoint Acme LLP")
+    assert "Organization / Entity Name" not in org["executor_appointment_clause"]
     assert org["executor_consent_who"] == "the Authorized Representative of the Organization mentioned"
     assert org["executor_label_suffix"] == " / Representative"
 

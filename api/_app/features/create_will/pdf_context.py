@@ -365,7 +365,7 @@ def _residue_clause(entries: list, title: str) -> str:
 def _executor_appointment_clause(executor: dict, title: str) -> str:
     if executor.get("executorType") == "org":
         return (
-            f"I appoint Organization / Entity Name: {v(executor, 'orgName')}, with Authorized Representative / "
+            f"I appoint {v(executor, 'orgName')}, with Authorized Representative / "
             f"Contact Person: {v(executor, 'orgRepName')}, having Registration / Tax ID Number: "
             f"{v(executor, 'orgRegNumber')}, and having Registered Office Address: {v(executor, 'orgAddress')}."
         )
