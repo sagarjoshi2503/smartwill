@@ -175,7 +175,7 @@ def list_testator_wills(db: Database, email: str, settings: Settings) -> dict:
         })
 
     wills.sort(key=lambda w: w[FLD_UPDATED_AT] or "", reverse=True)
-    return {"wills": wills}
+    return {"wills": wills, "willVisibleDays": settings.will_visible_days}
 
 
 def get_will_for_edit(db: Database, will_id: str, email: str) -> dict:

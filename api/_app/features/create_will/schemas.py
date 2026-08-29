@@ -21,6 +21,7 @@ class TestatorWillOut(BaseModel):
 
 class TestatorWillsResponse(BaseModel):
     wills: list[TestatorWillOut]
+    willVisibleDays: int
 
 
 class WillDetailResponse(BaseModel):

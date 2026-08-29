@@ -82,6 +82,10 @@ export const apiPathComplete = (willId: string): string => `/api/will/admin/${wi
 
 // --- Business rules ---
 export const MIN_PASSWORD_LENGTH = 8;
+// Fallback shown only until GET /api/will/my-wills responds — the real
+// value comes from that response's willVisibleDays field (server-side
+// Settings.will_visible_days), so this stays in sync with the backend's
+// actual configured retention even if an admin changes it via env var.
 export const WILL_VISIBLE_DAYS = 30;
 export const OTP_LENGTH = 6;
 export const PHONE_MASK_DIGITS = 5;

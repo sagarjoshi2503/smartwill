@@ -81,7 +81,7 @@ def test_returns_multiple_wills_sorted_most_recent_first(client, fake_db):
 def test_returns_empty_list_when_testator_has_no_wills(client):
     res = client.get(URL, headers=AUTH)
     assert res.status_code == 200
-    assert res.json() == {"wills": []}
+    assert res.json()["wills"] == []
 
 
 # --- negative scenarios ---
@@ -93,7 +93,7 @@ def test_excludes_wills_last_submitted_more_than_30_days_ago(client, fake_db):
     res = client.get(URL, headers=AUTH)
 
     assert res.status_code == 200
-    assert res.json() == {"wills": []}
+    assert res.json()["wills"] == []
 
 
 def test_keeps_a_will_created_long_ago_but_edited_within_30_days(client, fake_db):
@@ -119,7 +119,13 @@ def test_excludes_a_recently_created_will_not_touched_in_30_days(client, fake_db
     res = client.get(URL, headers=AUTH)
 
     assert res.status_code == 200
-    assert res.json() == {"wills": []}
+    assert res.json()["wills"] == []
+
+
+def test_returns_the_configured_will_visible_days(client):
+    res = client.get(URL, headers=AUTH)
+    assert res.status_code == 200
+    assert res.json()["willVisibleDays"] == constants.WILL_VISIBLE_DAYS
 
 
 def test_rejects_missing_auth_token(client):

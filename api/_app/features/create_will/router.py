@@ -38,7 +38,7 @@ async def save(
 
 @router.get(
     "/my-wills", response_model=TestatorWillsResponse, responses=ERROR_RESPONSES,
-    summary="List a testator's own Wills from the last 30 days",
+    summary="List a testator's own recent Wills (see Settings.will_visible_days)",
 )
 async def my_wills(
     db: Database = Depends(get_db), settings: Settings = Depends(get_settings),

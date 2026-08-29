@@ -24,6 +24,7 @@ export default function TestatorWillsView({email,onCreateNew,onEditWill,onViewWi
   onDownloadAnnex: () => void;
 }){
   const [wills,setWills]=useState<TestatorWill[]>([]);
+  const [willVisibleDays,setWillVisibleDays]=useState(WILL_VISIBLE_DAYS);
   const [status,setStatus]=useState<"loading"|"ready"|"error">("loading");
   const [error,setError]=useState("");
   const [busyId,setBusyId]=useState<string|null>(null);
@@ -106,6 +107,7 @@ export default function TestatorWillsView({email,onCreateNew,onEditWill,onViewWi
         if(!res.ok) throw new Error(data?.error || `Could not load your Wills (server returned ${res.status}).`);
         if(cancelled) return;
         setWills(data?.wills || []);
+        if(typeof data?.willVisibleDays === "number") setWillVisibleDays(data.willVisibleDays);
         setStatus("ready");
       } catch (err) {
         if(cancelled) return;
@@ -129,7 +131,7 @@ export default function TestatorWillsView({email,onCreateNew,onEditWill,onViewWi
           </button>
         </div>
         <div className="bg-[#F3F7E7] border border-[#4F9D33]/25 rounded-xl p-3.5 text-xs text-brand-dark flex items-start gap-2 mb-6">
-          <Clock size={13} className="mt-0.5 shrink-0"/>Wills created more than {WILL_VISIBLE_DAYS} days ago will be deleted from the system.
+          <Clock size={13} className="mt-0.5 shrink-0"/>Wills created more than {willVisibleDays} days ago will be deleted from the system.
         </div>
         {actionError&&<p className="text-red-500 text-xs mb-4">{actionError}</p>}
         <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden">
