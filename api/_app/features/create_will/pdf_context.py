@@ -20,6 +20,10 @@ so this must happen once, here, before any composition/concatenation.
 import re
 from xml.sax.saxutils import escape as _xml_escape
 
+from _app.shared.constants import (
+    FLD_ALL_INDIA_ASSETS, FLD_EXECUTOR, FLD_GUARDIAN, FLD_SIGN_DAY, FLD_SIGN_MONTH, FLD_SIGN_YEAR, FLD_TESTATOR,
+    FLD_WITNESSES,
+)
 from _app.features.create_will.section_titles import (
     ASSET_LABEL_COMMERCIAL_PROPERTY, ASSET_LABEL_HOUSE_FLAT, ASSET_LABEL_INTELLECTUAL_PROPERTY,
     ASSET_LABEL_JEWELLERY, ASSET_LABEL_LAND_PLOT, ASSET_LABEL_SOCIAL_MEDIA_DIGITAL, ASSET_LABEL_VEHICLE,
@@ -360,18 +364,18 @@ def _guardian_appointment_clause(guardian: dict, title: str) -> str:
 
 
 def build_pdf_context(will: dict) -> dict:
-    testator = will.get("testator") or {}
-    executor = will.get("executor") or {}
-    guardian = will.get("guardian") or {}
-    all_india_assets = will.get("allIndiaAssets") or {}
+    testator = will.get(FLD_TESTATOR) or {}
+    executor = will.get(FLD_EXECUTOR) or {}
+    guardian = will.get(FLD_GUARDIAN) or {}
+    all_india_assets = will.get(FLD_ALL_INDIA_ASSETS) or {}
     all_india_residue = _filled_residue(will.get("allIndiaResidue"))
-    witnesses = will.get("witnesses") or []
+    witnesses = will.get(FLD_WITNESSES) or []
     beneficiaries = will.get("beneficiaries") or []
 
-    if testator.get("signDay") and testator.get("signMonth") and testator.get("signYear"):
+    if testator.get(FLD_SIGN_DAY) and testator.get(FLD_SIGN_MONTH) and testator.get(FLD_SIGN_YEAR):
         execution_date_str = (
-            f"{ordinal_in_words(testator['signDay'])} day of {esc(testator['signMonth'])} "
-            f"of the year {year_in_words(testator['signYear'])}"
+            f"{ordinal_in_words(testator[FLD_SIGN_DAY])} day of {esc(testator[FLD_SIGN_MONTH])} "
+            f"of the year {year_in_words(testator[FLD_SIGN_YEAR])}"
         )
     else:
         execution_date_str = "____________________"

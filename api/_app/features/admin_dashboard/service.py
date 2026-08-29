@@ -6,6 +6,7 @@ from pymongo.database import Database
 from _app.core.config import Settings
 from _app.core.exceptions import AppError
 from _app.features.admin_dashboard import repository
+from _app.features.create_will.repository import delete_will, find_will_by_id, insert_admin_will, upsert_will
 from _app.shared import email
 from _app.shared.constants import (
     COMMENTS_REQUIRED, DEFAULT_GREETING, FLD_ADMIN_COMMENTS, FLD_ADMIN_EMAIL,
@@ -48,7 +49,7 @@ def save_will_as_admin(db: Database, body: dict, settings: Settings, admin_email
     will_id = (body.get(FLD_WILL_ID) or "").strip()
 
     if will_id:
-        existing = repository.find_will_by_id(db, will_id)
+        existing = find_will_by_id(db, will_id)
         if not existing:
             raise AppError(HTTP_NOT_FOUND, WILL_NOT_FOUND)
         created_at = existing.get(FLD_CREATED_AT, now)
@@ -87,7 +88,7 @@ def save_will_as_admin(db: Database, body: dict, settings: Settings, admin_email
     }
     if status == STATUS_COMPLETED:
         document[FLD_REVIEWER_EMAIL] = admin_email
-    repository.upsert_will(db, will_id, document)
+    upsert_will(db, will_id, document)
 
     if status == STATUS_PENDING_REVIEW:
         _submit_for_admin_review(db, settings, document)
@@ -96,7 +97,7 @@ def save_will_as_admin(db: Database, body: dict, settings: Settings, admin_email
 
 
 def _submit_for_admin_review(db: Database, settings: Settings, document: dict) -> None:
-    repository.insert_admin_will(db, {
+    insert_admin_will(db, {
         FLD_WILL_ID: document[FLD_WILL_ID],
         FLD_ADMIN_EMAIL: settings.admin_review_email,
         FLD_ASSIGNED_AT: datetime.now(timezone.utc),
@@ -143,7 +144,7 @@ def list_admin_wills(db: Database) -> dict:
 
 def get_will_as_admin(db: Database, will_id: str) -> dict:
     # No ownership check — the admin reviewer can open any submitted Will.
-    document = repository.find_will_by_id(db, will_id)
+    document = find_will_by_id(db, will_id)
     if not document:
         raise AppError(HTTP_NOT_FOUND, WILL_NOT_FOUND)
 
@@ -160,7 +161,7 @@ def get_will_as_admin(db: Database, will_id: str) -> dict:
 
 
 def admin_complete_will(db: Database, will_id: str, body: dict, settings: Settings, admin_email: str) -> dict:
-    document = repository.find_will_by_id(db, will_id)
+    document = find_will_by_id(db, will_id)
     if not document:
         raise AppError(HTTP_NOT_FOUND, WILL_NOT_FOUND)
 
@@ -172,7 +173,7 @@ def admin_complete_will(db: Database, will_id: str, body: dict, settings: Settin
         FLD_UPDATED_AT: datetime.now(timezone.utc),
         FLD_REVIEWER_EMAIL: admin_email,
     }
-    repository.upsert_will(db, will_id, document)
+    upsert_will(db, will_id, document)
 
     testator_email = document.get(FLD_TESTATOR_EMAIL)
     testator_name = (
@@ -197,7 +198,7 @@ def admin_send_back_will(db: Database, will_id: str, comments: str, settings: Se
     if not comments:
         raise AppError(HTTP_BAD_REQUEST, COMMENTS_REQUIRED)
 
-    document = repository.find_will_by_id(db, will_id)
+    document = find_will_by_id(db, will_id)
     if not document:
         raise AppError(HTTP_NOT_FOUND, WILL_NOT_FOUND)
 
@@ -207,8 +208,8 @@ def admin_send_back_will(db: Database, will_id: str, comments: str, settings: Se
         FLD_ADMIN_COMMENTS: comments,
         FLD_UPDATED_AT: datetime.now(timezone.utc),
     }
-    repository.upsert_will(db, will_id, document)
-    repository.insert_admin_will(db, {
+    upsert_will(db, will_id, document)
+    insert_admin_will(db, {
         FLD_WILL_ID: will_id,
         FLD_COMMENTS: comments,
         FLD_SENT_BACK_AT: datetime.now(timezone.utc),
@@ -237,9 +238,9 @@ def admin_send_back_will(db: Database, will_id: str, comments: str, settings: Se
 def delete_will_as_admin(db: Database, will_id: str) -> dict:
     # No ownership check — the admin reviewer can delete any submitted Will,
     # unlike the testator-scoped delete in the create_will module.
-    document = repository.find_will_by_id(db, will_id)
+    document = find_will_by_id(db, will_id)
     if not document:
         raise AppError(HTTP_NOT_FOUND, WILL_NOT_FOUND)
 
-    repository.delete_will(db, will_id)
+    delete_will(db, will_id)
     return {FLD_WILL_ID: will_id}

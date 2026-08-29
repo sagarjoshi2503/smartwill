@@ -4,6 +4,7 @@ from pymongo.database import Database
 from _app.core.config import Settings, get_settings
 from _app.core.db import get_db
 from _app.core.jwt_auth import get_current_admin
+from _app.core.request_body import json_body
 from _app.features.admin_dashboard import service
 from _app.features.admin_dashboard.schemas import (
     ClientsResponse, DeleteWillResponse, ErrorResponse, SaveWillResponse, WillDetailResponse,
@@ -30,13 +31,8 @@ async def save_admin(
     request: Request, db: Database = Depends(get_db), settings: Settings = Depends(get_settings),
     admin_email: str = Depends(get_current_admin),
 ):
-    try:
-        body = await request.json()
-    except Exception:
-        body = None
-    if not isinstance(body, dict):
-        body = None
-    return service.save_will_as_admin(db, body or {}, settings, admin_email)
+    body = await json_body(request)
+    return service.save_will_as_admin(db, body, settings, admin_email)
 
 
 @router.get(
@@ -65,12 +61,7 @@ async def complete_will_admin(
     will_id: str, request: Request, db: Database = Depends(get_db), settings: Settings = Depends(get_settings),
     admin_email: str = Depends(get_current_admin),
 ):
-    try:
-        body = await request.json()
-    except Exception:
-        body = {}
-    if not isinstance(body, dict):
-        body = {}
+    body = await json_body(request)
     return service.admin_complete_will(db, will_id, body, settings, admin_email)
 
 
@@ -83,12 +74,7 @@ async def send_back_will_admin(
     will_id: str, request: Request, db: Database = Depends(get_db), settings: Settings = Depends(get_settings),
     admin_email: str = Depends(get_current_admin),
 ):
-    try:
-        body = await request.json()
-    except Exception:
-        body = {}
-    if not isinstance(body, dict):
-        body = {}
+    body = await json_body(request)
     return service.admin_send_back_will(db, will_id, body.get(FLD_COMMENTS) or "", settings)
 
 

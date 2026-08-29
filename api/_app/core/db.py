@@ -10,8 +10,8 @@ from _app.core.config import Settings, get_settings
 from _app.core.exceptions import AppError
 from _app.core.logging import get_logger
 from _app.shared.constants import (
-    FLD_TESTATOR_EMAIL, FLD_UPDATED_AT, FLD_WILL_ID, HTTP_SERVER_ERROR, INDEX_ENSURE_TIMEOUT_MS,
-    MONGODB_NOT_CONFIGURED, WILL_COLLECTION_NAME,
+    FLD_TESTATOR_EMAIL, FLD_UPDATED_AT, FLD_WILL_ID, HTTP_SERVER_ERROR, MONGODB_NOT_CONFIGURED,
+    WILL_COLLECTION_NAME,
 )
 
 logger = get_logger(__name__)
@@ -24,7 +24,7 @@ def _get_client(mongodb_uri: str) -> MongoClient:
 
 
 @lru_cache
-def _ensure_indexes(mongodb_uri: str, db_name: str) -> None:
+def _ensure_indexes(mongodb_uri: str, db_name: str, timeout_ms: int) -> None:
     """Runs at most once per (uri, db_name) per warm process, same caching
     idea as _get_client — even a no-op create_index() call is a network
     round trip to Atlas, so this must not run on every request.
@@ -47,7 +47,7 @@ def _ensure_indexes(mongodb_uri: str, db_name: str) -> None:
     every request behind PyMongo's default ~30s server-selection timeout.
     """
     try:
-        db = MongoClient(mongodb_uri, serverSelectionTimeoutMS=INDEX_ENSURE_TIMEOUT_MS)[db_name]
+        db = MongoClient(mongodb_uri, serverSelectionTimeoutMS=timeout_ms)[db_name]
         db[WILL_COLLECTION_NAME].create_index(FLD_WILL_ID, unique=True)
         db[WILL_COLLECTION_NAME].create_index([(FLD_TESTATOR_EMAIL, 1), (FLD_UPDATED_AT, -1)])
     except PyMongoError:
@@ -73,6 +73,7 @@ def get_db(settings: Settings = Depends(get_settings)) -> Database:
     # simply hasn't landed yet for the very first query or two after a cold
     # start, same as before this existed.
     threading.Thread(
-        target=_ensure_indexes, args=(settings.mongodb_uri, settings.db_name), daemon=True,
+        target=_ensure_indexes, args=(settings.mongodb_uri, settings.db_name, settings.index_ensure_timeout_ms),
+        daemon=True,
     ).start()
     return _get_client(settings.mongodb_uri)[settings.db_name]

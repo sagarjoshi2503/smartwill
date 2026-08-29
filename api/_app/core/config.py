@@ -4,7 +4,10 @@ from typing import Annotated
 from pydantic import BeforeValidator
 from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 
-from _app.shared.constants import DB_NAME, DEFAULT_ADMIN_EMAIL, TWILIO_FROM_NUMBER
+from _app.shared.constants import (
+    ADMIN_LOGIN_LOCKOUT_SECONDS, ADMIN_LOGIN_WINDOW_SECONDS, DB_NAME, DEFAULT_ADMIN_EMAIL, INDEX_ENSURE_TIMEOUT_MS,
+    OTP_RESEND_COOLDOWN_SECONDS, RAZORPAY_TIMEOUT_SEC, TWILIO_FROM_NUMBER,
+)
 
 
 def _split_comma_separated(value: str | list[str]) -> list[str]:
@@ -81,6 +84,22 @@ class Settings(BaseSettings):
     # signatures server-side only — it must never reach the frontend.
     razorpay_key_id: str | None = None
     razorpay_key_secret: str | None = None
+
+    # Outbound-call and index-creation timeouts — tied to each deployment's
+    # network topology (AKS egress path, Atlas region distance) rather than
+    # a business rule, so unlike e.g. OTP_LENGTH these are legitimate to
+    # tune per environment. Defaulted to the values every environment has
+    # used until now, so nothing changes unless an env var overrides them.
+    razorpay_timeout_sec: int = RAZORPAY_TIMEOUT_SEC
+    index_ensure_timeout_ms: int = INDEX_ENSURE_TIMEOUT_MS
+
+    # Security cooldowns/lockouts — correct as fixed values in production,
+    # but an automated test suite or a staging environment exercising these
+    # flows repeatedly can lock itself out with no way to shorten the wait.
+    # Same "safe default, overridable per environment" shape as above.
+    otp_resend_cooldown_seconds: int = OTP_RESEND_COOLDOWN_SECONDS
+    admin_login_window_seconds: int = ADMIN_LOGIN_WINDOW_SECONDS
+    admin_login_lockout_seconds: int = ADMIN_LOGIN_LOCKOUT_SECONDS
 
 
 @lru_cache

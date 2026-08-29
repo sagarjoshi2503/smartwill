@@ -3,6 +3,7 @@ from pymongo.database import Database
 
 from _app.core.config import Settings, get_settings
 from _app.core.db import get_db
+from _app.core.request_body import json_body
 from _app.features.user_signin_gmail import service
 from _app.features.user_signin_gmail.schemas import AuthResponse, ErrorResponse
 from _app.shared.constants import HTTP_BAD_REQUEST, HTTP_SERVER_ERROR, HTTP_UNAUTHORIZED
@@ -21,8 +22,5 @@ ERROR_RESPONSES = {
     summary="Verify a Google Sign-In ID token",
 )
 async def verify_google(request: Request, db: Database = Depends(get_db), settings: Settings = Depends(get_settings)):
-    try:
-        body = await request.json()
-    except Exception:
-        body = {}
+    body = await json_body(request)
     return service.verify_google_signin(db, body, settings)

@@ -105,8 +105,6 @@ SECURITY_HEADER_VALUES = {
 }
 
 # --- Email (Resend) ---
-RESEND_API_URL = "https://api.resend.com/emails"
-EMAIL_TIMEOUT_SEC = 10
 DEFAULT_ADMIN_EMAIL = "admin@forwardlegacy.co.in"
 
 # --- SMS (Twilio) ---
@@ -257,6 +255,9 @@ FLD_AADHAAR_NUMBER = "aadhaarNumber"
 FLD_SPOUSE_AADHAAR_NUMBER = "spouseAadhaarNumber"
 FLD_SPOUSE_PAN = "spousePan"
 FLD_WITNESSES = "witnesses"
+FLD_SIGN_DAY = "signDay"
+FLD_SIGN_MONTH = "signMonth"
+FLD_SIGN_YEAR = "signYear"
 FLD_ALL_INDIA_ASSETS = "allIndiaAssets"
 FLD_ALL_INDIA_RESIDUE = "allIndiaResidue"
 FLD_GOAN_TESTATOR = "goanTestator"
@@ -277,12 +278,31 @@ FLD_CURRENCY = "currency"
 FLD_RECEIPT = "receipt"
 FLD_PAYMENT_STATUS = "paymentStatus"
 FLD_PAYMENT_AMOUNT = "paymentAmount"
+
+# `will` collection projection used by both create_will.repository's
+# list_testator_wills (My Wills) and admin_dashboard.repository's
+# list_admin_wills (Admin Portal) — only the fields either list view actually
+# reads, since the full `will` document holds an entire legal document's
+# worth of nested asset/executor/guardian data that's expensive to pull over
+# the wire for every row just to read one nested name. Was independently
+# duplicated in both files; centralized here since both already import from
+# this module.
+WILL_LIST_PROJECTION = {
+    FLD_WILL_ID: 1, FLD_TESTATOR_EMAIL: 1, FLD_UPDATED_AT: 1, FLD_STATUS: 1, FLD_WILL_TYPE: 1,
+    FLD_CREATED_BY: 1, FLD_PAYMENT_STATUS: 1, FLD_PAYMENT_AMOUNT: 1,
+    f"{FLD_WILL}.{FLD_TESTATOR}.{FLD_FULL_NAME}": 1,
+}
+
 # Razorpay's own field names, passed straight through unchanged (the
 # Checkout success handler in the browser hands back exactly these keys —
 # translating them to camelCase would just be a source of typos).
 FLD_RAZORPAY_ORDER_ID = "razorpay_order_id"
 FLD_RAZORPAY_PAYMENT_ID = "razorpay_payment_id"
 FLD_RAZORPAY_SIGNATURE = "razorpay_signature"
+# Same reasoning as the three above, but for the *response* Razorpay's own
+# order-creation API returns (not the Checkout success payload) — its
+# order id comes back under the bare key "id".
+FLD_RAZORPAY_ORDER_RESPONSE_ID = "id"
 FLD_ORDER_ID = "orderId"
 FLD_CONTACT = "contact"
 FLD_FULL_LEGAL_NAME = "fullLegalName"
@@ -308,7 +328,6 @@ FLD_VALIDITY_MONTHS = "validityMonths"
 FLD_FOUND = "found"
 FLD_CODES = "codes"
 FLD_VOUCHERS = "vouchers"
-FLD_SEARCH = "search"
 FLD_RAZORPAY_ORDER_ID_CAMEL = "razorpayOrderId"
 FLD_PAYMENT_ID = "paymentId"
 

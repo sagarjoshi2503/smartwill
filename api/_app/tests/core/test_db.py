@@ -37,7 +37,7 @@ def test_ensure_indexes_creates_will_id_and_testator_email_indexes(monkeypatch):
     monkeypatch.setattr(db_module, "MongoClient", lambda *a, **k: fake_client)
     _ensure_indexes.cache_clear()
 
-    _ensure_indexes("mongodb://test-ensure-indexes", "smartwill-test")
+    _ensure_indexes("mongodb://test-ensure-indexes", "smartwill-test", constants.INDEX_ENSURE_TIMEOUT_MS)
 
     indexes = fake_client["smartwill-test"]["will"].index_information()
     keys = [spec["key"] for spec in indexes.values()]
@@ -55,8 +55,8 @@ def test_ensure_indexes_runs_only_once_per_uri_and_db_name(monkeypatch):
     monkeypatch.setattr(db_module, "MongoClient", lambda *a, **k: calls.append(1) or fake_client)
     _ensure_indexes.cache_clear()
 
-    _ensure_indexes("mongodb://test-ensure-indexes-once", "smartwill-test")
-    _ensure_indexes("mongodb://test-ensure-indexes-once", "smartwill-test")
+    _ensure_indexes("mongodb://test-ensure-indexes-once", "smartwill-test", constants.INDEX_ENSURE_TIMEOUT_MS)
+    _ensure_indexes("mongodb://test-ensure-indexes-once", "smartwill-test", constants.INDEX_ENSURE_TIMEOUT_MS)
 
     assert len(calls) == 1
     _ensure_indexes.cache_clear()
@@ -69,7 +69,9 @@ def test_ensure_indexes_swallows_pymongo_errors_without_raising(monkeypatch):
     monkeypatch.setattr(db_module, "MongoClient", raise_error)
     _ensure_indexes.cache_clear()
 
-    _ensure_indexes("mongodb://test-ensure-indexes-unreachable", "smartwill-test")  # must not raise
+    _ensure_indexes(  # must not raise
+        "mongodb://test-ensure-indexes-unreachable", "smartwill-test", constants.INDEX_ENSURE_TIMEOUT_MS,
+    )
     _ensure_indexes.cache_clear()
 
 
@@ -84,9 +86,9 @@ def test_get_db_calls_ensure_indexes_in_background_without_blocking(monkeypatch)
     release_ensure = threading.Event()
     done = threading.Event()
 
-    def fake_ensure(uri, name):
+    def fake_ensure(uri, name, timeout_ms):
         release_ensure.wait(timeout=2)
-        calls.append((uri, name))
+        calls.append((uri, name, timeout_ms))
         done.set()
 
     monkeypatch.setattr(db_module, "_ensure_indexes", fake_ensure)
@@ -96,4 +98,4 @@ def test_get_db_calls_ensure_indexes_in_background_without_blocking(monkeypatch)
 
     release_ensure.set()
     assert done.wait(timeout=2)
-    assert calls == [("mongodb://fake", "smartwill-dev")]
+    assert calls == [("mongodb://fake", "smartwill-dev", constants.INDEX_ENSURE_TIMEOUT_MS)]

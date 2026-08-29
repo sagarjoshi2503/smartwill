@@ -20,7 +20,8 @@ from _app.shared.constants import (
     FLD_AMOUNT, FLD_BUYER_EMAIL, FLD_BUYER_NAME, FLD_CODE, FLD_CODES, FLD_CREATED_AT, FLD_CURRENCY,
     FLD_EXPIRES_AT, FLD_FOUND, FLD_MESSAGE, FLD_ORDER_ID, FLD_PAYMENT_ID, FLD_PAYMENT_STATUS, FLD_PLAN_LABEL,
     FLD_QTY,
-    FLD_RAZORPAY_ORDER_ID_CAMEL, FLD_RECEIPT, FLD_RECIPIENT_EMAIL, FLD_RECIPIENT_NAME, FLD_REDEEMED_AT,
+    FLD_RAZORPAY_ORDER_ID_CAMEL, FLD_RAZORPAY_ORDER_RESPONSE_ID, FLD_RECEIPT, FLD_RECIPIENT_EMAIL,
+    FLD_RECIPIENT_NAME, FLD_REDEEMED_AT,
     FLD_REDEEMED_BY_TESTATOR_EMAIL, FLD_REDEEMED_BY_WILL_ID, FLD_SIGNATURE, FLD_STATUS, FLD_TESTATOR_EMAIL,
     FLD_VALIDITY_MONTHS, FLD_VOUCHERS, FLD_WILL_ID, GIFT_VOUCHER_CODE_GENERATION_ATTEMPTS, GIFT_VOUCHER_DAYS_PER_MONTH,
     GIFT_VOUCHER_CODE_GENERATION_FAILED,
@@ -30,7 +31,7 @@ from _app.shared.constants import (
     GIFT_VOUCHER_SUBJECT_TMPL, GIFT_VOUCHER_VALIDITY_MONTHS, GIFT_VOUCHER_WILL_ID_REQUIRED, HTTP_BAD_REQUEST,
     HTTP_FORBIDDEN, HTTP_NOT_FOUND, HTTP_SERVER_ERROR, HTTP_UNAUTHORIZED, RAZORPAY_AUTH_FAILED,
     RAZORPAY_DEFAULT_CURRENCY, RAZORPAY_MIN_AMOUNT_PAISE, RAZORPAY_MISSING_FIELDS, RAZORPAY_NOT_CONFIGURED,
-    RAZORPAY_ORDER_FAILED, RAZORPAY_ORDERS_URL, RAZORPAY_SIGNATURE_INVALID, RAZORPAY_TIMEOUT_SEC, WILL_ACCESS_DENIED,
+    RAZORPAY_ORDER_FAILED, RAZORPAY_ORDERS_URL, RAZORPAY_SIGNATURE_INVALID, WILL_ACCESS_DENIED,
     WILL_NOT_FOUND,
 )
 from _app.shared.enums import PaymentStatus, VoucherStatus
@@ -50,7 +51,7 @@ def _create_razorpay_order(amount: int, currency: str, receipt: str, settings: S
             RAZORPAY_ORDERS_URL,
             auth=HTTPBasicAuth(settings.razorpay_key_id, settings.razorpay_key_secret),
             json={FLD_AMOUNT: amount, FLD_CURRENCY: currency, FLD_RECEIPT: receipt},
-            timeout=RAZORPAY_TIMEOUT_SEC,
+            timeout=settings.razorpay_timeout_sec,
         )
     except requests.RequestException:
         logger.warning("Could not reach Razorpay to create a gift voucher order", exc_info=True)
@@ -79,7 +80,7 @@ def create_order(body: dict, settings: Settings) -> dict:
 
     receipt = str(uuid.uuid4())
     order = _create_razorpay_order(int(amount), RAZORPAY_DEFAULT_CURRENCY, receipt, settings)
-    return {FLD_ORDER_ID: order["id"], FLD_AMOUNT: order[FLD_AMOUNT], FLD_CURRENCY: order[FLD_CURRENCY]}
+    return {FLD_ORDER_ID: order[FLD_RAZORPAY_ORDER_RESPONSE_ID], FLD_AMOUNT: order[FLD_AMOUNT], FLD_CURRENCY: order[FLD_CURRENCY]}
 
 
 def _generate_unique_code(db: Database) -> str:

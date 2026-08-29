@@ -4,6 +4,7 @@ from pymongo.database import Database
 from _app.core.config import Settings, get_settings
 from _app.core.db import get_db
 from _app.core.jwt_auth import get_current_admin, get_current_testator
+from _app.core.request_body import json_body
 from _app.features.gift_voucher import service
 from _app.features.gift_voucher.schemas import (
     AdminGenerateVouchersResponse, AdminListVouchersResponse, CreateVoucherOrderResponse, ErrorResponse,
@@ -19,20 +20,12 @@ ERROR_RESPONSES = {
 }
 
 
-async def _json_body(request: Request) -> dict:
-    try:
-        body = await request.json()
-    except Exception:
-        body = {}
-    return body if isinstance(body, dict) else {}
-
-
 @router.post(
     "/order", response_model=CreateVoucherOrderResponse, responses=ERROR_RESPONSES,
     summary="Create a Razorpay order to buy a Gift a Will voucher (public, unauthenticated)",
 )
 async def create_order(request: Request, settings: Settings = Depends(get_settings)):
-    body = await _json_body(request)
+    body = await json_body(request)
     return service.create_order(body, settings)
 
 
@@ -42,7 +35,7 @@ async def create_order(request: Request, settings: Settings = Depends(get_settin
     summary="Verify a voucher payment and issue the gift code by email (public, unauthenticated)",
 )
 async def purchase(request: Request, db: Database = Depends(get_db), settings: Settings = Depends(get_settings)):
-    body = await _json_body(request)
+    body = await json_body(request)
     return service.purchase(db, body, settings)
 
 
@@ -51,7 +44,7 @@ async def purchase(request: Request, db: Database = Depends(get_db), settings: S
     summary="Look up a voucher code's status (public, unauthenticated) — returns found:false rather than 404",
 )
 async def verify(request: Request, db: Database = Depends(get_db)):
-    body = await _json_body(request)
+    body = await json_body(request)
     return service.verify(db, body)
 
 
@@ -66,7 +59,7 @@ async def verify(request: Request, db: Database = Depends(get_db)):
 async def redeem(
     request: Request, db: Database = Depends(get_db), testator_email: str = Depends(get_current_testator),
 ):
-    body = await _json_body(request)
+    body = await json_body(request)
     return service.redeem(db, body, testator_email)
 
 
@@ -79,7 +72,7 @@ async def admin_generate(
     request: Request, db: Database = Depends(get_db), settings: Settings = Depends(get_settings),
     admin_email: str = Depends(get_current_admin),
 ):
-    body = await _json_body(request)
+    body = await json_body(request)
     return service.admin_generate(db, body, settings)
 
 

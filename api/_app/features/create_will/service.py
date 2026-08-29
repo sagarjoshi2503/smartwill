@@ -12,10 +12,10 @@ from _app.features.create_will.pdf_merge import merge_id_fields
 from _app.shared import email
 from _app.shared.constants import (
     FLD_ADMIN_COMMENTS, FLD_ADMIN_EMAIL, FLD_ASSIGNED_AT, FLD_CREATED_AT, FLD_CREATED_BY, FLD_FULL_LEGAL_NAME,
-    FLD_FULL_NAME, FLD_PAYMENT_AMOUNT, FLD_PAYMENT_STATUS, FLD_STATUS, FLD_TESTATOR, FLD_TESTATOR_EMAIL,
-    FLD_UPDATED_AT, FLD_WILL, FLD_WILL_ID, FLD_WILL_TYPE, HTTP_BAD_REQUEST, HTTP_FORBIDDEN, HTTP_NOT_FOUND,
-    BAD_TESTATOR_EMAIL, BAD_WILL_STATUS, BAD_WILL_TYPE, PDF_UNSUPPORTED_WILL_TYPE, STATUS_COMPLETED,
-    STATUS_DRAFT, STATUS_PENDING_REVIEW, WILL_VISIBLE_DAYS,
+    FLD_FULL_NAME, FLD_PAYMENT_AMOUNT, FLD_PAYMENT_STATUS, FLD_SIGN_DAY, FLD_SIGN_MONTH, FLD_SIGN_YEAR, FLD_STATUS,
+    FLD_TESTATOR, FLD_TESTATOR_EMAIL, FLD_UPDATED_AT, FLD_WILL, FLD_WILL_ID, FLD_WILL_TYPE, HTTP_BAD_REQUEST,
+    HTTP_FORBIDDEN, HTTP_NOT_FOUND, BAD_TESTATOR_EMAIL, BAD_WILL_STATUS, BAD_WILL_TYPE, PDF_UNSUPPORTED_WILL_TYPE,
+    STATUS_COMPLETED, STATUS_DRAFT, STATUS_PENDING_REVIEW, WILL_VISIBLE_DAYS,
     UNKNOWN_NAME, WILL_ACCESS_DENIED, WILL_REQUIRED, WILL_LOCKED, WILL_NOT_FOUND, SUBMIT_SUBJECT_TMPL,
 )
 from _app.shared.feature_flags import is_flag_enabled
@@ -214,9 +214,9 @@ def _with_signing_date_today(will: dict) -> dict:
     today = datetime.now(timezone.utc).date()
     testator = {
         **will[FLD_TESTATOR],
-        "signDay": str(today.day),
-        "signMonth": MONTHS[today.month - 1],
-        "signYear": str(today.year),
+        FLD_SIGN_DAY: str(today.day),
+        FLD_SIGN_MONTH: MONTHS[today.month - 1],
+        FLD_SIGN_YEAR: str(today.year),
     }
     return {**will, FLD_TESTATOR: testator}
 

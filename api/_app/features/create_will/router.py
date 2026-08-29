@@ -4,6 +4,7 @@ from pymongo.database import Database
 from _app.core.config import Settings, get_settings
 from _app.core.db import get_db
 from _app.core.jwt_auth import get_current_testator
+from _app.core.request_body import json_body
 from _app.features.create_will import service
 from _app.features.create_will.schemas import (
     DeleteWillResponse, ErrorResponse, SaveWillResponse, TestatorWillsResponse, WillDetailResponse,
@@ -31,13 +32,8 @@ async def save(
     request: Request, db: Database = Depends(get_db), settings: Settings = Depends(get_settings),
     testator_email: str = Depends(get_current_testator),
 ):
-    try:
-        body = await request.json()
-    except Exception:
-        body = None
-    if not isinstance(body, dict):
-        body = None
-    return service.save_will(db, body or {}, settings, testator_email)
+    body = await json_body(request)
+    return service.save_will(db, body, settings, testator_email)
 
 
 @router.get(
@@ -66,12 +62,8 @@ async def generate_pdf(
     will_id: str, request: Request, db: Database = Depends(get_db),
     testator_email: str = Depends(get_current_testator),
 ):
-    try:
-        body = await request.json()
-    except Exception:
-        body = None
-    id_fields = body.get(FLD_ID_FIELDS) if isinstance(body, dict) else None
-    pdf_bytes = service.generate_will_pdf(db, will_id, id_fields or {}, testator_email)
+    body = await json_body(request)
+    pdf_bytes = service.generate_will_pdf(db, will_id, body.get(FLD_ID_FIELDS) or {}, testator_email)
     return Response(
         content=pdf_bytes, media_type="application/pdf",
         headers={"Content-Disposition": 'inline; filename="Will.pdf"'},

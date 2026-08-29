@@ -4,6 +4,7 @@ from pymongo.database import Database
 from _app.core.config import Settings, get_settings
 from _app.core.db import get_db
 from _app.core.jwt_auth import get_current_testator
+from _app.core.request_body import json_body
 from _app.features.payments import service
 from _app.features.payments.schemas import (
     CreateOrderResponse, ErrorResponse, MarkPaymentFailedResponse, VerifyPaymentResponse,
@@ -27,12 +28,7 @@ async def create_order(
     request: Request, db: Database = Depends(get_db), settings: Settings = Depends(get_settings),
     testator_email: str = Depends(get_current_testator),
 ):
-    try:
-        body = await request.json()
-    except Exception:
-        body = {}
-    if not isinstance(body, dict):
-        body = {}
+    body = await json_body(request)
     return service.create_order(db, body, settings, testator_email)
 
 
@@ -44,12 +40,7 @@ async def verify_payment(
     request: Request, db: Database = Depends(get_db), settings: Settings = Depends(get_settings),
     testator_email: str = Depends(get_current_testator),
 ):
-    try:
-        body = await request.json()
-    except Exception:
-        body = {}
-    if not isinstance(body, dict):
-        body = {}
+    body = await json_body(request)
     return service.verify_payment(db, body, settings, testator_email)
 
 
@@ -60,10 +51,5 @@ async def verify_payment(
 async def mark_payment_failed(
     request: Request, db: Database = Depends(get_db), testator_email: str = Depends(get_current_testator),
 ):
-    try:
-        body = await request.json()
-    except Exception:
-        body = {}
-    if not isinstance(body, dict):
-        body = {}
+    body = await json_body(request)
     return service.mark_payment_failed(db, body, testator_email)

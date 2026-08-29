@@ -8,7 +8,7 @@ from _app.core.jwt_auth import create_access_token
 from _app.core.security import decode_transport_password, verify_password
 from _app.features.admin_signin import repository
 from _app.shared.constants import (
-    ADMIN_LOGIN_LOCKED_OUT, ADMIN_LOGIN_LOCKOUT_SECONDS, ADMIN_LOGIN_MAX_ATTEMPTS, ADMIN_LOGIN_WINDOW_SECONDS,
+    ADMIN_LOGIN_LOCKED_OUT, ADMIN_LOGIN_MAX_ATTEMPTS,
     FLD_EMAIL, FLD_FULL_NAME, FLD_NAME, FLD_PASSWORD, FLD_PWD_HASH, FLD_TOKEN, HTTP_BAD_REQUEST,
     HTTP_TOO_MANY_REQUESTS, HTTP_UNAUTHORIZED, INVALID_EMAIL, BAD_LOGIN_CREDS, PASSWORD_REQUIRED, ROLE_ADMIN,
 )
@@ -33,8 +33,8 @@ def login_admin(db: Database, body: dict, settings: Settings) -> dict:
     user = repository.find_by_email(db, email)
     if not user or not verify_password(password, user[FLD_PWD_HASH]):
         repository.record_failed_login(
-            email, now, window_seconds=ADMIN_LOGIN_WINDOW_SECONDS, max_attempts=ADMIN_LOGIN_MAX_ATTEMPTS,
-            lockout_seconds=ADMIN_LOGIN_LOCKOUT_SECONDS,
+            email, now, window_seconds=settings.admin_login_window_seconds, max_attempts=ADMIN_LOGIN_MAX_ATTEMPTS,
+            lockout_seconds=settings.admin_login_lockout_seconds,
         )
         raise AppError(HTTP_UNAUTHORIZED, BAD_LOGIN_CREDS)
 
