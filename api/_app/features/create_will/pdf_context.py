@@ -265,7 +265,7 @@ def _render_asset_list(
         ben = _find_beneficiary(beneficiaries, item.get("beneficiary"))
         if ben.get("beneficiaryType") == "org":
             lines.append(
-                f"{prefix}{label}: {v(item, 'description')} Bequeathed to: {v(ben, 'orgName')} (Entity Name), "
+                f"{prefix}{label}: {v(item, 'description')} Bequeathed to: {v(ben, 'orgName')}, "
                 f"Authorized Representative: {v(ben, 'orgRepName')}, "
                 f"Registration / Tax ID Number: {v(ben, 'orgRegNumber')}, "
                 f"Registered Office Address: {v(ben, 'orgAddress')}."
@@ -340,7 +340,7 @@ def _residue_clause(entries: list, title: str) -> str:
         suffix = "; " if i < len(entries) - 1 else "."
         if entry.get("beneficiaryType") == "org":
             parts.append(
-                f"{v(entry, 'orgName')} (Entity Name), "
+                f"{v(entry, 'orgName')}, "
                 f"Authorized Representative: {v(entry, 'orgRepName')}, "
                 f"Registration / Tax ID Number: {v(entry, 'orgRegNumber')}, "
                 f"Registered Office Address: {v(entry, 'orgAddress')}{suffix}"

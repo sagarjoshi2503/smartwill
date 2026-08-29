@@ -207,7 +207,7 @@ def test_asset_line_uses_org_block_when_beneficiary_is_an_organization():
     )
     will["allIndiaAssets"]["vehicle"] = [{"description": "Car 1", "beneficiary": "ABC Foundation Trust"}]
     line = build_pdf_context(will)["vehicle_lines"][0]
-    assert "Bequeathed to: ABC Foundation Trust (Entity Name)" in line
+    assert "Bequeathed to: ABC Foundation Trust," in line
     assert "Authorized Representative: Priya Mehta" in line
     assert "Registration / Tax ID Number: REG123" in line
     assert "Registered Office Address: 789 Trust Rd" in line
@@ -249,7 +249,7 @@ def test_residue_clause_uses_org_block_when_beneficiary_is_an_organization():
         }],
     )
     clause = build_pdf_context(will)["residue_clause"]
-    assert "XYZ Charitable Trust (Entity Name)" in clause
+    assert "XYZ Charitable Trust," in clause
     assert "Authorized Representative: Amit Rao" in clause
     assert "Registration / Tax ID Number: REG999" in clause
     assert "Registered Office Address: 12 Charity Lane" in clause
