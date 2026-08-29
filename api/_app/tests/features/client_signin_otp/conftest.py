@@ -1,6 +1,6 @@
 import pytest
 
-from _app.features.user_signin_otp import repository
+from _app.features.client_signin_otp import repository
 
 
 @pytest.fixture(autouse=True)

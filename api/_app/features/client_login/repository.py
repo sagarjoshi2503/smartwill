@@ -62,6 +62,61 @@ def record_login(db: Database, email: str, mobile_number: str | None) -> None:
         raise AppError(HTTP_SERVER_ERROR, DATABASE_UNAVAILABLE)
 
 
+def update_mobile_number(db: Database, email: str, mobile_number: str) -> None:
+    # upsert=True defensively — every authenticated testator should already
+    # have a clientlogin document (record_login runs on every sign-in), but
+    # this must never silently no-op if one somehow doesn't exist yet.
+    now = datetime.now(timezone.utc)
+    try:
+        _collection(db).update_one(
+            {FLD_EMAIL: email},
+            {
+                "$set": {FLD_MOBILE_NUMBER: mobile_number, FLD_UPDATED_AT: now},
+                "$setOnInsert": {FLD_EMAIL: email, FLD_CREATED_AT: now},
+            },
+            upsert=True,
+        )
+    except PyMongoError:
+        raise AppError(HTTP_SERVER_ERROR, DATABASE_UNAVAILABLE)
+
+
+# Profile "change mobile number" OTP store, keyed by the authenticated
+# testator's email (not phone — unlike sign-in, this action is already
+# authenticated, so there's no phone to key off until it's verified). Same
+# in-process-only caveat as client_signin_otp/repository.py's stores, same
+# placeholder-until-Redis note. (new_mobile_number, code, expires_at, failed_attempts)
+_mobile_change_otps: dict[str, tuple[str, str, datetime, int]] = {}
+_mobile_change_last_requested_at: dict[str, datetime] = {}
+
+
+def save_mobile_change_otp(email: str, new_mobile_number: str, code: str, expires_at: datetime, requested_at: datetime) -> None:
+    _mobile_change_otps[email] = (new_mobile_number, code, expires_at, 0)
+    _mobile_change_last_requested_at[email] = requested_at
+
+
+def seconds_since_last_mobile_change_request(email: str, now: datetime) -> float | None:
+    last = _mobile_change_last_requested_at.get(email)
+    return None if last is None else (now - last).total_seconds()
+
+
+def get_mobile_change_otp(email: str) -> tuple[str, str, datetime, int] | None:
+    return _mobile_change_otps.get(email)
+
+
+def record_mobile_change_otp_failed_attempt(email: str) -> int:
+    entry = _mobile_change_otps.get(email)
+    if not entry:
+        return 0
+    new_mobile_number, code, expires_at, attempts = entry
+    attempts += 1
+    _mobile_change_otps[email] = (new_mobile_number, code, expires_at, attempts)
+    return attempts
+
+
+def clear_mobile_change_otp(email: str) -> None:
+    _mobile_change_otps.pop(email, None)
+
+
 def record_logout(db: Database, email: str) -> None:
     """Marks a clientlogin document LoggedOut — a no-op if none exists yet
     (e.g. a token for an email that was somehow never actually recorded);

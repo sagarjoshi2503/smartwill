@@ -52,7 +52,8 @@ src/
       WillDocument.tsx / LiveDocPreview.tsx   Generic path for
                              successiondeed/customwill (no dedicated PDF
                              template exists for these two types)
-    admin-dashboard/, admin-signin/, admin-signup/, user-signin-otp/, chatbot/
+    admin-dashboard/, admin-signin/, admin-signup/, client-signin-otp/,
+    client-profile/, chatbot/
   utils/
     apiBase.ts                  apiUrl()/authFetch() — VITE_API_BASE_URL
     chatbotBase.ts               chatbotUrl() — VITE_CHATBOT_BASE_URL

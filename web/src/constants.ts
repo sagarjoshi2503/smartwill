@@ -55,6 +55,9 @@ export const API_OTP_REQUEST = "/api/auth/otp/request";
 export const API_OTP_VERIFY = "/api/auth/otp/verify";
 export const API_OTP_VERIFY_EMAIL = "/api/auth/otp/verify-email";
 export const API_AUTH_LOGOUT = "/api/auth/logout";
+export const API_CLIENT_PROFILE = "/api/client/profile";
+export const API_CLIENT_PROFILE_MOBILE_REQUEST_OTP = "/api/client/profile/mobile/request-otp";
+export const API_CLIENT_PROFILE_MOBILE_VERIFY_OTP = "/api/client/profile/mobile/verify-otp";
 export const API_CONTACT_SEND = "/api/contact-us/send";
 export const API_CONTACT_INFO = "/api/contact-us/info";
 export const apiPathWill = (willId: string): string => `/api/will/${willId}`;
@@ -153,12 +156,22 @@ export const ERR_VERIFY_EMAIL_OTP = "Could not verify the email code.";
 export const MSG_SENDING_OTP = "Sending OTP…";
 export const MSG_VERIFYING_OTP = "Verifying…";
 
+// --- Profile / change mobile number ---
+export const ERR_LOAD_PROFILE = "Could not load your profile.";
+export const ERR_SEND_MOBILE_OTP = "Could not send the verification code.";
+export const ERR_VERIFY_MOBILE_OTP = "Could not verify the code.";
+export const MSG_MOBILE_NUMBER_UPDATED = "Mobile number updated.";
+export const BTN_CHANGE_MOBILE_NUMBER = "Change Mobile Number";
+export const BTN_SEND_CODE = "Send Code";
+export const BTN_VERIFY_AND_SAVE = "Verify & Save";
+
 // --- App shell / header / wizard bar copy ---
 export const errSendBackTmpl = (status: number): string => `Could not send this Will back (server returned ${status}).`;
 export const ERR_SEND_BACK = "Could not send this Will back.";
 export const errSaveDraftTmpl = (status: number): string => `Could not save the draft (server returned ${status}).`;
 export const ERR_SAVE_DRAFT = "Could not save the draft.";
 export const BTN_LOGOUT = "Logout";
+export const BTN_PROFILE = "Profile";
 export const BTN_ADMIN_PORTAL = "Admin Portal";
 export const BTN_CREATE_YOUR_WILL = "Client Login";
 export const LBL_WILL_DRAFTING = "Will Drafting";

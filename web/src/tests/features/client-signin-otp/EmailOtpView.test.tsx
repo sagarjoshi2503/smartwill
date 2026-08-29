@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import EmailOtpView from "../../../features/user-signin-otp/EmailOtpView";
+import EmailOtpView from "../../../features/client-signin-otp/EmailOtpView";
 import { getAuthToken } from "../../../utils/auth";
 import { ROLE_TESTATOR } from "../../../constants";
 

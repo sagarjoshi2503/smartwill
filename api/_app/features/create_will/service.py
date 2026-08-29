@@ -15,7 +15,7 @@ from _app.shared.constants import (
     FLD_FULL_NAME, FLD_PAYMENT_AMOUNT, FLD_PAYMENT_STATUS, FLD_SIGN_DAY, FLD_SIGN_MONTH, FLD_SIGN_YEAR, FLD_STATUS,
     FLD_TESTATOR, FLD_TESTATOR_EMAIL, FLD_UPDATED_AT, FLD_WILL, FLD_WILL_ID, FLD_WILL_TYPE, HTTP_BAD_REQUEST,
     HTTP_FORBIDDEN, HTTP_NOT_FOUND, BAD_TESTATOR_EMAIL, BAD_WILL_STATUS, BAD_WILL_TYPE, PDF_UNSUPPORTED_WILL_TYPE,
-    STATUS_COMPLETED, STATUS_DRAFT, STATUS_PENDING_REVIEW, WILL_VISIBLE_DAYS,
+    STATUS_COMPLETED, STATUS_DRAFT, STATUS_PENDING_REVIEW,
     UNKNOWN_NAME, WILL_ACCESS_DENIED, WILL_REQUIRED, WILL_LOCKED, WILL_NOT_FOUND, SUBMIT_SUBJECT_TMPL,
 )
 from _app.shared.feature_flags import is_flag_enabled
@@ -153,12 +153,12 @@ def _submit_for_admin_review(db: Database, settings: Settings, document: dict) -
     )
 
 
-def list_testator_wills(db: Database, email: str) -> dict:
+def list_testator_wills(db: Database, email: str, settings: Settings) -> dict:
     email = normalize_email(email)
     if not is_valid_email(email):
         raise AppError(HTTP_BAD_REQUEST, BAD_TESTATOR_EMAIL)
 
-    cutoff = datetime.now(timezone.utc) - timedelta(days=WILL_VISIBLE_DAYS)
+    cutoff = datetime.now(timezone.utc) - timedelta(days=settings.will_visible_days)
     wills = []
     for w in repository.find_wills_by_testator_email_since(db, email, cutoff):
         testator = (w.get(FLD_WILL) or {}).get(FLD_TESTATOR) or {}

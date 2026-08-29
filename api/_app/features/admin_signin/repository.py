@@ -15,7 +15,7 @@ def find_by_email(db: Database, email: str) -> dict | None:
 
 
 # In-process brute-force lockout tracking — same placeholder-until-Redis
-# caveat as user_signin_otp/repository.py's OTP store (doesn't survive a
+# caveat as client_signin_otp/repository.py's OTP store (doesn't survive a
 # restart, doesn't work across multiple instances). Keyed by the already-
 # normalized email; deliberately tracks unknown emails too (not just real
 # accounts), so a lockout response never signals whether the email exists.

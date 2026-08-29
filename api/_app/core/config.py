@@ -6,7 +6,7 @@ from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 
 from _app.shared.constants import (
     ADMIN_LOGIN_LOCKOUT_SECONDS, ADMIN_LOGIN_WINDOW_SECONDS, DB_NAME, DEFAULT_ADMIN_EMAIL, INDEX_ENSURE_TIMEOUT_MS,
-    OTP_RESEND_COOLDOWN_SECONDS, RAZORPAY_TIMEOUT_SEC, TWILIO_FROM_NUMBER,
+    JWT_EXPIRE_MINUTES, OTP_RESEND_COOLDOWN_SECONDS, RAZORPAY_TIMEOUT_SEC, TWILIO_FROM_NUMBER, WILL_VISIBLE_DAYS,
 )
 
 
@@ -31,6 +31,11 @@ class Settings(BaseSettings):
     # _app/core/jwt_auth.py). Must be a long random secret, set only in the
     # server environment — never exposed to the frontend.
     jwt_secret_key: str | None = None
+
+    # Session timeout (minutes) — applies to both admin and testator
+    # sessions alike (create_access_token doesn't vary this by role).
+    # Overridable per environment (e.g. a longer session in local dev).
+    jwt_expire_minutes: int = JWT_EXPIRE_MINUTES
 
     # Lets local dev point at a separate database (e.g. "smartwill-dev") while
     # Vercel keeps using the existing production db, without touching the
@@ -100,6 +105,12 @@ class Settings(BaseSettings):
     otp_resend_cooldown_seconds: int = OTP_RESEND_COOLDOWN_SECONDS
     admin_login_window_seconds: int = ADMIN_LOGIN_WINDOW_SECONDS
     admin_login_lockout_seconds: int = ADMIN_LOGIN_LOCKOUT_SECONDS
+
+    # How many days a testator's Wills stay listed in "My Wills" (see
+    # create_will/service.py's list_testator_wills) — a retention/product
+    # policy, but one an environment might reasonably want to shorten (e.g.
+    # to more easily test the cutoff) without a code deploy.
+    will_visible_days: int = WILL_VISIBLE_DAYS
 
 
 @lru_cache

@@ -16,11 +16,22 @@ def fake_db():
 
 @pytest.fixture
 def configured_settings():
+    # Explicitly blanks every third-party provider credential — without
+    # this, Settings() falls back to whatever a developer's real
+    # .env.local has (pydantic-settings only overrides env-file values for
+    # fields actually passed here), so the unit test suite could silently
+    # place real Resend/SendGrid/Twilio/Razorpay API calls. This isn't
+    # hypothetical: an earlier run without these overrides genuinely hit
+    # Twilio's real API and tripped its daily send-limit error.
     return Settings(
         mongodb_uri="mongodb://fake",
         db_name="smartwill-dev",
         google_client_id="fake-client-id.apps.googleusercontent.com",
         jwt_secret_key="test-secret-key",
+        resend_api_key=None, resend_from_email=None,
+        sendgrid_api_key=None, sendgrid_from_email=None,
+        twilio_account_sid=None, twilio_auth_token=None,
+        razorpay_key_id=None, razorpay_key_secret=None,
     )
 
 

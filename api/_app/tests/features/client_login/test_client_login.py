@@ -2,8 +2,8 @@ from datetime import datetime, timedelta, timezone
 
 import jwt
 
-from _app.features.user_signin_otp import repository as otp_repository
-from _app.features.user_signin_gmail import service as gmail_service
+from _app.features.client_signin_otp import repository as otp_repository
+from _app.features.client_signin_gmail import service as gmail_service
 from _app.shared import constants
 from _app.shared.constants import CLIENTLOGIN_COLLECTION_NAME, JWT_ALGORITHM, JWT_CLAIM_ROLE, JWT_CLAIM_SUB
 

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Phone, ArrowRight } from "lucide-react";
 import BrandMark from "./shared/BrandMark";
-import GoogleSignInButton from "../features/user-signin-gmail/GoogleSignInButton";
+import GoogleSignInButton from "../features/client-signin-gmail/GoogleSignInButton";
 import { apiUrl } from "../utils/apiBase";
 import { setAuthToken, setAuthProfile } from "../utils/auth";
 import { API_GOOGLE, CONTENT_TYPE_JSON, HEADER_CONTENT_TYPE, ROLE_TESTATOR } from "../constants";

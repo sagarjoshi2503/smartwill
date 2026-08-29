@@ -13,9 +13,10 @@ import PartnerView from "./components/PartnerView";
 import SiteFooter from "./components/SiteFooter";
 import ContactUsView from "./components/ContactUsView";
 import AuthChoiceView from "./components/AuthChoiceView";
-import SignupView from "./features/user-signin-otp/SignupView";
-import OtpView from "./features/user-signin-otp/OtpView";
-import EmailOtpView from "./features/user-signin-otp/EmailOtpView";
+import SignupView from "./features/client-signin-otp/SignupView";
+import ProfileView from "./features/client-profile/ProfileView";
+import OtpView from "./features/client-signin-otp/OtpView";
+import EmailOtpView from "./features/client-signin-otp/EmailOtpView";
 import DisclaimerView from "./components/DisclaimerView";
 import WillInstructionsView from "./components/WillInstructionsView";
 import AdminLoginView from "./features/admin-signin/AdminLoginView";
@@ -44,7 +45,7 @@ import {
   OTP_LENGTH, STATUS_DRAFT, STATUS_PENDING_REVIEW, STATUS_COMPLETED,
   SEND_BACK_REDIRECT_MS, DRAFT_RESET_MS, WIZARD_REDIRECT_MS, ANNEX_PDF_URL_REVOKE_MS,
   MSG_VIEW_ONLY, MSG_SAVING, BTN_SAVE_AS_DRAFT, ROLE_ADMIN, ROLE_TESTATOR,
-  errSendBackTmpl, ERR_SEND_BACK, errSaveDraftTmpl, ERR_SAVE_DRAFT, ERR_GENERATE_PDF, BTN_LOGOUT,
+  errSendBackTmpl, ERR_SEND_BACK, errSaveDraftTmpl, ERR_SAVE_DRAFT, ERR_GENERATE_PDF, BTN_LOGOUT, BTN_PROFILE,
   BTN_ADMIN_PORTAL, BTN_CREATE_YOUR_WILL, LBL_WILL_DRAFTING, MSG_DRAFT_SAVED, MSG_DRAFT_FAILED,
   BTN_SEND_BACK_TO_TESTATOR, LBL_SEND_BACK_FOR_CHANGES, PH_SEND_BACK_COMMENTS, MSG_SENDING,
   BTN_SEND_BACK, BTN_CANCEL, BTN_GENERATE_WILL, ERR_GENERATE_WILL_MISSING_IDS, BTN_DISMISS,
@@ -306,7 +307,7 @@ export default function SmartWill() {
   // Phone OTP verified — no session yet. That step only proves phone
   // possession; without also proving the testator controls the email they
   // typed, anyone who owns a phone could type someone ELSE's email and be
-  // logged in as them (see api/_app/features/user_signin_otp/service.py's
+  // logged in as them (see api/_app/features/client_signin_otp/service.py's
   // verify_email_otp for the fix this second step drives). Advance to the
   // email code step rather than finalizing login here.
   const handlePhoneOtpVerified = () => {
@@ -661,12 +662,13 @@ export default function SmartWill() {
                 </>
               ):testatorAuthenticated && !isAdminView(view) ? (
                 <>
-                  <div className="flex items-center gap-2 bg-slate-100 rounded-full px-3 py-1.5 text-sm border border-slate-200 min-w-0">
+                  <button onClick={()=>setView("profile")} title={BTN_PROFILE}
+                    className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 rounded-full px-3 py-1.5 text-sm border border-slate-200 min-w-0 transition-colors">
                     <div className="w-6 h-6 bg-slate-200 rounded-full flex items-center justify-center text-[9px] font-bold text-slate-900 shrink-0">
                       {(signup.name||signup.email).split(" ").slice(0,2).map(n=>n[0]).join("").toUpperCase()}
                     </div>
                     <span className="text-brand text-sm truncate max-w-[140px] sm:max-w-[220px]">{signup.name||signup.email}</span>
-                  </div>
+                  </button>
                   <button onClick={handleTestatorLogout} className="flex items-center gap-1.5 text-slate-600 hover:text-slate-900 text-sm transition-colors"><LogOut size={13}/>{BTN_LOGOUT}</button>
                 </>
               ):(
@@ -691,8 +693,12 @@ export default function SmartWill() {
                 <button onClick={()=>{clearAuthToken(ROLE_ADMIN);setAdminProfile(null);setView("landing");}}
                   className="flex items-center gap-1.5 justify-center text-slate-600 text-sm mt-3 py-2"><LogOut size={13}/>{BTN_LOGOUT}</button>
               ) : testatorAuthenticated ? (
-                <button onClick={handleTestatorLogout}
-                  className="flex items-center gap-1.5 justify-center text-slate-600 text-sm mt-3 py-2"><LogOut size={13}/>{BTN_LOGOUT}</button>
+                <>
+                  <button onClick={()=>setView("profile")}
+                    className="flex items-center gap-1.5 justify-center text-slate-600 text-sm mt-3 py-2">{BTN_PROFILE}</button>
+                  <button onClick={handleTestatorLogout}
+                    className="flex items-center gap-1.5 justify-center text-slate-600 text-sm py-2"><LogOut size={13}/>{BTN_LOGOUT}</button>
+                </>
               ) : (
                 <>
                   <button onClick={()=>setView("authChoice")}
@@ -724,6 +730,7 @@ export default function SmartWill() {
       {view==="willInstructions" && <WillInstructionsView onContinue={()=>setView("disclaimer")} onBack={()=>setView("willTypeSelect")}/>}
       {view==="disclaimer" && <DisclaimerView dchecks={dchecks} setDchecks={setDchecks} willType={willType} onAgree={()=>setView("wizard")} onBack={()=>setView("willInstructions")}/>}
       {view==="myWills" && <TestatorWillsView email={signup.email} onCreateNew={handleCreateNewWill} onEditWill={handleEditWill} onViewWill={handleViewWill} onDownloadAnnex={()=>setView("annexBuilder")}/>}
+      {view==="profile" && testatorAuthenticated && <ProfileView onBack={()=>setView("myWills")}/>}
       {view==="adminLogin" && <AdminLoginView onLogin={(admin)=>{setAdminProfile(admin);setView("admin");}} onBack={()=>setView("landing")} onSignup={()=>setView("adminSignup")} signupEnabled={adminSignupEnabled}/>}
       {view==="adminSignup" && adminSignupEnabled && <AdminSignupView onSignup={(admin)=>{setAdminProfile(admin);setView("admin");}} onBack={()=>setView("adminLogin")} onGoToLogin={()=>setView("adminLogin")}/>}
       {view==="admin" && adminProfile && <AdminPortal admin={adminProfile} onCreateWill={handleAdminCreateWill} onReviewWill={handleAdminReviewWill}/>}

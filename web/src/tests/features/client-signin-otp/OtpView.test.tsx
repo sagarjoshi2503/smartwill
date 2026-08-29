@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import OtpView from "../../../features/user-signin-otp/OtpView";
+import OtpView from "../../../features/client-signin-otp/OtpView";
 import { getAuthToken } from "../../../utils/auth";
 import { ROLE_TESTATOR } from "../../../constants";
 

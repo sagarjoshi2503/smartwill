@@ -45,6 +45,9 @@ STATUS_COMPLETED = "Completed"
 
 # --- Business rules ---
 MIN_PASSWORD_LENGTH = 8
+# Will retention/visibility window for "My Wills" (see
+# create_will/service.py's list_testator_wills) — overridable per
+# environment via Settings.will_visible_days, see core/config.py.
 WILL_VISIBLE_DAYS = 30
 OTP_LENGTH = 6
 OTP_TTL_SECONDS = 300
@@ -63,7 +66,7 @@ OTP_RESEND_COOLDOWN_SECONDS = 60
 # phone possession, never that the testator also controls the email address
 # they typed — without this, any real phone owner could type someone else's
 # email and be issued a valid session token for that email (see
-# user_signin_otp/service.py's verify_email_otp). Same shape as the phone
+# client_signin_otp/service.py's verify_email_otp). Same shape as the phone
 # OTP's own constants above, deliberately kept separate so tuning one
 # (length/TTL/attempts) doesn't silently retune the other.
 EMAIL_OTP_LENGTH = 6
@@ -82,7 +85,10 @@ GIFT_VOUCHER_DAYS_PER_MONTH = 30
 
 # --- JWT auth ---
 JWT_ALGORITHM = "HS256"
-JWT_EXPIRE_MINUTES = 60 * 24
+# Session timeout for both roles (create_access_token doesn't vary this by
+# role) — overridable per environment via Settings.jwt_expire_minutes, see
+# core/config.py.
+JWT_EXPIRE_MINUTES = 15
 ROLE_ADMIN = "admin"
 ROLE_TESTATOR = "testator"
 
@@ -110,6 +116,11 @@ DEFAULT_ADMIN_EMAIL = "admin@forwardlegacy.co.in"
 # --- SMS (Twilio) ---
 TWILIO_FROM_NUMBER = "+17154074664"
 OTP_SMS_TMPL = "Your SmartWill OTP is {code}. It expires in 5 minutes."
+# Profile "change mobile number" flow (see client_login/service.py) — reuses
+# OTP_LENGTH/OTP_TTL_SECONDS/OTP_MAX_ATTEMPTS/OTP_COUNTRY_CODE and the phone
+# OTP flow's own error messages (identical meaning, no need for near-duplicate
+# constants); only the SMS wording itself needs to differ.
+MOBILE_CHANGE_SMS_TMPL = "Your Forward Legacy mobile number change code is {code}. It expires in 5 minutes."
 
 # --- Email OTP (second factor after the phone OTP — see EMAIL_OTP_* above) ---
 EMAIL_OTP_SUBJECT = "Your Forward Legacy verification code"

@@ -7,13 +7,13 @@ from _app.features.admin_signin.router import router as admin_signin_router
 from _app.features.admin_signup.router import router as admin_signup_router
 from _app.features.ai_usage.router import router as ai_usage_router
 from _app.features.chatbot_feedback.router import router as chatbot_feedback_router
-from _app.features.client_login.router import router as client_login_router
+from _app.features.client_login.router import profile_router as client_profile_router, router as client_login_router
+from _app.features.client_signin_gmail.router import router as client_signin_gmail_router
+from _app.features.client_signin_otp.router import router as client_signin_otp_router
 from _app.features.contact_us.router import router as contact_us_router
 from _app.features.create_will.router import router as create_will_router
 from _app.features.gift_voucher.router import router as gift_voucher_router
 from _app.features.payments.router import router as payments_router
-from _app.features.user_signin_gmail.router import router as user_signin_gmail_router
-from _app.features.user_signin_otp.router import router as user_signin_otp_router
 from _app.shared.constants import APP_TITLE, APP_VERSION
 
 app = FastAPI(title=APP_TITLE, version=APP_VERSION)
@@ -24,9 +24,10 @@ register_exception_handlers(app)
 
 app.include_router(admin_signin_router)
 app.include_router(admin_signup_router)
-app.include_router(user_signin_gmail_router)
-app.include_router(user_signin_otp_router)
+app.include_router(client_signin_gmail_router)
+app.include_router(client_signin_otp_router)
 app.include_router(client_login_router)
+app.include_router(client_profile_router)
 # admin_dashboard must be registered before create_will: both mount under
 # /api/will, and create_will's catch-all GET/DELETE "/{will_id}" routes
 # would otherwise shadow admin_dashboard's more specific "/admin-wills" and

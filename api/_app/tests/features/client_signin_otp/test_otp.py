@@ -1,4 +1,4 @@
-from _app.features.user_signin_otp import repository
+from _app.features.client_signin_otp import repository
 from _app.shared import constants
 
 REQUEST_URL = "/api/auth/otp/request"
@@ -128,7 +128,7 @@ def test_request_otp_cooldown_is_scoped_to_one_phone_number(client):
 def test_request_otp_cooldown_does_not_block_a_fresh_request_once_elapsed(client):
     from datetime import timedelta
 
-    from _app.features.user_signin_otp import repository as otp_repository
+    from _app.features.client_signin_otp import repository as otp_repository
 
     first = client.post(REQUEST_URL, json={"phone": "9876543210"})
     assert first.status_code == 200

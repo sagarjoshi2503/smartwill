@@ -40,8 +40,11 @@ async def save(
     "/my-wills", response_model=TestatorWillsResponse, responses=ERROR_RESPONSES,
     summary="List a testator's own Wills from the last 30 days",
 )
-async def my_wills(db: Database = Depends(get_db), testator_email: str = Depends(get_current_testator)):
-    return service.list_testator_wills(db, testator_email)
+async def my_wills(
+    db: Database = Depends(get_db), settings: Settings = Depends(get_settings),
+    testator_email: str = Depends(get_current_testator),
+):
+    return service.list_testator_wills(db, testator_email, settings)
 
 
 @router.get(

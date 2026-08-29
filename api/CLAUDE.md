@@ -36,8 +36,8 @@ _app/
     logging.py                   get_logger
   features/<name>/            One folder per feature (admin_dashboard,
                              admin_signin, admin_signup, create_will,
-                             contact_us, payments, user_signin_gmail,
-                             user_signin_otp, gift_voucher,
+                             contact_us, payments, client_signin_gmail,
+                             client_signin_otp, client_login, gift_voucher,
                              chatbot_feedback, ai_usage — the last two only
                              read collections chatbot/ writes (chatbotresponses,
                              aiusages), via its own independent MONGODB_URI,

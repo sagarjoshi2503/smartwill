@@ -7,7 +7,7 @@ from _app.core.config import Settings, get_settings
 from _app.core.exceptions import AppError
 from _app.shared.constants import (
     BEARER_PREFIX, HEADER_AUTHORIZATION, HTTP_SERVER_ERROR, HTTP_UNAUTHORIZED, INVALID_AUTH_TOKEN,
-    JWT_ALGORITHM, JWT_CLAIM_ROLE, JWT_CLAIM_SUB, JWT_EXPIRE_MINUTES, JWT_NOT_CONFIGURED, MISSING_AUTH_TOKEN,
+    JWT_ALGORITHM, JWT_CLAIM_ROLE, JWT_CLAIM_SUB, JWT_NOT_CONFIGURED, MISSING_AUTH_TOKEN,
     ROLE_ADMIN, ROLE_TESTATOR,
 )
 
@@ -19,7 +19,7 @@ def create_access_token(email: str, role: str, settings: Settings) -> str:
     now = datetime.now(timezone.utc)
     payload = {
         JWT_CLAIM_SUB: email, JWT_CLAIM_ROLE: role, "iat": now,
-        "exp": now + timedelta(minutes=JWT_EXPIRE_MINUTES),
+        "exp": now + timedelta(minutes=settings.jwt_expire_minutes),
     }
     return jwt.encode(payload, settings.jwt_secret_key, algorithm=JWT_ALGORITHM)
 

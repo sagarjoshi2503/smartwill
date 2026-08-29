@@ -11,7 +11,7 @@ import {
 // Second-factor step, shown right after the phone OTP succeeds — proves the
 // testator also controls the email address they typed (the phone OTP alone
 // only proves phone possession) before a session token is ever issued. See
-// api/_app/features/user_signin_otp/service.py's verify_email_otp: the
+// api/_app/features/client_signin_otp/service.py's verify_email_otp: the
 // email in the returned token is always the one captured server-side when
 // the phone OTP was verified, never anything resent from this screen.
 export default function EmailOtpView({emailOtp,handleEmailOtp,emailOtpRefs,phone,email,onNext}:{
