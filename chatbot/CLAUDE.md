@@ -3,8 +3,9 @@
 ## What this is
 
 FastAPI service running a manual Claude tool-use loop (Anthropic Messages
-API, model `claude-opus-5`) against `mcp/`'s 21 tools, gated by a
-role-based read-only whitelist. Powers the "ForwardLegacy Assistant" chat
+API, model `claude-opus-5`) against `mcp/`'s 32 tools, gated by a
+role-based read-only whitelist (see "The security pattern" below — only
+8 of those 32 tools are ever actually offered to Claude). Powers the "ForwardLegacy Assistant" chat
 widget in `web/`. Deployed three ways (Vercel Service, AKS, local Docker) —
 same source, env-var-only differences.
 

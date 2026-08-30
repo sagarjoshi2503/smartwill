@@ -63,6 +63,33 @@ SIMPLE_TOOLS = [
         server.admin_send_back_will, {"token": "tkn", "will_id": "w1", "comments": "fix this"}, "POST",
         "/api/will/admin/w1/send-back", "tkn", {"comments": "fix this"},
     ),
+    (
+        server.verify_email_otp, {"phone": "9876543210", "code": "123456"}, "POST", "/api/auth/otp/verify-email",
+        None, {"phone": "9876543210", "code": "123456"},
+    ),
+    (server.logout, {"token": "tkn"}, "POST", "/api/auth/logout", "tkn", None),
+    (server.get_profile, {"token": "tkn"}, "GET", "/api/client/profile", "tkn", None),
+    (
+        server.request_mobile_change, {"token": "tkn", "mobile_number": "9876543210"}, "POST",
+        "/api/client/profile/mobile/request-otp", "tkn", {"mobileNumber": "9876543210"},
+    ),
+    (
+        server.verify_mobile_change, {"token": "tkn", "code": "123456"}, "POST",
+        "/api/client/profile/mobile/verify-otp", "tkn", {"code": "123456"},
+    ),
+    (
+        server.create_voucher_order, {"amount": 499900, "plan_label": "All India Will"}, "POST",
+        "/api/gift-voucher/order", None, {"amount": 499900, "planLabel": "All India Will"},
+    ),
+    (
+        server.purchase_voucher, {"razorpay_order_id": "order_1", "payment_id": "pay_1", "signature": "sig"},
+        "POST", "/api/gift-voucher/purchase", None,
+        {"razorpayOrderId": "order_1", "paymentId": "pay_1", "signature": "sig"},
+    ),
+    (
+        server.redeem_voucher, {"token": "tkn", "code": "GIFT-1234", "will_id": "w1"}, "POST",
+        "/api/gift-voucher/redeem", "tkn", {"code": "GIFT-1234", "willId": "w1"},
+    ),
 ]
 
 
@@ -184,6 +211,32 @@ def test_admin_list_vouchers_with_search_appends_query_string(fake_call):
 
     assert fake_call.last["path"] == "/api/gift-voucher/admin/list?search=jane%40example.com"
     assert fake_call.last["token"] == "tkn"
+
+
+def test_admin_generate_vouchers_defaults_qty_to_one_and_omits_optional_fields(fake_call):
+    run(server.admin_generate_vouchers(token="tkn", plan_label="All India Will", amount=499900))
+
+    assert fake_call.last["method"] == "POST"
+    assert fake_call.last["path"] == "/api/gift-voucher/admin/generate"
+    assert fake_call.last["token"] == "tkn"
+    assert fake_call.last["json_body"] == {
+        "planLabel": "All India Will", "amount": 499900, "qty": 1, "validityMonths": None,
+        "buyerName": None, "buyerEmail": None, "recipientName": None, "recipientEmail": None, "message": None,
+    }
+
+
+def test_admin_generate_vouchers_sends_optional_fields_when_given(fake_call):
+    run(server.admin_generate_vouchers(
+        token="tkn", plan_label="Goan Will", amount=599900, qty=3, validity_months=6,
+        buyer_name="Jane", buyer_email="jane@example.com", recipient_name="Bob",
+        recipient_email="bob@example.com", message="Happy birthday!",
+    ))
+
+    assert fake_call.last["json_body"] == {
+        "planLabel": "Goan Will", "amount": 599900, "qty": 3, "validityMonths": 6,
+        "buyerName": "Jane", "buyerEmail": "jane@example.com", "recipientName": "Bob",
+        "recipientEmail": "bob@example.com", "message": "Happy birthday!",
+    }
 
 
 # --- error propagation: an ApiError raised by client.call surfaces to the caller ---
