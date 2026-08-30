@@ -57,7 +57,15 @@ _app/
                              own env var equivalent — falls back to
                              `default` anywhere else, never raises
     email.py, sms.py, validators.py, enums.py
-  tests/                      pytest, mirrors the features/ tree
+  tests/                      pytest, mirrors the features/ tree — except
+                             tests/pdf_regression/, which isn't feature
+                             tests at all: it compares a real generated Will
+                             PDF (pasted by hand into
+                             Data/NON GOAN-All India/TestDataFiles/) against
+                             the reference legal template in that folder's
+                             Template/ subfolder, to catch wording drift a
+                             data-level unit test can't see. Skips itself
+                             when that folder is empty.
 .env.example / .env.local     Local dev config (.env.local is gitignored,
                              read automatically by pydantic-settings)
 ```
