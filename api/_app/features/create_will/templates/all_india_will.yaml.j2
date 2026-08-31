@@ -47,7 +47,6 @@
 - type: paragraph
   text: {{ "I bequeath all my financial assets including Bank Accounts, Bank Locker, Fixed Deposits (FDs), Recurring Deposits (RDs), Public Provident Fund (PPF), Life Insurance, Stocks, Mutual Funds, Cryptocurrency (Crypto), Digital Wallets, National Pension System (NPS), Bonds, Alternative Investment Fund (AIF), Specialized Investment Fund (SIF), and Portfolio Management Services (PMS) entirely to the nominees registered in those financial instruments." | yamlstr }}
 {% if has_immovable or has_vehicle or has_personal or has_social_digital or has_intellectual_property %}
-- type: pagebreak
 {% if has_immovable %}
 - type: subheading
   text: {{ (letter_immovable ~ ". " ~ section_title_immovable ~ ":") | yamlstr }}
