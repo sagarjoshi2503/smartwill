@@ -115,7 +115,7 @@ def test_chat_anonymous_returns_text_reply_without_calling_a_tool(monkeypatch, c
     res = client.post("/chat", json={"messages": [{"role": "user", "content": "What is ForwardLegacy?"}]})
 
     assert res.status_code == 200
-    assert res.json() == {"reply": "ForwardLegacy helps you draft a Will.", "unavailable": False, "retrieval_mode": "mcp"}
+    assert res.json() == {"reply": "ForwardLegacy helps you draft a Will.", "unavailable": False, "retrieval_mode": "mcp", "rateLimited": False}
     assert session.call_tool_calls == []
 
 
@@ -148,7 +148,7 @@ def test_chat_injects_real_token_into_whitelisted_tool_call(monkeypatch, client)
     )
 
     assert res.status_code == 200
-    assert res.json() == {"reply": "You have no Wills yet.", "unavailable": False, "retrieval_mode": "mcp"}
+    assert res.json() == {"reply": "You have no Wills yet.", "unavailable": False, "retrieval_mode": "mcp", "rateLimited": False}
     assert session.call_tool_calls == [{"name": "list_my_wills", "args": {"token": "real-jwt"}}]
 
 
@@ -197,7 +197,7 @@ def test_chat_search_wills_calls_rag_client_not_mcp_session(monkeypatch, client)
     )
 
     assert res.status_code == 200
-    assert res.json() == {"reply": "Found it.", "unavailable": False, "retrieval_mode": "rag"}
+    assert res.json() == {"reply": "Found it.", "unavailable": False, "retrieval_mode": "rag", "rateLimited": False}
     assert session.call_tool_calls == []  # never went through the MCP session
 
 
@@ -273,7 +273,7 @@ def test_chat_search_faq_calls_rag_client_without_token(monkeypatch, client):
     res = client.post("/chat", json={"messages": [{"role": "user", "content": "how do I revoke a will"}]})
 
     assert res.status_code == 200
-    assert res.json() == {"reply": "Here's how.", "unavailable": False, "retrieval_mode": "mcp"}
+    assert res.json() == {"reply": "Here's how.", "unavailable": False, "retrieval_mode": "mcp", "rateLimited": False}
     assert session.call_tool_calls == []  # never went through the MCP session
 
 
@@ -447,7 +447,7 @@ def test_chat_returns_unavailable_when_mcp_session_fails_to_open(monkeypatch, cl
     res = client.post("/chat", json={"messages": [{"role": "user", "content": "hi"}]})
 
     assert res.status_code == 200
-    assert res.json() == {"reply": main.UNAVAILABLE_REPLY, "unavailable": True, "retrieval_mode": "mcp"}
+    assert res.json() == {"reply": main.UNAVAILABLE_REPLY, "unavailable": True, "retrieval_mode": "mcp", "rateLimited": False}
 
 
 def test_chat_returns_unavailable_when_claude_call_raises(monkeypatch, client):
@@ -477,7 +477,7 @@ def test_chat_handles_refusal_stop_reason(monkeypatch, client):
     res = client.post("/chat", json={"messages": [{"role": "user", "content": "x"}]})
 
     assert res.status_code == 200
-    assert res.json() == {"reply": "I'm not able to help with that.", "unavailable": False, "retrieval_mode": "mcp"}
+    assert res.json() == {"reply": "I'm not able to help with that.", "unavailable": False, "retrieval_mode": "mcp", "rateLimited": False}
 
 
 # --- runaway tool-use loop is bounded ---
@@ -645,4 +645,141 @@ def test_chat_logging_failure_does_not_break_chat_response(monkeypatch, client):
     res = client.post("/chat", json={"messages": [{"role": "user", "content": "x"}], "threadId": "t1"})
 
     assert res.status_code == 200
+    assert res.json()["reply"] == "hi"
+
+
+def test_chat_logs_caller_ip_when_email_is_blank(monkeypatch, client):
+    session = FakeSession()
+    patch_session(monkeypatch, session)
+    calls = _patch_log_ai_usage(monkeypatch)
+
+    async def fake_get_flag_enabled(key, *, default):
+        return True
+
+    monkeypatch.setattr(main, "get_flag_enabled", fake_get_flag_enabled)
+    fake_messages = FakeMessagesApi([FakeMessage("end_turn", [FakeTextBlock("hi")])])
+    monkeypatch.setattr(main.client, "messages", fake_messages)
+
+    res = client.post(
+        "/chat", json={"messages": [{"role": "user", "content": "x"}], "threadId": "t1"},
+        headers={"X-Forwarded-For": "203.0.113.5, 10.0.0.1"},
+    )
+
+    assert res.status_code == 200
+    assert len(calls) == 1
+    # The first entry (the originating client), not the proxy hop after it.
+    assert calls[0]["email"] == "203.0.113.5"
+
+
+# --- Daily rate limiting (POST /chat) — independent of "log-ai-usage" ---
+
+def _patch_rate_limit(monkeypatch, *, check_result=None):
+    check_calls = []
+    record_calls = []
+
+    def fake_check_limit(db, email, thread_id):
+        check_calls.append((email, thread_id))
+        return check_result
+
+    def fake_record_usage(db, email, thread_id, tokens, cost):
+        record_calls.append({"email": email, "thread_id": thread_id, "tokens": tokens, "cost": cost})
+
+    monkeypatch.setattr(main.rate_limit, "check_limit", fake_check_limit)
+    monkeypatch.setattr(main.rate_limit, "record_usage", fake_record_usage)
+    monkeypatch.setattr(main, "get_db", lambda: "fake-db")
+    return check_calls, record_calls
+
+
+def test_chat_refuses_without_calling_claude_when_over_the_daily_limit(monkeypatch, client):
+    session = FakeSession()
+    patch_session(monkeypatch, session)
+    check_calls, record_calls = _patch_rate_limit(monkeypatch, check_result="daily cost limit reached ($5)")
+    fake_messages = FakeMessagesApi([FakeMessage("end_turn", [FakeTextBlock("should never be seen")])])
+    monkeypatch.setattr(main.client, "messages", fake_messages)
+
+    res = client.post(
+        "/chat", json={"messages": [{"role": "user", "content": "x"}], "email": "a@b.com", "threadId": "t1"},
+    )
+
+    assert res.status_code == 200
+    body = res.json()
+    assert body["rateLimited"] is True
+    assert body["reply"] == main.RATE_LIMIT_REPLY
+    assert check_calls == [("a@b.com", "t1")]
+    # The whole point: Claude is never actually called once a cap is hit.
+    assert fake_messages.calls == []
+    assert record_calls == []
+
+
+def test_chat_records_daily_usage_for_a_signed_in_user_after_a_normal_reply(monkeypatch, client):
+    session = FakeSession()
+    patch_session(monkeypatch, session)
+    check_calls, record_calls = _patch_rate_limit(monkeypatch)
+    fake_messages = FakeMessagesApi([FakeMessage("end_turn", [FakeTextBlock("hi")], input_tokens=42, output_tokens=8)])
+    monkeypatch.setattr(main.client, "messages", fake_messages)
+
+    res = client.post(
+        "/chat", json={"messages": [{"role": "user", "content": "x"}], "email": "a@b.com", "threadId": "t1"},
+    )
+
+    assert res.status_code == 200
+    assert res.json()["rateLimited"] is False
+    assert check_calls == [("a@b.com", "t1")]
+    assert len(record_calls) == 1
+    assert record_calls[0]["email"] == "a@b.com"
+    assert record_calls[0]["thread_id"] == "t1"
+    assert record_calls[0]["tokens"] == 50  # input + output
+    assert record_calls[0]["cost"] > 0
+
+
+def test_chat_skips_the_daily_limit_entirely_for_anonymous_users(monkeypatch, client):
+    session = FakeSession()
+    patch_session(monkeypatch, session)
+    check_calls, record_calls = _patch_rate_limit(monkeypatch)
+    fake_messages = FakeMessagesApi([FakeMessage("end_turn", [FakeTextBlock("hi")])])
+    monkeypatch.setattr(main.client, "messages", fake_messages)
+
+    res = client.post("/chat", json={"messages": [{"role": "user", "content": "x"}], "threadId": "t1"})
+
+    assert res.status_code == 200
+    assert res.json()["rateLimited"] is False
+    assert check_calls == []
+    assert record_calls == []
+
+
+def test_chat_skips_the_daily_limit_when_thread_id_missing(monkeypatch, client):
+    session = FakeSession()
+    patch_session(monkeypatch, session)
+    check_calls, record_calls = _patch_rate_limit(monkeypatch)
+    fake_messages = FakeMessagesApi([FakeMessage("end_turn", [FakeTextBlock("hi")])])
+    monkeypatch.setattr(main.client, "messages", fake_messages)
+
+    res = client.post("/chat", json={"messages": [{"role": "user", "content": "x"}], "email": "a@b.com"})
+
+    assert res.status_code == 200
+    assert check_calls == []
+    assert record_calls == []
+
+
+def test_chat_allows_the_request_when_the_limit_check_itself_fails(monkeypatch, client):
+    # Fail-open, same philosophy as every other flag/logging call in this
+    # service — an internal error checking the quota must never itself
+    # block a legitimate user.
+    session = FakeSession()
+    patch_session(monkeypatch, session)
+
+    def raising_check_limit(db, email, thread_id):
+        raise ConnectionError("mongo unreachable")
+
+    monkeypatch.setattr(main.rate_limit, "check_limit", raising_check_limit)
+    monkeypatch.setattr(main, "get_db", lambda: "fake-db")
+    fake_messages = FakeMessagesApi([FakeMessage("end_turn", [FakeTextBlock("hi")])])
+    monkeypatch.setattr(main.client, "messages", fake_messages)
+
+    res = client.post(
+        "/chat", json={"messages": [{"role": "user", "content": "x"}], "email": "a@b.com", "threadId": "t1"},
+    )
+
+    assert res.status_code == 200
+    assert res.json()["rateLimited"] is False
     assert res.json()["reply"] == "hi"

@@ -18,7 +18,7 @@ interface AiUsageItem {
 }
 
 const CSV_COLUMNS: { key: keyof AiUsageItem; label: string; format?: (v: AiUsageItem[keyof AiUsageItem]) => string }[] = [
-  { key: "emailid", label: "Email" },
+  { key: "emailid", label: "Email / IP" },
   { key: "threadid", label: "Thread ID" },
   { key: "role", label: "Role" },
   { key: "modelname", label: "Model" },
@@ -104,7 +104,7 @@ export default function AiUsageAdminTab(){
           <div className="overflow-x-auto">
             <table className="w-full text-xs">
               <thead><tr className="border-b border-slate-200">
-                {["Email","Thread ID","Role","Model","Input Tokens","Output Tokens","Requests","Cost (USD)","Created (IST)","Updated (IST)"].map(h=>(
+                {["Email / IP","Thread ID","Role","Model","Input Tokens","Output Tokens","Requests","Cost (USD)","Created (IST)","Updated (IST)"].map(h=>(
                   <th key={h} className="text-left px-2 py-2 font-bold text-slate-400 uppercase tracking-wide whitespace-nowrap">{h}</th>
                 ))}
               </tr></thead>

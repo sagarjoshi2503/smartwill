@@ -367,6 +367,33 @@ FLD_UPDATED_DATE = "updateddate"
 FLD_ROLE = "role"
 FLD_AI_USAGE = "aiUsage"
 
+# --- ratelimits collection — one singleton document holding the chatbot's
+# admin-configurable daily usage caps (threads/cost/tokens per day). This
+# service owns writes (Admin Portal's Rate Limits tab); chatbot/'s own
+# rate_limit.py reads the same document via its own independent
+# MONGODB_URI, same cross-service-via-shared-Mongo pattern already used for
+# aiusages/chatbotresponses above. Seeded for a fresh environment by
+# database/migrations/0001_seed_chatbot_rate_limits.py — see database/CLAUDE.md.
+RATE_LIMITS_COLLECTION_NAME = "ratelimits"
+RATE_LIMITS_DOC_ID = "chatbot"
+FLD_MAX_THREADS_PER_DAY = "maxThreadsPerDay"
+FLD_MAX_COST_USD_PER_DAY = "maxCostUsdPerDay"
+FLD_MAX_TOKENS_PER_DAY = "maxTokensPerDay"
+FLD_UPDATED_BY = "updatedBy"
+RATE_LIMITS_MIN_THREADS_PER_DAY = 1
+RATE_LIMITS_MIN_COST_USD_PER_DAY = 0.01
+RATE_LIMITS_MIN_TOKENS_PER_DAY = 1
+RATE_LIMITS_INVALID_THREADS = f"maxThreadsPerDay must be an integer >= {RATE_LIMITS_MIN_THREADS_PER_DAY}."
+RATE_LIMITS_INVALID_COST = f"maxCostUsdPerDay must be a number >= {RATE_LIMITS_MIN_COST_USD_PER_DAY}."
+RATE_LIMITS_INVALID_TOKENS = f"maxTokensPerDay must be an integer >= {RATE_LIMITS_MIN_TOKENS_PER_DAY}."
+# What GET returns before any admin has ever saved a value — matches
+# chatbot/constants.py's DEFAULT_MAX_* fallback exactly, so the Admin
+# Portal's form shows the same numbers the assistant is actually enforcing
+# in the meantime.
+RATE_LIMITS_DEFAULT_THREADS_PER_DAY = 100
+RATE_LIMITS_DEFAULT_COST_USD_PER_DAY = 5.0
+RATE_LIMITS_DEFAULT_TOKENS_PER_DAY = 50_000
+
 # --- HTTP headers ---
 HEADER_AUTHORIZATION = "Authorization"
 BEARER_PREFIX = "Bearer "

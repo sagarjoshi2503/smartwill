@@ -5,25 +5,41 @@ import os
 from datetime import datetime, timezone
 
 import anthropic
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 import rag_client
-from ai_usage import log_ai_usage
+import rate_limit
+from ai_usage import cost_usd, log_ai_usage
 from constants import (
     CORS_ALLOW_HEADERS, CORS_ALLOW_METHODS, DEFAULT_HOST, DEFAULT_PORT, DEFAULT_RETRIEVAL_MODE,
     DEFAULT_SEARCH_LIMIT, ENV_CORS_ALLOW_ORIGINS, ERR_CORS_ALLOW_ORIGINS_REQUIRED, ERR_QUESTION_AND_ANSWER_REQUIRED,
     ERR_REASON_REQUIRED, ERR_REASON_TOO_LONG, FEEDBACK_COLLECTION_NAME, FLAG_LOG_AI_USAGE, FLAG_USE_RAG_OR_MCP,
     FLD_ANSWER, FLD_EMAIL, FLD_LIMIT, FLD_NOT_LIKED_REASON, FLD_QUERY, FLD_QUESTION, FLD_RESPONSE_DATETIME,
-    FLD_TOKEN, INCOMPLETE_REPLY, MAX_LEN_NOT_LIKED_REASON, MAX_TOKENS, MAX_TOOL_ITERATIONS, MODEL, MSG_ROLE_ASSISTANT,
-    MSG_ROLE_USER, REFUSAL_REPLY, RETRIEVAL_MODE_RAG, STOP_REASON_REFUSAL, STOP_REASON_TOOL_USE, SYSTEM_PROMPT,
-    TOOL_SEARCH_FAQ, TOOL_SEARCH_WILLS, UNAVAILABLE_REPLY, err_tool_not_available, err_tool_result,
+    FLD_TOKEN, INCOMPLETE_REPLY, MAX_TOKENS, MAX_LEN_NOT_LIKED_REASON, MAX_TOOL_ITERATIONS, MODEL,
+    MSG_ROLE_ASSISTANT, MSG_ROLE_USER, RATE_LIMIT_REPLY, REFUSAL_REPLY, RETRIEVAL_MODE_RAG, STOP_REASON_REFUSAL,
+    STOP_REASON_TOOL_USE, SYSTEM_PROMPT, TOOL_SEARCH_FAQ, TOOL_SEARCH_WILLS, UNAVAILABLE_REPLY,
+    err_tool_not_available, err_tool_result,
 )
 from db import get_db
 from feature_flags import get_flag_enabled, get_flag_value
 from mcp_client import open_session
 from tools import TOOLS_REQUIRING_TOKEN, allowed_tool_names, claude_tools_for_role, faq_tool_for_role, rag_tool_for_role
+
+
+def _client_ip(request: Request) -> str:
+    """Best-effort caller identity for an anonymous (not-signed-in) visitor
+    — used only as a fallback when body.email is blank, so anonymous rows
+    in aiusages/chatbotresponses show an IP instead of an empty emailid
+    column. Vercel/AKS both sit this service behind a reverse proxy, so the
+    real client address is in X-Forwarded-For (its first entry — the
+    originating client — rather than any intermediate proxy hop), not
+    request.client.host, which would just be the proxy's own address."""
+    forwarded = request.headers.get("x-forwarded-for")
+    if forwarded:
+        return forwarded.split(",")[0].strip()
+    return request.client.host if request.client else "unknown"
 
 logger = logging.getLogger("forwardlegacy-chatbot")
 
@@ -98,6 +114,11 @@ class ChatResponse(BaseModel):
     # search mode answered them. Always set, even on the unavailable/
     # incomplete paths, since the flag is read before anything can fail.
     retrieval_mode: str = DEFAULT_RETRIEVAL_MODE
+    # Set when this signed-in user hit one of their daily usage caps (see
+    # rate_limit.py) — distinct from `unavailable` (a service failure) so
+    # the frontend can show a specific "come back tomorrow" message rather
+    # than the generic "not available" one.
+    rateLimited: bool = False
 
 
 class ChatFeedbackRequest(BaseModel):
@@ -122,7 +143,7 @@ class ChatFeedbackResponse(BaseModel):
 # goes through the tool-use loop/whitelist above, it's just a REST endpoint
 # the frontend calls directly.
 @app.post("/chat/feedback", response_model=ChatFeedbackResponse)
-def chat_feedback(body: ChatFeedbackRequest):
+def chat_feedback(body: ChatFeedbackRequest, request: Request):
     question = body.question.strip()
     answer = body.answer.strip()
     if not question or not answer:
@@ -139,7 +160,9 @@ def chat_feedback(body: ChatFeedbackRequest):
             raise HTTPException(status_code=400, detail=ERR_REASON_TOO_LONG)
 
     get_db()[FEEDBACK_COLLECTION_NAME].insert_one({
-        FLD_EMAIL: (body.email or "").strip(),
+        # An anonymous visitor's feedback is identified by IP instead of a
+        # blank emailid, same reasoning as aiusages below.
+        FLD_EMAIL: (body.email or "").strip() or _client_ip(request),
         FLD_QUESTION: question,
         FLD_ANSWER: answer,
         FLD_RESPONSE_DATETIME: datetime.now(timezone.utc),
@@ -200,13 +223,12 @@ async def _execute_tool(
     return err_tool_result(text) if result.is_error else text
 
 
-async def _log_usage_if_enabled(body: ChatRequest, usage: dict) -> None:
+async def _log_usage_if_enabled(caller_id: str, body: ChatRequest, thread_id: str, usage: dict) -> None:
     if usage["requests"] == 0:
         return
     try:
         if not await get_flag_enabled(FLAG_LOG_AI_USAGE, default=False):
             return
-        thread_id = (body.threadId or "").strip()
         if not thread_id:
             return
         # log_ai_usage() uses pymongo (blocking) — must run off the event
@@ -216,7 +238,10 @@ async def _log_usage_if_enabled(body: ChatRequest, usage: dict) -> None:
         await asyncio.to_thread(
             log_ai_usage,
             get_db(),
-            email=(body.email or "").strip(),
+            # caller_id is body.email when signed in, else the caller's IP
+            # (see _client_ip) — an anonymous visitor's rows show an IP
+            # instead of a blank emailid column.
+            email=caller_id,
             role=body.role,
             thread_id=thread_id,
             model=MODEL,
@@ -231,12 +256,49 @@ async def _log_usage_if_enabled(body: ChatRequest, usage: dict) -> None:
         logger.warning("Could not log AI usage", exc_info=True)
 
 
+async def _record_daily_usage_for_limits(email: str, thread_id: str, usage: dict) -> None:
+    """Always runs (not gated behind FLAG_LOG_AI_USAGE — see rate_limit.py's
+    module docstring for why) whenever a signed-in user's request actually
+    reached Claude at least once. Anonymous visitors (blank email) aren't
+    tracked here — see constants.py's CHATBOT_MAX_* comment."""
+    if usage["requests"] == 0 or not email or not thread_id:
+        return
+    try:
+        cost = cost_usd(MODEL, usage["input_tokens"], usage["output_tokens"])
+        await asyncio.to_thread(
+            rate_limit.record_usage,
+            get_db(), email, thread_id, usage["input_tokens"] + usage["output_tokens"], cost,
+        )
+    except Exception:
+        logger.warning("Could not record daily usage for rate limiting", exc_info=True)
+
+
 @app.post("/chat", response_model=ChatResponse)
-async def chat(body: ChatRequest) -> ChatResponse:
+async def chat(body: ChatRequest, request: Request) -> ChatResponse:
     messages: list[dict] = [{"role": m.role, "content": m.content} for m in body.messages]
+    email = (body.email or "").strip()
+    thread_id = (body.threadId or "").strip()
+    # Identifies the caller for aiusages/chatbotresponses rows — the
+    # signed-in user's email, or their IP when anonymous (see _client_ip).
+    caller_id = email or _client_ip(request)
 
     retrieval_mode = await get_flag_value(FLAG_USE_RAG_OR_MCP, default=DEFAULT_RETRIEVAL_MODE)
     usage = {"input_tokens": 0, "output_tokens": 0, "requests": 0}
+
+    # Daily quota check — only for signed-in users (see constants.py's
+    # CHATBOT_MAX_* comment), and only when there's a thread to attribute
+    # it to. Runs before anything else so a capped user's request never
+    # reaches Claude at all — checking only after the call would still
+    # incur the cost this exists to cap.
+    if email and thread_id:
+        try:
+            refusal_reason = await asyncio.to_thread(rate_limit.check_limit, get_db(), email, thread_id)
+        except Exception:
+            logger.warning("Could not check daily usage limit — allowing the request", exc_info=True)
+            refusal_reason = None
+        if refusal_reason:
+            logger.info("Chatbot rate limit hit for %s: %s", email, refusal_reason)
+            return ChatResponse(reply=RATE_LIMIT_REPLY, rateLimited=True, retrieval_mode=retrieval_mode)
 
     try:
         async with open_session() as session:
@@ -290,8 +352,12 @@ async def chat(body: ChatRequest) -> ChatResponse:
         # INCOMPLETE_REPLY return below) — usage is only ever non-zero if
         # at least one client.messages.create() call actually completed,
         # and Anthropic bills for that call regardless of what ForwardLegacy
-        # does with the result afterward, so it's logged unconditionally.
-        await _log_usage_if_enabled(body, usage)
+        # does with the result afterward, so both are recorded
+        # unconditionally: the admin-visible log (flag-gated) and the daily
+        # quota this same request was already checked against (never
+        # flag-gated — see rate_limit.py).
+        await _log_usage_if_enabled(caller_id, body, thread_id, usage)
+        await _record_daily_usage_for_limits(email, thread_id, usage)
 
     return ChatResponse(reply=INCOMPLETE_REPLY, retrieval_mode=retrieval_mode)
 

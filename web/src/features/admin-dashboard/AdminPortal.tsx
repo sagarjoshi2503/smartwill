@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Users, Plus, Edit3, Trash2, Clock, CheckCircle2, Gift, MessageSquare, BarChart3 } from "lucide-react";
+import { Users, Plus, Edit3, Trash2, Clock, CheckCircle2, Gift, MessageSquare, BarChart3, Gauge } from "lucide-react";
 import { authFetch } from "../../utils/apiBase";
 import { fmt } from "../../utils/format";
 import {
@@ -14,6 +14,7 @@ import Pagination, { PAGE_SIZE } from "../../components/shared/Pagination";
 import GiftVoucherAdminTab from "./GiftVoucherAdminTab";
 import ChatbotFeedbackAdminTab from "./ChatbotFeedbackAdminTab";
 import AiUsageAdminTab from "./AiUsageAdminTab";
+import RateLimitsAdminTab from "./RateLimitsAdminTab";
 import type { AdminClient, AdminProfile, WillState, WillType } from "../../types";
 
 const STATUS_STYLE: Record<AdminClient["status"], string> = {
@@ -47,7 +48,7 @@ export default function AdminPortal({admin,onCreateWill,onReviewWill}:{
   const [reviewingId,setReviewingId]=useState<string|null>(null);
   const [reviewError,setReviewError]=useState("");
   const [statusFilter,setStatusFilter]=useState<"All"|AdminClient["status"]>("All");
-  const [mainTab,setMainTab]=useState<"wills"|"vouchers"|"feedback"|"aiUsage">("wills");
+  const [mainTab,setMainTab]=useState<"wills"|"vouchers"|"feedback"|"aiUsage"|"rateLimits">("wills");
   const [page,setPage]=useState(1);
   const chatbotFeedbackUiEnabled = useFlag(FLAGS.chatbotFeedbackUi);
   const showAiUsageEnabled = useFlag(FLAGS.showAiUsage);
@@ -142,6 +143,7 @@ export default function AdminPortal({admin,onCreateWill,onReviewWill}:{
             ...(showAiUsageEnabled
               ? [{v:"aiUsage", label:"AI Usage", icon:<BarChart3 size={13}/>}] as const
               : []),
+            {v:"rateLimits", label:"Rate Limits", icon:<Gauge size={13}/>},
           ] as const).map(t=>(
             <button key={t.v} onClick={()=>setMainTab(t.v)}
               className={`flex items-center gap-1.5 text-sm font-semibold px-4 py-2 rounded-full border transition-colors ${mainTab===t.v?"bg-brand text-white border-brand":"bg-white text-slate-600 border-slate-200 hover:border-slate-300"}`}>
@@ -150,7 +152,7 @@ export default function AdminPortal({admin,onCreateWill,onReviewWill}:{
           ))}
         </div>
 
-        {mainTab==="vouchers" ? <GiftVoucherAdminTab/> : mainTab==="feedback" ? <ChatbotFeedbackAdminTab/> : mainTab==="aiUsage" ? <AiUsageAdminTab/> : (<>
+        {mainTab==="vouchers" ? <GiftVoucherAdminTab/> : mainTab==="feedback" ? <ChatbotFeedbackAdminTab/> : mainTab==="aiUsage" ? <AiUsageAdminTab/> : mainTab==="rateLimits" ? <RateLimitsAdminTab/> : (<>
         <div className="flex flex-wrap gap-4 mb-6">
           <div className="bg-white border border-slate-200 rounded-xl p-4 w-fit">
             <div className="text-slate-600 mb-2"><Users size={17}/></div>

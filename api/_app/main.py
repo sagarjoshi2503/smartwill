@@ -14,6 +14,7 @@ from _app.features.contact_us.router import router as contact_us_router
 from _app.features.create_will.router import router as create_will_router
 from _app.features.gift_voucher.router import router as gift_voucher_router
 from _app.features.payments.router import router as payments_router
+from _app.features.rate_limits.router import router as rate_limits_router
 from _app.shared.constants import APP_TITLE, APP_VERSION
 
 app = FastAPI(title=APP_TITLE, version=APP_VERSION)
@@ -39,6 +40,7 @@ app.include_router(contact_us_router)
 app.include_router(gift_voucher_router)
 app.include_router(chatbot_feedback_router)
 app.include_router(ai_usage_router)
+app.include_router(rate_limits_router)
 
 
 @app.get("/healthz")

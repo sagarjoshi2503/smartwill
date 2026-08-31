@@ -19,7 +19,7 @@ from constants import (
 )
 
 
-def _cost_usd(model: str, input_tokens: int, output_tokens: int) -> float:
+def cost_usd(model: str, input_tokens: int, output_tokens: int) -> float:
     rates = MODEL_PRICING_USD_PER_TOKEN.get(model, DEFAULT_MODEL_PRICING_USD_PER_TOKEN)
     return round(input_tokens * rates["input"] + output_tokens * rates["output"], 6)
 
@@ -33,7 +33,7 @@ def log_ai_usage(
     pymongo is a blocking driver (see core/db.py's own lesson on this
     exact mistake in api/)."""
     now = datetime.now(timezone.utc)
-    cost = _cost_usd(model, input_tokens, output_tokens)
+    cost = cost_usd(model, input_tokens, output_tokens)
     db[AI_USAGE_COLLECTION_NAME].update_one(
         {FLD_EMAIL: email, FLD_THREAD_ID: thread_id},
         {

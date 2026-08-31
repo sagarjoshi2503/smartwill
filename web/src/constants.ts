@@ -72,6 +72,7 @@ export const API_GIFT_VOUCHER_ADMIN_GENERATE = "/api/gift-voucher/admin/generate
 export const API_GIFT_VOUCHER_ADMIN_LIST = "/api/gift-voucher/admin/list";
 export const API_CHATBOT_FEEDBACK_ADMIN_LIST = "/api/chatbot-feedback/admin/list";
 export const API_AI_USAGE_ADMIN_LIST = "/api/ai-usage/admin/list";
+export const API_ADMIN_RATE_LIMITS = "/api/admin/rate-limits";
 
 // --- Chatbot (pass to utils/chatbotBase's chatbotUrl(), a separate service — see chatbot/.env.example) ---
 export const CHATBOT_CHAT = "/chat";
@@ -168,6 +169,11 @@ export const MSG_MOBILE_NUMBER_UPDATED = "Mobile number updated.";
 export const BTN_CHANGE_MOBILE_NUMBER = "Change Mobile Number";
 export const BTN_SEND_CODE = "Send Code";
 export const BTN_VERIFY_AND_SAVE = "Verify & Save";
+
+// --- Admin: chatbot rate limits ---
+export const ERR_LOAD_RATE_LIMITS = "Could not load rate limits.";
+export const ERR_SAVE_RATE_LIMITS = "Could not save rate limits.";
+export const MSG_RATE_LIMITS_SAVED = "Rate limits updated.";
 
 // --- App shell / header / wizard bar copy ---
 export const errSendBackTmpl = (status: number): string => `Could not send this Will back (server returned ${status}).`;

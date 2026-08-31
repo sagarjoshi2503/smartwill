@@ -54,7 +54,7 @@ export default function ChatbotFeedbackAdminTab(){
           <div className="overflow-x-auto">
             <table className="w-full text-xs">
               <thead><tr className="border-b border-slate-200">
-                {["Email","Question","Answer","Feedback","Reason (if not liked)","Date/Time"].map(h=>(
+                {["Email / IP","Question","Answer","Feedback","Reason (if not liked)","Date/Time"].map(h=>(
                   <th key={h} className="text-left px-2 py-2 font-bold text-slate-400 uppercase tracking-wide whitespace-nowrap">{h}</th>
                 ))}
               </tr></thead>

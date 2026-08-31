@@ -102,12 +102,26 @@ def test_rejects_blank_question_or_answer(monkeypatch):
     assert db["chatbotresponses"].count_documents({}) == 0
 
 
-def test_anonymous_visitor_stores_blank_email(monkeypatch):
+def test_anonymous_visitor_stores_caller_ip_instead_of_a_blank_email(monkeypatch):
     db = _fake_db()
     client = _client(monkeypatch, db)
 
-    res = client.post("/chat/feedback", json={**VALID_LIKED, "email": None})
+    res = client.post(
+        "/chat/feedback", json={**VALID_LIKED, "email": None}, headers={"X-Forwarded-For": "203.0.113.5, 10.0.0.1"},
+    )
 
     assert res.status_code == 200
     doc = db["chatbotresponses"].find_one({})
-    assert doc["emailid"] == ""
+    # The first entry (the originating client) — not the second, an
+    # intermediate proxy hop that also appears in the header.
+    assert doc["emailid"] == "203.0.113.5"
+
+
+def test_signed_in_visitor_stores_their_email_not_their_ip(monkeypatch):
+    db = _fake_db()
+    client = _client(monkeypatch, db)
+
+    client.post("/chat/feedback", json=VALID_LIKED, headers={"X-Forwarded-For": "203.0.113.5"})
+
+    doc = db["chatbotresponses"].find_one({})
+    assert doc["emailid"] == "a@b.com"

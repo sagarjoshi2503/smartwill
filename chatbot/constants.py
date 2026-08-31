@@ -142,6 +142,53 @@ MODEL_PRICING_USD_PER_TOKEN: dict[str, dict[str, float]] = {
 # silently recording a cost of zero.
 DEFAULT_MODEL_PRICING_USD_PER_TOKEN = MODEL_PRICING_USD_PER_TOKEN["claude-opus-5"]
 
+# --- chatbotdailyusage collection — per-signed-in-user daily quota
+# tracking (see rate_limit.py). Deliberately separate from aiusages above:
+# aiusages accumulates for a thread's whole lifetime with no per-day
+# dimension, and its writes are gated behind FLAG_LOG_AI_USAGE (an
+# admin-display toggle) — quota *enforcement* must work regardless of
+# whether that display flag is on, or turning it off would silently
+# disable cost protection too. Keyed by (emailid, date); date is a plain
+# "YYYY-MM-DD" UTC string, not a datetime, so each day starts a fresh doc. ---
+DAILY_USAGE_COLLECTION_NAME = "chatbotdailyusage"
+FLD_DATE = "date"
+FLD_THREAD_IDS = "threadids"
+FLD_TOTAL_COST = "totalcost"
+FLD_TOTAL_TOKENS = "totaltokens"
+
+# Per-user daily caps — whichever of the three is hit first blocks further
+# /chat requests from that signed-in user for the rest of the day (UTC).
+# Only applied when body.email is non-blank (see main.py's chat()); an
+# anonymous visitor is identified by IP instead (see _client_ip in
+# main.py) and isn't rate-limited by this, since the anonymous tool
+# whitelist is already far more restrictive (health/contact/FAQ only — see
+# tools.py's ROLE_TOOL_WHITELIST).
+#
+# The actual values are admin-configurable at runtime — stored in the
+# `ratelimits` collection (this service's own MONGODB_URI, same database
+# api/ uses, same cross-service-via-shared-Mongo pattern already used for
+# aiusages/chatbotresponses above), edited via the Admin Portal's Rate
+# Limits tab (api/_app/features/rate_limits/, web/'s RateLimitsAdminTab.tsx)
+# — see rate_limit.py's get_limits(). The one document is seeded by
+# database/migrations/0001_seed_chatbot_rate_limits.py for a fresh
+# environment; the values below are only the in-code fallback used if that
+# document is somehow missing (a fresh/unmigrated database), so the
+# assistant fails safe-but-usable rather than crashing or being unlimited.
+RATE_LIMITS_COLLECTION_NAME = "ratelimits"
+RATE_LIMITS_DOC_ID = "chatbot"
+FLD_MAX_THREADS_PER_DAY = "maxThreadsPerDay"
+FLD_MAX_COST_USD_PER_DAY = "maxCostUsdPerDay"
+FLD_MAX_TOKENS_PER_DAY = "maxTokensPerDay"
+FLD_UPDATED_AT = "updatedAt"
+FLD_UPDATED_BY = "updatedBy"
+RATE_LIMITS_CACHE_TTL_SECONDS = 30
+
+DEFAULT_MAX_THREADS_PER_DAY = 100
+DEFAULT_MAX_COST_USD_PER_DAY = 5.0
+DEFAULT_MAX_TOKENS_PER_DAY = 50_000
+
+RATE_LIMIT_REPLY = "You've reached today's usage limit for the assistant. Please try again tomorrow."
+
 # --- rag/ tool-call argument field names + default limit (search_wills,
 # search_faq — both share this shape) ---
 FLD_QUERY = "query"

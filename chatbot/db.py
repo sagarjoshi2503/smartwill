@@ -12,7 +12,10 @@ from pymongo import MongoClient
 from pymongo.database import Database
 from pymongo.errors import PyMongoError
 
-from constants import AI_USAGE_COLLECTION_NAME, DB_NAME, ERR_MONGODB_URI_REQUIRED, FLD_EMAIL, FLD_THREAD_ID
+from constants import (
+    AI_USAGE_COLLECTION_NAME, DAILY_USAGE_COLLECTION_NAME, DB_NAME, ERR_MONGODB_URI_REQUIRED, FLD_DATE, FLD_EMAIL,
+    FLD_THREAD_ID,
+)
 
 if not os.environ.get("MONGODB_URI"):
     raise RuntimeError(ERR_MONGODB_URI_REQUIRED)
@@ -37,6 +40,7 @@ def _ensure_indexes(mongodb_uri: str, db_name: str) -> None:
     try:
         db = MongoClient(mongodb_uri)[db_name]
         db[AI_USAGE_COLLECTION_NAME].create_index([(FLD_EMAIL, 1), (FLD_THREAD_ID, 1)], unique=True)
+        db[DAILY_USAGE_COLLECTION_NAME].create_index([(FLD_EMAIL, 1), (FLD_DATE, 1)], unique=True)
     except PyMongoError:
         pass
 
